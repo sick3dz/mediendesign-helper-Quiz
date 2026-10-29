@@ -99,20 +99,20 @@ export const WcagMatchGame: React.FC<{ onComplete: (score: number) => void }> = 
 
   if (done) {
     return (
-      <div className="p-6 bg-white rounded-xl border border-slate-200 text-center">
-        <div className="w-12 h-12 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto mb-3">
+      <div className="p-6 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-center transition-colors">
+        <div className="w-12 h-12 bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 rounded-full flex items-center justify-center mx-auto mb-3">
           <Award className="w-6 h-6" />
         </div>
-        <h3 className="text-xl font-bold text-slate-900 mb-1">WCAG POUR-Meister!</h3>
-        <p className="text-sm text-slate-600 mb-4">
-          Punkte: <span className="font-mono font-bold text-amber-600 tabular-nums">{score} XP</span>
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">WCAG POUR-Meister!</h3>
+        <p className="text-sm text-slate-600 dark:text-slate-300 mb-4">
+          Punkte: <span className="font-mono font-bold text-amber-600 dark:text-amber-400 tabular-nums">{score} XP</span>
         </p>
-        <p className="text-xs text-slate-500 mb-6 max-w-md mx-auto">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 max-w-md mx-auto">
           Merke dir POUR für die Prüfung: Perceivable (Wahrnehmbar), Operable (Bedienbar), Understandable (Verständlich), Robust (Robust).
         </p>
         <button
           onClick={restart}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
         >
           <RotateCcw className="w-4 h-4" />
           Nochmal trainieren
@@ -122,21 +122,21 @@ export const WcagMatchGame: React.FC<{ onComplete: (score: number) => void }> = 
   }
 
   return (
-    <div className="p-6 bg-white rounded-xl border border-slate-200">
+    <div className="p-6 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <span className="text-xs font-semibold text-amber-600 uppercase tracking-wider">A11y Challenge</span>
-          <h3 className="text-lg font-bold text-slate-900">POUR-Zuordnung</h3>
+          <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">A11y Challenge</span>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">POUR-Zuordnung</h3>
         </div>
-        <div className="flex items-center gap-3 text-xs font-medium text-slate-500">
+        <div className="flex items-center gap-3 text-xs font-medium text-slate-500 dark:text-slate-400">
           <span>{index + 1} / {TASKS.length}</span>
-          <span className="font-mono font-bold text-amber-600 tabular-nums">{score} XP</span>
+          <span className="font-mono font-bold text-amber-600 dark:text-amber-400 tabular-nums">{score} XP</span>
         </div>
       </div>
 
-      <div className="my-5 p-6 bg-slate-50 rounded-xl border border-slate-200 text-center relative overflow-hidden">
-        <p className="text-xs text-slate-400 mb-1 uppercase tracking-wide">Welchem WCAG-Prinzip gehört diese Maßnahme an?</p>
-        <h4 className="text-base font-bold text-slate-900 mb-2">{current.action}</h4>
+      <div className="my-5 p-6 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 text-center relative overflow-hidden">
+        <p className="text-xs text-slate-400 dark:text-slate-500 mb-1 uppercase tracking-wide">Welchem WCAG-Prinzip gehört diese Maßnahme an?</p>
+        <h4 className="text-base font-bold text-slate-900 dark:text-white mb-2">{current.action}</h4>
 
         {lastFeedback && (
           <div className={`absolute inset-0 flex flex-col items-center justify-center p-4 transition-all ${lastFeedback.isCorrect ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`}>
@@ -160,17 +160,17 @@ export const WcagMatchGame: React.FC<{ onComplete: (score: number) => void }> = 
             key={item.key}
             onClick={() => handleChoose(item.key)}
             disabled={lastFeedback !== null}
-            className="p-3 text-left rounded-xl border border-slate-200 hover:border-amber-500 hover:bg-amber-50/40 transition-all group"
+            className="p-3 text-left rounded-xl border border-slate-200 dark:border-slate-800 hover:border-amber-500 dark:hover:border-amber-400 hover:bg-amber-50/40 dark:hover:bg-amber-950/30 transition-all group cursor-pointer"
           >
             <div className="flex items-center gap-2 mb-1">
-              <span className="w-6 h-6 rounded bg-slate-100 group-hover:bg-amber-500 group-hover:text-white flex items-center justify-center text-xs font-bold transition-colors font-mono">
+              <span className="w-6 h-6 rounded bg-slate-100 dark:bg-slate-700 group-hover:bg-amber-500 group-hover:text-white flex items-center justify-center text-xs font-bold transition-colors font-mono dark:text-slate-200">
                 {item.letter}
               </span>
-              <span className="text-xs font-bold text-slate-900 group-hover:text-amber-800">
+              <span className="text-xs font-bold text-slate-900 dark:text-slate-200 group-hover:text-amber-800 dark:group-hover:text-amber-400">
                 {item.title}
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 leading-tight">{item.sub}</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">{item.sub}</p>
           </button>
         ))}
       </div>

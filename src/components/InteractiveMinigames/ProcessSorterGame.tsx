@@ -67,21 +67,21 @@ export const ProcessSorterGame: React.FC<{ onComplete: (score: number) => void }
   };
 
   return (
-    <div className="p-6 bg-white rounded-xl border border-slate-200">
+    <div className="p-6 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">Ablauf-Puzzle</span>
-          <h3 className="text-lg font-bold text-slate-900">Bringe den Designprozess in die richtige Reihenfolge</h3>
+          <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Ablauf-Puzzle</span>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">Bringe den Designprozess in die richtige Reihenfolge</h3>
         </div>
         <button
           onClick={restart}
-          className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1 transition-colors"
+          className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
         >
           <RotateCcw className="w-3.5 h-3.5" /> Mischen
         </button>
       </div>
 
-      <p className="text-xs text-slate-500 mb-4">
+      <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
         Ordne die 6 Phasen von der ersten Idee bis zum fertigen Code. Nutze die Pfeile zum Verschieben.
       </p>
 
@@ -93,21 +93,21 @@ export const ProcessSorterGame: React.FC<{ onComplete: (score: number) => void }
               key={item.id}
               className={`p-3 rounded-lg border flex items-center justify-between transition-colors ${
                 isSuccess
-                  ? 'bg-emerald-50 border-emerald-300'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800'
                   : isAtCorrectPos
-                  ? 'bg-indigo-50/50 border-indigo-200'
-                  : 'bg-slate-50 border-slate-200'
+                  ? 'bg-indigo-50/50 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800'
+                  : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800'
               }`}
             >
               <div className="flex items-center gap-3">
                 <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono font-bold ${
-                  isAtCorrectPos ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-700'
+                  isAtCorrectPos ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
                 }`}>
                   {idx + 1}
                 </span>
                 <div>
-                  <div className="text-xs font-bold text-slate-900">{item.name}</div>
-                  <div className="text-[11px] text-slate-500">{item.desc}</div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white">{item.name}</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">{item.desc}</div>
                 </div>
               </div>
 
@@ -116,7 +116,7 @@ export const ProcessSorterGame: React.FC<{ onComplete: (score: number) => void }
                   <button
                     onClick={() => move(idx, 'up')}
                     disabled={idx === 0}
-                    className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-200 disabled:opacity-20 transition-colors"
+                    className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-200 dark:hover:text-white dark:hover:bg-slate-700 disabled:opacity-20 transition-colors cursor-pointer"
                     title="Nach oben"
                   >
                     <ArrowUp className="w-4 h-4" />
@@ -124,7 +124,7 @@ export const ProcessSorterGame: React.FC<{ onComplete: (score: number) => void }
                   <button
                     onClick={() => move(idx, 'down')}
                     disabled={idx === items.length - 1}
-                    className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-200 disabled:opacity-20 transition-colors"
+                    className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-200 dark:hover:text-white dark:hover:bg-slate-700 disabled:opacity-20 transition-colors cursor-pointer"
                     title="Nach unten"
                   >
                     <ArrowDown className="w-4 h-4" />
@@ -137,12 +137,12 @@ export const ProcessSorterGame: React.FC<{ onComplete: (score: number) => void }
       </div>
 
       {isSuccess && (
-        <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200 text-center">
-          <div className="flex items-center justify-center gap-2 text-emerald-800 font-bold text-sm mb-1">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+        <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800 text-center">
+          <div className="flex items-center justify-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-sm mb-1">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             Perfekt geordnet! 200 XP erhalten
           </div>
-          <p className="text-xs text-emerald-700 font-mono">
+          <p className="text-xs text-emerald-700 dark:text-emerald-400 font-mono">
             Merksatz: Wireframe = Aufbau | Mockup = Aussehen | Prototyp = Bedienung | Entwicklung = Funktion
           </p>
         </div>

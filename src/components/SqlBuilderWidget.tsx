@@ -101,7 +101,7 @@ export const SqlBuilderWidget: React.FC = () => {
       {/* Control Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* 1. Filter (WHERE) */}
-        <div className="bg-slate-850/80 p-3 rounded-xl border border-slate-800 space-y-2">
+        <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-800 space-y-2">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
             <Filter className="w-3.5 h-3.5 text-cyan-400" />
             <span>Filter (WHERE)</span>
@@ -150,7 +150,7 @@ export const SqlBuilderWidget: React.FC = () => {
         </div>
 
         {/* 2. Sortierung (ORDER BY) */}
-        <div className="bg-slate-850/80 p-3 rounded-xl border border-slate-800 space-y-2">
+        <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-800 space-y-2">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
             <ArrowUpDown className="w-3.5 h-3.5 text-cyan-400" />
             <span>Sortierung (ORDER BY)</span>
@@ -199,7 +199,7 @@ export const SqlBuilderWidget: React.FC = () => {
         </div>
 
         {/* 3. Tabellen-Verknüpfung (JOIN) */}
-        <div className="bg-slate-850/80 p-3 rounded-xl border border-slate-800 space-y-2">
+        <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-800 space-y-2">
           <div className="flex items-center justify-between text-xs font-semibold text-slate-300">
             <span className="flex items-center gap-1.5">
               <Link2 className="w-3.5 h-3.5 text-cyan-400" />
@@ -240,7 +240,7 @@ export const SqlBuilderWidget: React.FC = () => {
       <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/60">
         <table className="w-full text-left text-xs">
           <thead>
-            <tr className="bg-slate-850 border-b border-slate-800 text-slate-400 text-[11px] font-mono">
+            <tr className="bg-slate-800 border-b border-slate-800 text-slate-400 text-[11px] font-mono">
               <th className="py-2.5 px-4 font-semibold">Projekt_ID</th>
               <th className="py-2.5 px-4 font-semibold">Titel</th>
               {includeJoin ? (
@@ -281,7 +281,7 @@ export const SqlBuilderWidget: React.FC = () => {
       </div>
 
       {/* Explanatory note */}
-      <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-850/40 p-2.5 rounded-lg border border-slate-800/60">
+      <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-800/40 p-2.5 rounded-lg border border-slate-800/60">
         <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
         <span>
           {statusFilter !== 'all'

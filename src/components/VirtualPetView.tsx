@@ -845,7 +845,7 @@ export const VirtualPetView: React.FC<Props> = ({
                     </div>
 
                     <div className="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800">
-                      <div className="text-center py-1.5 px-3 rounded-lg bg-slate-100 dark:bg-slate-850 text-slate-400 dark:text-slate-500 text-[11px] font-medium flex items-center justify-center gap-1.5">
+                      <div className="text-center py-1.5 px-3 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 text-[11px] font-medium flex items-center justify-center gap-1.5">
                         <Lock className="w-3 h-3" />
                         <span>Kapitel noch nicht abgeschlossen</span>
                       </div>

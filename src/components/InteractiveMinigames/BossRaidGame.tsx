@@ -185,7 +185,7 @@ export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
       </div>
 
       {/* Question Card */}
-      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800">
+      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-800">
         <h3 className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1">
           Kampf-Frage #{currentIndex + 1}
         </h3>
@@ -207,7 +207,7 @@ export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
             } else if (isSelected && !opt.isCorrect) {
               btnStyle = 'bg-rose-50 dark:bg-rose-950/60 border-rose-500 text-rose-900 dark:text-rose-200 font-bold';
             } else {
-              btnStyle = 'opacity-50 bg-slate-100 dark:bg-slate-850 border-transparent';
+              btnStyle = 'opacity-50 bg-slate-100 dark:bg-slate-800 border-transparent';
             }
           }
 

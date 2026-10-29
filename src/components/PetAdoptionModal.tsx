@@ -82,7 +82,7 @@ export const PetAdoptionModal: React.FC<Props> = ({
         </div>
 
         {/* Live Pet Preview */}
-        <div className="flex flex-col items-center justify-center mb-6 p-4 rounded-2xl bg-gradient-to-b from-indigo-50/50 to-slate-50 dark:from-indigo-950/30 dark:to-slate-850/40 border border-indigo-100 dark:border-indigo-900/50">
+        <div className="flex flex-col items-center justify-center mb-6 p-4 rounded-2xl bg-gradient-to-b from-indigo-50/50 to-slate-50 dark:from-indigo-950/30 dark:to-slate-800/40 border border-indigo-100 dark:border-indigo-900/50">
           <div className="scale-90 sm:scale-100 transition-all">
             <PetAvatar pet={previewPetState} isPetted={true} size="md" />
           </div>

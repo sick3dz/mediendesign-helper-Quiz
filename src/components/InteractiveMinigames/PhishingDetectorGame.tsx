@@ -71,54 +71,54 @@ export const PhishingDetectorGame: React.FC<{ onComplete: (score: number) => voi
   };
 
   return (
-    <div className="p-6 bg-white rounded-xl border border-slate-200">
+    <div className="p-6 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <span className="text-xs font-semibold text-rose-600 uppercase tracking-wider">Detektiv-Simulation</span>
-          <h3 className="text-lg font-bold text-slate-900">Spot the Fake: 4 Betrugsmerkmale enttarnen</h3>
+          <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Detektiv-Simulation</span>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">Spot the Fake: 4 Betrugsmerkmale enttarnen</h3>
         </div>
-        <div className="flex items-center gap-3 text-xs font-medium text-slate-500">
-          <span className="font-mono font-bold text-slate-900">{foundCount} / {clues.length} gefunden</span>
-          <span className="font-mono font-bold text-indigo-600">{score} XP</span>
+        <div className="flex items-center gap-3 text-xs font-medium text-slate-500 dark:text-slate-400">
+          <span className="font-mono font-bold text-slate-900 dark:text-slate-200">{foundCount} / {clues.length} gefunden</span>
+          <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">{score} XP</span>
         </div>
       </div>
 
-      <p className="text-xs text-slate-500 mb-4">
+      <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
         Tippe im interaktiven Szenario unten auf alle 4 verdächtigen Elemente, die typisch für Phishing & Fake-Shops sind.
       </p>
 
       {/* Simulated Email & Fake Store Window */}
-      <div className="border border-slate-300 rounded-xl overflow-hidden bg-slate-50 mb-6 shadow-xs">
+      <div className="border border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800 mb-6 shadow-xs">
         {/* Browser / Email Bar */}
-        <div className="bg-slate-200 px-4 py-2 border-b border-slate-300 flex items-center justify-between text-xs text-slate-600">
+        <div className="bg-slate-200 dark:bg-slate-900 px-4 py-2 border-b border-slate-300 dark:border-slate-700 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-400"></span>
             <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-            <span className="ml-2 font-mono text-[11px] text-slate-600">Posteingang: Sicherheitswarnung & Sonderangebot</span>
+            <span className="ml-2 font-mono text-[11px] text-slate-600 dark:text-slate-400">Posteingang: Sicherheitswarnung & Sonderangebot</span>
           </div>
-          <span className="text-[11px] text-slate-500">HTML Mail Preview</span>
+          <span className="text-[11px] text-slate-500 dark:text-slate-500">HTML Mail Preview</span>
         </div>
 
-        <div className="p-5 space-y-4 bg-white">
+        <div className="p-5 space-y-4 bg-white dark:bg-slate-900">
           {/* Header Info */}
-          <div className="pb-3 border-b border-slate-100 flex flex-col gap-1">
+          <div className="pb-3 border-b border-slate-100 dark:border-slate-800 flex flex-col gap-1">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-400">Von:</span>
+              <span className="text-slate-400 dark:text-slate-500">Von:</span>
               <button
                 onClick={() => handleClueClick('sender')}
                 className={`px-2 py-1 rounded text-left transition-all ${
                   clues[0].found
-                    ? 'bg-emerald-100 text-emerald-800 font-mono font-semibold'
-                    : 'bg-rose-50 text-rose-700 hover:bg-rose-100 cursor-pointer border border-dashed border-rose-300'
+                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-mono font-semibold'
+                    : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 cursor-pointer border border-dashed border-rose-300 dark:border-rose-800'
                 }`}
               >
                 {clues[0].text} {clues[0].found && '✓'}
               </button>
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-400">Betreff:</span>
-              <span className="font-semibold text-slate-800">Dringende Handlung erforderlich</span>
+              <span className="text-slate-400 dark:text-slate-500">Betreff:</span>
+              <span className="font-semibold text-slate-800 dark:text-slate-200">Dringende Handlung erforderlich</span>
             </div>
           </div>
 
@@ -127,44 +127,44 @@ export const PhishingDetectorGame: React.FC<{ onComplete: (score: number) => voi
             onClick={() => handleClueClick('urgency')}
             className={`w-full p-3 rounded-lg text-left transition-all ${
               clues[1].found
-                ? 'bg-emerald-50 border border-emerald-300 text-emerald-900'
-                : 'bg-amber-50 border border-amber-300 text-amber-900 hover:bg-amber-100 cursor-pointer'
+                ? 'bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
+                : 'bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/60 cursor-pointer'
             }`}
           >
             <div className="flex items-center gap-2 text-xs font-bold">
-              <AlertTriangle className="w-4 h-4 text-amber-600" />
+              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-500" />
               <span>{clues[1].text}</span>
-              {clues[1].found && <CheckCircle2 className="w-4 h-4 text-emerald-600 ml-auto" />}
+              {clues[1].found && <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 ml-auto" />}
             </div>
           </button>
 
           {/* Fake Store Deal */}
-          <div className="p-4 border border-slate-200 rounded-lg bg-slate-50/50">
+          <div className="p-4 border border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50/50 dark:bg-slate-800/40">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-slate-700">Exklusiver VIP-Restposten Shop</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Exklusiver VIP-Restposten Shop</span>
               <button
                 onClick={() => handleClueClick('discount')}
                 className={`px-2 py-1 text-xs font-bold rounded transition-all ${
                   clues[3].found
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-rose-100 text-rose-800 hover:bg-rose-200 border border-rose-300 cursor-pointer'
+                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+                    : 'bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 hover:bg-rose-200 dark:hover:bg-rose-900/60 border border-rose-300 dark:border-rose-800 cursor-pointer'
                 }`}
               >
                 {clues[3].text} {clues[3].found && '✓'}
               </button>
             </div>
-            <p className="text-xs text-slate-600 mb-3">
+            <p className="text-xs text-slate-600 dark:text-slate-400 mb-3">
               Klicken Sie hier, um Ihre Bestellung sofort zu sichern und Ihr Konto freizuschalten.
             </p>
 
-            <div className="p-2.5 bg-white border border-slate-200 rounded text-xs flex items-center justify-between">
-              <span className="text-slate-500">Zahlungsabwicklung:</span>
+            <div className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-xs flex items-center justify-between">
+              <span className="text-slate-500 dark:text-slate-400">Zahlungsabwicklung:</span>
               <button
                 onClick={() => handleClueClick('payment')}
                 className={`px-2 py-1 rounded transition-all ${
                   clues[2].found
-                    ? 'bg-emerald-100 text-emerald-800 font-semibold'
-                    : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-300 cursor-pointer'
+                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-semibold'
+                    : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-300 dark:border-rose-800 cursor-pointer'
                 }`}
               >
                 {clues[2].text} {clues[2].found && '✓'}
@@ -181,28 +181,28 @@ export const PhishingDetectorGame: React.FC<{ onComplete: (score: number) => voi
             key={c.id}
             className={`p-3 rounded-lg border text-xs transition-colors ${
               c.found
-                ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900'
-                : 'bg-slate-50 border-slate-200 text-slate-600'
+                ? 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
+                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
             }`}
           >
             <div className="flex items-center gap-2 font-semibold mb-1">
-              {c.found ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <ShieldAlert className="w-4 h-4 text-slate-400" />}
+              {c.found ? <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> : <ShieldAlert className="w-4 h-4 text-slate-400 dark:text-slate-500" />}
               <span>{c.label}</span>
             </div>
-            <p className="text-[11px] text-slate-500">{c.hint}</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-500">{c.hint}</p>
           </div>
         ))}
       </div>
 
       {isFinished && (
-        <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center justify-between">
+        <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800 flex items-center justify-between">
           <div>
-            <h4 className="text-sm font-bold text-emerald-900">Alle Betrugsmerkmale erfolgreich enttarnt!</h4>
-            <p className="text-xs text-emerald-700">Du hast die Taktiken von Phishing und Fake-Shops sicher im Griff.</p>
+            <h4 className="text-sm font-bold text-emerald-900 dark:text-emerald-200">Alle Betrugsmerkmale erfolgreich enttarnt!</h4>
+            <p className="text-xs text-emerald-700 dark:text-emerald-400">Du hast die Taktiken von Phishing und Fake-Shops sicher im Griff.</p>
           </div>
           <button
             onClick={restart}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-medium transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             Nochmal

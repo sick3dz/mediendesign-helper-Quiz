@@ -278,7 +278,7 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
 
           {/* Interactive Chapter Slider Nav Pills (Visible when not searching) */}
           {!searchTerm && selectedCategory === 'all' && (
-            <div className="bg-slate-100 dark:bg-slate-850 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <div className="bg-slate-100 dark:bg-slate-800 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-800">
               <div className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-2 px-1 flex items-center justify-between">
                 <span>Kapitel-Navigation währen:</span>
                 <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">

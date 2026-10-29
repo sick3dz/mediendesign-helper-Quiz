@@ -64,7 +64,7 @@ export const ChapterSurpriseModal: React.FC<Props> = ({
         </p>
 
         {/* Live Pet Preview with Item */}
-        <div className="flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-b from-indigo-50/70 to-slate-50 dark:from-indigo-950/40 dark:to-slate-850/50 border border-indigo-100 dark:border-indigo-900/50 mb-6">
+        <div className="flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-b from-indigo-50/70 to-slate-50 dark:from-indigo-950/40 dark:to-slate-800/50 border border-indigo-100 dark:border-indigo-900/50 mb-6">
           <div className="scale-100 transition-all">
             <PetAvatar pet={previewPet} isPetted={true} size="md" />
           </div>
