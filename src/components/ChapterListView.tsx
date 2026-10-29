@@ -87,54 +87,6 @@ export const ChapterListView: React.FC<Props> = ({
 
   return (
     <div className="space-y-4 sm:space-y-5">
-      {/* Sleek Hero Header */}
-      <section className="bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-4.5 shadow-xs transition-colors">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Mediengestalter IHK Digital-Fokus · Designkonzeption</span>
-            </div>
-
-            <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              <BionicText
-                text="Interaktiver IHK-Lernpfad"
-                enabled={bionic}
-              />
-            </h1>
-
-            <p className="text-slate-600 dark:text-slate-300 text-xs mt-0.5 max-w-2xl">
-              <BionicText
-                text="Schlankes Lernen nach Kapiteln. Wähle ein Thema für fokussiertes Durcharbeiten ohne Ablenkungen."
-                enabled={bionic}
-              />
-            </p>
-          </div>
-
-          {/* Action buttons: Equal size (h-8), sleek style */}
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            {onGoToSpickzettel && (
-              <button
-                onClick={onGoToSpickzettel}
-                className="h-8 px-3.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-semibold hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
-              >
-                <span>💡 Digital-Leitfaden</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            )}
-
-            <button
-              onClick={onStartExam}
-              className="h-8 px-3.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
-            >
-              <Award className="w-3.5 h-3.5" />
-              <span>IHK-Prüfung</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      </section>
-
       {/* Chapter Cards Overview Grid */}
       <section aria-label="Kapitel-Auswahl">
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-1.5 sm:gap-2">

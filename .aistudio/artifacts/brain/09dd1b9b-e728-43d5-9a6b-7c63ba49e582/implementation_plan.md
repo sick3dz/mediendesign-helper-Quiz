@@ -1,32 +1,31 @@
-# Umsetzungsplan: Obere Navigationsleiste schlank & überlappungsfrei gestalten
+# Umsetzungsplan: Digital-Leitfaden Kapitel-Slider & Schnell-Filter
 
 ## User Intent
-Der Benutzer möchte die obere Leiste aufgeräumt und elegant gestalten. Die bisherigen doppelten Textlinks in Kombination mit dem Markennamen führten auf kleineren Bildschirmen zu Überlappungen. Gemäß der Benutzerauswahl wird der Markenname weggelassen und die Navigation auf den zentralen **Lernen / Menü**-Button fokussiert, über den man per Floating-Dropdown auf alle Bereiche zugreifen kann.
+Der Benutzer möchte das lange Scrollen im Digital-Leitfaden (`SpickzettelView.tsx`) beseitigen. Statt alle Themen untereinander in einer langen Seite anzuzeigen, soll eine Kapitel-Slider Navigation mit Vorheriges/Nächstes-Buttons, Schnell-Tabs sowie Live-Suchleiste und Kategorien-Filter (Formeln, IHK-Tipps, Designregeln) integriert werden.
 
 ---
 
 ## Proposed Changes
 
-### 1. `src/components/TopBar.tsx` vereinfachen & aufräumen
-- **Entfernen**: Den redundanten Text-Markennamen („DesignKonzept.prep“) und die einzelnen doppelten Textlinks (`Haustier`, `IHK-Prüfung`, `Digital-Leitfaden`, `Quiz-Spiele`).
-- **Neues zentrales Element**:
-  - Ein moderner, schlanker **Lernen / Menü**-Dropdown-Button im Zentrum.
-  - Beim Klick öffnet sich das Floating-Dropdown mit klaren Direktzugriffen auf:
-    1. 📚 **IHK-Lernpfad & Kapitel**
-    2. 💡 **Digital-Leitfaden (IHK)**
-    3. ✨ **Haustier-Lounge & EXP-Shop**
-    4. 🏆 **IHK-Abschlussprüfung**
-    5. 🎮 **Quiz-Spiele Hub**
-- **Rechte Aktionselemente**:
-  - Kompaktes **Backup**-Icon, **Dark-Mode-Toggle** und **Fokus-Sprint**-Button, ohne jegliche Überlappungen oder Platzprobleme.
+### 1. `src/components/SpickzettelView.tsx` umstrukturieren
+- **Kapitel-Slider / Paging-System**:
+  - Hinzufügen von `selectedTopicIndex` bzw. aktiver Thema-Auswahl.
+  - Implementierung eines horizontalen Kapitel-Sliders mit Kompakt-Tabs oben für alle Digital-Themen (z. B. *1. IxD & Usability*, *2. Responsive Design*, *3. Accessibility*, *4. IT-Sicherheit*, *5. Schnittstellen & DB*).
+  - Vorheriges Thema / Nächstes Thema Paging-Buttons am unteren Ende des ausgewählten Themas, damit man flüssig Thema für Thema durcharbeiten kann.
+- **Such- & Kategorien-Filter**:
+  - Echtzeit-Suchleiste zum Filtern nach Begriffen (z. B. *WCAG*, *SQL*, *Wireframe*, *DSGVO*).
+  - Quick-Pill-Filter für Kategorien (z. B. *Alle*, *Formeln & Vergleiche*, *IHK-Prüfungstipps*, *Designkonzeption*).
+- **Smooth Auto-Scroll**:
+  - Beim Klick auf "Nächstes Thema" oder einen Slider-Tab schickes sanftes Scrollen zum Beginn der Themenkarte.
 
 ---
 
 ## Verification Plan
 
 ### Automated Verification
-- `compile_applet` ausführen, um sicherzustellen, dass keine Syntax- oder TypeScript-Fehler vorliegen.
+- `compile_applet` ausführen, um festzustellen, dass TypeScript-Kompilierung fehlerfrei ist.
 
 ### Manual Verification
-- Auf allen Bildschirmgrößen (Desktop & Mobile) prüfen, dass die obere Leiste aufgeräumt, zentriert und völlig frei von Überlappungen ist.
-- Auf den **Lernen / Menü**-Button klicken, um sicherzustellen, dass sich alle Direktzugriffe nahtlos steuern lassen.
+- Den Digital-Leitfaden öffnen.
+- Über die Kapitel-Slider-Tabs und Vorheriges/Nächste-Buttons navigieren.
+- Testen der Live-Suche und Kategorie-Filter.

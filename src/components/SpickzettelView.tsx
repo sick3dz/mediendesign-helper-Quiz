@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { CHAPTERS } from '../data/chaptersData';
-import { DIGITAL_GUIDE_TOPICS } from '../data/digitalGuideData';
+import { DIGITAL_GUIDE_TOPICS, DigitalTopic } from '../data/digitalGuideData';
 import { BionicText } from '../utils/bionicReading';
 import {
   BookOpen,
@@ -10,6 +10,7 @@ import {
   Copy,
   Check,
   ArrowLeft,
+  ArrowRight,
   Monitor,
   ShieldAlert,
   Layers,
@@ -19,6 +20,8 @@ import {
   MousePointer,
   XCircle,
   Zap,
+  Lightbulb,
+  Filter,
 } from 'lucide-react';
 import { soundEffects } from '../services/audioService';
 
@@ -29,8 +32,12 @@ interface Props {
 
 export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
   const [activeTab, setActiveTab] = useState<'digital-guide' | 'comparisons' | 'chapters'>('digital-guide');
+  const [selectedTopicIndex, setSelectedTopicIndex] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const topicCardRef = useRef<HTMLDivElement>(null);
 
   const copyToClipboard = (text: string, id: string) => {
     soundEffects.playClick();
@@ -39,16 +46,45 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const handleSelectTopic = (index: number) => {
+    soundEffects.playClick();
+    setSelectedTopicIndex(index);
+    setTimeout(() => {
+      topicCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 40);
+  };
+
   const iconMap: Record<string, React.ReactNode> = {
     Sparkles: <Sparkles className="w-5 h-5 text-amber-500" />,
-    MousePointer: <MousePointer className="w-5 h-5 text-indigo-500" />,
-    Layers: <Layers className="w-5 h-5 text-indigo-500" />,
-    Monitor: <Monitor className="w-5 h-5 text-indigo-500" />,
+    MousePointer: <MousePointer className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />,
+    Layers: <Layers className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />,
+    Monitor: <Monitor className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />,
     ShieldAlert: <ShieldAlert className="w-5 h-5 text-rose-500" />,
     CheckCircle2: <CheckCircle2 className="w-5 h-5 text-emerald-500" />,
     Clock: <Clock className="w-5 h-5 text-amber-500" />,
-    Database: <Database className="w-5 h-5 text-indigo-500" />,
+    Database: <Database className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />,
   };
+
+  // Categories list
+  const categories = ['all', ...Array.from(new Set(DIGITAL_GUIDE_TOPICS.map(t => t.category)))];
+
+  // Filtered topics based on search term or category
+  const filteredTopics = DIGITAL_GUIDE_TOPICS.filter(topic => {
+    const matchesSearch =
+      !searchTerm ||
+      topic.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      topic.ihkFocusSummary.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      topic.keyConcepts.some(k =>
+        k.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        k.explanation.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    const matchesCategory = selectedCategory === 'all' || topic.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const activeTopic: DigitalTopic = DIGITAL_GUIDE_TOPICS[selectedTopicIndex] || DIGITAL_GUIDE_TOPICS[0];
+  const prevTopicIndex = selectedTopicIndex > 0 ? selectedTopicIndex - 1 : null;
+  const nextTopicIndex = selectedTopicIndex < DIGITAL_GUIDE_TOPICS.length - 1 ? selectedTopicIndex + 1 : null;
 
   const quickComparisons = [
     {
@@ -114,12 +150,12 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-6">
       {onBack && (
         <div className="flex items-center justify-between">
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Zurück zur Kapitelübersicht</span>
@@ -128,36 +164,36 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
       )}
 
       {/* Intro Header */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-7 shadow-xs transition-colors">
-        <div className="flex items-center gap-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-2 uppercase tracking-wider">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-7 shadow-xs transition-colors">
+        <div className="flex items-center gap-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-1.5 uppercase tracking-wider">
           <BookOpen className="w-4 h-4" />
-          <span>Prüfungs-Spickzettel & IHK Digital-Leitfaden</span>
+          <span>IHK Digital-Leitfaden & Prüfungs-Spickzettel</span>
         </div>
-        <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">
+        <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mb-2">
           IHK-Wissen für Digitalmedien (Ohne Print)
         </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
           <BionicText
-            text="Die Ausbildungsverordnung setzt verstärkt auf rein digitale Medien, Usability, Barrierefreiheit & Web-Entwicklung. Nutze diese Zusammenfassung für deine gezielte Prüfungsvorbereitung!"
+            text="Die Verordnung fokussiert rein digitale Medien, Usability, Barrierefreiheit & Web-Entwicklung. Nutze diesen Kapitel-Slider für zielgerichtetes Lernen ohne langes Scrollen!"
             enabled={bionic}
           />
         </p>
 
-        {/* Tab Switcher */}
-        <div className="flex flex-wrap items-center gap-2 mt-5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-semibold">
+        {/* Primary Tab Switcher */}
+        <div className="grid grid-cols-3 gap-1.5 mt-5 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-semibold">
           <button
             onClick={() => {
               soundEffects.playClick();
               setActiveTab('digital-guide');
             }}
-            className={`flex-1 py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`py-2 px-2 sm:px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
               activeTab === 'digital-guide'
                 ? 'bg-indigo-600 text-white shadow-xs font-extrabold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                : 'bg-transparent text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
-            <Zap className="w-3.5 h-3.5 text-amber-300" />
-            <span>IHK Digital-Fokus Leitfaden</span>
+            <Zap className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+            <span className="truncate">Digital-Leitfaden</span>
           </button>
 
           <button
@@ -165,14 +201,14 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
               soundEffects.playClick();
               setActiveTab('comparisons');
             }}
-            className={`flex-1 py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`py-2 px-2 sm:px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
               activeTab === 'comparisons'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-bold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold border border-slate-200 dark:border-slate-700'
+                : 'bg-transparent text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
-            <Layers className="w-3.5 h-3.5 text-indigo-500" />
-            <span>Schnell-Vergleiche</span>
+            <Layers className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
+            <span className="truncate">Schnell-Vergleiche</span>
           </button>
 
           <button
@@ -180,123 +216,166 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
               soundEffects.playClick();
               setActiveTab('chapters');
             }}
-            className={`flex-1 py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`py-2 px-2 sm:px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
               activeTab === 'chapters'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-bold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold border border-slate-200 dark:border-slate-700'
+                : 'bg-transparent text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
-            <BookOpen className="w-3.5 h-3.5 text-indigo-500" />
-            <span>Kapitel-Merksätze</span>
+            <BookOpen className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
+            <span className="truncate">Kapitel-Merksätze</span>
           </button>
         </div>
 
-        {/* Search */}
-        <div className="mt-4 relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-          <input
-            type="text"
-            placeholder="Nach Begriffen suchen (z. B. WCAG, SQL, Wireframe, DSGVO, SVG)..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 transition-colors"
-          />
+        {/* Live Search & Filter Bar */}
+        <div className="mt-4 flex flex-col sm:flex-row items-center gap-2">
+          <div className="relative flex-1 w-full">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+            <input
+              type="text"
+              placeholder="Live-Suche (z. B. WCAG, SQL, Persona, DSGVO, SVG)..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+            />
+          </div>
+
+          {/* Quick Category Filter Pills */}
+          <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto scrollbar-none py-1">
+            <Filter className="w-3.5 h-3.5 text-slate-400 shrink-0 mr-1" />
+            {categories.map((cat, idx) => (
+              <button
+                key={idx}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                  selectedCategory === cat
+                    ? 'bg-indigo-600 text-white shadow-2xs font-bold'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                {cat === 'all' ? 'Alle Themen' : cat}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* TAB 1: IHK Digital-Fokus Leitfaden */}
+      {/* TAB 1: Digital-Fokus Leitfaden mit Kapitel-Slider */}
       {activeTab === 'digital-guide' && (
-        <div className="space-y-6">
-          <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex items-start gap-3 text-xs">
-            <span className="text-xl shrink-0">💡</span>
+        <div className="space-y-4">
+          {/* Print Change Info Alert */}
+          <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex items-start gap-3 text-xs">
+            <Lightbulb className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
             <div>
               <span className="font-extrabold text-amber-900 dark:text-amber-200 block mb-0.5">
-                Was ändert sich durch den Entfall von reinem Print?
+                Prüfungsfokus: Kein reiner Print mehr!
               </span>
-              <p className="text-amber-800 dark:text-amber-300 leading-relaxed">
-                Klassische Offset-Druckmängel, Bogenausschießung und Farbdichtemessungen rücken in den Hintergrund. Die IHK prüft stattdessen vertieft <strong>Interaktionsdesign (IxD)</strong>, <strong>Responsive Web-Design</strong>, <strong>Barrierefreiheit (WCAG 2.2)</strong>, <strong>IT-Sicherheit/DSGVO</strong> sowie <strong>Datenbanken & Schnittstellen</strong>.
+              <p className="text-amber-900 dark:text-amber-200 leading-relaxed text-[11px] font-medium">
+                Offset-Druckmängel rücken in den Hintergrund. Die IHK prüft stattdessen vertieft <strong>Interaktionsdesign</strong>, <strong>Responsive Design</strong>, <strong>Barrierefreiheit (WCAG)</strong>, <strong>DSGVO</strong> & <strong>APIs</strong>.
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-5">
-            {DIGITAL_GUIDE_TOPICS.filter(
-              t =>
-                !searchTerm ||
-                t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                t.ihkFocusSummary.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                t.keyConcepts.some(k => k.term.toLowerCase().includes(searchTerm.toLowerCase()))
-            ).map(topic => (
-              <div
-                key={topic.id}
-                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-4"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/60">
-                      {iconMap[topic.iconName] || <BookOpen className="w-5 h-5 text-indigo-500" />}
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-                        {topic.category}
-                      </span>
-                      <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
-                        {topic.title}
-                      </h3>
-                    </div>
-                  </div>
-                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                    {topic.ihkFocusSummary}
-                  </span>
-                </div>
+          {/* Interactive Chapter Slider Nav Pills (Visible when not searching) */}
+          {!searchTerm && selectedCategory === 'all' && (
+            <div className="bg-slate-100 dark:bg-slate-850 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <div className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-2 px-1 flex items-center justify-between">
+                <span>Kapitel-Navigation währen:</span>
+                <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                  Kapitel {selectedTopicIndex + 1} von {DIGITAL_GUIDE_TOPICS.length}
+                </span>
+              </div>
 
-                {/* Shift comparison: What falls away vs. What is tested */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div className="p-3.5 rounded-xl bg-rose-50/60 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-900/40">
-                    <div className="flex items-center gap-1.5 font-extrabold text-rose-700 dark:text-rose-300 mb-1">
-                      <XCircle className="w-4 h-4 text-rose-500 shrink-0" />
-                      <span>Tritt in den Hintergrund (Print)</span>
-                    </div>
-                    <p className="text-slate-600 dark:text-slate-400">{topic.whatFailsAway}</p>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/40">
-                    <div className="flex items-center gap-1.5 font-extrabold text-emerald-700 dark:text-emerald-300 mb-1">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                      <span>Wird vertieft geprüft (Digital)</span>
-                    </div>
-                    <p className="text-slate-600 dark:text-slate-400">{topic.whatIsNewAndTested}</p>
-                  </div>
-                </div>
-
-                {/* Key Concepts List */}
-                <div className="space-y-3 pt-2">
-                  <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Die wichtigsten IHK-Schlüsselkonzepte:
-                  </h4>
-                  <div className="grid grid-cols-1 gap-2.5">
-                    {topic.keyConcepts.map((concept, idx) => (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {DIGITAL_GUIDE_TOPICS.map((topic, tIdx) => {
+                  const isSelected = tIdx === selectedTopicIndex;
+                  return (
+                    <button
+                      key={topic.id}
+                      onClick={() => handleSelectTopic(tIdx)}
+                      className={`p-2.5 rounded-xl text-left text-xs font-bold transition-all cursor-pointer border ${
+                        isSelected
+                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs ring-2 ring-indigo-500/20'
+                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:border-indigo-300 dark:hover:border-indigo-600'
+                      }`}
+                    >
                       <div
-                        key={idx}
-                        className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-750"
+                        className={`text-[9px] font-mono font-bold uppercase tracking-wider mb-0.5 ${
+                          isSelected ? 'text-indigo-200' : 'text-slate-500 dark:text-slate-400'
+                        }`}
                       >
-                        <div className="text-xs font-bold text-slate-900 dark:text-white mb-1">
-                          📌 {concept.term}
-                        </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                          {concept.explanation}
-                        </p>
-                        {concept.examTip && (
-                          <div className="mt-2 text-[11px] font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50/80 dark:bg-indigo-950/80 px-2.5 py-1 rounded-lg border border-indigo-200/50 dark:border-indigo-800/50 inline-block">
-                            🎯 IHK-Prüfungs-Tipp: {concept.examTip}
-                          </div>
-                        )}
+                        KAPITEL {tIdx + 1}
                       </div>
-                    ))}
-                  </div>
+                      <div className="line-clamp-2 text-[11px] font-bold leading-tight">
+                        {topic.title.replace(/^\d+\.\s*(★\s*)?/, '')}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Single Focused Topic Content or Search Results */}
+          <div ref={topicCardRef} className="scroll-mt-20">
+            {searchTerm || selectedCategory !== 'all' ? (
+              /* Search / Category Filter View */
+              <div className="space-y-4">
+                <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  {filteredTopics.length} Suchergebnisse gefunden:
+                </div>
+                {filteredTopics.map((topic) => (
+                  <TopicCard key={topic.id} topic={topic} bionic={bionic} iconMap={iconMap} />
+                ))}
+              </div>
+            ) : (
+              /* Single Topic Slider View */
+              <div className="space-y-4">
+                <TopicCard topic={activeTopic} bionic={bionic} iconMap={iconMap} />
+
+                {/* Bottom Paging Slider Navigation */}
+                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+                  {prevTopicIndex !== null ? (
+                    <button
+                      onClick={() => handleSelectTopic(prevTopicIndex)}
+                      className="h-9 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400 text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs max-w-full truncate"
+                      title={`Zu Kapitel ${prevTopicIndex + 1}: ${DIGITAL_GUIDE_TOPICS[prevTopicIndex].title}`}
+                    >
+                      <ArrowLeft className="w-4 h-4 shrink-0" />
+                      <span className="truncate">Kapitel {prevTopicIndex + 1}: {DIGITAL_GUIDE_TOPICS[prevTopicIndex].title.replace(/^\d+\.\s*(★\s*)?/, '')}</span>
+                    </button>
+                  ) : (
+                    <div />
+                  )}
+
+                  <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-300">
+                    Kapitel {selectedTopicIndex + 1} / {DIGITAL_GUIDE_TOPICS.length}
+                  </span>
+
+                  {nextTopicIndex !== null ? (
+                    <button
+                      onClick={() => handleSelectTopic(nextTopicIndex)}
+                      className="h-9 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ml-auto max-w-full truncate"
+                      title={`Zu Kapitel ${nextTopicIndex + 1}: ${DIGITAL_GUIDE_TOPICS[nextTopicIndex].title}`}
+                    >
+                      <span className="truncate">Weiter zu Kapitel {nextTopicIndex + 1}: {DIGITAL_GUIDE_TOPICS[nextTopicIndex].title.replace(/^\d+\.\s*(★\s*)?/, '')}</span>
+                      <ArrowRight className="w-4 h-4 shrink-0" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        soundEffects.playClick();
+                        setActiveTab('comparisons');
+                      }}
+                      className="h-9 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ml-auto"
+                    >
+                      <span>Weiter zu Schnell-Vergleichen</span>
+                      <ArrowRight className="w-4 h-4 shrink-0" />
+                    </button>
+                  )}
                 </div>
               </div>
-            ))}
+            )}
           </div>
         </div>
       )}
@@ -325,7 +404,7 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
                     <h4 className="text-sm font-bold text-slate-900 dark:text-white">{cmp.title}</h4>
                     <button
                       onClick={() => copyToClipboard(cmp.formula, cmp.id)}
-                      className="text-xs text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
+                      className="text-xs text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
                       title="Merksatz kopieren"
                     >
                       {copiedId === cmp.id ? (
@@ -337,29 +416,29 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
                     </button>
                   </div>
 
-                  <div className="p-3 bg-indigo-50/70 dark:bg-indigo-950/40 rounded-lg border border-indigo-100 dark:border-indigo-900/50 text-xs font-semibold text-indigo-900 dark:text-indigo-300 mb-3.5 font-mono">
+                  <div className="p-3 bg-indigo-50/70 dark:bg-indigo-950/50 rounded-xl border border-indigo-100 dark:border-indigo-900/60 text-xs font-bold text-indigo-950 dark:text-indigo-200 mb-3.5 font-mono">
                     💡 {cmp.formula}
                   </div>
 
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs text-left">
-                      <thead className="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-700">
+                      <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
                         <tr>
-                          <th className="py-2 px-3">Begriff</th>
-                          <th className="py-2 px-3">Frage / Fokus</th>
-                          <th className="py-2 px-3">Erscheinung</th>
-                          <th className="py-2 px-3">Hauptziel</th>
+                          <th className="py-2.5 px-3">Begriff</th>
+                          <th className="py-2.5 px-3">Frage / Fokus</th>
+                          <th className="py-2.5 px-3">Erscheinung</th>
+                          <th className="py-2.5 px-3">Hauptziel</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                         {cmp.rows.map((row, rIdx) => (
-                          <tr key={rIdx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                            <td className="py-2 px-3 font-bold text-slate-900 dark:text-white">
+                          <tr key={rIdx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50">
+                            <td className="py-2.5 px-3 font-extrabold text-slate-900 dark:text-white">
                               {row.term}
                             </td>
-                            <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{row.focus}</td>
-                            <td className="py-2 px-3 text-slate-500 dark:text-slate-400">{row.visual}</td>
-                            <td className="py-2 px-3 text-slate-600 dark:text-slate-300">{row.goal}</td>
+                            <td className="py-2.5 px-3 text-slate-800 dark:text-slate-200 font-medium">{row.focus}</td>
+                            <td className="py-2.5 px-3 text-slate-600 dark:text-slate-300">{row.visual}</td>
+                            <td className="py-2.5 px-3 text-slate-700 dark:text-slate-200 font-medium">{row.goal}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -382,25 +461,25 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
             {CHAPTERS.map(ch => (
               <div
                 key={ch.id}
-                className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs flex flex-col justify-between transition-colors"
+                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-xs flex flex-col justify-between transition-colors"
               >
                 <div>
-                  <span className="text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500 uppercase">
+                  <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 uppercase">
                     Kapitel {ch.number} · {ch.title}
                   </span>
-                  <p className="text-xs text-slate-800 dark:text-slate-200 font-medium italic mt-2 leading-relaxed">
+                  <p className="text-xs text-slate-900 dark:text-slate-100 font-semibold italic mt-2 leading-relaxed">
                     "{ch.examMerksatz}"
                   </p>
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1">
-                  <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase">
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">
                     Checkliste:
                   </span>
                   {ch.examChecklist.map((item, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-400"
+                      className="flex items-center gap-1.5 text-[11px] text-slate-700 dark:text-slate-300 font-medium"
                     >
                       <CheckSquare className="w-3 h-3 text-indigo-500 shrink-0" />
                       <span>{item}</span>
@@ -416,3 +495,78 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
   );
 };
 
+/* Subcomponent for rendering a single Topic Card */
+const TopicCard: React.FC<{
+  topic: DigitalTopic;
+  bionic: boolean;
+  iconMap: Record<string, React.ReactNode>;
+}> = ({ topic, bionic, iconMap }) => {
+  return (
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-4 transition-colors">
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-100 dark:border-indigo-900/60 shrink-0">
+            {iconMap[topic.iconName] || <BookOpen className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />}
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+              {topic.category}
+            </span>
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+              {topic.title}
+            </h3>
+          </div>
+        </div>
+        <span className="text-xs text-slate-700 dark:text-slate-300 font-bold">
+          {topic.ihkFocusSummary}
+        </span>
+      </div>
+
+      {/* Shift comparison: What falls away vs. What is tested */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+        <div className="p-3.5 rounded-xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-900/60">
+          <div className="flex items-center gap-1.5 font-extrabold text-rose-800 dark:text-rose-200 mb-1">
+            <XCircle className="w-4 h-4 text-rose-500 shrink-0" />
+            <span>Tritt in den Hintergrund (Print)</span>
+          </div>
+          <p className="text-slate-700 dark:text-slate-300 font-medium">{topic.whatFailsAway}</p>
+        </div>
+
+        <div className="p-3.5 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-900/60">
+          <div className="flex items-center gap-1.5 font-extrabold text-emerald-800 dark:text-emerald-200 mb-1">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span>Wird vertieft geprüft (Digital)</span>
+          </div>
+          <p className="text-slate-700 dark:text-slate-300 font-medium">{topic.whatIsNewAndTested}</p>
+        </div>
+      </div>
+
+      {/* Key Concepts List */}
+      <div className="space-y-3 pt-2">
+        <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+          Die wichtigsten IHK-Schlüsselkonzepte:
+        </h4>
+        <div className="grid grid-cols-1 gap-2.5">
+          {topic.keyConcepts.map((concept, idx) => (
+            <div
+              key={idx}
+              className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700"
+            >
+              <div className="text-xs font-extrabold text-slate-900 dark:text-white mb-1">
+                📌 {concept.term}
+              </div>
+              <p className="text-xs text-slate-800 dark:text-slate-200 leading-relaxed font-medium">
+                <BionicText text={concept.explanation} enabled={bionic} />
+              </p>
+              {concept.examTip && (
+                <div className="mt-2 text-[11px] font-bold text-indigo-800 dark:text-indigo-200 bg-indigo-50 dark:bg-indigo-950/80 px-2.5 py-1 rounded-lg border border-indigo-200 dark:border-indigo-800 inline-block">
+                  🎯 IHK-Prüfungs-Tipp: {concept.examTip}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};

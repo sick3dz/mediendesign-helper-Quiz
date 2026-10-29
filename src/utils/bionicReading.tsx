@@ -20,8 +20,8 @@ export function formatBionic(text: string): React.ReactNode {
       // 1-3 letters: highlight first letter
       return (
         <React.Fragment key={index}>
-          <span className="font-extrabold">{chunk.slice(0, 1)}</span>
-          <span className="font-normal opacity-90">{chunk.slice(1)}</span>
+          <span className="font-black text-slate-950 dark:text-white">{chunk.slice(0, 1)}</span>
+          <span className="font-normal">{chunk.slice(1)}</span>
         </React.Fragment>
       );
     }
@@ -33,8 +33,8 @@ export function formatBionic(text: string): React.ReactNode {
 
     return (
       <React.Fragment key={index}>
-        <span className="font-extrabold">{boldPart}</span>
-        <span className="font-normal opacity-90">{restPart}</span>
+        <span className="font-black text-slate-950 dark:text-white">{boldPart}</span>
+        <span className="font-normal">{restPart}</span>
       </React.Fragment>
     );
   });
