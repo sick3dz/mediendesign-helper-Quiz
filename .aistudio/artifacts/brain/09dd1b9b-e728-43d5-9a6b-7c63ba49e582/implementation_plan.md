@@ -1,31 +1,26 @@
-# Umsetzungsplan: Digital-Leitfaden Kapitel-Slider & Schnell-Filter
+# Umsetzungsplan: Interaktive Step-by-Step Lernhäppchen mit automatischem Top-Scroll
 
 ## User Intent
-Der Benutzer möchte das lange Scrollen im Digital-Leitfaden (`SpickzettelView.tsx`) beseitigen. Statt alle Themen untereinander in einer langen Seite anzuzeigen, soll eine Kapitel-Slider Navigation mit Vorheriges/Nächstes-Buttons, Schnell-Tabs sowie Live-Suchleiste und Kategorien-Filter (Formeln, IHK-Tipps, Designregeln) integriert werden.
+Der Benutzer möchte, dass beim Wechsel zu einem neuen Lernhäppchen (Nugget) die Ansicht **sofort ganz nach oben** zum Anfang springt, damit man nicht scrollen muss. Zudem sollen die Inhalte (Kernkonzept, Bulletpoints, Praxisbeispiele, Prüfungsmerksatz) schrittweise oder übersichtlich als interaktive Lernkarten dargestellt werden.
 
 ---
 
 ## Proposed Changes
 
-### 1. `src/components/SpickzettelView.tsx` umstrukturieren
-- **Kapitel-Slider / Paging-System**:
-  - Hinzufügen von `selectedTopicIndex` bzw. aktiver Thema-Auswahl.
-  - Implementierung eines horizontalen Kapitel-Sliders mit Kompakt-Tabs oben für alle Digital-Themen (z. B. *1. IxD & Usability*, *2. Responsive Design*, *3. Accessibility*, *4. IT-Sicherheit*, *5. Schnittstellen & DB*).
-  - Vorheriges Thema / Nächstes Thema Paging-Buttons am unteren Ende des ausgewählten Themas, damit man flüssig Thema für Thema durcharbeiten kann.
-- **Such- & Kategorien-Filter**:
-  - Echtzeit-Suchleiste zum Filtern nach Begriffen (z. B. *WCAG*, *SQL*, *Wireframe*, *DSGVO*).
-  - Quick-Pill-Filter für Kategorien (z. B. *Alle*, *Formeln & Vergleiche*, *IHK-Prüfungstipps*, *Designkonzeption*).
-- **Smooth Auto-Scroll**:
-  - Beim Klick auf "Nächstes Thema" oder einen Slider-Tab schickes sanftes Scrollen zum Beginn der Themenkarte.
+### 1. `src/components/ModuleLearningView.tsx` anpassen
+- **Sofortiges automatisches Scrollen**:
+  - Bei jedem Wechsel von `currentNuggetIndex` sofortiges Scrollen zum Top-Container `nuggetViewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })`.
+- **Progressive Step-by-Step Aufdeckung (Interaktiv)**:
+  - Jeder Bulletpoint / Abschnitt schaltet sich nach und nach frei (oder wird kompakt im vertikalen Lernfluss dargestellt), sodass man aktiv durch den Lernschritt geführt wird.
+  - Ein Klick auf "Nächstes Detail" oder "Weiter" deckt den nächsten Baustein auf, bis das Häppchen komplett ist und zum nächsten Häppchen weitergeschaltet wird.
 
 ---
 
 ## Verification Plan
 
 ### Automated Verification
-- `compile_applet` ausführen, um festzustellen, dass TypeScript-Kompilierung fehlerfrei ist.
+- `compile_applet` ausführen, um fehlerfreie Kompilierung zu verifizieren.
 
 ### Manual Verification
-- Den Digital-Leitfaden öffnen.
-- Über die Kapitel-Slider-Tabs und Vorheriges/Nächste-Buttons navigieren.
-- Testen der Live-Suche und Kategorie-Filter.
+- In einem Modul (z. B. Kapitel 8) ein Häppchen aufrufen und auf "Nächstes Häppchen" klicken.
+- Prüfen, dass der Bildschirm sofort zum oberen Rand des neuen Häppchens scrollt und die Inhalte sauber step-by-step präsentiert werden.
