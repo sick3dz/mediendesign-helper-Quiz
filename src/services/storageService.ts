@@ -178,3 +178,81 @@ export function saveUserSettings(settings: UserSettings): void {
     console.error('Failed to save settings', e);
   }
 }
+
+export interface BackupPayload {
+  app: string;
+  version: number;
+  exportDate: string;
+  stats: UserStats;
+  settings: UserSettings;
+}
+
+export function generateBackupJson(): string {
+  const stats = loadUserStats();
+  const settings = loadUserSettings();
+  const payload: BackupPayload = {
+    app: 'DesignKonzept.prep',
+    version: 1,
+    exportDate: new Date().toISOString(),
+    stats,
+    settings,
+  };
+  return JSON.stringify(payload, null, 2);
+}
+
+export function downloadBackupFile(): void {
+  const json = generateBackupJson();
+  const dateStr = new Date().toISOString().split('T')[0];
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `designkonzept-fortschritt-${dateStr}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+export function restoreBackupJson(jsonString: string): { success: boolean; stats?: UserStats; settings?: UserSettings; error?: string } {
+  try {
+    const parsed = JSON.parse(jsonString);
+    if (!parsed || typeof parsed !== 'object') {
+      return { success: false, error: 'Ungültiges JSON-Format.' };
+    }
+
+    // Support both direct BackupPayload and raw stats object
+    let importedStats: UserStats;
+    let importedSettings: UserSettings | undefined;
+
+    if (parsed.stats && typeof parsed.stats === 'object') {
+      importedStats = parsed.stats;
+      if (parsed.settings && typeof parsed.settings === 'object') {
+        importedSettings = parsed.settings;
+      }
+    } else if (parsed.xp !== undefined && Array.isArray(parsed.completedModules)) {
+      importedStats = parsed as UserStats;
+    } else {
+      return { success: false, error: 'Keine gültigen Fortschrittsdaten im Backup gefunden.' };
+    }
+
+    const mergedStats: UserStats = {
+      ...DEFAULT_STATS,
+      ...importedStats,
+      pet: { ...DEFAULT_PET_STATE, ...(importedStats.pet || {}) },
+    };
+
+    saveUserStats(mergedStats);
+
+    if (importedSettings) {
+      const mergedSettings = { ...DEFAULT_SETTINGS, ...importedSettings };
+      saveUserSettings(mergedSettings);
+      return { success: true, stats: mergedStats, settings: mergedSettings };
+    }
+
+    return { success: true, stats: mergedStats };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Dateien konnten nicht verarbeitet werden.' };
+  }
+}
+

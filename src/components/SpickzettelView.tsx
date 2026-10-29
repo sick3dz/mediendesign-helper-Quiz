@@ -91,6 +91,17 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
         { term: 'Änderungsaufwand', focus: 'Aktualisierungen', visual: 'Layout: Jeder Kanal manuell | Struktur: 1x zentral', interaction: 'Single Source of Truth', goal: 'Beseitigt Redundanzen & spart Korrekturzeit' },
         { term: 'Qualitätskontrolle', focus: 'Fehlervermeidung', visual: 'Pflichtfelder, Preise, Bildrechte, CMYK/RGB', interaction: 'Strikte Prüfung vor Ausspielung', goal: 'Verhindert Fehlerausbreitung in alle Kanäle' },
       ]
+    },
+    {
+      id: 'cmp-8',
+      title: 'Das XML-Ökosystem & die 4er-Prüfungskette',
+      formula: 'XML (speichert Daten) → DTD/XSD (prüft/validiert) → XPath (sucht Adresse) → XSLT (macht Design/HTML)',
+      rows: [
+        { term: 'Wohlgeformtheit (Well-formed)', focus: 'Syntax-Gültigkeit', visual: '1 Root, </tag>, kein Überkreuzen, Case-Sensitive', interaction: 'Verletzung führt zum Programmabsturz!', goal: 'Grundvoraussetzung für jeden Parser' },
+        { term: 'DTD & Schema (XSD)', focus: 'Das Daten-„Gesetzbuch“', visual: '<name> ist Pflicht, <farbe> ist optional', interaction: 'Definiert erlaubte Tags & Reihenfolge', goal: 'Strukturelle Validierung aller Dokumente' },
+        { term: 'XPath', focus: 'Adressierung im Baum', visual: '/shop/produkt/preis', interaction: 'Findet gezielt Knoten & Attribute (@waehrung)', goal: 'Präziser Datenzugriff ohne Suchen' },
+        { term: 'XSLT', focus: 'Design-Transformation', visual: 'XML (Rohdaten) + XSLT (Vorlage) = HTML', interaction: 'Wandelt medienneutrale Daten ins Ausgabelayout', goal: 'Perfekte Trennung von Inhalt und Form' },
+      ]
     }
   ];
 

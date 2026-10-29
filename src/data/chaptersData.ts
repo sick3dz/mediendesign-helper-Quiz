@@ -2188,7 +2188,11 @@ export const CHAPTERS: Chapter[] = [
       'Metadaten vs. Inhalt (Bildrechte, Autor, Erstellungsdatum, Tags)',
       'Warum ist ein fertiges PDF üblicherweise NICHT medienneutral?',
       'Fehlerquellen: Fehlende Pflichtfelder, falsche Preise, inkonsistente Ausgaben',
-      'Der 5-Schritte-IHK-Ablauf von der Erfassung bis zur Qualitätskontrolle'
+      'Der 5-Schritte-IHK-Ablauf von der Erfassung bis zur Qualitätskontrolle',
+      'XML-Wohlgeformtheit (Well-formed): 1 Root, Schließen aller Tags, kein Überkreuzen, Case-Sensitivity',
+      'XML-Zusatztechnologien: DTD/XSD (Gesetzbuch/Validierung), XPath (Adresse/Suche) & XSLT (Transformation)',
+      'Die IHK-Prüfungskette: XML (speichert) → DTD/XSD (prüft) → XPath (sucht) → XSLT (macht Design/HTML)',
+      'Vergleich: XML vs. JSON (Struktur, Lesbarkeit, Parsing-Speed, Web-APIs)'
     ],
     modules: [
       {
@@ -2582,6 +2586,141 @@ export const CHAPTERS: Chapter[] = [
               { id: 'c', text: 'Die Hintergrundfarbe des Desktops', isCorrect: false, explanation: 'Irrelevant.' },
               { id: 'd', text: 'Die Seriennummer des Druckerkabels', isCorrect: false, explanation: 'Irrelevant.' }
             ]
+          }
+        ]
+      },
+      {
+        id: 'med-4',
+        chapterId: 'crossmedia',
+        title: 'XML-Standard: Wohlgeformtheit, Ökosystem & Prüfungskette',
+        shortDesc: 'Die 4 Regeln der Well-formedness, DTD/XSD-Validierung, XPath-Adressierung, XSLT-Transformation und XML vs. JSON.',
+        estimatedMinutes: 5,
+        nuggets: [
+          {
+            id: 'n-med-4-1',
+            title: '1. Was ist XML eigentlich? (Bedeutung vs. Aussehen)',
+            coreConcept: 'Extensible Markup Language – die Brücke zwischen Design und Technik.',
+            bulletPoints: [
+              'Bedeutung statt Aussehen: Während HTML definiert, wie etwas aussieht (Präsentation), definiert XML, was die Daten bedeuten (Struktur und Inhalt).',
+              'Keine vordefinierten Tags: Im Gegensatz zu HTML (wo <h1> immer eine Überschrift ist), gibt es in XML keine festen Tags – du erfindest eigene semantische Tags, die exakt zu deinem Inhalt passen (z. B. <produkt>, <name>, <preis waehrung="EUR">).',
+              'Verständlichkeit: Jeder, der diese Datei liest (Mensch oder Maschine), versteht sofort die Datenbedeutung.'
+            ],
+            examFavorite: true,
+            merksatz: 'HTML bestimmt die Präsentation („wie es aussieht“), XML bestimmt die Datenstruktur („was es bedeutet“).'
+          },
+          {
+            id: 'n-med-4-2',
+            title: '2. Die 4 Regeln der Wohlgeformtheit (Well-formedness)',
+            coreConcept: 'Damit ein XML-Dokument gültig ist, MUSS es wohlgeformt sein – sonst stürzt der Parser ab!',
+            bulletPoints: [
+              '1. Genau ein Root-Element: Alles muss in einem einzigen übergeordneten Wurzelelement eingeschlossen sein.',
+              '2. Tags müssen geschlossen werden: Jedes <tag> braucht zwingend ein passendes </tag> (oder Self-Closing <tag/>).',
+              '3. Korrekte Verschachtelung: Tags dürfen sich niemals überkreuzen! Richtig: <a><b></b></a> | Falsch: <a><b></a></b>.',
+              '4. Case-Sensitivity: XML unterscheidet strikt Groß- und Kleinschreibung – <Name> und <name> sind zwei völlig verschiedene Tags.'
+            ],
+            examFavorite: true,
+            merksatz: 'Wohlgeformt (Well-formed): 1 Root-Element, alle Tags schließen, saubere Verschachtelung ohne Überkreuzung, strikte Case-Sensitivity.'
+          },
+          {
+            id: 'n-med-4-3',
+            title: '3. Das Zusatz-Ökosystem: DTD/XSD, XPath & XSLT',
+            coreConcept: 'XML allein ist nur Text – erst die Zusatztechnologien machen es zur Publishing-Macht.',
+            bulletPoints: [
+              'DTD (Document Type Definition) & XML-Schema (XSD): Das „Gesetzbuch“. Da Tags frei erfunden werden dürfen, legt das Schema fest, welche Tags erlaubt sind, ihre Reihenfolge und ob sie Pflicht (z. B. <name>) oder optional (<farbe>) sind.',
+              'XPath: Die gezielte „Adresse“ im XML-Baum, um Knoten aufzuspüren (z. B. /shop/produkt/preis führt direkt zum Preiswert).',
+              'XSLT (Extensible Stylesheet Language Transformations): Die Design-Brücke für Mediengestalter! Wandelt XML-Rohdaten über eine XSLT-Vorlage in Zielformate wie HTML oder Druck-FO um.'
+            ],
+            merksatz: 'DTD/XSD validiert die Struktur, XPath findet die Daten im Dokumentenbaum, XSLT transformiert Daten ins finale Ausgabedesign.'
+          },
+          {
+            id: 'n-med-4-4',
+            title: '4. Die IHK-Prüfungskette für XML',
+            coreConcept: 'Die 4-Schritte-Kette, die in Prüfungen als Standard abgefragt wird.',
+            bulletPoints: [
+              'Schritt 1: XML speichert die Daten strukturiert und medienneutral.',
+              'Schritt 2: DTD / XSD prüft, ob die Struktur stimmt und alle Pflichtfelder vorhanden sind (Validierung).',
+              'Schritt 3: XPath sucht und adressiert die gewünschten Daten im XML-Baum.',
+              'Schritt 4: XSLT macht daraus ein fertiges Design bzw. HTML-Ergebnis für den Benutzer.'
+            ],
+            examFavorite: true,
+            merksatz: 'Prüfungskette: XML (speichert) → DTD/XSD (prüft) → XPath (sucht) → XSLT (macht Design/HTML).'
+          },
+          {
+            id: 'n-med-4-5',
+            title: '5. Prüfungsvergleich: XML vs. JSON',
+            coreConcept: 'Warum JSON heute in Web-APIs dominiert, während XML im Publishing glänzt.',
+            bulletPoints: [
+              'Struktur: XML = hierarchischer Baum mit Tags (<tag>) | JSON = Schlüssel-Wert-Paare ("key": "value").',
+              'Lesbarkeit: XML wirkt durch schließende End-Tags oft überladen | JSON ist extrem schlank und kompakt.',
+              'Parsing-Geschwindigkeit: XML ist langsamer zu parsen | JSON wird extrem schnell und direkt nativ von JavaScript im Webbrowser verarbeitet.',
+              'Einsatzgebiete: XML bei komplexen Verlagsdokumenten, InDesign-Workflows & XSLT-Transformationen | JSON bei modernen Web-APIs, SPAs und mobilem Datenaustausch.'
+            ],
+            merksatz: 'XML für komplexe Dokumente & XSLT-Transformationen – JSON für schlanke, ultraschnelle Web-APIs.'
+          }
+        ],
+        quizQuestions: [
+          {
+            id: 'q-med-4-1',
+            chapterId: 'crossmedia',
+            moduleId: 'med-4',
+            question: 'Was ist der fundamentale Unterschied zwischen HTML und XML bezüglich der verwendeten Tags?',
+            options: [
+              { id: 'a', text: 'HTML hat vordefinierte Tags für das Aussehen (z. B. <h1>), während XML keine vordefinierten Tags hat und man eigene Tags für die inhaltliche Bedeutung frei erfindet', isCorrect: true, explanation: 'Richtig! HTML bestimmt die Präsentation, XML beschreibt die inhaltliche Semantik mit frei definierten Tags (z. B. <produkt>).' },
+              { id: 'b', text: 'HTML funktioniert nur offline, XML nur im Internet', isCorrect: false, explanation: 'Falsch.' },
+              { id: 'c', text: 'XML erlaubt grundsätzlich keine Buchstaben in Tags', isCorrect: false, explanation: 'Falsch.' },
+              { id: 'd', text: 'Es gibt keinen Unterschied, beide Sprachen nutzen exakt dieselben Tags', isCorrect: false, explanation: 'Falsch.' }
+            ],
+            merksatz: 'HTML = feste Tags für die Präsentation | XML = frei erfundene Tags für die Bedeutung.'
+          },
+          {
+            id: 'q-med-4-2',
+            chapterId: 'crossmedia',
+            moduleId: 'med-4',
+            question: 'Welche der folgenden Bedingungen MUSS zwingend erfüllt sein, damit ein XML-Dokument als „wohlgeformt“ (well-formed) gilt?',
+            options: [
+              { id: 'a', text: 'Genau ein Wurzelelement (Root), alle Tags geschlossen, saubere Verschachtelung ohne Überkreuzung und Beachtung von Case-Sensitivity', isCorrect: true, explanation: 'Exakt! Das sind die 4 Grundregeln der Wohlgeformtheit aus dem PDF.' },
+              { id: 'b', text: 'Die Datei muss mindestens 5 Bilder enthalten', isCorrect: false, explanation: 'Falsch.' },
+              { id: 'c', text: 'Tags dürfen niemals mit Großbuchstaben beginnen', isCorrect: false, explanation: 'Großbuchstaben sind erlaubt, müssen aber einheitlich geschlossen werden (Case-Sensitivity).' },
+              { id: 'd', text: 'Die Datei muss auf Deutsch verfasst sein', isCorrect: false, explanation: 'Unsinn.' }
+            ]
+          },
+          {
+            id: 'q-med-4-3',
+            chapterId: 'crossmedia',
+            moduleId: 'med-4',
+            question: 'Welches XML-Codesegment enthält einen groben Syntaxfehler und ist NICHT wohlgeformt?',
+            options: [
+              { id: 'a', text: '<a><b>Inhalt</a></b> (Tags sind überkreuzt verschachtelt)', isCorrect: true, explanation: 'Richtig! <b> wurde zuletzt geöffnet, muss also zuerst geschlossen werden (<a><b>Inhalt</b></a>).' },
+              { id: 'b', text: '<produkt><name>Stuhl</name><preis>99</preis></produkt>', isCorrect: false, explanation: 'Das ist vollständig wohlgeformt.' },
+              { id: 'c', text: '<shop><produkt waehrung="EUR">Tisch</produkt></shop>', isCorrect: false, explanation: 'Das ist vollständig wohlgeformt.' },
+              { id: 'd', text: '<artikel><titel>Katalog</titel></artikel>', isCorrect: false, explanation: 'Das ist vollständig wohlgeformt.' }
+            ]
+          },
+          {
+            id: 'q-med-4-4',
+            chapterId: 'crossmedia',
+            moduleId: 'med-4',
+            question: 'Welche Aufgabe übernimmt XSLT (Extensible Stylesheet Language Transformations) im Mediendesign-Workflow?',
+            options: [
+              { id: 'a', text: 'Es wandelt strukturierte XML-Rohdaten über Vorlagen in andere Zielformate um, z. B. in formatiertes HTML für den Webbrowser', isCorrect: true, explanation: 'Exakt! XML (Rohdaten) + XSLT (Design-Vorlage) = HTML (Ergebnis für den Nutzer).' },
+              { id: 'b', text: 'Es löscht alle Bilddateien vom Webserver', isCorrect: false, explanation: 'Falsch.' },
+              { id: 'c', text: 'Es formatiert Festplatten im Drucksaal', isCorrect: false, explanation: 'Unsinn.' },
+              { id: 'd', text: 'Es repariert kaputte Monitorpixel', isCorrect: false, explanation: 'Falsch.' }
+            ],
+            merksatz: 'XSLT transformiert XML-Rohdaten in gestaltetes HTML oder Druckformate.'
+          },
+          {
+            id: 'q-med-4-5',
+            chapterId: 'crossmedia',
+            moduleId: 'med-4',
+            question: 'Welche 4-teilige IHK-Prüfungskette beschreibt das Zusammenspiel von XML und seinen Zusatztechnologien perfekt?',
+            options: [
+              { id: 'a', text: 'XML (speichert Daten) → DTD/XSD (prüft Struktur) → XPath (sucht Daten) → XSLT (macht Design/HTML daraus)', isCorrect: true, explanation: 'Perfekt! Das ist die offizielle IHK-Zusammenfassungsformel aus dem PDF.' },
+              { id: 'b', text: 'HTML → CSS → JavaScript → PHP', isCorrect: false, explanation: 'Das ist der Web-Frontend-Stack, nicht die XML-Technologiefamilie.' },
+              { id: 'c', text: 'RGB → CMYK → Druck → Beschnitt', isCorrect: false, explanation: 'Das ist Druckfarbseparation.' },
+              { id: 'd', text: 'InDesign → Photoshop → Illustrator → Premiere', isCorrect: false, explanation: 'Das sind Adobe-Programme.' }
+            ],
+            merksatz: 'Die Prüfungskette: XML speichert → DTD/XSD prüft → XPath sucht → XSLT macht Design/HTML!'
           }
         ]
       }

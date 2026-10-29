@@ -274,7 +274,42 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
       { id: 'c', text: 'Weil Druckereien bei Tippfehlern die Polizei rufen', isCorrect: false, explanation: 'Unsinn.' },
       { id: 'd', text: 'Weil Single Source Publishing nur einmal pro Jahr ausgeführt werden darf', isCorrect: false, explanation: 'Falsch.' }
     ],
-    merksatz: 'Weil die Single Source alle Kanäle speist, muss die Datenqualität vor dem Rendern lückenlos kontrolliert werden.'
+  },
+  {
+    id: 'exam-25',
+    chapterId: 'crossmedia',
+    question: 'Aufgabe 25 (XML-Wohlgeformtheit): Welche 4 Regeln MUSS ein XML-Dokument zwingend einhalten, um „wohlgeformt“ (well-formed) zu sein?',
+    options: [
+      { id: 'a', text: '1. Genau ein Root-Element, 2. Alle Tags müssen geschlossen werden, 3. Korrekte Verschachtelung ohne Überkreuzung, 4. Beachtung von Case-Sensitivity (Groß-/Kleinschreibung)', isCorrect: true, explanation: 'Original-Prüfungsregeln aus dem PDF (Seite 1, Abschnitt 2)! Werden sie verletzt, stürzt das lesende Programm ab.' },
+      { id: 'b', text: '1. Nur Kleinbuchstaben erlaubt, 2. Keine Zahlen erlaubt, 3. Nur ein Absatz, 4. Keine Attribute', isCorrect: false, explanation: 'Falsch.' },
+      { id: 'c', text: '1. Mindestens 3 Root-Elemente nebeneinander, 2. Tags dürfen offen bleiben, 3. Keine Anführungszeichen', isCorrect: false, explanation: 'Völlig falsch, das verletzt alle Wohlgeformtheitsregeln.' },
+      { id: 'd', text: '1. Druckfarbraum CMYK, 2. 300 DPI Bildauflösung, 3. Beschnittzugabe 3mm, 4. PDF/X-3 Standard', isCorrect: false, explanation: 'Das sind Print-Produktionsregeln, keine XML-Syntaxregeln.' }
+    ],
+    merksatz: 'Wohlgeformt: 1 Root-Element, alle Tags schließen, keine überkreuzte Schachtelung, strikte Case-Sensitivity!'
+  },
+  {
+    id: 'exam-26',
+    chapterId: 'crossmedia',
+    question: 'Aufgabe 26 (XML-Zusatztechnologien & Prüfungskette): Welche 4-Stufen-Kette verbindet strukturierte Rohdaten mit Prüfung, Adressierung und fertigem Ausgabedesign?',
+    options: [
+      { id: 'a', text: 'XML (speichert Rohdaten) → DTD/XSD (prüft Struktur/Regelwerk) → XPath (sucht & adressiert Daten) → XSLT (transformiert in Design/HTML)', isCorrect: true, explanation: 'Exakt! Das ist die unverzichtbare IHK-Zusammenfassungskette aus dem PDF (Seite 2 & 3).' },
+      { id: 'b', text: 'InDesign → PDF-Export → Druckerei → Falzmaschine', isCorrect: false, explanation: 'Das ist ein konventioneller Print-Workflow.' },
+      { id: 'c', text: 'Photoshop → JPG → PNG → GIF', isCorrect: false, explanation: 'Das sind Bildformate.' },
+      { id: 'd', text: 'SQL → DDL → DML → CRUD', isCorrect: false, explanation: 'Das sind Datenbankbegriffe.' }
+    ],
+    merksatz: 'XML speichert → DTD/XSD prüft → XPath sucht → XSLT macht Design/HTML.'
+  },
+  {
+    id: 'exam-27',
+    chapterId: 'crossmedia',
+    question: 'Aufgabe 27 (XML vs. JSON im IHK-Vergleich): Warum hat JSON das XML-Format bei modernen Web-APIs und mobilen Applikationen weitgehend verdrängt?',
+    options: [
+      { id: 'a', text: 'JSON ist durch den Verzicht auf schließende Tags spürbar kompakter (kleinere Dateigröße), wird extrem schnell nativ in JavaScript im Browser geparst und nutzt direkte Schlüssel-Wert-Paare', isCorrect: true, explanation: 'Richtig! Die 4 Kernargumente aus der Vergleichstabelle des Prüfungs-PDFs (Kompaktheit, Geschwindigkeit, native JS-Integration, Lesbarkeit).' },
+      { id: 'b', text: 'Weil XML im Internet seit 2020 gesetzlich verboten ist', isCorrect: false, explanation: 'Falsch.' },
+      { id: 'c', text: 'Weil JSON nur maximal 5 Buchstaben lang sein darf', isCorrect: false, explanation: 'Unsinn.' },
+      { id: 'd', text: 'Weil XML-Dateien ausschließlich auf Floppy Disks gespeichert werden können', isCorrect: false, explanation: 'Unsinn.' }
+    ],
+    merksatz: 'JSON ist kompakter als XML, schneller im Parsing und nativ im Webbrowser integriert.'
   }
 ];
 

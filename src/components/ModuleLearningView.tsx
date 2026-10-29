@@ -10,6 +10,7 @@ import { WcagMatchGame } from './InteractiveMinigames/WcagMatchGame';
 import { SqlBuilderWidget } from './SqlBuilderWidget';
 import { JsonInspectorWidget } from './JsonInspectorWidget';
 import { CrossmediaPublishingWidget } from './CrossmediaPublishingWidget';
+import { XmlInspectorWidget } from './XmlInspectorWidget';
 import { ArrowLeft, ArrowRight, CheckCircle2, Star, Sparkles, HelpCircle, Gamepad2 } from 'lucide-react';
 
 interface Props {
@@ -210,6 +211,11 @@ export const ModuleLearningView: React.FC<Props> = ({
           {/* Interactive Single Source & Multi-Channel Simulator for Module med-2 */}
           {module.id === 'med-2' && (
             <CrossmediaPublishingWidget />
+          )}
+
+          {/* Interactive XML Inspector & Well-Formedness Lab for Module med-4 */}
+          {module.id === 'med-4' && (
+            <XmlInspectorWidget />
           )}
 
           {/* Bottom Card Controls */}

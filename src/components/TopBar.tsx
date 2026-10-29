@@ -1,4 +1,5 @@
 import React from 'react';
+import { HardDrive } from 'lucide-react';
 
 export type ActiveTab = 'chapters' | 'pet' | 'exam' | 'spickzettel' | 'minigames';
 
@@ -8,6 +9,7 @@ interface Props {
   darkMode: boolean;
   onToggleDarkMode: () => void;
   onOpenFocusSprint: () => void;
+  onOpenBackupModal: () => void;
   petSpeciesEmoji: string;
 }
 
@@ -17,6 +19,7 @@ export const TopBar: React.FC<Props> = ({
   darkMode,
   onToggleDarkMode,
   onOpenFocusSprint,
+  onOpenBackupModal,
   petSpeciesEmoji,
 }) => {
   return (
@@ -89,8 +92,18 @@ export const TopBar: React.FC<Props> = ({
           </button>
         </nav>
 
-        {/* Zone 3: Dark Mode toggle + Primary Sprint Action */}
-        <div className="flex items-center gap-3 shrink-0">
+        {/* Zone 3: Backup button + Dark Mode toggle + Primary Sprint Action */}
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            onClick={onOpenBackupModal}
+            className="p-1.5 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-semibold"
+            title="Fortschritt extern sichern & wiederherstellen"
+            aria-label="Backup manager"
+          >
+            <HardDrive className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+            <span className="hidden sm:inline">Backup</span>
+          </button>
+
           <button
             onClick={onToggleDarkMode}
             className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"

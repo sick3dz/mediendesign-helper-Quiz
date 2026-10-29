@@ -26,6 +26,7 @@ import { ExamSimulatorView } from './components/ExamSimulatorView';
 import { SpickzettelView } from './components/SpickzettelView';
 import { MiniGamesHubView } from './components/MiniGamesHubView';
 import { FocusSprintModal } from './components/FocusSprintModal';
+import { BackupModal } from './components/BackupModal';
 import { ChapterSurpriseModal } from './components/ChapterSurpriseModal';
 import { CHAPTER_SURPRISES, ChapterSurprise } from './data/petData';
 
@@ -42,6 +43,7 @@ export default function App() {
   const [stats, setStats] = useState<UserStats>(() => loadUserStats());
   const [settings, setSettings] = useState<UserSettings>(() => loadUserSettings());
   const [isFocusSprintOpen, setIsFocusSprintOpen] = useState(false);
+  const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [isAdoptionModalOpen, setIsAdoptionModalOpen] = useState<boolean>(
     () => !stats.pet?.hasAdopted
   );
@@ -389,6 +391,7 @@ export default function App() {
         darkMode={settings.darkMode}
         onToggleDarkMode={handleToggleDarkMode}
         onOpenFocusSprint={() => setIsFocusSprintOpen(true)}
+        onOpenBackupModal={() => setIsBackupModalOpen(true)}
         petSpeciesEmoji={speciesEmojiMap[stats.pet.species] || '🐾'}
       />
 
@@ -502,6 +505,16 @@ export default function App() {
       <FocusSprintModal
         isOpen={isFocusSprintOpen}
         onClose={() => setIsFocusSprintOpen(false)}
+      />
+
+      {/* Backup & Restore Manager Modal */}
+      <BackupModal
+        isOpen={isBackupModalOpen}
+        onClose={() => setIsBackupModalOpen(false)}
+        onBackupRestored={(newStats, newSettings) => {
+          setStats(newStats);
+          if (newSettings) setSettings(newSettings);
+        }}
       />
 
       {/* Chapter Completion Surprise Modal */}

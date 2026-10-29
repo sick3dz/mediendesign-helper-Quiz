@@ -345,7 +345,7 @@ export const CHAPTER_SURPRISES: ChapterSurprise[] = [
     chapterId: 'crossmedia',
     chapterNumber: 8,
     chapterTitle: 'Medienneutrale Daten & Crossmedia',
-    unlockRequirement: 'Schließe alle 3 Module in Kapitel 8 ab',
+    unlockRequirement: 'Schließe alle 4 Module in Kapitel 8 ab',
     accessory: {
       id: 'special_crossmedia_prism',
       name: 'Holo-Crossmedia-Spektralprisma',
