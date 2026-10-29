@@ -24,6 +24,7 @@ interface Props {
   onSelectChapter?: (chapterId: string) => void;
   onSelectModule: (chapterId: string, moduleId: string) => void;
   onStartExam: () => void;
+  onOpenGames?: () => void;
 }
 
 export const ChapterListView: React.FC<Props> = ({
@@ -34,6 +35,7 @@ export const ChapterListView: React.FC<Props> = ({
   onSelectChapter,
   onSelectModule,
   onStartExam,
+  onOpenGames,
 }) => {
   // If no external chapter selection is passed, find the first chapter with incomplete modules, or default to first
   const [internalSelectedId, setInternalSelectedId] = useState<string>(() => {

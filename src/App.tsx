@@ -90,9 +90,7 @@ export default function App() {
         const decayedPet = calculatePetDecay(prevStats.pet);
         if (
           decayedPet.hunger !== prevStats.pet.hunger ||
-          decayedPet.energy !== prevStats.pet.energy ||
-          decayedPet.happiness !== prevStats.pet.happiness ||
-          decayedPet.isSleeping !== prevStats.pet.isSleeping
+          decayedPet.happiness !== prevStats.pet.happiness
         ) {
           const updatedStats = { ...prevStats, pet: decayedPet };
           saveUserStats(updatedStats);
@@ -444,6 +442,10 @@ export default function App() {
           setPetInitialTab('care');
           setActiveTab('pet');
         }}
+        onOpenGames={() => {
+          setSelectedModuleMeta(null);
+          setActiveTab('minigames');
+        }}
         onChangePet={() => setIsAdoptionModalOpen(true)}
       />
 
@@ -470,6 +472,7 @@ export default function App() {
                 onSelectChapter={setSelectedChapterId}
                 onSelectModule={(cId, mId) => setSelectedModuleMeta({ chapterId: cId, moduleId: mId })}
                 onStartExam={() => setActiveTab('exam')}
+                onOpenGames={() => setActiveTab('minigames')}
               />
             )}
 
@@ -481,6 +484,7 @@ export default function App() {
                 onCoinsChange={handleCoinsChange}
                 onXpChange={handleXpChange}
                 onOpenAdoptionModal={() => setIsAdoptionModalOpen(true)}
+                onGoToGames={() => setActiveTab('minigames')}
                 onBack={() => setActiveTab('chapters')}
               />
             )}

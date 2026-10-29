@@ -57,8 +57,6 @@ export const PetAdoptionModal: React.FC<Props> = ({
     name: petName || PET_SPECIES[selectedSpecies].defaultName,
     hunger: 90,
     happiness: 95,
-    energy: 100,
-    isSleeping: false,
     lastCareTimestamp: Date.now(),
     equipped: currentPet.equipped || {},
     inventory: currentPet.inventory || { food: {}, accessories: [] },

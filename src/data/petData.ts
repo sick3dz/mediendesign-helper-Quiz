@@ -373,10 +373,8 @@ export const DEFAULT_PET_STATE: PetState = {
   hasAdopted: false, // User selects first!
   species: 'dog',
   name: 'Bello',
-  hunger: 80,
-  happiness: 80,
-  energy: 90,
-  isSleeping: false,
+  hunger: 85,
+  happiness: 85,
   lastCareTimestamp: Date.now(),
   equipped: {},
   inventory: {
@@ -388,7 +386,6 @@ export const DEFAULT_PET_STATE: PetState = {
   },
   timesFed: 0,
   timesPetted: 0,
-  timesNapped: 0,
   timesPlayed: 0,
 };
 
@@ -400,55 +397,30 @@ export function calculatePetDecay(pet: PetState): PetState {
   const elapsedMs = Math.max(0, now - lastTime);
   const elapsedHours = elapsedMs / (1000 * 60 * 60);
 
-  // If less than ~15 seconds, skip calculation
-  if (elapsedHours < 0.004) {
+  if (elapsedHours < 0.005) {
     return {
       ...pet,
-      energy: pet.energy ?? 90,
       lastCareTimestamp: pet.lastCareTimestamp || now,
     };
   }
 
-  let currentHunger = pet.hunger ?? 80;
-  let currentEnergy = pet.energy ?? 90;
-  let currentHappiness = pet.happiness ?? 80;
+  let currentHunger = pet.hunger ?? 85;
+  let currentHappiness = pet.happiness ?? 85;
 
-  if (pet.isSleeping) {
-    // Sleeping restores energy (+30 points per hour) and decays hunger slowly (-3 points per hour)
-    currentEnergy = Math.min(100, currentEnergy + elapsedHours * 30);
-    currentHunger = Math.max(0, currentHunger - elapsedHours * 3);
+  // Gentle decay: Hunger drops ~3 points per hour (~72 points/day)
+  currentHunger = Math.max(15, currentHunger - elapsedHours * 3);
 
-    // Auto wake up when 100% rested
-    const isSleeping = currentEnergy < 100;
-
-    return {
-      ...pet,
-      hunger: Math.round(currentHunger),
-      energy: Math.round(currentEnergy),
-      happiness: Math.round(currentHappiness),
-      isSleeping,
-      lastCareTimestamp: now,
-    };
-  }
-
-  // Awake decay rate:
-  // Hunger: drops ~5.5 points per hour (~132 points/day) -> needs feeding every 6-12 hours
-  // Energy: drops ~4.5 points per hour -> needs a nap/sleep
-  // Happiness: drops ~3.5 points per hour if hungry (<40) or tired (<40)
-  currentHunger = Math.max(0, currentHunger - elapsedHours * 5.5);
-  currentEnergy = Math.max(0, currentEnergy - elapsedHours * 4.5);
-
-  if (currentHunger < 40 || currentEnergy < 40) {
-    currentHappiness = Math.max(0, currentHappiness - elapsedHours * 4.0);
+  if (currentHunger < 30) {
+    currentHappiness = Math.max(15, currentHappiness - elapsedHours * 2);
   }
 
   return {
     ...pet,
     hunger: Math.round(currentHunger),
-    energy: Math.round(currentEnergy),
     happiness: Math.round(currentHappiness),
     lastCareTimestamp: now,
   };
 }
+
 
 

@@ -1,64 +1,83 @@
-# Implementierungsplan: Vervollständigung der IHK-Prüfungsthemen
+# StudyQuest Quiz-Spiele & Interaktiver Lern-Hub
 
-## Übersicht & Bestandsaufnahme
+Integration eines dedizierten Spiele-Bereichs mit 3 unterhaltsamen Minigames (*Speed-Quiz Quest*, *Memory-Match* & *Boss-Raid*). Alle Spiele nutzen dynamisch die IHK-Fragen und belohnen erfolgreiche Runden mit EXP-Punkten für das Haustier.
 
-Die Lernplattform deckt aktuell 8 Kapitel ab:
-1. Interaktionsdesign (IxD)
-2. Wireframes & Mockups
-3. Prototyping & Usability-Testing
-4. Datenschutz, IT-Sicherheit & DSGVO
-5. Web Accessibility (WCAG 2.2)
-6. Projektablauf, Agiles Arbeiten & Scrum
-7. Datenbanken, SQL & JSON
-8. Medienneutrale Daten, Crossmedia & XML
+## User Review & Critical Decisions
 
-Um den IHK-Prüfungskatalog für Mediengestalter Digital & Print (Fachrichtung Designkonzeption) zu 100% abzudecken, fehlen noch zwei essenzielle Themenbereiche aus den Bereichen Farbmetrik und Typografie.
+> [!IMPORTANT] Alle 3 vom Nutzer gewählten Spielmodi werden im interaktiven Spiele-Bereich bereitgestellt und nahtlos in das Haustier-Belohnungssystem eingebunden.
+
+- **Bestätigte Entscheidung 1 (Spielmodi)**: Bereitstellung aller 3 Spiele (*Speed-Quiz Quest*, *Memory-Match*, *Boss-Raid*) im Spiele-Bereich.
+- **Bestätigte Entscheidung 2 (Platzierung)**: Spiele-Button in der Hauptnavigation (unter 'Challenges') sowie im Haustier-Levelbereich bei den Challenges.
+- **Bestätigte Entscheidung 3 (Fragenbasis)**: Dynamische Generierung von Fragen & Fachbegriffen aus allen 7 IHK-Kapiteln & Prüfungsmodulen.
 
 ---
 
-## Geplante Erweiterungen
+## 1. Overview & Core Concept
 
-### 1. Kapitel 9: Farbtheorie, Farbräume & ICC-Farbmanagement
-- **Modul 9-1: Additive & Subtraktive Farbmischung (RGB vs. CMYK)**
-  - Lichtfarben (RGB: sRGB, Display P3) vs. Körperfarben (CMYK: ISO Coated v2, PSO Uncoated).
-  - Primär-, Sekundär- und Komplementärfarben, Farbtiefe (8-Bit vs. 16-Bit per Kanal).
-- **Modul 9-2: ICC-Farbprofile, Device Intent & Farbraum-Transformation**
-  - Was macht ein ICC-Profil?PCS (Profile Connection Space).
-  - Rendering Intents (Relativ farbmetrisch, Absolut farbmetrisch, Perzeptiv/Wahrnehmungsorientiert, Sättigung).
-  - Gamut Warning (Farbraumüberschreitung) und Softproof in Photoshop/InDesign.
-- **Modul 9-3: Sonderfarben, LAB-Farbraum & Schwarzaufbau (GCR / UCR)**
-  - Volltonfarben (Pantone, HKS) vs. Prozessfarben.
-  - Geräteunabhängiger CIELAB-Farbraum ($L^*a^*b^*$).
-  - Buntaufbau vs. Unbuntaufbau (GCR: Gray Component Replacement, UCR: Under Color Removal) und Gesamtfarbauftrag (GFA max 300%).
+1. **Speed-Quiz Quest**:
+   - Fragen gegen die ablaufende Zeit (z. B. 12 Sekunden pro Frage) beantworten.
+   - Richtige Antworten in Serie bauen eine Combo auf und geben Bonus-EXP.
 
-### 2. Kapitel 10: Lesetypografie, Mikrotypografie & Layout-Raster
-- **Modul 10-1: Schriftklassifikation, Anatomie & Schriftenkombination**
-  - DIN 16518 Schriftklassen (Venetianische Renaissance-Antiqua, Klassizistische Antiqua, Grotesk, Egyptienne, Handschriftliche).
-  - Anatomie der Buchstaben (Versalhöhe, X-Höhe, Ober-/Unterlänge, Dickte, Fleisch, Serife).
-  - Schriftenkombination: Schriftmischung nach Formprinzip und Epochen.
-- **Modul 10-2: Makro- & Mikrotypografie (Satzregeln & Lesbarkeit)**
-  - Zeilenlänge (50–75 Zeichen), Durchschuss / Zeilenabstand (120–145%).
-  - Laufweite (Spationierung), Kerning (Unterschneidung) vs. Spacing.
-  - Typografische Satzzeichen: Bis-Strich (En-Dash `–`), Gedankenstrich, Anführungszeichen (Typografische Anführungszeichen `„ “` vs. Zollzeichen `"`).
-- **Modul 10-3: Layout-Systeme, Satzspiegel & Variable Fonts**
-  - Satzspiegelkonstruktion (Neunerteilung, Goldener Schnitt, Villard'sche Figur).
-  - CSS Grid & Flexbox für responsive Web-Typografie.
-  - Variable Fonts (Axes: wght, wdth, ital, opsz) für barrierefreie und reaktive Interfaces.
+2. **Memory-Match & IHK-Begriffe**:
+   - Karten-Paare finden: Zuordnung von Fachbegriffen zu den passenden IHK-Definitionen (z. B. *Accessibility* ↔ *Barrierefreiheit nach WCAG*, *SQL JOIN* ↔ *Verknüpfung von zwei Tabellen*).
+   - Züge-Zähler und Zeitmessung für Highscores.
+
+3. **Boss-Raid Quiz**:
+   - Rundenbasierter Bosskampf gegen Lern-Gegner (z. B. "Master Bug", "Prüfungs-Phantom").
+   - Richtige Antworten lösen Spezial-Angriffe aus und ziehen Boss-HP ab. Falsche Antworten verringern die Spieler-HP.
+   - Sieg belohnt mit großen EXP-Mengen für das Haustier.
 
 ---
 
-## Interaktive Praxis-Labor-Ergänzungen
+## 2. User Experience & Visual Design
 
-1. **Interaktiver Farbraum- & Rendering-Intent-Simulator (`ColorGamutWidget.tsx`)**:
-   - Visualisiert den Unterschied zwischen RGB-Monitordarstellung und CMYK-Druckfarbraum mit simulierter Gamut-Warnung und Rendering-Intent-Umschaltung.
-2. **Typografie- & Mikrotypo-Satzspiegel-Studio (`TypographyStudioWidget.tsx`)**:
-   - Live-Editor zum Testen von Zeilenlängen, Durchschuss, Kerning und typografischen Satzzeichen im Vorher-Nachher-Vergleich.
+- **Layout & Einbindung**:
+  - Aufrufbar über die Hauptnavigation unter `Challenges / Spiele` sowie im Haustier-Raum unter dem Tab `Challenges & Minispiele`.
+  - Übersichtliches Hub-Grid mit 3 interaktiven Spielkarten inklusive Highscore-Anzeige, Zeitrekorden und Belohnungsübersicht.
+- **Visual Identity**:
+  - Dunkles Slate/Indigo-Theme mit Neon-Akzenten (Amber/Emerald/Rose).
+  - HP-Balken, Timer-Countdowns, Partikel-Animationen und Soundeffekte bei Siegen.
 
 ---
 
-## Verifikationsplan
-- Erstellung der neuen Kapitel und Module in `src/data/chaptersData.ts`.
-- Ergänzung entsprechender Prüfungsfragen in `src/data/examQuestions.ts`.
-- Ergänzung der Schnell-Vergleiche in `src/components/SpickzettelView.tsx`.
-- Aktualisierung des Haustier-Belohnungssystems (`petData.ts`) für Kapitel 9 und 10.
-- Durchführung von `lint_applet` (`tsc --noEmit`) und `compile_applet` (`npm run build`).
+## 3. Key Product Decisions & Trade-Offs
+
+- **Echte IHK-Inhalte**: Alle Fragen und Begriffspaare speisen sich aus den echten Lerninhalten (`chaptersData.ts` und `examData.ts`).
+- **Lern-Synergie mit dem Haustier**: Verdiente EXP aus den Spielen werden sofort im `stats.xp`-Konto gutgeschrieben, womit man im Haustier-Shop Leckerlis und Accessoires kaufen kann.
+
+---
+
+## 4. Technical Architecture & Data Strategy
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                          App.tsx                                │
+│        (state: activeTab = 'minigames', stats.xp, pet)          │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+                 ┌───────────────┴───────────────┐
+                 ▼                               ▼
+  ┌──────────────────────────────┐ ┌──────────────────────────────┐
+  │     TopBar / Nav Navigation  │ │   VirtualPetView (Sub-Tab)   │
+  └──────────────┬───────────────┘ └──────────────┬───────────────┘
+                 │                                │
+                 └───────────────┬────────────────┘
+                                 ▼
+              ┌─────────────────────────────────────┐
+              │      MiniGamesHubView.tsx           │
+              │  (Auswahl & Modi-Umschaltung)       │
+              └──────────────────┬──────────────────┘
+                                 │
+     ┌───────────────────────────┼───────────────────────────┐
+     ▼                           ▼                           ▼
+┌─────────────────────────┐ ┌─────────────────────────┐ ┌─────────────────────────┐
+│ SpeedQuizGame.tsx       │ │ MemoryMatchGame.tsx     │ │ BossRaidGame.tsx        │
+│ (Timer, Combo & XP)     │ │ (Begriffe ↔ Definition) │ │ (Boss HP & Attacken)    │
+└─────────────────────────┘ └─────────────────────────┘ └─────────────────────────┘
+```
+
+- **Dateien & Komponenten**:
+  - `MiniGamesHubView.tsx`: Erweitert um die 3 neuen Spielmodi mit Tabs/Karten.
+  - `SpeedQuizGame.tsx`: Reaktiver Timer, Combo-Multiplikator, EXP-Berechnung.
+  - `MemoryMatchGame.tsx`: Kartenpaar-Matching mit IHK-Fachbegriffen & Definitionen.
+  - `BossRaidGame.tsx`: Boss-Lebensbalken, Spieler-HP, Multiple-Choice-Kampfsystem.

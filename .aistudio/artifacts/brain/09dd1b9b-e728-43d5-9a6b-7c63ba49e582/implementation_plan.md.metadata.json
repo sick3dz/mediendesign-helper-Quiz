@@ -1,6 +1,6 @@
 {
-  "summary":  "Umfaenglicher Themen-Ausbauplan: Ergänzung von Kapitel 9 (Farbtheorie, Farbräume & ICC-Farbmanagement) und Kapitel 10 (Lesetypografie, Mikrotypografie & Raster-Systeme) inklusive interaktiver Tools und Prüfungsfragen.",
-  "updatedAt":  "2026-10-29T15:42:03.791766996Z",
+  "summary":  "Implementation plan for StudyQuest-like interactive quiz minigames (Speed-Quiz, Memory-Match, Boss-Raid) integrated with IHK quiz content and Pet EXP system.",
+  "updatedAt":  "2026-10-29T15:58:08.626489550Z",
   "requestFeedback":  true,
   "userFacing":  true
 }
