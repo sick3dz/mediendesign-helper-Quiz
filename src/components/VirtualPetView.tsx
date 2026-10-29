@@ -392,7 +392,7 @@ export const VirtualPetView: React.FC<Props> = ({
       </div>
 
       {/* Navigation Sub-Tabs */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-850 rounded-xl text-xs font-semibold">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-900 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-800">
         <button
           onClick={() => {
             soundEffects.playClick();

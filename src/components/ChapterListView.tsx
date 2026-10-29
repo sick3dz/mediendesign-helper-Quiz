@@ -179,25 +179,25 @@ export const ChapterListView: React.FC<Props> = ({
         className="bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs transition-colors scroll-mt-20 sm:scroll-mt-24"
       >
         {/* Active Chapter Title & Meta Header */}
-        <div className="p-4 sm:p-4.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-850/30">
+        <div className="p-4 sm:p-4.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/60">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5">
             <div className="inline-flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 text-xs font-mono font-bold">
+              <span className="px-2 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-950/90 text-indigo-800 dark:text-indigo-200 text-xs font-mono font-bold">
                 KAPITEL {currentChapter.number} VON {chapters.length}
               </span>
-              <span className="text-xs text-slate-500 dark:text-slate-400">
+              <span className="text-xs text-slate-700 dark:text-slate-200 font-semibold">
                 {activeChapterStats.completed} von {activeChapterStats.total} Modulen erledigt
               </span>
             </div>
 
-            <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+            <div className="flex items-center gap-3 text-xs text-slate-700 dark:text-slate-200 font-semibold">
               <span className="flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                <Clock className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
                 ~{currentChapter.modules.reduce((acc, m) => acc + m.estimatedMinutes, 0)} Min
               </span>
               <span>·</span>
               <span className="flex items-center gap-1">
-                <Layers className="w-3.5 h-3.5 text-indigo-500" />
+                <Layers className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
                 {currentChapter.modules.length} Module
               </span>
             </div>
@@ -295,11 +295,11 @@ export const ChapterListView: React.FC<Props> = ({
                           <BionicText text={module.title} enabled={bionic} />
                         </h4>
 
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
+                        <p className="text-[11px] text-slate-700 dark:text-slate-200 font-medium line-clamp-1">
                           {module.shortDesc}
                         </p>
 
-                        <div className="flex items-center gap-2 pt-0.5 text-[10px] text-slate-400 font-mono">
+                        <div className="flex items-center gap-2 pt-0.5 text-[10px] text-slate-600 dark:text-slate-300 font-mono font-semibold">
                           <span>{module.estimatedMinutes} Min</span>
                           <span>·</span>
                           <span>{module.nuggets.length} Einheiten</span>

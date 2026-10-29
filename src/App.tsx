@@ -50,12 +50,14 @@ export default function App() {
   const [petInitialTab, setPetInitialTab] = useState<'care' | 'shop' | 'wardrobe' | 'adopt'>('care');
   const [activeSurprise, setActiveSurprise] = useState<ChapterSurprise | null>(null);
 
-  // Sync dark mode class on <html>
+  // Sync dark mode class on <html> & <body>
   useEffect(() => {
     if (settings.darkMode) {
       document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
     }
   }, [settings.darkMode]);
 
