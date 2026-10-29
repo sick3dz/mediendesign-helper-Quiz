@@ -77,7 +77,7 @@ export const TopBar: React.FC<Props> = ({
                 : 'hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            Merksätze
+            💡 Digital-Leitfaden
           </button>
 
           <button

@@ -429,11 +429,11 @@ export const VirtualPetView: React.FC<Props> = ({
               soundEffects.playClick();
               onGoToGames();
             }}
-            className="flex-1 py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold shadow-xs hover:opacity-90"
+            className="flex-1 py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/80 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 font-bold text-xs shadow-2xs"
             title="Spiele Speed-Quiz, Memory und Boss-Raid"
           >
-            <Gamepad2 className="w-3.5 h-3.5 text-amber-300 animate-bounce" />
-            <span>🎮 Quiz-Spiele</span>
+            <Gamepad2 className="w-3.5 h-3.5 text-indigo-500" />
+            <span>Quiz-Spiele</span>
           </button>
         )}
 

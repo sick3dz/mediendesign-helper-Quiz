@@ -1,83 +1,61 @@
-# StudyQuest Quiz-Spiele & Interaktiver Lern-Hub
+# Schlanke Kapitel-Navigation & Vereinheitlichte IHK-Buttons
 
-Integration eines dedizierten Spiele-Bereichs mit 3 unterhaltsamen Minigames (*Speed-Quiz Quest*, *Memory-Match* & *Boss-Raid*). Alle Spiele nutzen dynamisch die IHK-Fragen und belohnen erfolgreiche Runden mit EXP-Punkten für das Haustier.
+Straffung der Benutzeroberfläche in `ChapterListView.tsx` und `TopBar.tsx`. Reduzierung der vertikalen Höhe, schlanke Kapitel-Navigation (`◀ Vorheriges`, `Kapitel-Übersicht`, `Nächstes ▶`) und vereinheitlichte 32px-Aktionsbuttons.
 
 ## User Review & Critical Decisions
 
-> [!IMPORTANT] Alle 3 vom Nutzer gewählten Spielmodi werden im interaktiven Spiele-Bereich bereitgestellt und nahtlos in das Haustier-Belohnungssystem eingebunden.
+> [!IMPORTANT] Das Layout wird nach unten hin deutlich schlanker gestaltet, damit die Lerneinheiten ohne langes Scrollen sofort im Blickfeld liegen.
 
-- **Bestätigte Entscheidung 1 (Spielmodi)**: Bereitstellung aller 3 Spiele (*Speed-Quiz Quest*, *Memory-Match*, *Boss-Raid*) im Spiele-Bereich.
-- **Bestätigte Entscheidung 2 (Platzierung)**: Spiele-Button in der Hauptnavigation (unter 'Challenges') sowie im Haustier-Levelbereich bei den Challenges.
-- **Bestätigte Entscheidung 3 (Fragenbasis)**: Dynamische Generierung von Fragen & Fachbegriffen aus allen 7 IHK-Kapiteln & Prüfungsmodulen.
+- **Bestätigte Entscheidung 1 (Kapitel-Navigation)**: Kompakter Kopfbereich mit schnellen Navigations-Buttons (`◀ Vorheriges`, `Übersicht`, `Nächstes ▶`) und einer schlanken Themenliste.
+- **Bestätigte Entscheidung 2 (IHK-Button-Design)**: Alle IHK-Buttons (IHK-Prüfung, Digital-Leitfaden, Quiz-Spiele) erhalten exakt dieselbe Höhe (32px / `h-8`), schlanke Ecken (`rounded-lg`) und abgestimmte Schriftgrößen (`text-xs font-semibold`).
 
 ---
 
 ## 1. Overview & Core Concept
 
-1. **Speed-Quiz Quest**:
-   - Fragen gegen die ablaufende Zeit (z. B. 12 Sekunden pro Frage) beantworten.
-   - Richtige Antworten in Serie bauen eine Combo auf und geben Bonus-EXP.
+1. **Kompakter Kapitel-Kopfbereich (`ChapterListView.tsx`)**:
+   - Schlanke obere Leiste zur direkten Kapitel-Umschaltung: `◀ Vorheriges`, `Kapitel X von 7`, `Nächstes ▶`.
+   - Kurze Themen-Übersicht für das ausgewählte Kapitel mit klarem Fortschritt.
+   - Kein überladener Textaufbau nach unten hin.
 
-2. **Memory-Match & IHK-Begriffe**:
-   - Karten-Paare finden: Zuordnung von Fachbegriffen zu den passenden IHK-Definitionen (z. B. *Accessibility* ↔ *Barrierefreiheit nach WCAG*, *SQL JOIN* ↔ *Verknüpfung von zwei Tabellen*).
-   - Züge-Zähler und Zeitmessung für Highscores.
-
-3. **Boss-Raid Quiz**:
-   - Rundenbasierter Bosskampf gegen Lern-Gegner (z. B. "Master Bug", "Prüfungs-Phantom").
-   - Richtige Antworten lösen Spezial-Angriffe aus und ziehen Boss-HP ab. Falsche Antworten verringern die Spieler-HP.
-   - Sieg belohnt mit großen EXP-Mengen für das Haustier.
+2. **Vereinheitlichte IHK-Buttons (`TopBar.tsx` & `ChapterListView.tsx`)**:
+   - `IHK-Prüfung`, `Digital-Leitfaden` und `Quiz-Spiele` teilen sich einheitliche Maße: `h-8 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5`.
+   - Beseitigt unterschiedlich dicke oder ungleich geformte Buttons.
 
 ---
 
 ## 2. User Experience & Visual Design
 
-- **Layout & Einbindung**:
-  - Aufrufbar über die Hauptnavigation unter `Challenges / Spiele` sowie im Haustier-Raum unter dem Tab `Challenges & Minispiele`.
-  - Übersichtliches Hub-Grid mit 3 interaktiven Spielkarten inklusive Highscore-Anzeige, Zeitrekorden und Belohnungsübersicht.
-- **Visual Identity**:
-  - Dunkles Slate/Indigo-Theme mit Neon-Akzenten (Amber/Emerald/Rose).
-  - HP-Balken, Timer-Countdowns, Partikel-Animationen und Soundeffekte bei Siegen.
+- **Keine vertikale Überladung**: Reduzierte Margins (`py-2`, `gap-3` statt `gap-6` / `p-7`), damit Themenkarten sofort sichtbar sind.
+- **Flüssiges Kapitel-Switching**: Nutzer können mit einem Klick zum nächsten oder vorherigen Kapitel springen.
 
 ---
 
 ## 3. Key Product Decisions & Trade-Offs
 
-- **Echte IHK-Inhalte**: Alle Fragen und Begriffspaare speisen sich aus den echten Lerninhalten (`chaptersData.ts` und `examData.ts`).
-- **Lern-Synergie mit dem Haustier**: Verdiente EXP aus den Spielen werden sofort im `stats.xp`-Konto gutgeschrieben, womit man im Haustier-Shop Leckerlis und Accessoires kaufen kann.
+- **Schlanke Themenkarten**: Reduzierte Padding-Höhen der Module, direkte Anzeige von Status (Erledigt / Offen) und Dauer.
+- **Konsistenter TopBar-Contract**: Alle primären Navigationselemente fügen sich harmonisch auf einer einheitlichen 32px-Höhenlinie ein.
 
 ---
 
 ## 4. Technical Architecture & Data Strategy
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                          App.tsx                                │
-│        (state: activeTab = 'minigames', stats.xp, pet)          │
-└────────────────────────────────┬────────────────────────────────┘
-                                 │
-                 ┌───────────────┴───────────────┐
-                 ▼                               ▼
-  ┌──────────────────────────────┐ ┌──────────────────────────────┐
-  │     TopBar / Nav Navigation  │ │   VirtualPetView (Sub-Tab)   │
-  └──────────────┬───────────────┘ └──────────────┬───────────────┘
-                 │                                │
-                 └───────────────┬────────────────┘
-                                 ▼
-              ┌─────────────────────────────────────┐
-              │      MiniGamesHubView.tsx           │
-              │  (Auswahl & Modi-Umschaltung)       │
-              └──────────────────┬──────────────────┘
-                                 │
-     ┌───────────────────────────┼───────────────────────────┐
-     ▼                           ▼                           ▼
-┌─────────────────────────┐ ┌─────────────────────────┐ ┌─────────────────────────┐
-│ SpeedQuizGame.tsx       │ │ MemoryMatchGame.tsx     │ │ BossRaidGame.tsx        │
-│ (Timer, Combo & XP)     │ │ (Begriffe ↔ Definition) │ │ (Boss HP & Attacken)    │
-└─────────────────────────┘ └─────────────────────────┘ └─────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                             TopBar                               │
+│  [Wordmark]   [Lernen | Leitfaden | IHK-Prüfung | Quiz-Spiele]   │
+└─────────────────────────────────┬────────────────────────────────┘
+                                  │
+                                  ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                      ChapterListView                             │
+│   [ ◀ Vorheriges ]   [ Kapitel 1: IxD ]   [ Nächstes ▶ ]         │
+│   ────────────────────────────────────────────────────────────   │
+│   • Modul 1: Grundbegriffe (10 Min)           [ Starten ]        │
+│   • Modul 2: Affordance & Signifier (8 Min)   [ Starten ]        │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
-- **Dateien & Komponenten**:
-  - `MiniGamesHubView.tsx`: Erweitert um die 3 neuen Spielmodi mit Tabs/Karten.
-  - `SpeedQuizGame.tsx`: Reaktiver Timer, Combo-Multiplikator, EXP-Berechnung.
-  - `MemoryMatchGame.tsx`: Kartenpaar-Matching mit IHK-Fachbegriffen & Definitionen.
-  - `BossRaidGame.tsx`: Boss-Lebensbalken, Spieler-HP, Multiple-Choice-Kampfsystem.
+- **Dateien**:
+  - `src/components/TopBar.tsx`: Vereinheitlichung der Navigations-Buttons auf `h-8`.
+  - `src/components/ChapterListView.tsx`: Neuer schlanker Kapitel-Header mit Navigation und komprimierter Modulliste.

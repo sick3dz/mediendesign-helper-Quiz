@@ -473,6 +473,7 @@ export default function App() {
                 onSelectModule={(cId, mId) => setSelectedModuleMeta({ chapterId: cId, moduleId: mId })}
                 onStartExam={() => setActiveTab('exam')}
                 onOpenGames={() => setActiveTab('minigames')}
+                onGoToSpickzettel={() => setActiveTab('spickzettel')}
               />
             )}
 

@@ -206,7 +206,7 @@ export const TopPetCompanionBar: React.FC<Props> = ({
             {/* Dedicated EXP-Shop Button */}
             <button
               onClick={() => onOpenShop()}
-              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+              className="h-8 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95 whitespace-nowrap shrink-0"
               title="Gib deine verdienten EXP-Punkte im Shop aus"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
@@ -217,11 +217,11 @@ export const TopPetCompanionBar: React.FC<Props> = ({
             {onOpenGames && (
               <button
                 onClick={onOpenGames}
-                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
+                className="h-8 px-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95 whitespace-nowrap shrink-0"
                 title="Spiele Speed-Quiz, Memory oder Boss-Raid"
               >
                 <Gamepad2 className="w-3.5 h-3.5 text-slate-950" />
-                <span>🎮 Spiele</span>
+                <span>Quiz-Spiele</span>
               </button>
             )}
 
