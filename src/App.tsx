@@ -28,7 +28,7 @@ import { MiniGamesHubView } from './components/MiniGamesHubView';
 import { FocusSprintModal } from './components/FocusSprintModal';
 import { BackupModal } from './components/BackupModal';
 import { ChapterSurpriseModal } from './components/ChapterSurpriseModal';
-import { CHAPTER_SURPRISES, ChapterSurprise } from './data/petData';
+import { CHAPTER_SURPRISES, ChapterSurprise, calculatePetDecay } from './data/petData';
 
 import { VirtualPetView } from './components/VirtualPetView';
 
@@ -80,6 +80,29 @@ export default function App() {
       setStats(updatedStats);
       saveUserStats(updatedStats);
     }
+  }, []);
+
+  // Periodic pet vitals decay check (hunger, energy & happiness based on time elapsed)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStats((prevStats) => {
+        if (!prevStats.pet) return prevStats;
+        const decayedPet = calculatePetDecay(prevStats.pet);
+        if (
+          decayedPet.hunger !== prevStats.pet.hunger ||
+          decayedPet.energy !== prevStats.pet.energy ||
+          decayedPet.happiness !== prevStats.pet.happiness ||
+          decayedPet.isSleeping !== prevStats.pet.isSleeping
+        ) {
+          const updatedStats = { ...prevStats, pet: decayedPet };
+          saveUserStats(updatedStats);
+          return updatedStats;
+        }
+        return prevStats;
+      });
+    }, 15000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleUpdateSettings = (newSettings: UserSettings) => {

@@ -80,6 +80,9 @@ export interface PetState {
   name: string;
   hunger: number; // 0 to 100 (100 = full)
   happiness: number; // 0 to 100 (100 = ecstatic)
+  energy: number; // 0 to 100 (100 = fully rested)
+  isSleeping?: boolean;
+  lastCareTimestamp?: number; // Date.now() timestamp
   equipped: {
     head?: string;
     face?: string;
@@ -91,6 +94,8 @@ export interface PetState {
   };
   timesFed: number;
   timesPetted: number;
+  timesNapped?: number;
+  timesPlayed?: number;
 }
 
 export interface UserStats {

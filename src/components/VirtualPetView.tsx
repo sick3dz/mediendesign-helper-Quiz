@@ -226,6 +226,62 @@ export const VirtualPetView: React.FC<Props> = ({
     });
   };
 
+  const handlePlayBall = () => {
+    const currentEnergy = pet.energy ?? 90;
+    if (currentEnergy < 15) {
+      soundEffects.playWrong();
+      showTemporaryFeedback(`${pet.name} ist zu müde zum Spielen! Lass ${pet.name} erst ein Nickerchen machen.`);
+      return;
+    }
+
+    soundEffects.playCoin();
+    try {
+      confetti({ particleCount: 35, spread: 50 });
+    } catch {}
+
+    const newHappiness = Math.min(100, pet.happiness + 20);
+    const newEnergy = Math.max(0, currentEnergy - 12);
+    const newHunger = Math.max(0, pet.hunger - 8);
+
+    const updated: PetState = {
+      ...pet,
+      happiness: newHappiness,
+      energy: newEnergy,
+      hunger: newHunger,
+      timesPlayed: (pet.timesPlayed || 0) + 1,
+    };
+
+    onUpdatePet(updated);
+    showTemporaryFeedback(`⚽ Ausgiebig mit ${pet.name} gespielt! (+20 Laune, -12 Energie)`);
+  };
+
+  const handleToggleSleep = () => {
+    soundEffects.playClick();
+    const nextSleeping = !pet.isSleeping;
+    if (nextSleeping) {
+      showTemporaryFeedback(`😴 ${pet.name} schläft jetzt tief und fest... (Energie lädt auf)`);
+    } else {
+      showTemporaryFeedback(`☀️ ${pet.name} ist wieder aufgewacht und voller Energie!`);
+    }
+    onUpdatePet({
+      ...pet,
+      isSleeping: nextSleeping,
+      lastCareTimestamp: Date.now(),
+    });
+  };
+
+  const energyLevel = pet.energy ?? 90;
+
+  // Thought Bubble Text based on conditions
+  const getThoughtBubble = () => {
+    if (pet.isSleeping) return `😴 Zzz... ${pet.name} träumt von fehlerfreiem Code...`;
+    if (pet.hunger < 30) return `🍕 Knurr! Ich habe großen Hunger! Füttere mich bitte.`;
+    if (energyLevel < 30) return `💤 Gähn... Ich bin so müde! Lass mich kurz schlafen.`;
+    if (pet.happiness < 35) return `🥺 Ich würde mich über etwas Zuneigung oder ein Spiel freuen!`;
+    if (pet.happiness > 80) return `🌟 ${pet.name} fühlt sich fantastisch! Bereit für die Prüfung!`;
+    return `🐾 Hallo! Lass uns gemeinsam lernen!`;
+  };
+
   // Count available food items in inventory
   const totalFoodInInventory = Object.values(pet.inventory.food).reduce((a, b) => a + b, 0);
 
@@ -296,6 +352,14 @@ export const VirtualPetView: React.FC<Props> = ({
           </div>
         </div>
 
+        {/* Thought Bubble */}
+        <div className="flex justify-center mb-2">
+          <div className="relative bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-medium px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs max-w-sm text-center">
+            {getThoughtBubble()}
+            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-100 dark:bg-slate-800 border-r border-b border-slate-200 dark:border-slate-700 rotate-45" />
+          </div>
+        </div>
+
         {/* Temporary Feedback Toast */}
         {feedbackMsg && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-full shadow-lg animate-bounce">
@@ -303,26 +367,60 @@ export const VirtualPetView: React.FC<Props> = ({
           </div>
         )}
 
+        {/* Thought Bubble */}
+        <div className="flex justify-center mb-2">
+          <div className="relative bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-medium px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs max-w-sm text-center">
+            {getThoughtBubble()}
+            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-100 dark:bg-slate-800 border-r border-b border-slate-200 dark:border-slate-700 rotate-45" />
+          </div>
+        </div>
+
         {/* Pet Stage with Reactive PetAvatar */}
         <div className="relative py-4 flex flex-col items-center justify-center">
           <PetAvatar pet={pet} isEating={isEating} isPetted={isPetted} size="lg" />
 
-          {/* Quick Petting Heart CTA */}
-          <button
-            onClick={handlePet}
-            className="mt-4 px-4 py-2 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/60 rounded-xl text-xs font-bold flex items-center gap-2 transition-transform active:scale-95 cursor-pointer shadow-xs"
-          >
-            <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
-            <span>{pet.name} streicheln (+12 Laune)</span>
-          </button>
+          {/* Interactive Care Action Buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5 mt-5">
+            {/* Streicheln */}
+            <button
+              onClick={handlePet}
+              className="px-3.5 py-2 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/60 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-transform active:scale-95 cursor-pointer shadow-xs"
+            >
+              <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
+              <span>Streicheln (+12 Laune)</span>
+            </button>
+
+            {/* Ball Spielen */}
+            <button
+              onClick={handlePlayBall}
+              className="px-3.5 py-2 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-transform active:scale-95 cursor-pointer shadow-xs"
+            >
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span>Ball spielen (+20 Laune)</span>
+            </button>
+
+            {/* Schlafen / Nickerchen */}
+            <button
+              onClick={handleToggleSleep}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-transform active:scale-95 cursor-pointer shadow-xs ${
+                pet.isSleeping
+                  ? 'bg-indigo-600 text-white border border-indigo-500 animate-pulse'
+                  : 'bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300'
+              }`}
+            >
+              <Zap className="w-4 h-4 text-indigo-400" />
+              <span>{pet.isSleeping ? '☀️ Aufwecken' : '😴 Nickerchen (Energie laden)'}</span>
+            </button>
+          </div>
         </div>
 
-        {/* Vitals Gauges */}
-        <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+        {/* 3 Vitals Gauges (Sättigung, Ausdauer, Zufriedenheit) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+          {/* Sättigung */}
           <div>
             <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
               <span className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
-                <Utensils className="w-3.5 h-3.5" /> Sättigung
+                <Utensils className="w-3.5 h-3.5" /> Sättigung (Hunger)
               </span>
               <span className="font-mono text-slate-600 dark:text-slate-400 tabular-nums">
                 {pet.hunger}%
@@ -342,10 +440,35 @@ export const VirtualPetView: React.FC<Props> = ({
             </div>
           </div>
 
+          {/* Energie */}
+          <div>
+            <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
+              <span className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400">
+                <Zap className="w-3.5 h-3.5 text-indigo-500" /> Ausdauer (Energie)
+              </span>
+              <span className="font-mono text-slate-600 dark:text-slate-400 tabular-nums">
+                {energyLevel}%
+              </span>
+            </div>
+            <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+              <div
+                className={`h-full transition-all duration-300 ${
+                  energyLevel < 30
+                    ? 'bg-rose-500'
+                    : energyLevel < 60
+                    ? 'bg-amber-500'
+                    : 'bg-indigo-500'
+                }`}
+                style={{ width: `${energyLevel}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Zufriedenheit */}
           <div>
             <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
               <span className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400">
-                <Heart className="w-3.5 h-3.5 fill-rose-500" /> Zufriedenheit
+                <Heart className="w-3.5 h-3.5 fill-rose-500" /> Laune (Zufriedenheit)
               </span>
               <span className="font-mono text-slate-600 dark:text-slate-400 tabular-nums">
                 {pet.happiness}%
@@ -353,7 +476,13 @@ export const VirtualPetView: React.FC<Props> = ({
             </div>
             <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
               <div
-                className="bg-rose-500 h-full rounded-full transition-all duration-300"
+                className={`h-full transition-all duration-300 ${
+                  pet.happiness < 30
+                    ? 'bg-rose-500'
+                    : pet.happiness < 60
+                    ? 'bg-amber-500'
+                    : 'bg-rose-500'
+                }`}
                 style={{ width: `${pet.happiness}%` }}
               />
             </div>

@@ -8,8 +8,9 @@ import {
   Utensils,
   ShoppingBag,
   Sparkles,
-  ChevronDown,
-  ChevronUp,
+  Zap,
+  Moon,
+  Sun,
   RefreshCw,
   ExternalLink,
 } from 'lucide-react';
@@ -29,13 +30,14 @@ export const TopPetCompanionBar: React.FC<Props> = ({
   onOpenFullPetRoom,
   onChangePet,
 }) => {
-  const { pet, xp, coins } = stats;
+  const { pet, xp } = stats;
   const speciesInfo = PET_SPECIES[pet.species];
 
   const [isPetted, setIsPetted] = useState(false);
   const [isEating, setIsEating] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [quickFeedback, setQuickFeedback] = useState<string | null>(null);
+
+  const energyLevel = pet.energy ?? 90;
 
   const showFeedback = (text: string) => {
     setQuickFeedback(text);
@@ -57,6 +59,21 @@ export const TopPetCompanionBar: React.FC<Props> = ({
     showFeedback(`${pet.name} schnurrt zufrieden! (+10 Laune)`);
   };
 
+  const handleToggleSleep = () => {
+    soundEffects.playClick();
+    const nextSleeping = !pet.isSleeping;
+    if (nextSleeping) {
+      showFeedback(`😴 ${pet.name} hält ein gemütliches Nickerchen...`);
+    } else {
+      showFeedback(`☀️ ${pet.name} ist wieder aufgewacht!`);
+    }
+    onUpdatePet({
+      ...pet,
+      isSleeping: nextSleeping,
+      lastCareTimestamp: Date.now(),
+    });
+  };
+
   // Quick feed with first available food in inventory
   const availableFoodEntry = Object.entries(pet.inventory?.food || {}).find(
     ([, qty]) => qty > 0
@@ -64,7 +81,6 @@ export const TopPetCompanionBar: React.FC<Props> = ({
 
   const handleQuickFeed = () => {
     if (!availableFoodEntry) {
-      // If no food in inventory, open shop
       showFeedback('Keine Snacks mehr! Öffne den EXP-Shop.');
       onOpenShop('food');
       return;
@@ -101,14 +117,17 @@ export const TopPetCompanionBar: React.FC<Props> = ({
     showFeedback(`${foodItem.name} verfüttert! (+${foodItem.nutrition} Sättigung)`);
   };
 
-  const moodLabel =
-    pet.hunger < 35
-      ? 'Hungrig 🥪'
-      : pet.happiness > 75
-      ? 'Überglücklich! ✨'
-      : pet.happiness < 40
-      ? 'Braucht Liebe 🥺'
-      : 'Zufrieden 😊';
+  const moodLabel = pet.isSleeping
+    ? 'Schläft 😴'
+    : pet.hunger < 35
+    ? 'Hungrig 🥪'
+    : energyLevel < 35
+    ? 'Müde 💤'
+    : pet.happiness > 75
+    ? 'Überglücklich! ✨'
+    : pet.happiness < 40
+    ? 'Braucht Liebe 🥺'
+    : 'Zufrieden 😊';
 
   return (
     <div className="bg-white/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 transition-colors shadow-2xs">
@@ -126,7 +145,7 @@ export const TopPetCompanionBar: React.FC<Props> = ({
                 <PetAvatar pet={pet} isEating={isEating} isPetted={isPetted} size="sm" />
               </div>
               <span className="absolute -bottom-1 -right-1 text-xs select-none">
-                {isPetted ? '💖' : '🐾'}
+                {pet.isSleeping ? '😴' : isPetted ? '💖' : '🐾'}
               </span>
             </button>
 
@@ -145,11 +164,11 @@ export const TopPetCompanionBar: React.FC<Props> = ({
               </div>
 
               {/* Vitals Progress Bars */}
-              <div className="flex items-center gap-3 mt-1 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+              <div className="flex items-center gap-2.5 sm:gap-3.5 mt-1 text-[10px] font-medium text-slate-500 dark:text-slate-400">
                 {/* Hunger Meter */}
-                <div className="flex items-center gap-1.5" title={`Sättigung: ${pet.hunger}%`}>
-                  <Utensils className="w-3 h-3 text-amber-500" />
-                  <div className="w-14 sm:w-18 bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                <div className="flex items-center gap-1" title={`Sättigung: ${pet.hunger}%`}>
+                  <Utensils className="w-3 h-3 text-amber-500 shrink-0" />
+                  <div className="w-10 sm:w-14 bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
                     <div
                       className={`h-full transition-all duration-300 ${
                         pet.hunger < 35 ? 'bg-rose-500' : 'bg-amber-500'
@@ -160,10 +179,24 @@ export const TopPetCompanionBar: React.FC<Props> = ({
                   <span className="font-mono text-[9px] tabular-nums">{pet.hunger}%</span>
                 </div>
 
+                {/* Energy Meter */}
+                <div className="flex items-center gap-1" title={`Energie: ${energyLevel}%`}>
+                  <Zap className="w-3 h-3 text-indigo-500 shrink-0" />
+                  <div className="w-10 sm:w-14 bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-300 ${
+                        energyLevel < 35 ? 'bg-rose-500' : 'bg-indigo-500'
+                      }`}
+                      style={{ width: `${energyLevel}%` }}
+                    />
+                  </div>
+                  <span className="font-mono text-[9px] tabular-nums">{energyLevel}%</span>
+                </div>
+
                 {/* Happiness Meter */}
-                <div className="flex items-center gap-1.5" title={`Zufriedenheit: ${pet.happiness}%`}>
-                  <Heart className="w-3 h-3 text-rose-500 fill-rose-500" />
-                  <div className="w-14 sm:w-18 bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                <div className="flex items-center gap-1" title={`Zufriedenheit: ${pet.happiness}%`}>
+                  <Heart className="w-3 h-3 text-rose-500 fill-rose-500 shrink-0" />
+                  <div className="w-10 sm:w-14 bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
                     <div
                       className="bg-rose-500 h-full rounded-full transition-all duration-300"
                       style={{ width: `${pet.happiness}%` }}
@@ -182,8 +215,22 @@ export const TopPetCompanionBar: React.FC<Props> = ({
             </div>
           )}
 
-          {/* Right: Quick Interactive Pet & Shop CTAs */}
-          <div className="flex items-center gap-2 self-end sm:self-center">
+          {/* Right: Quick Interactive Pet & Care CTAs */}
+          <div className="flex items-center gap-1.5 sm:gap-2 self-end sm:self-center">
+            {/* Sleep Toggle */}
+            <button
+              onClick={handleToggleSleep}
+              className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95 ${
+                pet.isSleeping
+                  ? 'bg-indigo-600 text-white border border-indigo-500'
+                  : 'bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300'
+              }`}
+              title={pet.isSleeping ? 'Aufwecken' : 'Nickerchen machen'}
+            >
+              {pet.isSleeping ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{pet.isSleeping ? 'Aufwecken' : 'Schlafen'}</span>
+            </button>
+
             {/* Quick Pet Button */}
             <button
               onClick={handleQuickPet}
@@ -198,43 +245,19 @@ export const TopPetCompanionBar: React.FC<Props> = ({
             <button
               onClick={handleQuickFeed}
               className="px-2.5 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-900/60 text-amber-700 dark:text-amber-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
-              title="Gib deinem Begleiter einen Snack"
+              title="Snack füttern"
             >
-              <Utensils className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-              <span>
-                Füttern {availableFoodEntry ? `(${availableFoodEntry[1]})` : ''}
-              </span>
-            </button>
-
-            {/* Dedicated EXP-Shop Button */}
-            <button
-              onClick={() => onOpenShop()}
-              className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
-              title="Gib deine verdienten EXP-Punkte im Shop aus"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>EXP-Shop</span>
-              <span className="font-mono text-[10px] bg-indigo-800/80 px-1.5 py-0.2 rounded-full text-indigo-200">
-                {xp} XP
-              </span>
+              <Utensils className="w-3.5 h-3.5 text-amber-500" />
+              <span className="hidden sm:inline">Füttern</span>
             </button>
 
             {/* Change Pet / Switch species */}
             <button
               onClick={onChangePet}
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-all cursor-pointer"
               title="Anderes Haustier auswählen"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-            </button>
-
-            {/* Open Full Pet Room */}
-            <button
-              onClick={onOpenFullPetRoom}
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-              title="Vollbild-Haustierzimmer & Kleiderschrank öffnen"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

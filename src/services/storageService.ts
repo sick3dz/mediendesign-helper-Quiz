@@ -1,5 +1,5 @@
 import { UserStats, Badge } from '../types/quiz';
-import { DEFAULT_PET_STATE } from '../data/petData';
+import { DEFAULT_PET_STATE, calculatePetDecay } from '../data/petData';
 
 const STORAGE_KEY = 'mediengestalter_adhd_trainer_stats_v2';
 const SETTINGS_KEY = 'mediengestalter_adhd_trainer_settings_v2';
@@ -143,10 +143,11 @@ export function loadUserStats(): UserStats {
     if (!raw) return DEFAULT_STATS;
     const parsed = JSON.parse(raw);
     const mergedPet = { ...DEFAULT_PET_STATE, ...(parsed.pet || {}) };
+    const decayedPet = calculatePetDecay(mergedPet);
     return {
       ...DEFAULT_STATS,
       ...parsed,
-      pet: mergedPet,
+      pet: decayedPet,
     };
   } catch {
     return DEFAULT_STATS;

@@ -1,51 +1,64 @@
-# Implementierungsplan: GitHub Pages Deployment Fix
+# Implementierungsplan: Vervollständigung der IHK-Prüfungsthemen
 
-## Ursachenanalyse
+## Übersicht & Bestandsaufnahme
 
-1. **Root Cause für den weißen Bildschirm & 404 Fehler auf Skripte:**
-   - In `vite.config.ts` ist aktuell keine `base`-Eigenschaft gesetzt.
-   - Vite kompiliert Skripte und Stylesheets daher standardmäßig mit absolutem Root-Pfad: `<script src="/assets/index-xxx.js">`.
-   - Bei GitHub Pages liegt die App typischerweise in einem Unterordner des Repositories (`https://<username>.github.io/<repository-name>/`).
-   - Der Browser versucht die Skripte von `https://<username>.github.io/assets/...` statt `https://<username>.github.io/<repository-name>/assets/...` zu laden. Dies führt zu HTTP 404 (Not Found) und einem komplett weißen Bildschirm.
-   - **Lösung:** Konfiguration von `base: './'` in `vite.config.ts`. Damit werden alle Asset-Referenzen relativ generiert, was universell sowohl für GitHub Pages Unterverzeichnisse als auch für Root-/Custom-Domains fehlerfrei funktioniert.
+Die Lernplattform deckt aktuell 8 Kapitel ab:
+1. Interaktionsdesign (IxD)
+2. Wireframes & Mockups
+3. Prototyping & Usability-Testing
+4. Datenschutz, IT-Sicherheit & DSGVO
+5. Web Accessibility (WCAG 2.2)
+6. Projektablauf, Agiles Arbeiten & Scrum
+7. Datenbanken, SQL & JSON
+8. Medienneutrale Daten, Crossmedia & XML
 
-2. **Fehlende automatische Build-Pipeline:**
-   - GitHub Pages benötigt entweder den gebauten statischen `dist/`-Ordner oder eine CI/CD-Pipeline via GitHub Actions.
-   - Wenn nur der Quellcode gepusht wird, kann GitHub Pages ohne Workflow die TypeScript/React-Dateien nicht kompilieren.
-   - **Lösung:** Einrichten eines offiziellen, schlanken GitHub Actions Workflows (`.github/workflows/deploy.yml`), der bei jedem Push auf den `main`-Branch automatisch baut und auf GitHub Pages veröffentlicht.
-
-3. **SPA-Routing-Fallback (404-Handling):**
-   - GitHub Pages wirft bei Direktaufrufen oder Reloads einen 404-Fehler, falls keine `404.html` vorhanden ist.
-   - **Lösung:** Ergänzung eines kleinen Build-Schritts (`cp dist/index.html dist/404.html`), damit die Single Page App auch bei Routing und Reloads intakt bleibt.
+Um den IHK-Prüfungskatalog für Mediengestalter Digital & Print (Fachrichtung Designkonzeption) zu 100% abzudecken, fehlen noch zwei essenzielle Themenbereiche aus den Bereichen Farbmetrik und Typografie.
 
 ---
 
-## Geplante Maßnahmen
+## Geplante Erweiterungen
 
-### 1. Vite-Konfiguration anpassen (`vite.config.ts`)
-- Ergänzung von `base: './'` im Rückgabeobjekt von `defineConfig`.
-- Dadurch generiert Vite relative Asset-Pfade (`./assets/...`), die in jedem GitHub Pages URL-Schema funktionieren.
+### 1. Kapitel 9: Farbtheorie, Farbräume & ICC-Farbmanagement
+- **Modul 9-1: Additive & Subtraktive Farbmischung (RGB vs. CMYK)**
+  - Lichtfarben (RGB: sRGB, Display P3) vs. Körperfarben (CMYK: ISO Coated v2, PSO Uncoated).
+  - Primär-, Sekundär- und Komplementärfarben, Farbtiefe (8-Bit vs. 16-Bit per Kanal).
+- **Modul 9-2: ICC-Farbprofile, Device Intent & Farbraum-Transformation**
+  - Was macht ein ICC-Profil?PCS (Profile Connection Space).
+  - Rendering Intents (Relativ farbmetrisch, Absolut farbmetrisch, Perzeptiv/Wahrnehmungsorientiert, Sättigung).
+  - Gamut Warning (Farbraumüberschreitung) und Softproof in Photoshop/InDesign.
+- **Modul 9-3: Sonderfarben, LAB-Farbraum & Schwarzaufbau (GCR / UCR)**
+  - Volltonfarben (Pantone, HKS) vs. Prozessfarben.
+  - Geräteunabhängiger CIELAB-Farbraum ($L^*a^*b^*$).
+  - Buntaufbau vs. Unbuntaufbau (GCR: Gray Component Replacement, UCR: Under Color Removal) und Gesamtfarbauftrag (GFA max 300%).
 
-### 2. GitHub Actions Deployment-Workflow anlegen (`.github/workflows/deploy.yml`)
-- Erstellung der Datei `.github/workflows/deploy.yml` mit:
-  - Trigger auf `push` zum Branch `main` (bzw. konfigurierbar für `master`).
-  - Permissions für `pages: write` und `id-token: write`.
-  - Checkout des Repositories (`actions/checkout@v4`).
-  - Node.js Setup (`actions/setup-node@v4` mit Cache für `npm`).
-  - Installation der Abhängigkeiten (`npm ci` oder `npm install`).
-  - Build-Schritt (`npm run build`).
-  - Kopieren von `dist/index.html` nach `dist/404.html` als SPA-Fallback.
-  - Artefakt-Upload (`actions/upload-pages-artifact@v3`).
-  - Deployment auf GitHub Pages (`actions/deploy-pages@v4`).
+### 2. Kapitel 10: Lesetypografie, Mikrotypografie & Layout-Raster
+- **Modul 10-1: Schriftklassifikation, Anatomie & Schriftenkombination**
+  - DIN 16518 Schriftklassen (Venetianische Renaissance-Antiqua, Klassizistische Antiqua, Grotesk, Egyptienne, Handschriftliche).
+  - Anatomie der Buchstaben (Versalhöhe, X-Höhe, Ober-/Unterlänge, Dickte, Fleisch, Serife).
+  - Schriftenkombination: Schriftmischung nach Formprinzip und Epochen.
+- **Modul 10-2: Makro- & Mikrotypografie (Satzregeln & Lesbarkeit)**
+  - Zeilenlänge (50–75 Zeichen), Durchschuss / Zeilenabstand (120–145%).
+  - Laufweite (Spationierung), Kerning (Unterschneidung) vs. Spacing.
+  - Typografische Satzzeichen: Bis-Strich (En-Dash `–`), Gedankenstrich, Anführungszeichen (Typografische Anführungszeichen `„ “` vs. Zollzeichen `"`).
+- **Modul 10-3: Layout-Systeme, Satzspiegel & Variable Fonts**
+  - Satzspiegelkonstruktion (Neunerteilung, Goldener Schnitt, Villard'sche Figur).
+  - CSS Grid & Flexbox für responsive Web-Typografie.
+  - Variable Fonts (Axes: wght, wdth, ital, opsz) für barrierefreie und reaktive Interfaces.
 
-### 3. Dokumentation & Checkliste in `README.md`
-- Schritt-für-Schritt-Anleitung für die einmalige Aktivierung in den GitHub Repository-Einstellungen:
-  - Repository auf GitHub aufrufen -> **Settings** -> **Pages**.
-  - Unter **Build and deployment** > **Source**: **GitHub Actions** auswählen.
+---
+
+## Interaktive Praxis-Labor-Ergänzungen
+
+1. **Interaktiver Farbraum- & Rendering-Intent-Simulator (`ColorGamutWidget.tsx`)**:
+   - Visualisiert den Unterschied zwischen RGB-Monitordarstellung und CMYK-Druckfarbraum mit simulierter Gamut-Warnung und Rendering-Intent-Umschaltung.
+2. **Typografie- & Mikrotypo-Satzspiegel-Studio (`TypographyStudioWidget.tsx`)**:
+   - Live-Editor zum Testen von Zeilenlängen, Durchschuss, Kerning und typografischen Satzzeichen im Vorher-Nachher-Vergleich.
 
 ---
 
 ## Verifikationsplan
-- Ausführen von `npm run build` (`compile_applet`), um zu überprüfen, dass relative Pfade sauber in der `dist/index.html` generiert werden.
-- Ausführen von `lint_applet`, um TypeScript-Fehlerfreiheit sicherzustellen.
-- Syntaxprüfung der Workflow-YAML-Datei.
+- Erstellung der neuen Kapitel und Module in `src/data/chaptersData.ts`.
+- Ergänzung entsprechender Prüfungsfragen in `src/data/examQuestions.ts`.
+- Ergänzung der Schnell-Vergleiche in `src/components/SpickzettelView.tsx`.
+- Aktualisierung des Haustier-Belohnungssystems (`petData.ts`) für Kapitel 9 und 10.
+- Durchführung von `lint_applet` (`tsc --noEmit`) und `compile_applet` (`npm run build`).
