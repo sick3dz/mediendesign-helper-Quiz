@@ -398,7 +398,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
       {/* Strict 3-zone Top Navigation */}
       <TopBar
         activeTab={activeTab}
@@ -450,7 +450,7 @@ export default function App() {
       />
 
       {/* Main Content Arena */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-8">
         {selectedModuleMeta && currentChapter && currentModule ? (
           <ModuleLearningView
             chapter={currentChapter}

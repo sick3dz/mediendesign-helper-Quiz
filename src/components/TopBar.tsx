@@ -1,5 +1,13 @@
-import React from 'react';
-import { HardDrive } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  HardDrive,
+  ChevronDown,
+  BookOpen,
+  Lightbulb,
+  Sparkles,
+  Award,
+  Gamepad2,
+} from 'lucide-react';
 
 export type ActiveTab = 'chapters' | 'pet' | 'exam' | 'spickzettel' | 'minigames';
 
@@ -22,77 +30,176 @@ export const TopBar: React.FC<Props> = ({
   onOpenBackupModal,
   petSpeciesEmoji,
 }) => {
+  const [isLernenMenuOpen, setIsLernenMenuOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsLernenMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleMenuSelect = (tab: ActiveTab) => {
+    setActiveTab(tab);
+    setIsLernenMenuOpen(false);
+  };
+
   return (
     <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
-      <div className="max-w-6xl mx-auto flex items-center justify-between gap-2 sm:gap-4 md:gap-6 px-3 sm:px-6 py-2.5 overflow-hidden">
-        {/* Zone 1: Single text element wordmark */}
-        <button
-          onClick={() => setActiveTab('chapters')}
-          className="text-sm sm:text-base font-bold tracking-tight text-slate-900 dark:text-white whitespace-nowrap shrink-0 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-left"
-        >
-          DesignKonzept<span className="text-indigo-600 dark:text-indigo-400">.prep</span>
-        </button>
-
-        {/* Zone 2: Clean single-line text navigation links */}
-        <nav className="flex items-center gap-2.5 sm:gap-4 md:gap-5 text-xs font-semibold text-slate-600 dark:text-slate-400 overflow-x-auto min-w-0 scrollbar-none py-0.5">
+      <div className="max-w-6xl mx-auto flex items-center justify-between gap-2 sm:gap-4 px-3 sm:px-6 py-2 overflow-visible">
+        {/* Zone 1: Central Lernen & Navigation Floating Menu */}
+        <div className="relative" ref={dropdownRef}>
           <button
-            onClick={() => setActiveTab('chapters')}
-            className={`whitespace-nowrap shrink-0 transition-colors pb-0.5 cursor-pointer ${
-              activeTab === 'chapters'
-                ? 'text-indigo-600 dark:text-indigo-400 font-bold border-b-2 border-indigo-600 dark:border-indigo-400'
-                : 'hover:text-slate-900 dark:hover:text-white'
+            onClick={() => setIsLernenMenuOpen(prev => !prev)}
+            className={`whitespace-nowrap transition-all px-3 py-1.5 rounded-xl flex items-center gap-2 cursor-pointer shadow-2xs text-xs font-extrabold ${
+              isLernenMenuOpen
+                ? 'bg-indigo-600 text-white ring-2 ring-indigo-500/30'
+                : 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/80'
             }`}
+            aria-expanded={isLernenMenuOpen}
+            title="Lernzentrum & Direktzugriffe öffnen"
           >
-            Lernen
+            <BookOpen className="w-4 h-4 text-indigo-500 dark:text-indigo-400 shrink-0" />
+            <span>Lernen & Direktzugriffe</span>
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isLernenMenuOpen ? 'rotate-180' : ''}`} />
           </button>
 
-          <button
-            onClick={() => setActiveTab('pet')}
-            className={`whitespace-nowrap shrink-0 transition-colors pb-0.5 flex items-center gap-1 cursor-pointer ${
-              activeTab === 'pet'
-                ? 'text-indigo-600 dark:text-indigo-400 font-bold border-b-2 border-indigo-600 dark:border-indigo-400'
-                : 'hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <span>{petSpeciesEmoji}</span>
-            <span>Haustier</span>
-          </button>
+          {/* Floating Dropdown Card */}
+          {isLernenMenuOpen && (
+            <div className="absolute top-full left-0 mt-2 w-72 sm:w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-2 z-50 space-y-1 animate-in fade-in zoom-in-95 duration-150">
+              <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                  Lernzentrum & Schnell-Navigator
+                </span>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Direktsprung zu allen Modulen, Leitfaden & Tools
+                </p>
+              </div>
 
-          <button
-            onClick={() => setActiveTab('exam')}
-            className={`whitespace-nowrap shrink-0 transition-colors pb-0.5 cursor-pointer ${
-              activeTab === 'exam'
-                ? 'text-indigo-600 dark:text-indigo-400 font-bold border-b-2 border-indigo-600 dark:border-indigo-400'
-                : 'hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            IHK-Prüfung
-          </button>
+              {/* Option 1: Lernen & Kapitel */}
+              <button
+                onClick={() => handleMenuSelect('chapters')}
+                className={`w-full p-2.5 rounded-xl text-left transition-all flex items-start gap-3 cursor-pointer ${
+                  activeTab === 'chapters'
+                    ? 'bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/80 text-indigo-900 dark:text-indigo-200'
+                    : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-800 dark:text-slate-200'
+                }`}
+              >
+                <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 shrink-0 mt-0.5">
+                  <BookOpen className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold flex items-center gap-1.5">
+                    <span>IHK-Lernpfad & Kapitel</span>
+                    {activeTab === 'chapters' && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />}
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
+                    Alle 8 IHK-Kapitel, Module & Interaktionsdesign
+                  </p>
+                </div>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('spickzettel')}
-            className={`whitespace-nowrap shrink-0 transition-colors pb-0.5 cursor-pointer ${
-              activeTab === 'spickzettel'
-                ? 'text-indigo-600 dark:text-indigo-400 font-bold border-b-2 border-indigo-600 dark:border-indigo-400'
-                : 'hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            💡 Digital-Leitfaden
-          </button>
+              {/* Option 2: Digital-Leitfaden */}
+              <button
+                onClick={() => handleMenuSelect('spickzettel')}
+                className={`w-full p-2.5 rounded-xl text-left transition-all flex items-start gap-3 cursor-pointer ${
+                  activeTab === 'spickzettel'
+                    ? 'bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/80 text-indigo-900 dark:text-indigo-200'
+                    : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-800 dark:text-slate-200'
+                }`}
+              >
+                <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5">
+                  <Lightbulb className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold flex items-center gap-1.5">
+                    <span>💡 Digital-Leitfaden (IHK)</span>
+                    {activeTab === 'spickzettel' && <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
+                    Neuer IHK Digital-Fokus & Prüfungs-Formeln ohne Print
+                  </p>
+                </div>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('minigames')}
-            className={`whitespace-nowrap shrink-0 transition-colors pb-0.5 cursor-pointer ${
-              activeTab === 'minigames'
-                ? 'text-indigo-600 dark:text-indigo-400 font-bold border-b-2 border-indigo-600 dark:border-indigo-400'
-                : 'hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            🎮 Quiz-Spiele
-          </button>
-        </nav>
+              {/* Option 3: EXP-Shop & Haustier */}
+              <button
+                onClick={() => handleMenuSelect('pet')}
+                className={`w-full p-2.5 rounded-xl text-left transition-all flex items-start gap-3 cursor-pointer ${
+                  activeTab === 'pet'
+                    ? 'bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/80 text-indigo-900 dark:text-indigo-200'
+                    : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-800 dark:text-slate-200'
+                }`}
+              >
+                <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold flex items-center gap-1.5">
+                    <span>{petSpeciesEmoji} Haustier-Lounge & EXP-Shop</span>
+                    {activeTab === 'pet' && <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />}
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
+                    Snacks, Accessoires & Haustierpflege mit Lern-EXP
+                  </p>
+                </div>
+              </button>
 
-        {/* Zone 3: Backup button + Dark Mode toggle + Primary Sprint Action */}
+              {/* Option 4: IHK-Prüfungs-Simulator */}
+              <button
+                onClick={() => handleMenuSelect('exam')}
+                className={`w-full p-2.5 rounded-xl text-left transition-all flex items-start gap-3 cursor-pointer ${
+                  activeTab === 'exam'
+                    ? 'bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/80 text-indigo-900 dark:text-indigo-200'
+                    : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-800 dark:text-slate-200'
+                }`}
+              >
+                <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5">
+                  <Award className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold flex items-center gap-1.5">
+                    <span>🏆 IHK-Abschlussprüfung</span>
+                    {activeTab === 'exam' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
+                    Realistischer Prüfungssimulator mit Noten-Auswertung
+                  </p>
+                </div>
+              </button>
+
+              {/* Option 5: Quiz-Spiele */}
+              <button
+                onClick={() => handleMenuSelect('minigames')}
+                className={`w-full p-2.5 rounded-xl text-left transition-all flex items-start gap-3 cursor-pointer ${
+                  activeTab === 'minigames'
+                    ? 'bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/80 text-indigo-900 dark:text-indigo-200'
+                    : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-800 dark:text-slate-200'
+                }`}
+              >
+                <div className="p-2 rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5">
+                  <Gamepad2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold flex items-center gap-1.5">
+                    <span>🎮 Quiz-Spiele Hub</span>
+                    {activeTab === 'minigames' && <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
+                    Speed-Quiz, Memory-Flip & Boss-Raid Mini-Games
+                  </p>
+                </div>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Zone 2: Backup button + Dark Mode toggle + Primary Sprint Action */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <button
             onClick={onOpenBackupModal}
@@ -119,10 +226,11 @@ export const TopBar: React.FC<Props> = ({
 
           <button
             onClick={onOpenFocusSprint}
-            className="px-2.5 sm:px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors whitespace-nowrap shrink-0 shadow-xs flex items-center gap-1.5 cursor-pointer"
+            className="px-2.5 sm:px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors whitespace-nowrap shrink-0 shadow-2xs flex items-center gap-1.5 cursor-pointer"
+            title="Fokus-Sprint Timer (Pomodoro Lerneinheit)"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            <span>Fokus-Sprint</span>
+            <span>Fokus</span>
           </button>
         </div>
       </div>

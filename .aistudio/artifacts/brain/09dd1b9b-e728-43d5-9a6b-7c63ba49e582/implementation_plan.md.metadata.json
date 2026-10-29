@@ -1,6 +1,6 @@
 {
-  "summary":  "Implementation plan for streamlined chapter navigation and unified 32px sleek button design.",
-  "updatedAt":  "2026-10-29T16:22:29.007530976Z",
+  "summary":  "Plan to streamline TopBar by omitting the brand wordmark text and replacing the crowded navigation with a single sleek central Lernen dropdown menu with all direct links.",
+  "updatedAt":  "2026-10-29T16:45:56.403449808Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

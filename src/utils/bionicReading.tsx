@@ -10,7 +10,7 @@ export function formatBionic(text: string): React.ReactNode {
   const words = text.split(/(\s+)/);
 
   return words.map((chunk, index) => {
-    // If it's whitespace or punctuation only
+    // If it's whitespace
     if (/^\s+$/.test(chunk)) {
       return chunk;
     }
@@ -19,10 +19,10 @@ export function formatBionic(text: string): React.ReactNode {
     if (len <= 3) {
       // 1-3 letters: highlight first letter
       return (
-        <span key={index}>
-          <span className="font-bold text-slate-900">{chunk.slice(0, 1)}</span>
-          <span>{chunk.slice(1)}</span>
-        </span>
+        <React.Fragment key={index}>
+          <span className="font-extrabold">{chunk.slice(0, 1)}</span>
+          <span className="font-normal opacity-90">{chunk.slice(1)}</span>
+        </React.Fragment>
       );
     }
 
@@ -32,10 +32,10 @@ export function formatBionic(text: string): React.ReactNode {
     const restPart = chunk.slice(splitIndex);
 
     return (
-      <span key={index}>
-        <span className="font-bold text-slate-900">{boldPart}</span>
-        <span>{restPart}</span>
-      </span>
+      <React.Fragment key={index}>
+        <span className="font-extrabold">{boldPart}</span>
+        <span className="font-normal opacity-90">{restPart}</span>
+      </React.Fragment>
     );
   });
 }

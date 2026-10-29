@@ -182,7 +182,7 @@ export const TopPetCompanionBar: React.FC<Props> = ({
           )}
 
           {/* Right: Quick Interactive Pet & Shop CTAs */}
-          <div className="flex items-center gap-1.5 sm:gap-2 self-start sm:self-center shrink-0">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 self-start sm:self-center shrink-0 max-w-full">
             {/* Quick Pet Button */}
             <button
               onClick={handleQuickPet}

@@ -392,20 +392,20 @@ export const VirtualPetView: React.FC<Props> = ({
       </div>
 
       {/* Navigation Sub-Tabs */}
-      <div className="flex items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-850 rounded-xl text-xs font-semibold">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-850 rounded-xl text-xs font-semibold">
         <button
           onClick={() => {
             soundEffects.playClick();
             setActiveTab('care');
           }}
-          className={`flex-1 py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`py-2 px-2.5 sm:px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeTab === 'care'
               ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
-          <Utensils className="w-3.5 h-3.5" />
-          <span>Füttern ({totalFoodInInventory})</span>
+          <Utensils className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">Füttern ({totalFoodInInventory})</span>
         </button>
 
         <button
@@ -413,14 +413,14 @@ export const VirtualPetView: React.FC<Props> = ({
             soundEffects.playClick();
             setActiveTab('shop');
           }}
-          className={`flex-1 py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`py-2 px-2.5 sm:px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeTab === 'shop'
               ? 'bg-indigo-600 text-white shadow-xs font-bold'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
-          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-          <span>EXP-Shop</span>
+          <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+          <span className="truncate">EXP-Shop</span>
         </button>
 
         {onGoToGames && (
@@ -429,11 +429,11 @@ export const VirtualPetView: React.FC<Props> = ({
               soundEffects.playClick();
               onGoToGames();
             }}
-            className="flex-1 py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/80 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 font-bold text-xs shadow-2xs"
+            className="py-2 px-2.5 sm:px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/80 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 font-bold text-xs shadow-2xs"
             title="Spiele Speed-Quiz, Memory und Boss-Raid"
           >
-            <Gamepad2 className="w-3.5 h-3.5 text-indigo-500" />
-            <span>Quiz-Spiele</span>
+            <Gamepad2 className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+            <span className="truncate">Quiz-Spiele</span>
           </button>
         )}
 
@@ -442,14 +442,14 @@ export const VirtualPetView: React.FC<Props> = ({
             soundEffects.playClick();
             setActiveTab('wardrobe');
           }}
-          className={`flex-1 py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`py-2 px-2.5 sm:px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeTab === 'wardrobe'
               ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
-          <Shirt className="w-3.5 h-3.5" />
-          <span>Kleiderschrank ({pet.inventory.accessories.length})</span>
+          <Shirt className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">Kleiderschrank ({pet.inventory.accessories.length})</span>
         </button>
 
         <button
@@ -461,14 +461,14 @@ export const VirtualPetView: React.FC<Props> = ({
               setActiveTab('adopt');
             }
           }}
-          className={`flex-1 py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`col-span-2 sm:col-span-1 py-2 px-2.5 sm:px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeTab === 'adopt'
               ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
-          <RefreshCw className="w-3.5 h-3.5" />
-          <span>Tier wechseln</span>
+          <RefreshCw className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">Tier wechseln</span>
         </button>
       </div>
 

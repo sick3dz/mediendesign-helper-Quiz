@@ -78,7 +78,7 @@ export const AdhdControlsBar: React.FC<Props> = ({ stats, settings, onUpdateSett
                 ? 'bg-indigo-600 text-white font-semibold'
                 : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
             }`}
-            title="Hebt die ersten Buchstaben hervor"
+            title="Bionisches Lesen: Hebt Wortanfänge als Lesehilfe bei ADHS hervor"
           >
             <Eye className="w-3 h-3" />
             <span>Bionic</span>
