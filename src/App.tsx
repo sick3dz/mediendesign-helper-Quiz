@@ -31,6 +31,8 @@ import { FocusSprintModal } from './components/FocusSprintModal';
 import { BackupModal } from './components/BackupModal';
 import { ChapterSurpriseModal } from './components/ChapterSurpriseModal';
 import { CHAPTER_SURPRISES, ChapterSurprise, calculatePetDecay } from './data/petData';
+import { ambientAudioService, AmbientSoundType } from './services/ambientAudioService';
+import confetti from 'canvas-confetti';
 
 import { VirtualPetView } from './components/VirtualPetView';
 
@@ -51,6 +53,15 @@ export default function App() {
   );
   const [petInitialTab, setPetInitialTab] = useState<'care' | 'shop' | 'wardrobe' | 'adopt'>('care');
   const [activeSurprise, setActiveSurprise] = useState<ChapterSurprise | null>(null);
+
+  // Focus Sprint Global Persistent State
+  const [sprintTotalSeconds, setSprintTotalSeconds] = useState(300);
+  const [sprintSecondsLeft, setSprintSecondsLeft] = useState(300);
+  const [isSprintActive, setIsSprintActive] = useState(false);
+  const [sprintIsDone, setSprintIsDone] = useState(false);
+  const [sprintSoundType, setSprintSoundType] = useState<AmbientSoundType>('lofi');
+  const [sprintVolume, setSprintVolume] = useState<number>(0.35);
+  const [sprintIsMuted, setSprintIsMuted] = useState<boolean>(false);
 
   // Sync dark mode class on <html> & <body>
   useEffect(() => {
@@ -340,6 +351,85 @@ export default function App() {
     });
   };
 
+  // Sync ambient sound with timer running state globally
+  useEffect(() => {
+    if (isSprintActive && sprintSoundType !== 'none') {
+      ambientAudioService.play(sprintSoundType);
+    } else {
+      ambientAudioService.stop();
+    }
+  }, [isSprintActive, sprintSoundType]);
+
+  // Global Focus Sprint countdown interval
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isSprintActive && sprintSecondsLeft > 0) {
+      interval = setInterval(() => {
+        setSprintSecondsLeft(sec => sec - 1);
+      }, 1000);
+    } else if (sprintSecondsLeft === 0 && isSprintActive) {
+      setIsSprintActive(false);
+      setSprintIsDone(true);
+      ambientAudioService.stop();
+      soundEffects.playLevelUp();
+      try {
+        confetti({ particleCount: 85, spread: 80, origin: { y: 0.3 } });
+      } catch {
+        // ignore
+      }
+      handleFocusSprintCompleted(40);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isSprintActive, sprintSecondsLeft]);
+
+  const handleToggleSprintActive = () => {
+    soundEffects.playClick();
+    setIsSprintActive(prev => !prev);
+  };
+
+  const handleResetSprint = (secs: number = sprintTotalSeconds) => {
+    soundEffects.playClick();
+    setIsSprintActive(false);
+    setSprintTotalSeconds(secs);
+    setSprintSecondsLeft(secs);
+    setSprintIsDone(false);
+    ambientAudioService.stop();
+  };
+
+  const handleSelectSprintSound = (type: AmbientSoundType) => {
+    soundEffects.playClick();
+    setSprintSoundType(type);
+    if (isSprintActive) {
+      if (type === 'none') {
+        ambientAudioService.stop();
+      } else {
+        ambientAudioService.play(type);
+      }
+    }
+  };
+
+  const handleSprintVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVol = parseFloat(e.target.value);
+    setSprintVolume(newVol);
+    ambientAudioService.setVolume(newVol);
+    if (sprintIsMuted && newVol > 0) {
+      setSprintIsMuted(false);
+      ambientAudioService.setMuted(false);
+    }
+  };
+
+  const handleToggleSprintMute = () => {
+    const nextMuted = !sprintIsMuted;
+    setSprintIsMuted(nextMuted);
+    ambientAudioService.setMuted(nextMuted);
+  };
+
+  const sprintMinutes = Math.floor(sprintSecondsLeft / 60);
+  const sprintSeconds = sprintSecondsLeft % 60;
+  const sprintTimeFormatted = `${String(sprintMinutes).padStart(2, '0')}:${String(sprintSeconds).padStart(2, '0')}`;
+
   const handleClaimDailyMission = (missionId: string) => {
     setStats(prev => {
       const missions = prev.dailyMissions || [];
@@ -578,6 +668,8 @@ export default function App() {
         onOpenFocusSprint={() => setIsFocusSprintOpen(true)}
         onOpenBackupModal={() => setIsBackupModalOpen(true)}
         petSpeciesEmoji={speciesEmojiMap[stats.pet.species] || '🐾'}
+        isSprintActive={isSprintActive}
+        sprintTimeFormatted={sprintTimeFormatted}
       />
 
       {/* ADHD Cognitive Aids & Gamification Bar */}
@@ -706,7 +798,18 @@ export default function App() {
       <FocusSprintModal
         isOpen={isFocusSprintOpen}
         onClose={() => setIsFocusSprintOpen(false)}
-        onSprintCompleted={handleFocusSprintCompleted}
+        totalSeconds={sprintTotalSeconds}
+        secondsLeft={sprintSecondsLeft}
+        isActive={isSprintActive}
+        isDone={sprintIsDone}
+        soundType={sprintSoundType}
+        volume={sprintVolume}
+        isMuted={sprintIsMuted}
+        onToggleActive={handleToggleSprintActive}
+        onReset={handleResetSprint}
+        onSelectSound={handleSelectSprintSound}
+        onVolumeChange={handleSprintVolumeChange}
+        onToggleMute={handleToggleSprintMute}
       />
 
       {/* Backup & Restore Manager Modal */}

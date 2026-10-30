@@ -1,6 +1,6 @@
 {
-  "summary":  "Systematischer Abgleich aller Lern-Häppchen mit allen Quiz-Fragen abgeschlossen. Alle prüfungsrelevanten Details (wie 0 Tage Dauer beim Meilenstein, Change Request, Spear-Phishing) sind nun vollständig im Vorab-Lernmaterial enthalten.",
-  "updatedAt":  "2026-10-30T10:25:37.215285635Z",
+  "summary":  "Plan zur Entkopplung des Fokus-Sprint Timers von der Modalanzeige, damit der Timer im Hintergrund beim Navigieren weiterläuft und live im TopBar-Header angezeigt wird.",
+  "updatedAt":  "2026-10-30T10:29:13.799029081Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

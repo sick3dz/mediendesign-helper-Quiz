@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { soundEffects } from '../services/audioService';
-import { ambientAudioService, AmbientSoundType } from '../services/ambientAudioService';
+import { AmbientSoundType } from '../services/ambientAudioService';
 import {
   Play,
   Pause,
   RotateCcw,
   X,
   Sparkles,
-  Coffee,
   Volume2,
   VolumeX,
   Music,
@@ -15,122 +14,51 @@ import {
   CloudRain,
   Wind,
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSprintCompleted?: (earnedXp: number) => void;
+  totalSeconds: number;
+  secondsLeft: number;
+  isActive: boolean;
+  isDone: boolean;
+  soundType: AmbientSoundType;
+  volume: number;
+  isMuted: boolean;
+  onToggleActive: () => void;
+  onReset: (secs?: number) => void;
+  onSelectSound: (type: AmbientSoundType) => void;
+  onVolumeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onToggleMute: () => void;
 }
 
-export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose, onSprintCompleted }) => {
-  const [totalSeconds, setTotalSeconds] = useState(300); // 5 min default
-  const [secondsLeft, setSecondsLeft] = useState(300);
-  const [isActive, setIsActive] = useState(false);
-  const [isDone, setIsDone] = useState(false);
-  const [soundType, setSoundType] = useState<AmbientSoundType>('lofi');
-  const [volume, setVolume] = useState<number>(0.35);
-  const [isMuted, setIsMuted] = useState<boolean>(false);
-
-  // Sync ambient sound with timer running state
-  useEffect(() => {
-    if (isActive && soundType !== 'none') {
-      ambientAudioService.play(soundType);
-    } else {
-      ambientAudioService.stop();
-    }
-  }, [isActive, soundType]);
-
-  // Handle closing modal - stop audio cleanly
-  useEffect(() => {
-    if (!isOpen) {
-      ambientAudioService.stop();
-      setIsActive(false);
-    }
-  }, [isOpen]);
-
-  // Timer countdown
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (isActive && secondsLeft > 0) {
-      interval = setInterval(() => {
-        setSecondsLeft(sec => sec - 1);
-      }, 1000);
-    } else if (secondsLeft === 0 && isActive) {
-      setIsActive(false);
-      setIsDone(true);
-      ambientAudioService.stop();
-      soundEffects.playLevelUp();
-      try {
-        confetti({ particleCount: 85, spread: 80, origin: { y: 0.3 } });
-      } catch {
-        // ignore
-      }
-      if (onSprintCompleted) {
-        onSprintCompleted(40);
-      }
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isActive, secondsLeft, onSprintCompleted]);
-
+export const FocusSprintModal: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  totalSeconds,
+  secondsLeft,
+  isActive,
+  isDone,
+  soundType,
+  volume,
+  isMuted,
+  onToggleActive,
+  onReset,
+  onSelectSound,
+  onVolumeChange,
+  onToggleMute,
+}) => {
   if (!isOpen) return null;
-
-  const toggle = () => {
-    soundEffects.playClick();
-    setIsActive(!isActive);
-  };
-
-  const reset = (secs: number = totalSeconds) => {
-    soundEffects.playClick();
-    setIsActive(false);
-    setTotalSeconds(secs);
-    setSecondsLeft(secs);
-    setIsDone(false);
-    ambientAudioService.stop();
-  };
-
-  const handleSelectSound = (type: AmbientSoundType) => {
-    soundEffects.playClick();
-    setSoundType(type);
-    if (isActive) {
-      if (type === 'none') {
-        ambientAudioService.stop();
-      } else {
-        ambientAudioService.play(type);
-      }
-    }
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVol = parseFloat(e.target.value);
-    setVolume(newVol);
-    ambientAudioService.setVolume(newVol);
-    if (isMuted && newVol > 0) {
-      setIsMuted(false);
-      ambientAudioService.setMuted(false);
-    }
-  };
-
-  const handleToggleMute = () => {
-    const nextMuted = !isMuted;
-    setIsMuted(nextMuted);
-    ambientAudioService.setMuted(nextMuted);
-  };
 
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
-  const progressPercent = ((totalSeconds - secondsLeft) / totalSeconds) * 100;
+  const progressPercent = totalSeconds > 0 ? ((totalSeconds - secondsLeft) / totalSeconds) * 100 : 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4">
       <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 relative transition-colors max-h-[92vh] overflow-y-auto">
         <button
-          onClick={() => {
-            ambientAudioService.stop();
-            onClose();
-          }}
+          onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 rounded-lg transition-colors cursor-pointer"
           aria-label="Schließen"
         >
@@ -200,7 +128,10 @@ export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose, onSprintCom
         {/* Primary Sprint Controls */}
         <div className="flex items-center justify-center gap-3 mb-5">
           <button
-            onClick={toggle}
+            onClick={() => {
+              soundEffects.playClick();
+              onToggleActive();
+            }}
             className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs transition-all shadow-xs cursor-pointer active:scale-98 ${
               isActive
                 ? 'bg-amber-600 hover:bg-amber-700 text-white'
@@ -212,7 +143,10 @@ export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose, onSprintCom
           </button>
 
           <button
-            onClick={() => reset(totalSeconds)}
+            onClick={() => {
+              soundEffects.playClick();
+              onReset(totalSeconds);
+            }}
             className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
             title="Zurücksetzen"
           >
@@ -226,7 +160,10 @@ export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose, onSprintCom
           {[180, 300, 600].map(secs => (
             <button
               key={secs}
-              onClick={() => reset(secs)}
+              onClick={() => {
+                soundEffects.playClick();
+                onReset(secs);
+              }}
               className={`px-3 py-1 rounded-lg font-mono font-bold text-xs cursor-pointer transition-all ${
                 totalSeconds === secs
                   ? 'bg-indigo-600 text-white shadow-2xs'
@@ -250,7 +187,10 @@ export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose, onSprintCom
 
           <div className="grid grid-cols-2 gap-1.5">
             <button
-              onClick={() => handleSelectSound('lofi')}
+              onClick={() => {
+                soundEffects.playClick();
+                onSelectSound('lofi');
+              }}
               className={`p-2 rounded-xl border text-left text-xs font-bold flex items-center gap-2 cursor-pointer transition-all ${
                 soundType === 'lofi'
                   ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
@@ -262,7 +202,10 @@ export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose, onSprintCom
             </button>
 
             <button
-              onClick={() => handleSelectSound('white-noise')}
+              onClick={() => {
+                soundEffects.playClick();
+                onSelectSound('white-noise');
+              }}
               className={`p-2 rounded-xl border text-left text-xs font-bold flex items-center gap-2 cursor-pointer transition-all ${
                 soundType === 'white-noise'
                   ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
@@ -274,7 +217,10 @@ export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose, onSprintCom
             </button>
 
             <button
-              onClick={() => handleSelectSound('rain')}
+              onClick={() => {
+                soundEffects.playClick();
+                onSelectSound('rain');
+              }}
               className={`p-2 rounded-xl border text-left text-xs font-bold flex items-center gap-2 cursor-pointer transition-all ${
                 soundType === 'rain'
                   ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
@@ -286,7 +232,10 @@ export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose, onSprintCom
             </button>
 
             <button
-              onClick={() => handleSelectSound('none')}
+              onClick={() => {
+                soundEffects.playClick();
+                onSelectSound('none');
+              }}
               className={`p-2 rounded-xl border text-left text-xs font-bold flex items-center gap-2 cursor-pointer transition-all ${
                 soundType === 'none'
                   ? 'bg-slate-800 text-white border-slate-800 shadow-2xs'
@@ -302,7 +251,7 @@ export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose, onSprintCom
           {soundType !== 'none' && (
             <div className="flex items-center gap-2.5 pt-1 text-xs">
               <button
-                onClick={handleToggleMute}
+                onClick={onToggleMute}
                 className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer p-1"
                 title={isMuted ? 'Ton an' : 'Stumm schalten'}
               >
@@ -314,7 +263,7 @@ export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose, onSprintCom
                 max="1"
                 step="0.05"
                 value={isMuted ? 0 : volume}
-                onChange={handleVolumeChange}
+                onChange={onVolumeChange}
                 className="w-full accent-indigo-600 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg cursor-pointer"
               />
               <span className="font-mono text-[10px] text-slate-400 w-8 text-right">
