@@ -157,7 +157,7 @@ export const TopPetCompanionBar: React.FC<Props> = ({
                 />
               </div>
               <span className="absolute -bottom-1 -right-1 text-xs select-none">
-                {pet.isSleeping ? '💤' : isPetted ? '💖' : '🐾'}
+                {isPetted ? '💖' : '🐾'}
               </span>
             </button>
 

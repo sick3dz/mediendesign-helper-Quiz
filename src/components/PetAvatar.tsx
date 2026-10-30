@@ -108,19 +108,32 @@ export const PetAvatar: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Peaceful Sleep Floating Exam Dream Cloud */}
+
+      {/* Rising 💤 when sleeping */}
       {isSleeping && (
-        <div className="absolute -top-7 right-0 z-20 flex flex-col items-center pointer-events-none select-none animate-bounce">
-          <div className="px-2.5 py-1 bg-white/95 dark:bg-slate-800/95 border border-indigo-200 dark:border-indigo-700 rounded-full shadow-md text-[11px] font-extrabold text-indigo-600 dark:text-indigo-300 flex items-center gap-1.5">
-            <span className="text-xs">💭</span>
-            <span>🎓 💯 🏆</span>
+        <div className={`absolute pointer-events-none select-none z-20 ${size === 'sm' ? 'top-2 left-1/2 -translate-x-1/2' : size === 'md' ? 'top-8 right-12' : 'top-16 right-24'}`}>
+          <div className="relative">
+            <span 
+              className={`absolute font-black text-indigo-600 dark:text-indigo-400 animate-rise-fade drop-shadow-[0_0_2px_rgba(255,255,255,0.9)] dark:drop-shadow-[0_0_2px_rgba(0,0,0,0.5)] ${size === 'sm' ? 'text-[10px]' : size === 'md' ? 'text-2xl' : 'text-4xl'}`}
+              style={{ animationDelay: '0s', left: '0', top: '0' }}
+            >
+              💤
+            </span>
+            <span 
+              className={`absolute font-black text-indigo-500/80 dark:text-indigo-500 animate-rise-fade drop-shadow-[0_0_2px_rgba(255,255,255,0.9)] dark:drop-shadow-[0_0_2px_rgba(0,0,0,0.5)] ${size === 'sm' ? 'text-[8px]' : size === 'md' ? 'text-xl' : 'text-3xl'}`}
+              style={{ animationDelay: '0.8s', left: size === 'sm' ? '5px' : '24px', top: size === 'sm' ? '-6px' : '-40px' }}
+            >
+              💤
+            </span>
+            <span 
+              className={`absolute font-black text-indigo-400/60 dark:text-indigo-600 animate-rise-fade drop-shadow-[0_0_2px_rgba(255,255,255,0.9)] dark:drop-shadow-[0_0_2px_rgba(0,0,0,0.5)] ${size === 'sm' ? 'text-[7px]' : size === 'md' ? 'text-lg' : 'text-2xl'}`}
+              style={{ animationDelay: '1.6s', left: size === 'sm' ? '-5px' : '-20px', top: size === 'sm' ? '-12px' : '-70px' }}
+            >
+              💤
+            </span>
           </div>
-          <div className="w-2 h-2 bg-white/90 dark:bg-slate-800/90 border border-indigo-200 dark:border-indigo-700 rounded-full -mt-0.5 ml-2" />
-          <div className="w-1 h-1 bg-white/80 dark:bg-slate-800/80 border border-indigo-200 dark:border-indigo-700 rounded-full -mt-0.5 ml-1" />
         </div>
       )}
-
-      {/* Pet SVG Illustrations */}
       <svg viewBox="0 0 200 200" className="w-full h-full select-none overflow-visible">
         <defs>
           <linearGradient id="rainbow-grad" x1="0%" y1="0%" x2="100%" y2="100%">
