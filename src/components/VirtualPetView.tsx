@@ -244,6 +244,27 @@ export const VirtualPetView: React.FC<Props> = ({
     }
   };
 
+  const handleHighFive = () => {
+    soundEffects.playPetForSpecies(pet.species);
+    setIsPetted(true);
+    setTimeout(() => setIsPetted(false), 1000);
+
+    try {
+      confetti({ particleCount: 35, spread: 50 });
+    } catch {
+      // ignore
+    }
+
+    const updated: PetState = {
+      ...pet,
+      isSleeping: false,
+      happiness: Math.min(100, pet.happiness + 10),
+      timesPlayed: (pet.timesPlayed || 0) + 1,
+    };
+    onUpdatePet(updated);
+    showTemporaryFeedback(soundConfig.highFiveActionMsg(pet.name));
+  };
+
   // 2. Gentle Wakeup Action
   const handleWakeUp = () => {
     soundEffects.playPetForSpecies(pet.species);
@@ -786,6 +807,14 @@ export const VirtualPetView: React.FC<Props> = ({
 
           {/* Interactive Care Action Buttons */}
           <div className="flex flex-wrap items-center justify-center gap-2.5 mt-6">
+            <button
+              onClick={handleHighFive}
+              className="px-4 py-2 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60 rounded-xl text-xs font-bold flex items-center gap-2 transition-transform active:scale-95 cursor-pointer shadow-xs"
+            >
+              <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" />
+              <span>{soundConfig.highFiveLabel}</span>
+            </button>
+
             <button
               onClick={handlePet}
               className="px-4 py-2 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/60 rounded-xl text-xs font-bold flex items-center gap-2 transition-transform active:scale-95 cursor-pointer shadow-xs"

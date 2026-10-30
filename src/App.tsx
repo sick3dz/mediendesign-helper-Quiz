@@ -385,6 +385,43 @@ export default function App() {
     };
   }, [isSprintActive, sprintSecondsLeft]);
 
+  const handleClaimSprintLoot = (rewardText: string) => {
+    setStats(prev => {
+      let updatedPet = { ...prev.pet };
+      let newXp = prev.xp;
+
+      if (rewardText.includes('Glücks-Kekse')) {
+        const cur = updatedPet.inventory.food['cookie'] || 0;
+        updatedPet.inventory = {
+          ...updatedPet.inventory,
+          food: { ...updatedPet.inventory.food, cookie: cur + 2 },
+        };
+      } else if (rewardText.includes('Bubble-Tea')) {
+        const cur = updatedPet.inventory.food['boba'] || 0;
+        updatedPet.inventory = {
+          ...updatedPet.inventory,
+          food: { ...updatedPet.inventory.food, boba: cur + 1 },
+        };
+      } else if (rewardText.includes('Prüfungs-Apfel')) {
+        const cur = updatedPet.inventory.food['golden_apple'] || 0;
+        updatedPet.inventory = {
+          ...updatedPet.inventory,
+          food: { ...updatedPet.inventory.food, golden_apple: cur + 1 },
+        };
+      } else if (rewardText.includes('100 Bonus EXP')) {
+        newXp += 100;
+      }
+
+      const updatedStats = {
+        ...prev,
+        xp: newXp,
+        pet: updatedPet,
+      };
+      saveUserStats(updatedStats);
+      return updatedStats;
+    });
+  };
+
   const handleToggleSprintActive = () => {
     soundEffects.playClick();
     setIsSprintActive(prev => !prev);
@@ -813,6 +850,7 @@ export default function App() {
         onSelectSound={handleSelectSprintSound}
         onVolumeChange={handleSprintVolumeChange}
         onToggleMute={handleToggleSprintMute}
+        onClaimLoot={handleClaimSprintLoot}
       />
 
       {/* Backup & Restore Manager Modal */}

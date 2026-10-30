@@ -63,6 +63,21 @@ export const TopPetCompanionBar: React.FC<Props> = ({
     showFeedback(`${soundConfig.soundIcon} "${soundConfig.soundWord}" – ${soundConfig.petActionMsg(pet.name)}`);
   };
 
+  const handleQuickHighFive = () => {
+    soundEffects.playPetForSpecies(pet.species);
+    setIsPetted(true);
+    setTimeout(() => setIsPetted(false), 800);
+
+    const updated: PetState = {
+      ...pet,
+      isSleeping: false,
+      happiness: Math.min(100, pet.happiness + 10),
+      timesPlayed: (pet.timesPlayed || 0) + 1,
+    };
+    onUpdatePet(updated);
+    showFeedback(soundConfig.highFiveActionMsg(pet.name));
+  };
+
   // Quick feed with first available food in inventory
   const availableFoodEntry = Object.entries(pet.inventory?.food || {}).find(
     ([, qty]) => qty > 0
@@ -204,6 +219,16 @@ export const TopPetCompanionBar: React.FC<Props> = ({
 
           {/* Right: Quick Interactive Pet & Shop CTAs */}
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 self-start sm:self-center shrink-0 max-w-full">
+            {/* Quick High-Five Button */}
+            <button
+              onClick={handleQuickHighFive}
+              className="px-2.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-bold flex items-center gap-1 transition-all cursor-pointer shadow-2xs active:scale-95"
+              title={soundConfig.highFiveLabel}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+              <span>{soundConfig.highFiveLabel}</span>
+            </button>
+
             {/* Quick Pet Button */}
             <button
               onClick={handleQuickPet}

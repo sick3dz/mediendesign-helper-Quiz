@@ -42,6 +42,8 @@ export const PET_SPECIES: Record<PetSpecies, PetSpeciesInfo> = {
 export interface PetSpeciesSoundConfig {
   soundWord: string;
   soundIcon: string;
+  highFiveLabel: string;
+  highFiveActionMsg: (name: string) => string;
   petActionMsg: (name: string) => string;
   wakeUpMsg: (name: string) => string;
 }
@@ -50,24 +52,32 @@ export const PET_SPECIES_SOUNDS: Record<PetSpecies, PetSpeciesSoundConfig> = {
   dog: {
     soundWord: 'Wuff!',
     soundIcon: '🐶',
+    highFiveLabel: 'Pfötchen geben! 🐾',
+    highFiveActionMsg: (name: string) => `${name} gibt dir begeistert Pfötchen! High-Five! 🐾 (+10 Laune)`,
     petActionMsg: (name: string) => `${name} bellt freudig und wedelt begeistert mit dem Schwanz! (+15 Laune) 🐾`,
     wakeUpMsg: (name: string) => `${name} springt mit einem munteren "Wuff!" auf! ☀️`,
   },
   cat: {
     soundWord: 'Miau!',
     soundIcon: '🐱',
+    highFiveLabel: 'Pfötchen geben! 🐾',
+    highFiveActionMsg: (name: string) => `${name} tippt dir sanft mit der Pfote auf die Hand! High-Five! 🐾 (+10 Laune)`,
     petActionMsg: (name: string) => `${name} schnurrt wohlig und schmiegt sich sanft an dich! (+15 Laune) ✨`,
     wakeUpMsg: (name: string) => `${name} gähnt und streckt sich mit einem zarten "Miau!" ☀️`,
   },
   penguin: {
     soundWord: 'Nöööt!',
     soundIcon: '🐧',
+    highFiveLabel: 'Flügel geben! 🪶',
+    highFiveActionMsg: (name: string) => `${name} klatscht vergnügt mit den Flügeln an deine Hand! High-Five! 🪶 (+10 Laune)`,
     petActionMsg: (name: string) => `${name} trötet vergnügt und watschelt stolz im Kreis! (+15 Laune) ❄️`,
     wakeUpMsg: (name: string) => `${name} schüttelt das Gefieder mit einem lauten "Nöööt!" ☀️`,
   },
   axolotl: {
     soundWord: 'Blubb!',
     soundIcon: '🦎',
+    highFiveLabel: 'Flosse geben! 🫧',
+    highFiveActionMsg: (name: string) => `${name} wackelt freudig mit der Flosse an deiner Hand! High-Five! 🫧 (+10 Laune)`,
     petActionMsg: (name: string) => `${name} blubbert glücklich und wackelt mit den Kiemen! (+15 Laune) 🫧`,
     wakeUpMsg: (name: string) => `${name} taucht mit einem munteren "Blubb!" an die Oberfläche! ☀️`,
   },

@@ -13,6 +13,7 @@ import {
   Headphones,
   CloudRain,
   Wind,
+  Gift,
 } from 'lucide-react';
 
 interface Props {
@@ -30,6 +31,7 @@ interface Props {
   onSelectSound: (type: AmbientSoundType) => void;
   onVolumeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onToggleMute: () => void;
+  onClaimLoot?: (rewardText: string) => void;
 }
 
 export const FocusSprintModal: React.FC<Props> = ({
@@ -47,12 +49,30 @@ export const FocusSprintModal: React.FC<Props> = ({
   onSelectSound,
   onVolumeChange,
   onToggleMute,
+  onClaimLoot,
 }) => {
+  const [lootClaimed, setLootClaimed] = React.useState<string | null>(null);
+
   if (!isOpen) return null;
 
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
   const progressPercent = totalSeconds > 0 ? ((totalSeconds - secondsLeft) / totalSeconds) * 100 : 0;
+
+  const handleUnboxLoot = () => {
+    soundEffects.playLevelUp();
+    const rewards = [
+      '🍪 2x Glücks-Kekse für dein Haustier!',
+      '🧋 1x Fokus Bubble-Tea geschenkt!',
+      '⚡ +100 Bonus EXP Guthaben!',
+      '🍎 1x Goldener Prüfungs-Apfel!',
+    ];
+    const item = rewards[Math.floor(Math.random() * rewards.length)];
+    setLootClaimed(item);
+    if (onClaimLoot) {
+      onClaimLoot(item);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4">
@@ -112,16 +132,42 @@ export const FocusSprintModal: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Done / Celebration Banner */}
+        {/* Done / Celebration Banner & Mystery Lootbox */}
         {isDone ? (
-          <div className="text-center p-3.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800 mb-5 animate-in fade-in">
-            <div className="flex items-center justify-center gap-1.5 text-emerald-800 dark:text-emerald-300 font-extrabold text-sm mb-0.5">
-              <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" />
-              <span>Session gemeistert! +40 ⚡ EXP erhalten</span>
+          <div className="space-y-3 mb-5 animate-in fade-in">
+            <div className="text-center p-3.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800">
+              <div className="flex items-center justify-center gap-1.5 text-emerald-800 dark:text-emerald-300 font-extrabold text-sm mb-0.5">
+                <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" />
+                <span>Session gemeistert! +40 ⚡ EXP erhalten</span>
+              </div>
+              <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                Deine tägliche Fokus-Mission wurde aktualisiert. Zeit für eine kurze Pause!
+              </p>
             </div>
-            <p className="text-xs text-emerald-700 dark:text-emerald-400">
-              Deine tägliche Fokus-Mission wurde aktualisiert. Zeit für 2 Minuten Pause!
-            </p>
+
+            {/* Mystery Loot Box Unboxing Card */}
+            <div className="text-center p-4 bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-indigo-500/10 dark:from-amber-500/20 dark:via-purple-500/20 dark:to-indigo-500/20 rounded-2xl border border-amber-300 dark:border-amber-700/60 space-y-2">
+              <div className="flex items-center justify-center gap-1.5 text-amber-900 dark:text-amber-200 font-extrabold text-sm">
+                <Gift className="w-5 h-5 text-amber-500 animate-bounce" />
+                <span>Fokus-Belohnungskiste! 🎁</span>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300">
+                Du hast deinen Sprint erfolgreich durchgezogen! Öffne deine Überraschungskiste:
+              </p>
+              {!lootClaimed ? (
+                <button
+                  onClick={handleUnboxLoot}
+                  className="mt-1 px-4 py-2 bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer inline-flex items-center gap-2"
+                >
+                  <Sparkles className="w-4 h-4 fill-amber-300" />
+                  <span>Kiste jetzt öffnen! ✨</span>
+                </button>
+              ) : (
+                <div className="p-2.5 bg-white/90 dark:bg-slate-800/90 rounded-xl border border-amber-300 dark:border-amber-700 text-xs font-bold text-amber-800 dark:text-amber-300 animate-bounce">
+                  🎉 Belohnung erhalten: {lootClaimed}
+                </div>
+              )}
+            </div>
           </div>
         ) : null}
 

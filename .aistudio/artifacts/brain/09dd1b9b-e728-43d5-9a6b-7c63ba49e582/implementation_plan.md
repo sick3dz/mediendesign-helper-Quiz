@@ -1,28 +1,26 @@
-# Implementation Plan - Night Sleep Schedule (22:00-06:00), Exam Dream Bubbles & TopBar Live Preview
+# Implementation Plan - ADHD Dopamine Boosters (Streak Combos, Sprint Loot Box & Pet High-Five)
 
-Implement automatic night sleep from 22:00 to 06:00 with exam success dream bubbles, and extend live item previews (accessories, frames) to the top navigation bar's pet icon.
+Introduce three lightweight, highly motivating ADHD mechanics to maximize engagement and reward focus without cluttering the user interface.
 
-## User Requirements
-1. **Night Sleep Schedule (22:00 - 06:00)**: Automatically set pet state to sleeping between 22:00 and 06:00. Display a floating dream cloud bubble with IHK exam victory dreams (`💭 🎓 💯 🏆 📜`).
-2. **TopBar Live Preview**: When previewing items (accessories, frames) in Shop or Wardrobe, mirror the preview onto the small pet avatar in `TopBar.tsx`.
+## Proposed Features
 
-## Proposed Changes
+### 1. Dopamin-Combos (`🔥 3er-Serie + Bonus EXP`)
+- **Module Learning**: Track consecutive correct answers (`streakCombo`).
+- **Reward**: On every 3rd consecutive correct answer:
+  - Display a floating toast (`🔥 3ER-COMBO! +25 EXTRA EXP!`).
+  - Trigger celebratory confetti burst.
+  - Award +25 extra EXP points directly.
 
-### 1. `src/data/petData.ts`
-- Update `calculatePetDecay(pet)`:
-  - Check current hour (`new Date().getHours()`). If `hour >= 22 || hour < 6`, automatically set `isSleeping: true`.
-- Update `getDynamicPetThought(pet)`:
-  - Add night dream thoughts for sleeping pets focused on passing the IHK exam, receiving 100% scores, and earned trophies.
+### 2. Fokus-Sprint Mystery Loot Box (`🎁 Fokus-Belohnungskiste`)
+- **Sprint Completion**: When a 5-min or 15-min Focus Sprint finishes:
+  - Display an interactive "Mystery Loot Box" unboxing card.
+  - Unboxing awards a random surprise drop (e.g. 2x Glücks-Kekse, 1x Fokus Bubble Tea, or +100 Bonus EXP) with a celebratory unboxing sound and confetti.
 
-### 2. `src/components/PetAvatar.tsx`
-- Enhance sleeping state visuals:
-  - Render a animated floating dream cloud bubble (`💭 🎓 💯 🏆`) with gentle bounce/pulse above sleeping pets.
-
-### 3. `src/App.tsx` & `src/components/TopBar.tsx`
-- Add `activePreview` state (`previewAccessory`, `previewFrame`) to `App.tsx` or pass preview callback from `VirtualPetView.tsx`.
-- Pass `previewOverride` to `TopBar.tsx`'s `PetAvatar` component so item previews render live on the header avatar as well.
+### 3. Pet High-Five / Pfötchen-Geben (`🐾 High-Five Action`)
+- **Interactive High-Five**: Add a quick "🐾 High-Five" button to `TopPetCompanionBar.tsx` and `VirtualPetView.tsx`.
+- **Reaction**: Triggers a cheerful high-five sound, energetic pet bounce, +10 happiness boost, and encouraging motivational pop-up (*"✋ High-Five! Du rockst das!"*).
 
 ## Verification Plan
-1. Run `lint_applet` (`tsc --noEmit`).
-2. Run `compile_applet` (`npm run build`).
-3. Verify night sleep logic, dream bubbles, and live TopBar preview sync.
+1. Execute `lint_applet` (`tsc --noEmit`).
+2. Execute `compile_applet` (`npm run build`).
+3. Test streak combos, sprint loot box unboxing, and pet high-five interactions.

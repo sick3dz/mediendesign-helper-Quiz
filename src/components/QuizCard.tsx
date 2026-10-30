@@ -31,8 +31,14 @@ export const QuizCard: React.FC<Props> = ({
   const [correctCount, setCorrectCount] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [answers, setAnswers] = useState<Record<number, boolean>>({});
+  const [comboToast, setComboToast] = useState<string | null>(null);
 
   const currentQuestion = questions[currentIndex] || questions[0];
+
+  const showComboFeedback = (msg: string) => {
+    setComboToast(msg);
+    setTimeout(() => setComboToast(null), 2800);
+  };
 
   // Keyboard navigation: 1, 2, 3, 4 or Enter
   useEffect(() => {
@@ -70,6 +76,15 @@ export const QuizCard: React.FC<Props> = ({
       setCorrectCount(c => c + 1);
       if (onCorrectAnswer) {
         onCorrectAnswer();
+      }
+
+      if (nextCombo > 0 && nextCombo % 3 === 0) {
+        showComboFeedback(`🔥 ${nextCombo}ER-COMBO! +25 EXTRA EXP BONUS! 🎉`);
+        try {
+          confetti({ particleCount: 55, spread: 75, origin: { y: 0.6 } });
+        } catch {
+          // ignore
+        }
       }
     } else {
       soundEffects.playWrong();
@@ -186,7 +201,14 @@ export const QuizCard: React.FC<Props> = ({
   const selectedOption = currentQuestion.options.find(o => o.id === selectedOptionId);
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xs transition-colors space-y-6">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xs transition-colors space-y-6 relative">
+      {/* Dopamine Combo Floating Toast */}
+      {comboToast && (
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30 px-5 py-2 bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-600 text-white font-black text-xs sm:text-sm rounded-full shadow-xl animate-bounce flex items-center gap-1.5 whitespace-nowrap">
+          <span>{comboToast}</span>
+        </div>
+      )}
+
       {/* Top progress strip with Question Stepper Pills */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800 text-xs">
         <div className="flex items-center gap-2">
