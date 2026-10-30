@@ -142,6 +142,8 @@ export const FocusSprintModal: React.FC<Props> = ({
   const [sprintMode, setSprintMode] = useState<'passive' | 'active_quiz'>('active_quiz');
   const [hasStarted, setHasStarted] = useState(false);
   const [showExitConfirmModal, setShowExitConfirmModal] = useState(false);
+  const [pendingModeSwitch, setPendingModeSwitch] = useState<'passive' | 'active_quiz' | null>(null);
+  const [pendingTimeReset, setPendingTimeReset] = useState<number | null>(null);
   const [lootClaimed, setLootClaimed] = useState<string | null>(null);
 
   // Blitz-Quiz State
@@ -169,6 +171,8 @@ export const FocusSprintModal: React.FC<Props> = ({
       setLootClaimed(null);
       setHasStarted(false);
       setShowExitConfirmModal(false);
+      setPendingModeSwitch(null);
+      setPendingTimeReset(null);
     }
   }, [isOpen]);
 
@@ -193,7 +197,57 @@ export const FocusSprintModal: React.FC<Props> = ({
       onToggleActive();
     }
     onReset(300);
-    onClose();
+    setHasStarted(false);
+    setBlitzScore(0);
+    setTotalAttempted(0);
+    setBlitzCombo(0);
+    setUnitsCompleted(false);
+  };
+
+  const handleRequestModeSwitch = (targetMode: 'passive' | 'active_quiz') => {
+    if (targetMode === sprintMode) return;
+    soundEffects.playClick();
+
+    // If an active session is in progress, ask for confirmation!
+    if ((isActive || hasStarted) && !isSessionFinished) {
+      setPendingModeSwitch(targetMode);
+    } else {
+      setSprintMode(targetMode);
+    }
+  };
+
+  const handleConfirmModeSwitch = () => {
+    if (pendingModeSwitch) {
+      if (isActive) {
+        onToggleActive();
+      }
+      setSprintMode(pendingModeSwitch);
+      setPendingModeSwitch(null);
+      onReset(300);
+      setHasStarted(false);
+    }
+  };
+
+  const handleRequestDurationChange = (secs: number) => {
+    if (secs === totalSeconds) return;
+    soundEffects.playClick();
+
+    // If an active session is in progress, ask for confirmation!
+    if ((isActive || hasStarted) && !isSessionFinished) {
+      setPendingTimeReset(secs);
+    } else {
+      onReset(secs);
+    }
+  };
+
+  const handleConfirmDurationChange = () => {
+    if (pendingTimeReset !== null) {
+      if (isActive) {
+        onToggleActive();
+      }
+      onReset(pendingTimeReset);
+      setPendingTimeReset(null);
+    }
   };
 
   const handleStartSprintNow = () => {
@@ -330,23 +384,88 @@ export const FocusSprintModal: React.FC<Props> = ({
           <div className="p-4 bg-amber-500/10 dark:bg-amber-500/20 rounded-2xl border-2 border-amber-500/50 mb-4 animate-in fade-in space-y-3 text-center">
             <div className="flex items-center justify-center gap-2 text-amber-900 dark:text-amber-200 font-extrabold text-sm">
               <ShieldAlert className="w-5 h-5 text-amber-500" />
-              <span>Sprint wirklich abbrechen?</span>
+              <span>Sprint wirklich beenden?</span>
             </div>
             <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
-              Du bist gerade mitten im Lern-Flow! Wenn du jetzt abbrichst, geht dein bisheriger Sprint-Fortschritt verloren.
+              Du bist gerade mitten im Lern-Flow! Was möchtest du tun?
             </p>
-            <div className="flex items-center justify-center gap-2 pt-1">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
               <button
                 onClick={() => setShowExitConfirmModal(false)}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
               >
                 Nein, weiterlernen! 🔥
               </button>
               <button
                 onClick={handleConfirmExit}
-                className="px-3.5 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-rose-500 hover:text-white text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
+                className="w-full sm:w-auto px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
               >
-                Ja, beenden
+                Zurück zur Start-Lobby 🏠
+              </button>
+              <button
+                onClick={() => {
+                  setShowExitConfirmModal(false);
+                  if (isActive) onToggleActive();
+                  onReset(300);
+                  onClose();
+                }}
+                className="w-full sm:w-auto px-3 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-rose-500 hover:text-white text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
+              >
+                Fenster schließen ✖
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* CONFIRMATION OVERLAY FOR MODE SWITCHING DURING ACTIVE SESSION */}
+        {pendingModeSwitch !== null && (
+          <div className="p-4 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-2xl border-2 border-indigo-500/50 mb-4 animate-in fade-in space-y-3 text-center">
+            <div className="flex items-center justify-center gap-2 text-indigo-900 dark:text-indigo-200 font-extrabold text-sm">
+              <ShieldAlert className="w-5 h-5 text-indigo-500" />
+              <span>Moduswechsel bestätigen</span>
+            </div>
+            <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+              Möchtest du zum neuen Modus wechseln? Dein aktueller Sprint wird dabei zurückgesetzt.
+            </p>
+            <div className="flex items-center justify-center gap-2 pt-1">
+              <button
+                onClick={() => setPendingModeSwitch(null)}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+              >
+                Nein, beim aktuellen Sprint bleiben! 🔥
+              </button>
+              <button
+                onClick={handleConfirmModeSwitch}
+                className="px-3.5 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-amber-500 hover:text-white text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
+              >
+                Ja, Modus wechseln
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* CONFIRMATION OVERLAY FOR DURATION CHANGE DURING ACTIVE SESSION */}
+        {pendingTimeReset !== null && (
+          <div className="p-4 bg-indigo-500/10 dark:bg-indigo-500/20 rounded-2xl border-2 border-indigo-500/50 mb-4 animate-in fade-in space-y-3 text-center">
+            <div className="flex items-center justify-center gap-2 text-indigo-900 dark:text-indigo-200 font-extrabold text-sm">
+              <Clock className="w-5 h-5 text-indigo-500" />
+              <span>Zeitenwechsel bestätigen</span>
+            </div>
+            <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+              Möchtest du die Zeitdauer auf {Math.round(pendingTimeReset / 60)} Minuten ändern? Der aktuelle Sprint wird dabei neu gestartet.
+            </p>
+            <div className="flex items-center justify-center gap-2 pt-1">
+              <button
+                onClick={() => setPendingTimeReset(null)}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+              >
+                Nein, beim aktuellen Sprint bleiben! 🔥
+              </button>
+              <button
+                onClick={handleConfirmDurationChange}
+                className="px-3.5 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-amber-500 hover:text-white text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
+              >
+                Ja, Zeit ändern
               </button>
             </div>
           </div>
@@ -371,31 +490,26 @@ export const FocusSprintModal: React.FC<Props> = ({
               {/* Mode Selector Tabs in Lobby */}
               <div className="grid grid-cols-2 gap-1.5 p-1 bg-white/80 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700">
                 <button
-                  onClick={() => {
-                    soundEffects.playClick();
-                    setSprintMode('active_quiz');
-                  }}
-                  className={`py-2 px-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  onClick={() => handleRequestModeSwitch('active_quiz')}
+                  className={`py-2 px-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-300 ease-out cursor-pointer active:scale-95 ${
                     sprintMode === 'active_quiz'
-                      ? 'bg-gradient-to-r from-amber-500 to-indigo-600 text-white shadow-2xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-gradient-to-r from-amber-500 to-indigo-600 text-white shadow-md scale-[1.02] ring-2 ring-amber-400/40'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
                   }`}
                 >
-                  <Zap className="w-3.5 h-3.5 fill-current text-amber-300" />
+                  <Zap className={`w-3.5 h-3.5 fill-current text-amber-300 transition-transform duration-300 ${sprintMode === 'active_quiz' ? 'scale-110 rotate-12' : ''}`} />
                   <span>⚡ 20-Einheiten Mix</span>
                 </button>
 
                 <button
-                  onClick={() => {
-                    soundEffects.playClick();
-                    setSprintMode('passive');
-                  }}
-                  className={`py-2 px-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  onClick={() => handleRequestModeSwitch('passive')}
+                  className={`py-2 px-2.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-300 ease-out cursor-pointer active:scale-95 ${
                     sprintMode === 'passive'
-                      ? 'bg-indigo-600 text-white shadow-2xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-indigo-600 text-white shadow-md scale-[1.02] ring-2 ring-indigo-400/40'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
                   }`}
                 >
+                  <Clock className={`w-3.5 h-3.5 transition-transform duration-300 ${sprintMode === 'passive' ? 'scale-110 -rotate-12 text-amber-300' : ''}`} />
                   <span>⏱️ Passiv: Timer</span>
                 </button>
               </div>
@@ -419,10 +533,7 @@ export const FocusSprintModal: React.FC<Props> = ({
                     return (
                       <button
                         key={secs}
-                        onClick={() => {
-                          soundEffects.playClick();
-                          onReset(secs);
-                        }}
+                        onClick={() => handleRequestDurationChange(secs)}
                         className={`py-1.5 px-1 rounded-lg font-mono font-bold text-xs transition-all cursor-pointer text-center ${
                           isSelected
                             ? 'bg-indigo-600 text-white shadow-xs scale-102'
@@ -437,14 +548,29 @@ export const FocusSprintModal: React.FC<Props> = ({
               </div>
 
               <div className="text-left space-y-1.5 text-xs text-slate-700 dark:text-slate-300 bg-white/60 dark:bg-slate-900/60 p-3 rounded-xl border border-indigo-100 dark:border-indigo-900/50">
-                <div className="flex items-center gap-2 font-bold">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span>Maximal 20 Lerneinheiten (Spaced Flashcards & Quiz)</span>
-                </div>
-                <div className="flex items-center gap-2 font-bold">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  <span>Entspannendes Box-Breathing zum Abschluss</span>
-                </div>
+                {sprintMode === 'active_quiz' ? (
+                  <>
+                    <div className="flex items-center gap-2 font-bold">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <span>Maximal 20 Lerneinheiten (Spaced Flashcards & Quiz)</span>
+                    </div>
+                    <div className="flex items-center gap-2 font-bold">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <span>Entspannendes Box-Breathing zum Abschluss</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2 font-bold">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <span>Ungestörter Fokus-Timer mit beruhigendem Audio</span>
+                    </div>
+                    <div className="flex items-center gap-2 font-bold">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <span>Reizreduzierte Arbeitsumgebung ohne Quiz-Fragen</span>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Prominent Start Button */}
@@ -453,7 +579,11 @@ export const FocusSprintModal: React.FC<Props> = ({
                 className="w-full py-3 px-5 bg-gradient-to-r from-amber-500 via-indigo-600 to-indigo-700 hover:from-amber-600 hover:to-indigo-800 text-white font-black text-sm rounded-2xl shadow-lg transition-all active:scale-98 cursor-pointer flex items-center justify-center gap-2 group"
               >
                 <Zap className="w-5 h-5 fill-amber-300 text-amber-300 group-hover:scale-110 transition-transform" />
-                <span>⚡ Fokus-Sprint JETZT STARTEN ({Math.round(totalSeconds / 60)} Min)</span>
+                <span>
+                  {sprintMode === 'active_quiz'
+                    ? `⚡ Fokus-Sprint JETZT STARTEN (${Math.round(totalSeconds / 60)} Min)`
+                    : `⏱️ Fokus-Timer JETZT STARTEN (${Math.round(totalSeconds / 60)} Min)`}
+                </span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -464,31 +594,26 @@ export const FocusSprintModal: React.FC<Props> = ({
             {/* Mode Selector Tabs */}
             <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl mb-3">
               <button
-                onClick={() => {
-                  soundEffects.playClick();
-                  setSprintMode('active_quiz');
-                }}
-                className={`py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                onClick={() => handleRequestModeSwitch('active_quiz')}
+                className={`py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-300 ease-out cursor-pointer active:scale-95 ${
                   sprintMode === 'active_quiz'
-                    ? 'bg-gradient-to-r from-amber-500 to-indigo-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-gradient-to-r from-amber-500 to-indigo-600 text-white shadow-md scale-[1.02] ring-2 ring-amber-400/40'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
                 }`}
               >
-                <Zap className="w-4 h-4 fill-current text-amber-300" />
+                <Zap className={`w-4 h-4 fill-current text-amber-300 transition-transform duration-300 ${sprintMode === 'active_quiz' ? 'scale-110 rotate-12' : ''}`} />
                 <span>⚡ Aktiv: 20-Einheiten Mix</span>
               </button>
 
               <button
-                onClick={() => {
-                  soundEffects.playClick();
-                  setSprintMode('passive');
-                }}
-                className={`py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                onClick={() => handleRequestModeSwitch('passive')}
+                className={`py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-300 ease-out cursor-pointer active:scale-95 ${
                   sprintMode === 'passive'
-                    ? 'bg-indigo-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-indigo-600 text-white shadow-md scale-[1.02] ring-2 ring-indigo-400/40'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
                 }`}
               >
+                <Clock className={`w-3.5 h-3.5 transition-transform duration-300 ${sprintMode === 'passive' ? 'scale-110 -rotate-12 text-amber-300' : ''}`} />
                 <span>⏱️ Passiv: Timer</span>
               </button>
             </div>
@@ -504,9 +629,11 @@ export const FocusSprintModal: React.FC<Props> = ({
                     <span className="text-indigo-600 dark:text-indigo-400">
                       {isSessionFinished ? '✓ Beendet' : isActive ? '● Sprint läuft' : 'Bereit'}
                     </span>
-                    <span className="text-amber-600 dark:text-amber-400 font-mono text-[10px]">
-                      Einheit {Math.min(totalAttempted, MAX_UNITS)} / {MAX_UNITS}
-                    </span>
+                    {sprintMode === 'active_quiz' && (
+                      <span className="text-amber-600 dark:text-amber-400 font-mono text-[10px]">
+                        Einheit {Math.min(totalAttempted, MAX_UNITS)} / {MAX_UNITS}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -548,10 +675,7 @@ export const FocusSprintModal: React.FC<Props> = ({
                     return (
                       <button
                         key={secs}
-                        onClick={() => {
-                          soundEffects.playClick();
-                          onReset(secs);
-                        }}
+                        onClick={() => handleRequestDurationChange(secs)}
                         className={`px-2 py-0.5 rounded-md font-mono text-[11px] font-bold cursor-pointer transition-all ${
                           isSelected
                             ? 'bg-indigo-600 text-white shadow-2xs'
@@ -613,7 +737,34 @@ export const FocusSprintModal: React.FC<Props> = ({
               </div>
             ) : sprintMode === 'active_quiz' && currentItem ? (
               /* ACTIVE SPRINT: INTERLEAVED KNOWLEDGE & QUIZ ITEM */
-              <div className="mb-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <div className="mb-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 relative overflow-hidden min-h-[220px]">
+                {/* Frosted Glass (Milchglas) Pause Overlay */}
+                {!isActive && hasStarted && !isSessionFinished && (
+                  <div className="absolute inset-0 z-20 backdrop-blur-md bg-white/85 dark:bg-slate-900/90 flex flex-col items-center justify-center p-4 text-center space-y-3 animate-in fade-in">
+                    <div className="p-3 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-full border border-amber-300 dark:border-amber-700">
+                      <Pause className="w-6 h-6 fill-current" />
+                    </div>
+                    <div>
+                      <h5 className="font-extrabold text-slate-900 dark:text-white text-sm">
+                        ⏸️ Fokus-Sprint Pausiert
+                      </h5>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs">
+                        Inhalt ist während der Pause verdeckt. Klicke auf Weiterlernen, um fortzufahren!
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        soundEffects.playClick();
+                        onToggleActive();
+                      }}
+                      className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Play className="w-4 h-4 fill-current" />
+                      <span>Weiterlernen</span>
+                    </button>
+                  </div>
+                )}
+
                 {/* Live Stats & Category Header */}
                 <div className="flex items-center justify-between text-xs mb-3">
                   <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1 truncate max-w-[65%]">
@@ -778,10 +929,7 @@ export const FocusSprintModal: React.FC<Props> = ({
                       return (
                         <button
                           key={secs}
-                          onClick={() => {
-                            soundEffects.playClick();
-                            onReset(secs);
-                          }}
+                          onClick={() => handleRequestDurationChange(secs)}
                           className={`px-3 py-1.5 rounded-lg font-mono font-bold text-xs cursor-pointer transition-all ${
                             isSelected
                               ? 'bg-indigo-600 text-white shadow-xs'
