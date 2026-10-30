@@ -185,10 +185,10 @@ export default function App() {
 
   const grantLevelUpRewards = (
     prevStats: UserStats,
-    newXp: number,
+    newLifetimeXp: number,
     basePet: PetState
   ): { level: number; updatedPet: PetState; newlyLeveledUp: boolean } => {
-    const levelInfo = calculateLevel(newXp);
+    const levelInfo = calculateLevel(newLifetimeXp);
     const leveledUp = levelInfo.level > prevStats.level;
     let updatedPet = { ...basePet };
 
@@ -207,7 +207,7 @@ export default function App() {
     }
 
     return {
-      level: levelInfo.level,
+      level: Math.max(prevStats.level, levelInfo.level),
       updatedPet,
       newlyLeveledUp: leveledUp,
     };
@@ -220,7 +220,9 @@ export default function App() {
         ? prev.completedModules
         : [...prev.completedModules, moduleId];
 
-      const newXp = prev.xp + gainedXp;
+      const curLifetime = prev.lifetimeXp ?? prev.xp;
+      const newLifetimeXp = curLifetime + gainedXp;
+      const newXp = prev.xp + gainedXp; // Spendable credit
       const earnedCoins = Math.round(gainedXp * 0.6) + 30;
       const newCoins = prev.coins + earnedCoins;
 
@@ -255,7 +257,7 @@ export default function App() {
       }
 
       // Check for level ups and reward free food packages
-      const { level, updatedPet } = grantLevelUpRewards(prev, newXp, basePet);
+      const { level, updatedPet } = grantLevelUpRewards(prev, newLifetimeXp, basePet);
 
       // Update daily mission for module learning
       const missions = prev.dailyMissions || [];
@@ -270,6 +272,7 @@ export default function App() {
         ...prev,
         pet: updatedPet,
         xp: newXp,
+        lifetimeXp: newLifetimeXp,
         coins: newCoins,
         level,
         dailyMissions: updatedMissions,
@@ -279,6 +282,7 @@ export default function App() {
           ...prev,
           pet: updatedPet,
           xp: newXp,
+          lifetimeXp: newLifetimeXp,
           coins: newCoins,
           completedModules: updatedCompleted,
           answeredQuestionsCount: prev.answeredQuestionsCount + 1,
@@ -318,13 +322,16 @@ export default function App() {
         }
         return m;
       });
+      const curLifetime = prev.lifetimeXp ?? prev.xp;
+      const newLifetimeXp = curLifetime + earnedXp;
       const newXp = prev.xp + earnedXp;
-      const { level, updatedPet } = grantLevelUpRewards(prev, newXp, prev.pet);
+      const { level, updatedPet } = grantLevelUpRewards(prev, newLifetimeXp, prev.pet);
 
       const nextStats: UserStats = {
         ...prev,
         pet: updatedPet,
         xp: newXp,
+        lifetimeXp: newLifetimeXp,
         level,
         dailyMissions: updatedMissions,
       };
@@ -341,13 +348,16 @@ export default function App() {
         return prev;
       }
       const updatedMissions = missions.map(m => (m.id === missionId ? { ...m, isClaimed: true } : m));
+      const curLifetime = prev.lifetimeXp ?? prev.xp;
+      const newLifetimeXp = curLifetime + target.rewardXp;
       const newXp = prev.xp + target.rewardXp;
-      const { level, updatedPet } = grantLevelUpRewards(prev, newXp, prev.pet);
+      const { level, updatedPet } = grantLevelUpRewards(prev, newLifetimeXp, prev.pet);
 
       const nextStats: UserStats = {
         ...prev,
         pet: updatedPet,
         xp: newXp,
+        lifetimeXp: newLifetimeXp,
         level,
         dailyMissions: updatedMissions,
       };
@@ -358,15 +368,18 @@ export default function App() {
 
   const handleScoreEarned = (score: number) => {
     setStats(prev => {
+      const curLifetime = prev.lifetimeXp ?? prev.xp;
+      const newLifetimeXp = curLifetime + score;
       const newXp = prev.xp + score;
       const earnedCoins = Math.round(score * 0.5);
       const newCoins = prev.coins + earnedCoins;
-      const { level, updatedPet } = grantLevelUpRewards(prev, newXp, prev.pet);
+      const { level, updatedPet } = grantLevelUpRewards(prev, newLifetimeXp, prev.pet);
 
       const nextStats: UserStats = {
         ...prev,
         pet: updatedPet,
         xp: newXp,
+        lifetimeXp: newLifetimeXp,
         coins: newCoins,
         level,
       };
@@ -385,9 +398,11 @@ export default function App() {
     const gainedCoins = result.score * 30 + 100;
 
     setStats(prev => {
+      const curLifetime = prev.lifetimeXp ?? prev.xp;
+      const newLifetimeXp = curLifetime + gainedXp;
       const newXp = prev.xp + gainedXp;
       const newCoins = prev.coins + gainedCoins;
-      const levelInfo = calculateLevel(newXp);
+      const levelInfo = calculateLevel(newLifetimeXp);
       const badges = [...prev.earnedBadges];
       if ((result.grade === '1' || result.grade === '2') && !badges.includes('exam_ready')) {
         badges.push('exam_ready');
@@ -396,8 +411,9 @@ export default function App() {
       const nextStats: UserStats = {
         ...prev,
         xp: newXp,
+        lifetimeXp: newLifetimeXp,
         coins: newCoins,
-        level: levelInfo.level,
+        level: Math.max(prev.level, levelInfo.level),
         earnedBadges: badges,
         examScores: [
           ...prev.examScores,
@@ -444,12 +460,10 @@ export default function App() {
   const handleXpChange = (newXp: number) => {
     setStats(prev => {
       const safeXp = Math.max(0, newXp);
-      const calculatedLevel = calculateLevel(safeXp).level;
-      const preservedLevel = Math.max(prev.level, calculatedLevel);
+      // Spending EXP acts strictly as spending balance/credit; level and lifetimeXp are never reduced!
       const nextStats: UserStats = {
         ...prev,
         xp: safeXp,
-        level: preservedLevel,
       };
       saveUserStats(nextStats);
       return nextStats;

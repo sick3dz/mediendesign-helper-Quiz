@@ -61,7 +61,8 @@ export function generateDailyMissions(): DailyMission[] {
 }
 
 const DEFAULT_STATS: UserStats = {
-  xp: 0, // Starts at 0 EXP so every point is earned through learning
+  xp: 0, // Starts at 0 spendable EXP balance (Guthaben)
+  lifetimeXp: 0, // Starts at 0 lifetime EXP (dauerhafter Level-Fortschritt)
   coins: 0, // Starts at 0 coins
   level: 1,
   streakDays: 1,
@@ -302,9 +303,17 @@ export function loadUserStats(): UserStats {
       dailyMissionsDate = today;
     }
 
+    const parsedXp = typeof parsed.xp === 'number' ? parsed.xp : 0;
+    const levelLadderFloor = LEVEL_LADDER.find(l => l.level === (parsed.level || 1))?.xp || 0;
+    const lifetimeXp = typeof parsed.lifetimeXp === 'number'
+      ? Math.max(parsed.lifetimeXp, parsedXp)
+      : Math.max(parsedXp, levelLadderFloor);
+
     return {
       ...DEFAULT_STATS,
       ...parsed,
+      xp: parsedXp,
+      lifetimeXp,
       pet: decayedPet,
       dailyMissions,
       dailyMissionsDate,
@@ -427,6 +436,10 @@ export function restoreBackupJson(jsonString: string): { success: boolean; stats
 export function resetUserStatsToDefault(): UserStats {
   const freshStats: UserStats = {
     ...DEFAULT_STATS,
+    xp: 0,
+    lifetimeXp: 0,
+    coins: 0,
+    level: 1,
     pet: { ...DEFAULT_PET_STATE },
     dailyMissions: generateDailyMissions(),
     dailyMissionsDate: getTodayDateString(),

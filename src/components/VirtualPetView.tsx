@@ -92,7 +92,9 @@ export const VirtualPetView: React.FC<Props> = ({
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
   const [isRoadmapExpanded, setIsRoadmapExpanded] = useState(false);
 
-  const levelInfo = calculateLevel(xp);
+  // Level & progression are strictly tied to lifetime earned EXP (never decreases when spending!)
+  const lifetimeProgressXp = stats.lifetimeXp ?? Math.max(xp, LEVEL_LADDER.find(l => l.level === (stats.level || 1))?.xp || 0);
+  const levelInfo = calculateLevel(lifetimeProgressXp);
 
   const unlockedCosmetics = stats.unlockedCosmetics || ['theme-default', 'sound-standard', 'title-novice', 'frame-none'];
   const equippedCosmetics = stats.equippedCosmetics || {
@@ -449,13 +451,19 @@ export const VirtualPetView: React.FC<Props> = ({
 
         {/* EXP Progress Bar & Stats */}
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
-            <span>
-              Fortschritt: <strong className="text-slate-900 dark:text-white tabular-nums">{xp}</strong> / {levelInfo.nextLevelXp} EXP
+          <div className="flex flex-wrap items-center justify-between gap-1 text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
+            <span className="flex items-center gap-1.5">
+              <span>Rang-Fortschritt:</span>
+              <strong className="text-slate-900 dark:text-white tabular-nums">{lifetimeProgressXp}</strong> / {levelInfo.nextLevelXp} EXP
             </span>
-            <span className="tabular-nums text-indigo-600 dark:text-indigo-400 font-extrabold">
-              {levelInfo.progressPercent}%
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-mono text-indigo-700 dark:text-indigo-300 font-bold bg-indigo-50 dark:bg-indigo-950/70 px-2 py-0.5 rounded-md border border-indigo-200/80 dark:border-indigo-800" title="Dieses Guthaben kannst du für Snacks und Zubehör ausgeben, ohne dein Level zu senken">
+                Guthaben: <strong className="tabular-nums">{xp}</strong> ⚡ EXP
+              </span>
+              <span className="tabular-nums text-indigo-600 dark:text-indigo-400 font-extrabold">
+                {levelInfo.progressPercent}%
+              </span>
+            </div>
           </div>
 
           <div className="w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden p-0.5 border border-slate-200/60 dark:border-slate-800">

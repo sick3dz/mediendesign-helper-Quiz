@@ -132,7 +132,8 @@ export interface DailyMission {
 }
 
 export interface UserStats {
-  xp: number;
+  xp: number; // Spendables EXP-Guthaben (kann im Shop ausgegeben werden)
+  lifetimeXp?: number; // Gesamte verdiente EXP für dauerhaften Level- & Rang-Fortschritt (sinkt nie)
   coins: number; // Redeemable in pet shop alongside EXP
   level: number;
   streakDays: number;

@@ -12,10 +12,11 @@ interface Props {
 }
 
 export const AdhdControlsBar: React.FC<Props> = ({ stats, settings, onUpdateSettings, onGoToPet }) => {
-  const levelInfo = calculateLevel(stats.xp);
-  const xpInCurrentLevel = stats.xp - levelInfo.currentLevelXp;
+  const progressXp = stats.lifetimeXp ?? stats.xp;
+  const levelInfo = calculateLevel(progressXp);
+  const xpInCurrentLevel = progressXp - levelInfo.currentLevelXp;
   const xpNeeded = levelInfo.nextLevelXp - levelInfo.currentLevelXp;
-  const levelProgress = Math.min(Math.round((xpInCurrentLevel / xpNeeded) * 100), 100);
+  const levelProgress = Math.min(Math.round((xpInCurrentLevel / (xpNeeded || 1)) * 100), 100);
 
   const toggleBionic = () => {
     soundEffects.playClick();
