@@ -67,6 +67,7 @@ interface Props {
   onOpenAdoptionModal?: () => void;
   onGoToGames?: () => void;
   onBack?: () => void;
+  onPreviewOverrideChange?: (preview: { equipped?: Partial<PetState['equipped']> } | undefined) => void;
 }
 
 type ShopCategory = 'food' | 'accessories' | 'themes' | 'soundpacks' | 'titles' | 'frames';
@@ -82,6 +83,7 @@ export const VirtualPetView: React.FC<Props> = ({
   onOpenAdoptionModal,
   onGoToGames,
   onBack,
+  onPreviewOverrideChange,
 }) => {
   const { pet, xp, coins = 0 } = stats;
   const speciesInfo = PET_SPECIES[pet.species];
@@ -99,6 +101,22 @@ export const VirtualPetView: React.FC<Props> = ({
   const [previewAccessory, setPreviewAccessory] = useState<PetAccessory | null>(null);
   const [previewFrame, setPreviewFrame] = useState<CosmeticItem | null>(null);
   const [thoughtSeed, setThoughtSeed] = useState(0);
+
+  // Sync live accessory & frame preview to external listener (TopBar companion)
+  useEffect(() => {
+    if (onPreviewOverrideChange) {
+      if (!previewAccessory && !previewFrame) {
+        onPreviewOverrideChange(undefined);
+      } else {
+        onPreviewOverrideChange({
+          equipped: {
+            ...(previewAccessory ? { [previewAccessory.category]: previewAccessory.id } : {}),
+            ...(previewFrame ? { frame: previewFrame.id } : {}),
+          },
+        });
+      }
+    }
+  }, [previewAccessory, previewFrame, onPreviewOverrideChange]);
 
   // Level & progression are strictly tied to lifetime earned EXP (never decreases when spending!)
   const lifetimeProgressXp = stats.lifetimeXp ?? Math.max(xp, LEVEL_LADDER.find(l => l.level === (stats.level || 1))?.xp || 0);

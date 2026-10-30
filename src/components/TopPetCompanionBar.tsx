@@ -21,6 +21,9 @@ interface Props {
   onOpenFullPetRoom: () => void;
   onOpenGames?: () => void;
   onChangePet: () => void;
+  previewOverride?: {
+    equipped?: Partial<PetState['equipped']>;
+  };
 }
 
 export const TopPetCompanionBar: React.FC<Props> = ({
@@ -30,6 +33,7 @@ export const TopPetCompanionBar: React.FC<Props> = ({
   onOpenFullPetRoom,
   onOpenGames,
   onChangePet,
+  previewOverride,
 }) => {
   const { pet, xp } = stats;
   const speciesInfo = PET_SPECIES[pet.species];
@@ -127,7 +131,18 @@ export const TopPetCompanionBar: React.FC<Props> = ({
               title={pet.isSleeping ? 'Schläft friedlich – Klick zum Aufwecken!' : 'Klick zum Streicheln!'}
             >
               <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 active:scale-95">
-                <PetAvatar pet={pet} isEating={isEating} isPetted={isPetted} size="sm" />
+                <PetAvatar
+                  pet={pet}
+                  isEating={isEating}
+                  isPetted={isPetted}
+                  size="sm"
+                  previewOverride={{
+                    equipped: {
+                      ...(stats.equippedCosmetics?.frame ? { frame: stats.equippedCosmetics.frame } : {}),
+                      ...(previewOverride?.equipped || {}),
+                    },
+                  }}
+                />
               </div>
               <span className="absolute -bottom-1 -right-1 text-xs select-none">
                 {pet.isSleeping ? '💤' : isPetted ? '💖' : '🐾'}

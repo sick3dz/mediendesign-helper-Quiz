@@ -450,8 +450,11 @@ export function calculatePetDecay(pet: PetState): PetState {
     currentHappiness = Math.max(30, currentHappiness - elapsedHours * 1.5);
   }
 
-  // If away for more than 5 hours or tired, the pet peacefully sleeps
-  const isSleeping = elapsedHours >= 5 || Boolean(pet.isSleeping && currentHunger <= 40);
+  const currentHour = new Date().getHours();
+  const isNightHours = currentHour >= 22 || currentHour < 6;
+
+  // If night hours (22:00 - 06:00), away for >= 5 hours, or tired, the pet peacefully sleeps
+  const isSleeping = isNightHours || elapsedHours >= 5 || Boolean(pet.isSleeping && currentHunger <= 40);
 
   return {
     ...pet,
@@ -465,11 +468,15 @@ export function calculatePetDecay(pet: PetState): PetState {
 export function getDynamicPetThought(pet: PetState, statsXp: number = 0, seedIndex?: number): string {
   if (!pet) return 'Bereit für die IHK-Prüfung! ★';
 
-  if (pet.isSleeping) {
+  const hour = new Date().getHours();
+  const isNightHours = hour >= 22 || hour < 6;
+
+  if (pet.isSleeping || isNightHours) {
     const sleepQuotes = [
-      `Zzz... ${pet.name} träumt von 100 % in der IHK-Prüfung... 💤`,
-      `Chrrr... ${pet.name} ruht sich aus und lädt die Lernakkus auf... 🌙`,
-      `Zzz... Sanfte Träume von farbharmonischen Layouts... 💤`,
+      `💭 Zzz... ${pet.name} träumt friedlich von 100 % in der IHK-Abschlussprüfung! 🎓🏆`,
+      `💭 Zzz... ${pet.name} träumt von einer goldenen Ehrenurkunde "IHK-Prüfling des Jahres"! ✨📜`,
+      `💭 Zzz... ${pet.name} träumt von fehlerfreien Wireframes, glänzenden Medaillen & Leckerlis! 🍖🥇`,
+      `💭 Zzz... Sanfte Nachtruhe (22:00–06:00 Uhr)... Morgen knacken wir das nächste Kapitel! 🌙⭐`,
     ];
     return sleepQuotes[(seedIndex ?? Math.floor(Math.random() * sleepQuotes.length)) % sleepQuotes.length];
   }
@@ -482,7 +489,6 @@ export function getDynamicPetThought(pet: PetState, statsXp: number = 0, seedInd
     return `${pet.name} schaut dich mit treuen Augen an... Zeit für eine Streicheleinheit! 💖`;
   }
 
-  const hour = new Date().getHours();
   const timeContext = hour >= 5 && hour < 12 ? 'morning' : hour >= 12 && hour < 18 ? 'afternoon' : 'evening';
 
   const speciesQuotes: Record<PetSpecies, string[]> = {

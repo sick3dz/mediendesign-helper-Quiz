@@ -77,12 +77,15 @@ export const PetAvatar: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Peaceful Sleep Floating Zzz Bubble */}
+      {/* Peaceful Sleep Floating Exam Dream Cloud */}
       {isSleeping && (
-        <div className="absolute -top-4 right-1 flex flex-col items-center pointer-events-none select-none z-20 animate-bounce">
-          <span className="text-sm font-black text-indigo-500 dark:text-indigo-400 drop-shadow">Z</span>
-          <span className="text-xs font-bold text-indigo-400 dark:text-indigo-300 -mt-1 ml-2">z</span>
-          <span className="text-[10px] font-semibold text-indigo-300 dark:text-indigo-200 -mt-1 ml-3">z</span>
+        <div className="absolute -top-7 right-0 z-20 flex flex-col items-center pointer-events-none select-none animate-bounce">
+          <div className="px-2.5 py-1 bg-white/95 dark:bg-slate-800/95 border border-indigo-200 dark:border-indigo-700 rounded-full shadow-md text-[11px] font-extrabold text-indigo-600 dark:text-indigo-300 flex items-center gap-1.5">
+            <span className="text-xs">💭</span>
+            <span>🎓 💯 🏆</span>
+          </div>
+          <div className="w-2 h-2 bg-white/90 dark:bg-slate-800/90 border border-indigo-200 dark:border-indigo-700 rounded-full -mt-0.5 ml-2" />
+          <div className="w-1 h-1 bg-white/80 dark:bg-slate-800/80 border border-indigo-200 dark:border-indigo-700 rounded-full -mt-0.5 ml-1" />
         </div>
       )}
 

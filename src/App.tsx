@@ -53,6 +53,7 @@ export default function App() {
   );
   const [petInitialTab, setPetInitialTab] = useState<'care' | 'shop' | 'wardrobe' | 'adopt'>('care');
   const [activeSurprise, setActiveSurprise] = useState<ChapterSurprise | null>(null);
+  const [petPreviewOverride, setPetPreviewOverride] = useState<{ equipped?: Partial<PetState['equipped']> } | undefined>(undefined);
 
   // Focus Sprint Global Persistent State
   const [sprintTotalSeconds, setSprintTotalSeconds] = useState(300);
@@ -703,6 +704,7 @@ export default function App() {
           setActiveTab('minigames');
         }}
         onChangePet={() => setIsAdoptionModalOpen(true)}
+        previewOverride={petPreviewOverride}
       />
 
       {/* Daily Quests / Missions Ribbon Bar */}
@@ -752,6 +754,7 @@ export default function App() {
                 onOpenAdoptionModal={() => setIsAdoptionModalOpen(true)}
                 onGoToGames={() => setActiveTab('minigames')}
                 onBack={() => setActiveTab('chapters')}
+                onPreviewOverrideChange={setPetPreviewOverride}
               />
             )}
 

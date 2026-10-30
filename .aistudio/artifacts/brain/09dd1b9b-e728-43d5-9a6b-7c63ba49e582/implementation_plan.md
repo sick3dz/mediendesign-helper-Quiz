@@ -1,31 +1,28 @@
-# Implementation Plan - Open Shiny Pet Eyes, Auto-Thoughts & Accessory Layering Fix
+# Implementation Plan - Night Sleep Schedule (22:00-06:00), Exam Dream Bubbles & TopBar Live Preview
 
-Fix the pet avatar eye SVGs to display open, lively eyes with sparkle catchlights, implement periodic blinking, set up automatic thought bubble updates every 12 seconds without click audio, and verify accessory overlay z-indexing in the top pet view.
+Implement automatic night sleep from 22:00 to 06:00 with exam success dream bubbles, and extend live item previews (accessories, frames) to the top navigation bar's pet icon.
 
 ## User Requirements
-1. **Thought Bubble Auto-Rotate**: Remove manual audio click on the thought bubble. Automatically update quotes every 12 seconds and upon any pet activity.
-2. **Accessory Layering**: Ensure newly equipped accessories (hats, glasses, collars, frames) render cleanly on top of the pet avatar in the room header view.
-3. **Open Shiny Eyes & Blinking**: Update pet SVGs in `PetAvatar.tsx` so all species (Dog, Cat, Penguin, Axolotl) have open, friendly "Glanzaugen" with sparkle highlights when awake, and blink occasionally.
+1. **Night Sleep Schedule (22:00 - 06:00)**: Automatically set pet state to sleeping between 22:00 and 06:00. Display a floating dream cloud bubble with IHK exam victory dreams (`💭 🎓 💯 🏆 📜`).
+2. **TopBar Live Preview**: When previewing items (accessories, frames) in Shop or Wardrobe, mirror the preview onto the small pet avatar in `TopBar.tsx`.
 
 ## Proposed Changes
 
-### 1. `src/components/PetAvatar.tsx`
-- Refactor eye SVG rendering in `renderDog`, `renderCat`, `renderPenguin`, and `renderAxolotl`:
-  - When `pet.isSleeping` is true, display peaceful closed eye arcs `💤`.
-  - When awake, render open, large, expressive eyes with shiny white catchlights (`glanzaugen`).
-  - Apply `animate-pet-blink` class to the eye group so they blink closed briefly every 4 seconds.
-- Verify accessory z-indexes (`head`, `face`, `neck`, `frame`) so all equipped items are layered on top of the pet body.
+### 1. `src/data/petData.ts`
+- Update `calculatePetDecay(pet)`:
+  - Check current hour (`new Date().getHours()`). If `hour >= 22 || hour < 6`, automatically set `isSleeping: true`.
+- Update `getDynamicPetThought(pet)`:
+  - Add night dream thoughts for sleeping pets focused on passing the IHK exam, receiving 100% scores, and earned trophies.
 
-### 2. `src/index.css`
-- Add `@keyframes petBlink` and CSS utility `.animate-pet-blink`:
-  - Eye scaleY shrinks to 0.1 for ~0.15s every 4 seconds to simulate natural, gentle blinking.
+### 2. `src/components/PetAvatar.tsx`
+- Enhance sleeping state visuals:
+  - Render a animated floating dream cloud bubble (`💭 🎓 💯 🏆`) with gentle bounce/pulse above sleeping pets.
 
-### 3. `src/components/VirtualPetView.tsx`
-- Remove `onClick` audio sound from thought bubble.
-- Add a 12-second `useEffect` timer to cycle `thoughtSeed` automatically.
-- Increment `thoughtSeed` on pet interactions (petting, feeding, waking up, equipping items).
+### 3. `src/App.tsx` & `src/components/TopBar.tsx`
+- Add `activePreview` state (`previewAccessory`, `previewFrame`) to `App.tsx` or pass preview callback from `VirtualPetView.tsx`.
+- Pass `previewOverride` to `TopBar.tsx`'s `PetAvatar` component so item previews render live on the header avatar as well.
 
 ## Verification Plan
-1. Execute `lint_applet` (`tsc --noEmit`).
-2. Execute `compile_applet` (`npm run build`).
-3. Verify eyes are open and blinking, accessories render properly, and thought bubbles cycle smoothly over time.
+1. Run `lint_applet` (`tsc --noEmit`).
+2. Run `compile_applet` (`npm run build`).
+3. Verify night sleep logic, dream bubbles, and live TopBar preview sync.
