@@ -11,6 +11,7 @@ export const CHAPTERS: Chapter[] = [
     examMerksatz: 'Interaktionsdesign gestaltet das Verhalten digitaler Produkte, damit Nutzer ihre Ziele effizient, verständlich und angenehm erreichen können.',
     examChecklist: [
       { task: 'UI vs. UX vs. IxD Kernfragen', detail: 'Beherrsche die 3 Leitfragen: Wie sieht es aus? (UI), Wie funktioniert es? (IxD), Wie fühlt es sich an? (UX).' },
+      { task: 'Gestaltgesetze', detail: 'Nähe, Ähnlichkeit, Geschlossenheit etc. – wie Nutzer Designelemente gruppieren.' },
       { task: 'Affordance vs. Signifier', detail: 'Prüfungsfavorit! Affordance ist die Handlungsmöglichkeit (z.B. Griff), Signifier der Hinweis (z.B. Schild "Ziehen").' },
       { task: 'Donald Normans 7 Prinzipien', detail: 'Discoverability, Feedback, Constraints, Mapping, Konsistenz, Affordance und Signifiers benennen können.' },
       { task: '10 Nielsen-Heuristiken', detail: 'Der Goldstandard: Systemstatus, Reale Welt, Kontrolle, Konsistenz, Fehlerhilfe, Wiedererkennen, Flexibilität, Minimalismus, Fehlerdiagnose, Dokumentation.' },
@@ -437,17 +438,41 @@ export const CHAPTERS: Chapter[] = [
               { id: 'c', text: 'Flexibilität für Profis', isCorrect: false, explanation: 'Ladebalken betrifft alle Nutzer.' },
               { id: 'd', text: 'Wiedererkennen statt Erinnern', isCorrect: false, explanation: 'Hier geht es um den Echtzeit-Zustand des Systems.' }
             ]
-          },
+          }
+        ]
+      },
+      {
+        id: 'ixd-7',
+        chapterId: 'ixd',
+        title: 'Gestaltgesetze: Visuelle Wahrnehmung',
+        shortDesc: 'Nähe, Ähnlichkeit & Geschlossenheit – Wie wir Design verstehen',
+        estimatedMinutes: 4,
+        nuggets: [
           {
-            id: 'q-ixd-6-3',
+            id: 'n-ixd-12',
+            title: 'Warum Gestaltgesetze?',
+            coreConcept: 'Das Gehirn sucht immer nach Mustern und Strukturen.',
+            bulletPoints: [
+              'Gesetz der Nähe: Nahe beieinander liegende Elemente werden als Gruppe wahrgenommen.',
+              'Gesetz der Ähnlichkeit: Elemente mit gleichen Farben/Formen gehören zusammen.',
+              'Gesetz der Geschlossenheit: Unvollständige Formen werden vom Gehirn ergänzt.',
+              'Gesetz der Kontinuität: Augen folgen dem sanftesten Weg (Linien/Kurven).',
+              'Gesetz der Prägnanz: Das Gehirn bevorzugt einfache, symmetrische Formen.'
+            ],
+            examFavorite: true
+          }
+        ],
+        quizQuestions: [
+          {
+            id: 'q-ixd-7-1',
             chapterId: 'ixd',
-            moduleId: 'ixd-6',
-            question: 'Eine Website meldet statt "Error 0x80040154" den Text: "Das Bild konnte nicht geladen werden, bitte versuche es erneut". Welche Heuristik wird hier befolgt?',
+            moduleId: 'ixd-7',
+            question: 'Welches Gestaltgesetz erklärt, warum wir eine Navigationsleiste als eine Einheit wahrnehmen, wenn die Links dicht beieinander stehen?',
             options: [
-              { id: 'a', text: 'Fehler verständlich erklären und Lösungen anbieten', isCorrect: true, explanation: 'Exakt! Fehlermeldungen müssen in klarer Nutzersprache formuliert sein und konstruktive Hilfe bieten.' },
-              { id: 'b', text: 'Reines Print-Design', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'c', text: 'Klassisches Wasserfallmodell', isCorrect: false, explanation: 'Das ist ein Projektmanagement-Modell.' },
-              { id: 'd', text: 'DNS-Auflösung', isCorrect: false, explanation: 'Netzwerkbegriff.' }
+              { id: 'a', text: 'Gesetz der Nähe', isCorrect: true, explanation: 'Richtig! Räumliche Nähe suggeriert Zusammengehörigkeit.' },
+              { id: 'b', text: 'Gesetz der Kontinuität', isCorrect: false, explanation: 'Kontinuität betrifft den Linienverlauf.' },
+              { id: 'c', text: 'Gesetz der Geschlossenheit', isCorrect: false, explanation: 'Geschlossenheit ergänzt fehlende Konturen.' },
+              { id: 'd', text: 'Gesetz der Prägnanz', isCorrect: false, explanation: 'Prägnanz bevorzugt einfache Formen.' }
             ]
           }
         ]
@@ -464,6 +489,7 @@ export const CHAPTERS: Chapter[] = [
     examMerksatz: 'Ein Wireframe ist eine vereinfachte, meist schwarz-weiße Darstellung einer Website oder App und dient der Planung von Struktur, Navigation und Nutzerführung, bevor das eigentliche Design entwickelt wird.',
     examChecklist: [
       { task: 'Definition & Merksatz', detail: 'Wireframes sind schematische Baupläne ohne Farben/Bilder für Struktur, Navigation und Nutzerführung.' },
+      { task: 'Zielgruppen & Sinus-Milieus', detail: 'Design für Lebenswelten (z.B. Performer, Bürgerliche Mitte) statt nur für Alter.' },
       { task: 'Wireframe vs. Mockup vs. Prototyp', detail: 'Kenne die Kette: Aufbau (Wireframe) → Aussehen (Mockup) → Bedienung (Prototyp).' },
       { task: 'Die 3 Fidelity-Stufen', detail: 'Low-Fidelity (Skizze), Mid-Fidelity (Digitaler Entwurf), High-Fidelity (Präziser Bauplan).' },
       { task: 'Die 6 Standard-Zonen', detail: 'Header, Navigation, Content, Call-to-Action (CTA), Sidebar und Footer einplanen.' },
@@ -717,6 +743,78 @@ export const CHAPTERS: Chapter[] = [
               { id: 'b', text: 'Breadcrumb', isCorrect: false, explanation: 'Breadcrumb ist die Pfad-Navigation.' },
               { id: 'c', text: 'Social Engineering', isCorrect: false, explanation: 'Das ist eine Betrugsmasche.' },
               { id: 'd', text: 'Affordance-Köder', isCorrect: false, explanation: 'Erfundene Bezeichnung.' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'wf-5',
+        chapterId: 'wireframe',
+        title: 'Zielgruppen & Sinus-Milieus',
+        shortDesc: 'Wer nutzt das Produkt? Lebenswelten & Persona-Grundlagen',
+        estimatedMinutes: 4,
+        nuggets: [
+          {
+            id: 'n-wf-6',
+            title: 'Sinus-Milieus: Die 10 Lebenswelten',
+            coreConcept: 'Zielgruppen nach Werten und Lebensstil statt nur Alter/Einkommen.',
+            bulletPoints: [
+              'Bürgerliche Mitte: Der gesicherte Mainstream (Harmonie & Sicherheit).',
+              'Performer: Die Effizienz-Elite (Erfolg, Technik, Networking).',
+              'Expeditive: Die kreative Avantgarde (Individualismus, Grenzen suchen).',
+              'Traditionelle: Die Bewahrer (Sicherheit, Ordnung, Tradition).',
+              'Warum wichtig? Design muss zur Lebenswelt passen (z. B. Technik-Fokus vs. Gemütlichkeit).'
+            ],
+            examFavorite: true
+          }
+        ],
+        quizQuestions: [
+          {
+            id: 'q-wf-5-1',
+            chapterId: 'wireframe',
+            moduleId: 'wf-5',
+            question: 'Warum sind Sinus-Milieus für die Designkonzeption aussagekräftiger als rein demografische Daten (wie Alter)?',
+            options: [
+              { id: 'a', text: 'Weil sie grundlegende Werte, Einstellungen und Lebensstile bündeln', isCorrect: true, explanation: 'Richtig! Zwei 30-Jährige können völlig unterschiedliche Lebenswelten und Designgeschmäcker haben.' },
+              { id: 'b', text: 'Weil sie gesetzlich vorgeschrieben sind', isCorrect: false, explanation: 'Falsch.' },
+              { id: 'c', text: 'Weil sie nur für den Online-Handel gelten', isCorrect: false, explanation: 'Sinus-Milieus gelten für alle Lebensbereiche.' },
+              { id: 'd', text: 'Weil sie Pixel in Vektoren umwandeln', isCorrect: false, explanation: 'Falsch.' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'wf-6',
+        chapterId: 'wireframe',
+        title: 'Styleguide & Corporate Design',
+        shortDesc: 'Komponenten, Farben & Branding-Regeln für die Konsistenz',
+        estimatedMinutes: 5,
+        nuggets: [
+          {
+            id: 'n-wf-7',
+            title: 'Was ist ein Styleguide?',
+            coreConcept: 'Ein zentrales Dokument, das visuelle Regeln für ein Produkt definiert.',
+            bulletPoints: [
+              'Corporate Identity (CI): Die gesamte Persönlichkeit eines Unternehmens.',
+              'Corporate Design (CD): Das visuelle Erscheinungsbild (Logo, Hausfarbe, Schrift).',
+              'Bestandteile: Farbpalette (HEX/RGB), Typografie (Fonts, Größen), Ikonografie.',
+              'Component Library: Vordefinierte Buttons, Formulare und Navigations-Elemente.',
+              'Ziel: Konsistenz über alle Seiten und Geräte hinweg.'
+            ],
+            examFavorite: true
+          }
+        ],
+        quizQuestions: [
+          {
+            id: 'q-wf-6-1',
+            chapterId: 'wireframe',
+            moduleId: 'wf-6',
+            question: 'Was ist der Hauptzweck eines Styleguides im Webdesign?',
+            options: [
+              { id: 'a', text: 'Sicherstellung der visuellen Konsistenz über alle Seiten hinweg', isCorrect: true, explanation: 'Richtig! Ein Styleguide sorgt dafür, dass alle Elemente einheitlich aussehen.' },
+              { id: 'b', text: 'Die automatische Programmierung des Backends', isCorrect: false, explanation: 'Styleguides betreffen das Frontend-Design, nicht das Backend.' },
+              { id: 'c', text: 'Das Festlegen der Server-Preise', isCorrect: false, explanation: 'Falsch.' },
+              { id: 'd', text: 'Die Auswahl der Büroausstattung', isCorrect: false, explanation: 'Das gehört nicht zum digitalen Styleguide.' }
             ]
           }
         ]
@@ -1224,6 +1322,51 @@ export const CHAPTERS: Chapter[] = [
             ]
           }
         ]
+      },
+      {
+        id: 'sec-4',
+        chapterId: 'security',
+        title: 'Rechtliche Grundlagen: Urheberrecht & Impressum',
+        shortDesc: 'Wer darf was nutzen? Copyright, Lizenzen & Kennzeichnungspflicht',
+        estimatedMinutes: 5,
+        nuggets: [
+          {
+            id: 'n-sec-8',
+            title: 'Das Urheberrecht im Mediendesign',
+            coreConcept: 'Schutz geistigen Eigentums ab dem Moment der Schöpfung.',
+            bulletPoints: [
+              'Entstehung: Automatisch mit der Schöpfung (kein © nötig in DE).',
+              'Nutzungsrechte: Der Urheber kann anderen Rechte einräumen (Einfach vs. Ausschließend, Zeitlich, Räumlich, Inhaltlich begrenzt).',
+              'Stockmedien: Lizenzen genau prüfen (z. B. Adobe Stock, Unsplash, CC-Lizenzen).',
+              'Creative Commons (CC): CC-BY (Namensnennung), CC-ND (Keine Bearbeitung), CC-NC (Nicht kommerziell).'
+            ],
+            examFavorite: true
+          },
+          {
+            id: 'n-sec-9',
+            title: 'Impressumspflicht & Datenschutzerklärung',
+            coreConcept: 'Rechtliche Transparenz im Web (TMG / TDDDG).',
+            bulletPoints: [
+              'Impressum: Pflicht für alle "geschäftsmäßigen" Telemedien (fast jede Website).',
+              'Inhalt: Name, Anschrift, E-Mail, Vertretungsberechtigte, USt-IdNr.',
+              'Datenschutzerklärung: Pflicht bei Erhebung personenbezogener Daten (Cookies, Formulare, Tracking).'
+            ]
+          }
+        ],
+        quizQuestions: [
+          {
+            id: 'q-sec-4-1',
+            chapterId: 'security',
+            moduleId: 'sec-4',
+            question: 'Wann entsteht in Deutschland der Schutz durch das Urheberrecht?',
+            options: [
+              { id: 'a', text: 'Automatisch im Moment der Schöpfung des Werkes', isCorrect: true, explanation: 'Richtig! In Deutschland muss ein Werk nicht registriert werden; der Schutz entsteht mit der Schöpfung.' },
+              { id: 'b', text: 'Erst wenn man ein ©-Zeichen daneben schreibt', isCorrect: false, explanation: 'Das © ist in Deutschland rechtlich nicht notwendig für den Schutz.' },
+              { id: 'c', text: 'Erst nach der Anmeldung beim Patentamt', isCorrect: false, explanation: 'Patente schützen technische Erfindungen, nicht das Urheberrecht.' },
+              { id: 'd', text: 'Nach 10 Jahren Veröffentlichung', isCorrect: false, explanation: 'Der Schutz beginnt sofort.' }
+            ]
+          }
+        ]
       }
     ]
   },
@@ -1689,6 +1832,51 @@ export const CHAPTERS: Chapter[] = [
               { id: 'b', text: 'Er bestimmt das finale Design der Webapplikation', isCorrect: false, explanation: 'Das entscheiden Designer/Product Owner.' },
               { id: 'c', text: 'Er ist der Kunde und bezahlt die Rechnungen', isCorrect: false, explanation: 'Das ist der Auftraggeber/Stakeholder.' },
               { id: 'd', text: 'Er schreibt das Lastenheft des Kunden', isCorrect: false, explanation: 'Nein.' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'proj-4',
+        chapterId: 'project',
+        title: 'Kommunikation & Konfliktmanagement',
+        shortDesc: 'Korrekturworkflows, Feedback-Regeln & professionelle Konfliktlösung',
+        estimatedMinutes: 4,
+        nuggets: [
+          {
+            id: 'n-proj-7',
+            title: 'Professioneller Korrekturworkflow',
+            coreConcept: 'Effiziente Abstimmungsprozesse mit dem Kunden.',
+            bulletPoints: [
+              'Korrekturschleifen: Festgelegte Anzahl von Feedback-Runden (meist 2-3) im Angebot.',
+              'Abnahme: Schriftliche Bestätigung von Teilergebnissen (Meilensteinen).',
+              'Änderungsmanagement: Neue Wünsche während der Umsetzung werden als "Change Request" bewertet.'
+            ]
+          },
+          {
+            id: 'n-proj-8',
+            title: 'Umgang mit Konflikten (Soft Skills)',
+            coreConcept: 'Deeskalation und lösungsorientierte Kommunikation.',
+            bulletPoints: [
+              'Aktives Zuhören: Ausreden lassen, Verständnis zeigen, Gesagtes zusammenfassen.',
+              'Ich-Botschaften: Eigene Wahrnehmung schildern ("Ich habe den Eindruck...") statt Vorwürfe zu machen ("Sie haben schon wieder...").',
+              'Sachebene vs. Beziehungsebene: Sachliche Probleme von persönlichen Gefühlen trennen.',
+              'Harvard-Konzept: Suche nach Win-Win-Lösungen statt bloßem Kompromiss.'
+            ],
+            examFavorite: true
+          }
+        ],
+        quizQuestions: [
+          {
+            id: 'q-proj-4-1',
+            chapterId: 'project',
+            moduleId: 'proj-4',
+            question: 'Welche Technik ist besonders hilfreich, um in einem hitzigen Kundengespräch Deeskalation zu betreiben?',
+            options: [
+              { id: 'a', text: 'Aktives Zuhören und Ich-Botschaften senden', isCorrect: true, explanation: 'Richtig! Diese Techniken signalisieren Wertschätzung und vermeiden unnötige Frontenbildung.' },
+              { id: 'b', text: 'Dem Kunden sofort widersprechen, wenn er Unrecht hat', isCorrect: false, explanation: 'Das eskaliert die Situation meistens.' },
+              { id: 'c', text: 'Das Gespräch wortlos verlassen', isCorrect: false, explanation: 'Unprofessionell.' },
+              { id: 'd', text: 'Die Schuld auf die Praktikanten schieben', isCorrect: false, explanation: 'Absolut unprofessionell.' }
             ]
           }
         ]
@@ -2748,6 +2936,155 @@ export const CHAPTERS: Chapter[] = [
               { id: 'd', text: 'InDesign → Photoshop → Illustrator → Premiere', isCorrect: false, explanation: 'Das sind Adobe-Programme.' }
             ],
             merksatz: 'Die Prüfungskette: XML speichert → DTD/XSD prüft → XPath sucht → XSLT macht Design/HTML!'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'graphics',
+    number: 8,
+    title: 'Digitale Bild- & Grafikdaten',
+    subtitle: 'Vektor vs. Pixel, Farbräume & medienneutrale Daten',
+    description: 'Meistere die technischen Grundlagen der digitalen Produktion: SVG vs. WebP, Kompression, Auflösung und medienneutrale Workflows.',
+    accentColor: 'orange',
+    examMerksatz: 'Medienneutrale Datenhaltung (Single Source Publishing) ermöglicht die effiziente Nutzung von Inhalten in verschiedenen Zielkanälen (Web, App, Print) durch Trennung von Inhalt und Layout.',
+    examChecklist: [
+      { task: 'Vektor vs. Pixel', detail: 'Vektoren (SVG) sind mathematisch berechnet und verlustfrei skalierbar; Pixel (WebP, JPG) sind rasterbasiert.' },
+      { task: 'Verlustfreie vs. Verlustbehaftete Kompression', detail: 'JPG (verlustbehaftet/Lossy), PNG/WebP (verlustfrei möglich/Lossless).' },
+      { task: 'RGB vs. CMYK', detail: 'RGB für Bildschirme (additiv), CMYK für Druck (subtraktiv). Crossmedia nutzt RGB als Basis.' },
+      { task: 'Medienneutralität', detail: 'Daten werden in einem neutralen Format (oft XML/JSON) und Farbraum (RGB) vorgehalten.' }
+    ],
+    modules: [
+      {
+        id: 'gfx-1',
+        chapterId: 'graphics',
+        title: 'Pixel vs. Vektor (SVG & WebP)',
+        shortDesc: 'Skalierbarkeit, Auflösung und moderne Webformate',
+        estimatedMinutes: 4,
+        nuggets: [
+          {
+            id: 'n-gfx-1',
+            title: 'Pixelgrafiken (Rastergrafiken)',
+            coreConcept: 'Bestehen aus einem Gitter von Farbpunkten.',
+            bulletPoints: [
+              'Vorteil: Realistische Fotos, komplexe Farbverläufe.',
+              'Nachteil: Verpixeln beim Vergrößern, hohe Dateigrößen bei hoher Auflösung.',
+              'Formate: WebP (Modern!), JPG, PNG, GIF.'
+            ]
+          },
+          {
+            id: 'n-gfx-2',
+            title: 'Vektorgrafiken (SVG)',
+            coreConcept: 'Bestehen aus mathematischen Pfaden (Linien, Kurven).',
+            bulletPoints: [
+              'Vorteil: Unendlich verlustfrei skalierbar, sehr kleine Dateigrößen für Icons/Logos, im Code editierbar.',
+              'Nachteil: Nicht für Fotos geeignet.',
+              'Format: SVG (Scalable Vector Graphics) – basiert auf XML!'
+            ],
+            examFavorite: true
+          }
+        ],
+        quizQuestions: [
+          {
+            id: 'q-gfx-1-1',
+            chapterId: 'graphics',
+            moduleId: 'gfx-1',
+            question: 'Welches Format ist für ein responsives Firmenlogo im Web am besten geeignet, um auf allen Displaygrößen scharf zu bleiben?',
+            options: [
+              { id: 'a', text: 'SVG (Vektorbasiert)', isCorrect: true, explanation: 'Richtig! SVG bleibt bei jeder Skalierung knackscharf und ist sehr speichereffizient.' },
+              { id: 'b', text: 'JPG mit hoher Kompression', isCorrect: false, explanation: 'JPG verpixelt beim Vergrößern.' },
+              { id: 'c', text: 'BMP', isCorrect: false, explanation: 'Veraltet und ungeeignet.' },
+              { id: 'd', text: 'TIFF', isCorrect: false, explanation: 'Kein Web-Format.' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'gfx-2',
+        chapterId: 'graphics',
+        title: 'Kompression & Bildbewertung',
+        shortDesc: 'Lossy vs. Lossless und das Allround-Talent WebP',
+        estimatedMinutes: 3,
+        nuggets: [
+          {
+            id: 'n-gfx-3',
+            title: 'Verlustbehaftet (Lossy) vs. Verlustfrei (Lossless)',
+            coreConcept: 'Dateigröße vs. Bildqualität.',
+            bulletPoints: [
+              'Lossy: Bildinformationen werden unwiderruflich gelöscht (z. B. JPG). Spart extrem viel Platz, führt aber zu Artefakten.',
+              'Lossless: Alle Daten bleiben erhalten (z. B. PNG, WebP-Lossless). Ideal für Grafiken mit Text oder Transparenz.'
+            ]
+          },
+          {
+            id: 'n-gfx-4',
+            title: 'WebP: Der IHK-Prüfungsfavorit',
+            coreConcept: 'Das moderne All-in-One Format von Google.',
+            bulletPoints: [
+              'Unterstützt Lossy UND Lossless Kompression.',
+              'Unterstützt Alphakanäle (Transparenz) wie PNG.',
+              'Unterstützt Animationen wie GIF.',
+              'Dateigröße meist 25-30% kleiner als JPG/PNG bei gleicher Qualität.'
+            ],
+            examFavorite: true
+          }
+        ],
+        quizQuestions: [
+          {
+            id: 'q-gfx-2-1',
+            chapterId: 'graphics',
+            moduleId: 'gfx-2',
+            question: 'Was ist ein wesentlicher Vorteil des WebP-Formats gegenüber dem klassischen JPG?',
+            options: [
+              { id: 'a', text: 'Bessere Kompression bei gleicher Qualität und Unterstützung von Transparenz', isCorrect: true, explanation: 'Exakt! WebP kombiniert die Vorteile von JPG und PNG.' },
+              { id: 'b', text: 'Es kann nur in Schwarz-Weiß speichern', isCorrect: false, explanation: 'Falsch.' },
+              { id: 'c', text: 'Es benötigt keine Internetverbindung', isCorrect: false, explanation: 'Unsinning.' },
+              { id: 'd', text: 'Es ist ein reines Audio-Format', isCorrect: false, explanation: 'Nein.' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'gfx-3',
+        chapterId: 'graphics',
+        title: 'Crossmedia & Medienneutrale Daten',
+        shortDesc: 'Single Source Publishing: Einmal erstellen, überall nutzen',
+        estimatedMinutes: 4,
+        nuggets: [
+          {
+            id: 'n-gfx-5',
+            title: 'Was bedeutet medienneutral?',
+            coreConcept: 'Inhalte ohne Kanalspezialisierung speichern.',
+            bulletPoints: [
+              'Inhalt (XML/Daten) ist getrennt von der Form (CSS/Layout).',
+              'Farbraum: Speicherung in eciRGB (großer RGB-Farbraum) statt CMYK.',
+              'Vorteil: Bilder können später sowohl für Web (sRGB) auch für Druck (ISO Coated v2) perfekt konvertiert werden.'
+            ],
+            examFavorite: true
+          },
+          {
+            id: 'n-gfx-6',
+            title: 'Workflow: RGB vs. CMYK',
+            coreConcept: 'Farben für verschiedene Ausgabemedien.',
+            bulletPoints: [
+              'RGB: Additive Farbmischung (Licht), für Monitore.',
+              'CMYK: Subtraktive Farbmischung (Pigment), für Druck.',
+              'IHK-Regel: Im medienneutralen Workflow erfolgt die Konvertierung nach CMYK erst so spät wie möglich ("Late Binding").'
+            ]
+          }
+        ],
+        quizQuestions: [
+          {
+            id: 'q-gfx-3-1',
+            chapterId: 'graphics',
+            moduleId: 'gfx-3',
+            question: 'Was versteht man unter medienneutraler Datenhaltung?',
+            options: [
+              { id: 'a', text: 'Daten werden so aufbereitet, dass sie für verschiedene Ausgabemedien (Web, Print, App) flexibel einsetzbar sind', isCorrect: true, explanation: 'Richtig! Die Trennung von Inhalt und Format ist hierbei entscheidend.' },
+              { id: 'b', text: 'Daten dürfen nur auf USB-Sticks gespeichert werden', isCorrect: false, explanation: 'Nein.' },
+              { id: 'c', text: 'Alle Bilder müssen zwingend schwarz-weiß sein', isCorrect: false, explanation: 'Falsch.' },
+              { id: 'd', text: 'Das Löschen aller Meta-Daten', isCorrect: false, explanation: 'Gegenteil ist der Fall.' }
+            ]
           }
         ]
       }
