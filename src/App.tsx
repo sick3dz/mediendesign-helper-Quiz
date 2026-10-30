@@ -13,6 +13,7 @@ import {
   saveUserSettings,
   UserSettings,
   calculateLevel,
+  LEVEL_LADDER,
   ALL_BADGES,
 } from './services/storageService';
 import { soundEffects } from './services/audioService';
@@ -182,6 +183,36 @@ export default function App() {
     return newlyEarned;
   };
 
+  const grantLevelUpRewards = (
+    prevStats: UserStats,
+    newXp: number,
+    basePet: PetState
+  ): { level: number; updatedPet: PetState; newlyLeveledUp: boolean } => {
+    const levelInfo = calculateLevel(newXp);
+    const leveledUp = levelInfo.level > prevStats.level;
+    let updatedPet = { ...basePet };
+
+    if (leveledUp) {
+      soundEffects.playLevelUp();
+      LEVEL_LADDER.filter(t => t.level <= levelInfo.level && t.level > prevStats.level).forEach(tier => {
+        const curQty = updatedPet.inventory.food[tier.rewardFood.id] || 0;
+        updatedPet.inventory = {
+          ...updatedPet.inventory,
+          food: {
+            ...updatedPet.inventory.food,
+            [tier.rewardFood.id]: curQty + tier.rewardFood.count,
+          },
+        };
+      });
+    }
+
+    return {
+      level: levelInfo.level,
+      updatedPet,
+      newlyLeveledUp: leveledUp,
+    };
+  };
+
   const handleModuleCompleted = (moduleId: string, gainedXp: number) => {
     setStats(prev => {
       const alreadyCompleted = prev.completedModules.includes(moduleId);
@@ -192,23 +223,22 @@ export default function App() {
       const newXp = prev.xp + gainedXp;
       const earnedCoins = Math.round(gainedXp * 0.6) + 30;
       const newCoins = prev.coins + earnedCoins;
-      const levelInfo = calculateLevel(newXp);
 
       // Check for newly completed chapters and exclusive surprises
-      let updatedPet = { ...prev.pet };
+      let basePet = { ...prev.pet };
       let newlyUnlockedSurprise: ChapterSurprise | null = null;
 
       for (const surprise of CHAPTER_SURPRISES) {
         const chapter = CHAPTERS.find(c => c.id === surprise.chapterId);
         if (chapter && chapter.modules.length > 0) {
           const isChapterComplete = chapter.modules.every(m => updatedCompleted.includes(m.id));
-          const alreadyHasSurprise = updatedPet.inventory.accessories.includes(surprise.accessory.id);
+          const alreadyHasSurprise = basePet.inventory.accessories.includes(surprise.accessory.id);
           if (isChapterComplete && !alreadyHasSurprise) {
-            updatedPet = {
-              ...updatedPet,
+            basePet = {
+              ...basePet,
               inventory: {
-                ...updatedPet.inventory,
-                accessories: [...updatedPet.inventory.accessories, surprise.accessory.id],
+                ...basePet.inventory,
+                accessories: [...basePet.inventory.accessories, surprise.accessory.id],
               },
             };
             if (!newlyUnlockedSurprise) {
@@ -224,6 +254,9 @@ export default function App() {
         }, 500);
       }
 
+      // Check for level ups and reward free food packages
+      const { level, updatedPet } = grantLevelUpRewards(prev, newXp, basePet);
+
       // Update daily mission for module learning
       const missions = prev.dailyMissions || [];
       const updatedMissions = missions.map(m => {
@@ -238,7 +271,7 @@ export default function App() {
         pet: updatedPet,
         xp: newXp,
         coins: newCoins,
-        level: levelInfo.level,
+        level,
         dailyMissions: updatedMissions,
         completedModules: updatedCompleted,
         answeredQuestionsCount: prev.answeredQuestionsCount + 1,
@@ -286,11 +319,13 @@ export default function App() {
         return m;
       });
       const newXp = prev.xp + earnedXp;
-      const levelInfo = calculateLevel(newXp);
+      const { level, updatedPet } = grantLevelUpRewards(prev, newXp, prev.pet);
+
       const nextStats: UserStats = {
         ...prev,
+        pet: updatedPet,
         xp: newXp,
-        level: levelInfo.level,
+        level,
         dailyMissions: updatedMissions,
       };
       saveUserStats(nextStats);
@@ -307,11 +342,13 @@ export default function App() {
       }
       const updatedMissions = missions.map(m => (m.id === missionId ? { ...m, isClaimed: true } : m));
       const newXp = prev.xp + target.rewardXp;
-      const levelInfo = calculateLevel(newXp);
+      const { level, updatedPet } = grantLevelUpRewards(prev, newXp, prev.pet);
+
       const nextStats: UserStats = {
         ...prev,
+        pet: updatedPet,
         xp: newXp,
-        level: levelInfo.level,
+        level,
         dailyMissions: updatedMissions,
       };
       saveUserStats(nextStats);
@@ -324,12 +361,14 @@ export default function App() {
       const newXp = prev.xp + score;
       const earnedCoins = Math.round(score * 0.5);
       const newCoins = prev.coins + earnedCoins;
-      const levelInfo = calculateLevel(newXp);
+      const { level, updatedPet } = grantLevelUpRewards(prev, newXp, prev.pet);
+
       const nextStats: UserStats = {
         ...prev,
+        pet: updatedPet,
         xp: newXp,
         coins: newCoins,
-        level: levelInfo.level,
+        level,
       };
       saveUserStats(nextStats);
       return nextStats;

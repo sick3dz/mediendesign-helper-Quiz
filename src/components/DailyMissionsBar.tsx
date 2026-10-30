@@ -23,12 +23,33 @@ export const DailyMissionsBar: React.FC<Props> = ({
   onClaimReward,
   onOpenFocusSprint,
 }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // Default to collapsed so it does not clutter the screen on startup
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem('daily_missions_collapsed');
+      return stored === null ? true : stored === 'true';
+    } catch {
+      return true;
+    }
+  });
 
   const completedCount = missions.filter(m => m.currentCount >= m.targetCount).length;
   const claimedCount = missions.filter(m => m.isClaimed).length;
   const totalMissions = missions.length;
   const hasUnclaimed = missions.some(m => m.currentCount >= m.targetCount && !m.isClaimed);
+
+  const toggleCollapse = () => {
+    soundEffects.playClick();
+    setIsCollapsed(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem('daily_missions_collapsed', String(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
 
   const handleClaim = (m: DailyMission) => {
     soundEffects.playLevelUp();
@@ -44,19 +65,44 @@ export const DailyMissionsBar: React.FC<Props> = ({
     <div className="bg-slate-50/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 transition-colors">
       <div className="max-w-6xl mx-auto px-3 sm:px-6 py-2">
         {/* Header Ribbon of the Bar */}
-        <div className="flex items-center justify-between gap-3">
+        <div
+          onClick={toggleCollapse}
+          className="flex items-center justify-between gap-3 cursor-pointer group select-none"
+        >
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-800 flex items-center justify-center shrink-0 text-amber-700 dark:text-amber-300">
+            <div className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-950/70 border border-amber-300 dark:border-amber-800 flex items-center justify-center shrink-0 text-amber-700 dark:text-amber-300 group-hover:scale-105 transition-transform">
               <Target className="w-3.5 h-3.5" />
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-xs font-black tracking-tight text-slate-900 dark:text-white">
+              <span className="text-xs font-black tracking-tight text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                 Tages-Missionen
               </span>
               <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
                 {claimedCount}/{totalMissions} belohnt
               </span>
             </div>
+
+            {/* Quick mini-summary tags when collapsed */}
+            {isCollapsed && (
+              <div className="hidden sm:flex items-center gap-1.5 ml-1 text-[10px] font-mono font-bold">
+                {missions.map(m => (
+                  <span
+                    key={m.id}
+                    className={`flex items-center gap-1 px-1.5 py-0.2 rounded-md ${
+                      m.isClaimed
+                        ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60'
+                        : m.currentCount >= m.targetCount
+                        ? 'text-amber-800 dark:text-amber-200 bg-amber-100 dark:bg-amber-950/60'
+                        : 'text-slate-600 dark:text-slate-400 bg-slate-200/70 dark:bg-slate-800'
+                    }`}
+                  >
+                    <span>{m.icon}</span>
+                    <span>{Math.min(m.currentCount, m.targetCount)}/{m.targetCount}</span>
+                  </span>
+                ))}
+              </div>
+            )}
+
             {hasUnclaimed && (
               <span className="flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 animate-bounce">
                 <Sparkles className="w-3 h-3 fill-slate-950" />
@@ -68,12 +114,15 @@ export const DailyMissionsBar: React.FC<Props> = ({
           <div className="flex items-center gap-2">
             {/* Collapse toggle */}
             <button
-              onClick={() => setIsCollapsed(prev => !prev)}
-              className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer text-xs flex items-center gap-1"
+              onClick={e => {
+                e.stopPropagation();
+                toggleCollapse();
+              }}
+              className="p-1 rounded-lg text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 transition-colors cursor-pointer text-xs flex items-center gap-1"
               title={isCollapsed ? 'Missionen ausklappen' : 'Missionen minimieren'}
             >
               <span className="text-[11px] font-medium hidden sm:inline">
-                {isCollapsed ? 'Einblenden' : 'Minimieren'}
+                {isCollapsed ? 'Aufgaben anzeigen' : 'Minimieren'}
               </span>
               {isCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
             </button>

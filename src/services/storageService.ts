@@ -160,31 +160,127 @@ export const ALL_BADGES: Badge[] = [
   },
 ];
 
-export function calculateLevel(xp: number): { level: number; title: string; currentLevelXp: number; nextLevelXp: number } {
-  const thresholds = [
-    { level: 1, title: 'Design-Novize', xp: 0 },
-    { level: 2, title: 'Konzept-Trainee', xp: 200 },
-    { level: 3, title: 'UX-Junior', xp: 500 },
-    { level: 4, title: 'IxD-Spezialist', xp: 1000 },
-    { level: 5, title: 'Konzeptions-Profi', xp: 1800 },
-    { level: 6, title: 'Prüfungs-Titan', xp: 3000 },
-  ];
+export interface LevelTier {
+  level: number;
+  title: string;
+  xp: number;
+  icon: string;
+  rewardTitle: string;
+  rewardFood: { id: string; name: string; icon: string; count: number };
+  rewardDescription: string;
+}
 
-  let current = thresholds[0];
-  let next = thresholds[1];
+export const LEVEL_LADDER: LevelTier[] = [
+  {
+    level: 1,
+    title: 'Design-Novize',
+    xp: 0,
+    icon: '🌱',
+    rewardTitle: 'Design-Novize',
+    rewardFood: { id: 'food-apple', name: 'Knackiger Apfel', icon: '🍎', count: 2 },
+    rewardDescription: 'Start-Ausrüstung & 2x Knackiger Apfel',
+  },
+  {
+    level: 2,
+    title: 'Konzept-Trainee',
+    xp: 200,
+    icon: '📐',
+    rewardTitle: 'Konzept-Trainee',
+    rewardFood: { id: 'food-pizza', name: 'Steinofen-Pizza', icon: '🍕', count: 2 },
+    rewardDescription: 'Titel "Konzept-Trainee" + 2x Steinofen-Pizza',
+  },
+  {
+    level: 3,
+    title: 'UX-Junior',
+    xp: 500,
+    icon: '✨',
+    rewardTitle: 'UX-Junior',
+    rewardFood: { id: 'food-sushi', name: 'Lachs-Sushi Set', icon: '🍣', count: 3 },
+    rewardDescription: 'Titel "UX-Junior" + 3x Lachs-Sushi',
+  },
+  {
+    level: 4,
+    title: 'IxD-Spezialist',
+    xp: 1000,
+    icon: '⚡',
+    rewardTitle: 'IxD-Spezialist',
+    rewardFood: { id: 'food-donut', name: 'Schoko-Streusel Donut', icon: '🍩', count: 4 },
+    rewardDescription: 'Titel "IxD-Spezialist" + 4x Schoko-Donut',
+  },
+  {
+    level: 5,
+    title: 'Konzeptions-Profi',
+    xp: 1800,
+    icon: '🎯',
+    rewardTitle: 'Konzeptions-Profi',
+    rewardFood: { id: 'food-steak', name: 'Gourmet Steak', icon: '🥩', count: 5 },
+    rewardDescription: 'Titel "Konzeptions-Profi" + 5x Gourmet Steak',
+  },
+  {
+    level: 6,
+    title: 'Prüfungs-Titan',
+    xp: 3000,
+    icon: '🏆',
+    rewardTitle: 'Prüfungs-Titan',
+    rewardFood: { id: 'food-cake', name: 'Glücks-Erdbeerkuchen', icon: '🍰', count: 5 },
+    rewardDescription: 'Titel "Prüfungs-Titan" + 5x Glückskuchen',
+  },
+  {
+    level: 7,
+    title: 'Design-Legende',
+    xp: 5000,
+    icon: '👑',
+    rewardTitle: 'Design-Legende',
+    rewardFood: { id: 'food-cake', name: 'Glücks-Erdbeerkuchen', icon: '🍰', count: 10 },
+    rewardDescription: 'Legendärer Meistertitel + 10x Gourmet-Festmahl',
+  },
+];
 
-  for (let i = 0; i < thresholds.length; i++) {
-    if (xp >= thresholds[i].xp) {
-      current = thresholds[i];
-      next = thresholds[i + 1] || { level: current.level + 1, title: 'Design-Legende', xp: current.xp + 1500 };
+export interface LevelInfo {
+  level: number;
+  title: string;
+  icon: string;
+  currentLevelXp: number;
+  nextLevelXp: number;
+  xpNeededForNext: number;
+  progressPercent: number;
+  isMaxLevel: boolean;
+  nextTier: LevelTier | null;
+  currentTier: LevelTier;
+}
+
+export function calculateLevel(xp: number): LevelInfo {
+  let currentTier = LEVEL_LADDER[0];
+  let nextTier: LevelTier | null = LEVEL_LADDER[1];
+
+  for (let i = 0; i < LEVEL_LADDER.length; i++) {
+    if (xp >= LEVEL_LADDER[i].xp) {
+      currentTier = LEVEL_LADDER[i];
+      nextTier = LEVEL_LADDER[i + 1] || null;
     }
   }
 
+  const isMaxLevel = nextTier === null;
+  const currentLevelXp = currentTier.xp;
+  const nextLevelXp = nextTier ? nextTier.xp : currentTier.xp;
+  const xpNeededForNext = nextTier ? Math.max(0, nextTier.xp - xp) : 0;
+
+  const span = nextLevelXp - currentLevelXp;
+  const progressPercent = isMaxLevel
+    ? 100
+    : Math.min(100, Math.max(0, Math.round(((xp - currentLevelXp) / (span || 1)) * 100)));
+
   return {
-    level: current.level,
-    title: current.title,
-    currentLevelXp: current.xp,
-    nextLevelXp: next.xp,
+    level: currentTier.level,
+    title: currentTier.title,
+    icon: currentTier.icon,
+    currentLevelXp,
+    nextLevelXp,
+    xpNeededForNext,
+    progressPercent,
+    isMaxLevel,
+    nextTier,
+    currentTier,
   };
 }
 

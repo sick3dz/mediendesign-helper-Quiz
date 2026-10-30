@@ -24,6 +24,7 @@ import {
   ALL_COSMETICS,
   findCosmeticById,
 } from '../data/cosmeticsData';
+import { calculateLevel, LEVEL_LADDER, LevelTier } from '../services/storageService';
 import { PetAvatar } from './PetAvatar';
 import { soundEffects } from '../services/audioService';
 import confetti from 'canvas-confetti';
@@ -46,6 +47,10 @@ import {
   CircleDot,
   Moon,
   Sun,
+  ChevronDown,
+  ChevronUp,
+  Trophy,
+  Gift,
 } from 'lucide-react';
 
 interface Props {
@@ -85,6 +90,9 @@ export const VirtualPetView: React.FC<Props> = ({
   const [isEating, setIsEating] = useState(false);
   const [isPetted, setIsPetted] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
+  const [isRoadmapExpanded, setIsRoadmapExpanded] = useState(false);
+
+  const levelInfo = calculateLevel(xp);
 
   const unlockedCosmetics = stats.unlockedCosmetics || ['theme-default', 'sound-standard', 'title-novice', 'frame-none'];
   const equippedCosmetics = stats.equippedCosmetics || {
@@ -393,6 +401,156 @@ export const VirtualPetView: React.FC<Props> = ({
           </button>
         </div>
       )}
+
+      {/* Prominent Level & Rewards Roadmap Card */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-xs transition-colors space-y-4">
+        {/* Level Header Strip */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center text-2xl shadow-2xs shrink-0">
+              <span>{levelInfo.icon}</span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                  Aktueller Rang
+                </span>
+                <span className="text-xs font-mono font-bold px-1.5 py-0.2 rounded-md bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300">
+                  Level {levelInfo.level}
+                </span>
+              </div>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">
+                {levelInfo.title}
+              </h3>
+            </div>
+          </div>
+
+          {/* Next Level & EXP Remaining Badge */}
+          <div className="flex flex-col sm:items-end text-xs">
+            {levelInfo.isMaxLevel ? (
+              <span className="font-extrabold text-amber-600 dark:text-amber-400 flex items-center gap-1 font-mono">
+                <Trophy className="w-4 h-4" /> Maximaler Rang erreicht! 👑
+              </span>
+            ) : (
+              <>
+                <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white">
+                  <span className="text-slate-400">Nächstes Ziel:</span>
+                  <span className="text-indigo-600 dark:text-indigo-400">
+                    Level {levelInfo.nextTier?.level} ({levelInfo.nextTier?.title})
+                  </span>
+                </div>
+                <span className="text-[11px] font-mono font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">
+                  Noch {levelInfo.xpNeededForNext} ⚡ EXP benötigt
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* EXP Progress Bar & Stats */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
+            <span>
+              Fortschritt: <strong className="text-slate-900 dark:text-white tabular-nums">{xp}</strong> / {levelInfo.nextLevelXp} EXP
+            </span>
+            <span className="tabular-nums text-indigo-600 dark:text-indigo-400 font-extrabold">
+              {levelInfo.progressPercent}%
+            </span>
+          </div>
+
+          <div className="w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden p-0.5 border border-slate-200/60 dark:border-slate-800">
+            <div
+              className="h-full bg-gradient-to-r from-indigo-500 via-indigo-600 to-amber-500 rounded-full transition-all duration-500 shadow-xs"
+              style={{ width: `${levelInfo.progressPercent}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Next Level Rewards Preview Banner */}
+        {levelInfo.nextTier && (
+          <div className="p-3 rounded-2xl bg-gradient-to-r from-indigo-50/70 via-purple-50/50 to-amber-50/70 dark:from-indigo-950/40 dark:via-purple-950/30 dark:to-amber-950/40 border border-indigo-100 dark:border-indigo-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+            <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
+              <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-400 shrink-0">
+                <Gift className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="font-extrabold text-slate-900 dark:text-white">
+                  Belohnung bei Level {levelInfo.nextTier.level}:
+                </span>{' '}
+                <span className="text-slate-600 dark:text-slate-300 font-medium">
+                  {levelInfo.nextTier.rewardDescription}
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                soundEffects.playClick();
+                setIsRoadmapExpanded(prev => !prev);
+              }}
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 transition-colors cursor-pointer self-start sm:self-auto shrink-0 whitespace-nowrap"
+            >
+              <span>{isRoadmapExpanded ? 'Stufenleiter minimieren' : 'Alle 7 Stufen ansehen'}</span>
+              {isRoadmapExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+          </div>
+        )}
+
+        {/* Expandable Level Ladder Drawer */}
+        {isRoadmapExpanded && (
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2 animate-in fade-in duration-200">
+            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+              Vollständiger Lern- & Belohnungspfad (Level 1 bis 7)
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {LEVEL_LADDER.map(tier => {
+                const isCurrent = tier.level === levelInfo.level;
+                const isPassed = xp >= tier.xp;
+
+                return (
+                  <div
+                    key={tier.level}
+                    className={`p-3 rounded-2xl border text-left transition-all flex items-start gap-3 ${
+                      isCurrent
+                        ? 'bg-indigo-50/80 dark:bg-indigo-950/60 border-indigo-400 dark:border-indigo-700 ring-2 ring-indigo-500/20'
+                        : isPassed
+                        ? 'bg-slate-50/80 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 opacity-80'
+                        : 'bg-white dark:bg-slate-900/60 border-dashed border-slate-200 dark:border-slate-800 opacity-60'
+                    }`}
+                  >
+                    <span className="text-2xl select-none shrink-0 mt-0.5">{tier.icon}</span>
+                    <div className="min-w-0 flex-1 space-y-0.5">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
+                          Lvl {tier.level}: {tier.title}
+                        </span>
+                        {isCurrent ? (
+                          <span className="text-[9px] font-bold font-mono px-1.5 py-0.2 rounded-full bg-indigo-600 text-white shrink-0">
+                            Aktuell ★
+                          </span>
+                        ) : isPassed ? (
+                          <span className="text-[9px] font-bold font-mono text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 shrink-0">
+                            <Check className="w-3 h-3" /> Erreicht
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-bold font-mono text-slate-400 shrink-0">
+                            {tier.xp} EXP
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="text-[11px] text-slate-600 dark:text-slate-300 font-medium leading-snug">
+                        🎁 {tier.rewardDescription}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Pet Showcase Room Card */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm relative overflow-hidden transition-colors">
