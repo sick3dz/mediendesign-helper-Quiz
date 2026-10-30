@@ -1,87 +1,28 @@
-# Level-Progression & Belohnungs-Roadmap in der Haustier-Lounge
+# Implementierungsplan: Tablet- & iPad-Layout-Optimierung (Abgeschlossen)
 
-Dieser Implementierungsplan beschreibt die Integration einer transparenten, motivierenden Level- und Belohnungsübersicht direkt in die Haustier-Lounge. Nutzer sehen jederzeit auf einen Blick, auf welchem Level sie sich befinden, wie viele EXP bis zum nächsten Aufstieg fehlen, wie der nächste Rang heißt und welche exklusiven Belohnungen (Lerntitel und Futter-Pakete) beim Erreichen freigeschaltet werden.
+Die gesamte Benutzeroberfläche wurde umfassend für iPads und Tablets (sowohl iPad Hochformat ~768px/810px als auch Querformat 1024px+) überprüft und verfeinert.
 
----
+## 1. Ergonomische Maximalbreiten (Zentriertes Layout)
+- **Hauptcontainer (`max-w-6xl` & `max-w-4xl`):** Sämtliche Ansichten sind zentriert mit `mx-auto` und weichen Seitenabständen (`px-4 sm:px-6`). Auf dem iPad wird der Bildschirm voll ausgenutzt, ohne dass Texte überbreit und unleserlich auseinandergezogen werden.
+- **Lesefreundlichkeit:** Die Lernmodule nutzen `max-w-3xl`, was die perfekte ergonomische Zeilenlänge (65–85 Zeichen) zum Lernen bietet.
 
-## User Review & Bestätigte Entscheidungen
+## 2. Modulare Responsive Breakpoints für iPads
+- **Kapitelübersicht (`ChapterListView`):**
+  - Smartphone: 2 Spalten (`grid-cols-2`)
+  - iPad / Tablet: 4 Spalten (`sm:grid-cols-4`), saubere 2x4 Matrix für alle 8 IHK-Kapitel
+  - Desktop: 8 Spalten (`lg:grid-cols-8`)
+- **Tages-Missionen Bar (`DailyMissionsBar`):**
+  - Auf dem iPad (`md:grid-cols-3`) liegen die 3 täglichen Missionen elegant nebeneinander.
+- **Digital-Leitfaden & Spickzettel (`SpickzettelView`):**
+  - Primäre Umschalter und Kapitel-Pagination passen sich nahtlos an (Kurzform mobil, Volltext ab Tablet).
+  - Suchfeld und Kategorie-Filterpillen liegen auf dem iPad aufgeräumt in einer gemeinsamen horizontalen Zeile.
+  - Vergleichstabellen bieten ausreichend Breite ohne horizontales Ruckeln.
+- **Haustier-Lounge (`VirtualPetView`):**
+  - Level-Roadmap, Haustierzimmer und Shop skalieren mit responsivem Grid (`sm:grid-cols-3 md:grid-cols-4`) für präzise Touch-Bedienung.
+- **StudyQuest Mini-Games Hub (`MiniGamesHubView`):**
+  - 3-Spalten-Raster für Quiz-Spiele und 2-Spalten-Raster für Kapitel-Challenges.
+- **Header-Titel (`ModuleLearningView`):**
+  - Erweiterung der Titelbegrenzung auf Tablets (`sm:max-w-md`), damit Kapitel- und Modulnamen ohne Abbruch angezeigt werden.
 
-> [!IMPORTANT]
-> Folgende Entscheidungen wurden basierend auf deinen Antworten im interaktiven Frage-Schritt festgelegt:
-
-- **Platzierung**: Als prominente, stylische Übersichtskarte direkt über dem Haustier-Raum in der Haustier-Lounge (`VirtualPetView.tsx`).
-- **Belohnungsarten**: Exklusive Lerntitel für das Profil sowie reichhaltige Futter- und Snack-Pakete für das Haustier, die automatisch im Inventar landen.
-- **Transparenz & Übersicht**: Direkte Anzeige des aktuellen Rangs, Fortschrittsbalken mit exakter EXP-Differenz (`Noch X EXP bis Level Y`), Vorschau des Folgerangs sowie ein aufklappbarer Level-Pfad für alle Stufen.
-
----
-
-## 1. Übersicht & Kernkonzept
-
-- **Ziel**: Dem Nutzer eine glasklare Orientierung über seinen Lern- und Erfahrungsfortschritt geben und zusätzlichen Anreiz schaffen, Module und Sprints abzuschließen.
-- **Didaktischer & psychologischer Effekt**:
-  - Sichtbare "Noch 120 EXP bis Level 4"-Etappenziele aktivieren die Lernmotivation.
-  - Das Haustier profitiert direkt durch kostenlose Gourmet-Snacks, die bei jedem Levelaufstieg ins Inventar wandern.
-  - Der neue Titel kann sofort getragen und im Header angezeigt werden.
-
----
-
-## 2. User Experience & Visuelles Design
-
-### A. Prominente Level-Header-Karte (`VirtualPetView.tsx`)
-- **Gestaltung**:
-  - Hochwertige Card im 60-30-10 Design, passend zu hellem und dunklem Modus.
-  - Links: Großes Level-Insignia mit Stern/Rang-Icon (`Level 3`) und dem aktuellen Rangnamen (`UX-Junior`).
-  - Mitte: Sauberer, ungerahmter Fortschrittsbalken mit Tabular-Numerals:
-    - Text: `340 / 500 EXP` (68% erreicht).
-    - Status-Hinweis: `Noch 160 ⚡ EXP bis Level 4 (IxD-Spezialist)`.
-  - Rechts: Vorschau-Badge der nächsten Belohnung:
-    - `🎁 Nächste Belohnung: 4x 🍩 Donut + Titel 'IxD-Spezialist'`.
-  - Button: *"Alle Level ansehen"* zum Aufklappen der vollständigen Rangliste (Level 1 bis 7).
-
-### B. Vollständige Stufenleiter (Level 1 bis 7)
-| Level | Benötigte EXP | Rang-Titel | Freigeschaltete Belohnung |
-|---|---|---|---|
-| **Level 1** | 0 EXP | **Design-Novize** | Startausstattung & Haustier-Adoption |
-| **Level 2** | 200 EXP | **Konzept-Trainee** | 2x 🍕 Pizza-Snack + Titel *"Konzept-Trainee"* |
-| **Level 3** | 500 EXP | **UX-Junior** | 3x 🍣 Sushi-Platte + Titel *"UX-Junior"* |
-| **Level 4** | 1.000 EXP | **IxD-Spezialist** | 4x 🍩 Schoko-Donut + Titel *"IxD-Spezialist"* |
-| **Level 5** | 1.800 EXP | **Konzeptions-Profi** | 5x 🥩 Deluxe-Steak + Titel *"Konzeptions-Profi"* |
-| **Level 6** | 3.000 EXP | **Prüfungs-Titan** | 5x 🍰 Zauber-Kuchen + Titel *"Prüfungs-Titan"* |
-| **Level 7** | 5.000 EXP | **Design-Legende** | 10x Festmahl-Mix + Titel *"Design-Legende"* |
-
-### C. Automatischer Levelaufstiegs-Trigger & Feier
-- Beim Überschreiten der EXP-Schwelle:
-  - Automatisches Hinzufügen der Snack-Mengen in `pet.inventory.food`.
-  - Hinzufügen des neuen Titels in `unlockedCosmetics`.
-  - Festliche Toast-Benachrichtigung und Level-Up-Fanfare.
-
----
-
-## 3. Technische Umsetzung & Komponenten-Architektur
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    VirtualPetView.tsx                       │
-│                                                             │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │            PetLevelProgressionCard.tsx                │  │
-│  │   [Lvl 3: UX-Junior]  === 68% ===  [Lvl 4 Vorschau]   │  │
-│  │   🎁 Nächste Belohnung: 4x Donut + Titel              │  │
-│  │   [Button: Alle Ränge anzeigen / minimieren]          │  │
-│  └───────────────────────────────────────────────────────┘  │
-│                                                             │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │               Pet Room & Care Showcase                │  │
-│  │         (Avatar, Streicheln, Füttern, Tabs)           │  │
-│  └───────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Dateiänderungen:
-1. `src/services/storageService.ts`:
-   - Erweiterung der `calculateLevel`-Funktion um `rewards` (Food items + Title name), `progressPercent` und `xpRemaining`.
-   - Export der vollständigen `LEVEL_LADDER`-Konstante.
-2. `src/components/VirtualPetView.tsx`:
-   - Einbindung der neuen `PetLevelProgressionCard` als oberstes Element der Haustier-Lounge.
-   - Interaktives Umschalten der Detail-Rangliste mit allen 7 Stufen.
-3. Verifikation mit `compile_applet` und `lint_applet`.
+## 3. Status
+- Alle Tests, Lint-Checks (`tsc --noEmit`) und Build-Kompilierung erfolgreich bestanden.

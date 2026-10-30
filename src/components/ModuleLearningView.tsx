@@ -107,7 +107,7 @@ export const ModuleLearningView: React.FC<Props> = ({
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <span>Kapitel {chapter.number}</span>
           <span aria-hidden="true">·</span>
-          <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[150px]">{module.title}</span>
+          <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[150px] sm:max-w-md">{module.title}</span>
         </div>
       </div>
 

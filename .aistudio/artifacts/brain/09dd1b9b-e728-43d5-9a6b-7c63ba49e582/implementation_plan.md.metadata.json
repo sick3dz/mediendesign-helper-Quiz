@@ -1,6 +1,6 @@
 {
-  "summary":  "Implementierungsplan für die prominente Level- und Belohnungsübersicht in der Haustier-Lounge: Visualisierung des aktuellen Levels, verbleibende EXP bis zum nächsten Rang, Titelvorschau sowie automatische Vergabe von Futter-Paketen und exklusiven Lerntiteln bei jedem Levelaufstieg.",
-  "updatedAt":  "2026-10-30T09:21:40.505815983Z",
+  "summary":  "Vollständige Prüfung und Optimierung des responsiven Layouts für iPads und Tablets (768px bis 1024px+). Alle Bereiche passen sich ideal an Hoch- und Querformat an.",
+  "updatedAt":  "2026-10-30T09:51:38.055964914Z",
   "requestFeedback":  true,
   "userFacing":  true
 }
