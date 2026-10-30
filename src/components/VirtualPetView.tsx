@@ -15,6 +15,7 @@ import {
   PET_ACCESSORIES,
   CHAPTER_SURPRISES,
   findAccessoryById,
+  PET_SPECIES_SOUNDS,
 } from '../data/petData';
 import {
   COSMETIC_THEMES,
@@ -116,11 +117,13 @@ export const VirtualPetView: React.FC<Props> = ({
     setTimeout(() => setFeedbackMsg(null), 2500);
   };
 
+  const soundConfig = PET_SPECIES_SOUNDS[pet.species];
+
   // 1. Petting interaction (wakes up pet if sleeping!)
   const handlePet = () => {
-    soundEffects.playPet();
+    soundEffects.playPetForSpecies(pet.species);
     setIsPetted(true);
-    setTimeout(() => setIsPetted(false), 800);
+    setTimeout(() => setIsPetted(false), 1000);
 
     const wasSleeping = Boolean(pet.isSleeping);
     const newHappiness = Math.min(100, pet.happiness + 15);
@@ -133,22 +136,22 @@ export const VirtualPetView: React.FC<Props> = ({
     onUpdatePet(updated);
 
     if (wasSleeping) {
-      showTemporaryFeedback(`${pet.name} ist aufgewacht und schnurrt glücklich! (+15 Laune) ☀️`);
+      showTemporaryFeedback(soundConfig.wakeUpMsg(pet.name));
     } else {
-      showTemporaryFeedback(`${pet.name} freut sich riesig über deine Streicheleinheit! (+15 Laune)`);
+      showTemporaryFeedback(`${soundConfig.soundIcon} "${soundConfig.soundWord}" – ${soundConfig.petActionMsg(pet.name)}`);
     }
   };
 
   // 2. Gentle Wakeup Action
   const handleWakeUp = () => {
-    soundEffects.playPet();
+    soundEffects.playPetForSpecies(pet.species);
     const updated: PetState = {
       ...pet,
       isSleeping: false,
       happiness: Math.min(100, pet.happiness + 20),
     };
     onUpdatePet(updated);
-    showTemporaryFeedback(`Guten Morgen! ${pet.name} ist ausgeschlafen und lernbereit! ☀️`);
+    showTemporaryFeedback(soundConfig.wakeUpMsg(pet.name));
   };
 
   // 3. Feeding from inventory (also gently wakes up)
@@ -656,6 +659,12 @@ export const VirtualPetView: React.FC<Props> = ({
 
         {/* Pet Stage with Reactive PetAvatar */}
         <div className="relative py-6 flex flex-col items-center justify-center">
+          {isPetted && (
+            <div className="absolute top-0 z-20 px-4 py-1.5 bg-amber-400 text-slate-900 font-black text-sm rounded-2xl shadow-lg border-2 border-amber-300 animate-bounce flex items-center gap-1.5 pointer-events-none">
+              <span className="text-base">{soundConfig.soundIcon}</span>
+              <span>"{soundConfig.soundWord}"</span>
+            </div>
+          )}
           <PetAvatar pet={pet} isEating={isEating} isPetted={isPetted} size="lg" />
 
           {/* Interactive Care Action Buttons */}

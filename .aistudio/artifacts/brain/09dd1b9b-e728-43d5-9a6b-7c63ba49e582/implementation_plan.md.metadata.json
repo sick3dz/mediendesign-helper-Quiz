@@ -1,6 +1,6 @@
 {
-  "summary":  "Plan zur Entkopplung des Fokus-Sprint Timers von der Modalanzeige, damit der Timer im Hintergrund beim Navigieren weiterläuft und live im TopBar-Header angezeigt wird.",
-  "updatedAt":  "2026-10-30T10:29:13.799029081Z",
+  "summary":  "Implementation plan for species-specific pet petting sounds (Web Audio API) and German sound text messages.",
+  "updatedAt":  "2026-10-30T10:37:11.676518364Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

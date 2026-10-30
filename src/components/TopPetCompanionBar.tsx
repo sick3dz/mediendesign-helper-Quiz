@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PetState, UserStats, PetFood } from '../types/quiz';
-import { PET_SPECIES, PET_FOODS } from '../data/petData';
+import { PET_SPECIES, PET_FOODS, PET_SPECIES_SOUNDS } from '../data/petData';
 import { findCosmeticById } from '../data/cosmeticsData';
 import { PetAvatar } from './PetAvatar';
 import { soundEffects } from '../services/audioService';
@@ -33,6 +33,7 @@ export const TopPetCompanionBar: React.FC<Props> = ({
 }) => {
   const { pet, xp } = stats;
   const speciesInfo = PET_SPECIES[pet.species];
+  const soundConfig = PET_SPECIES_SOUNDS[pet.species];
 
   const [isPetted, setIsPetted] = useState(false);
   const [isEating, setIsEating] = useState(false);
@@ -40,13 +41,13 @@ export const TopPetCompanionBar: React.FC<Props> = ({
 
   const showFeedback = (text: string) => {
     setQuickFeedback(text);
-    setTimeout(() => setQuickFeedback(null), 2200);
+    setTimeout(() => setQuickFeedback(null), 2500);
   };
 
   const handleQuickPet = () => {
-    soundEffects.playPet();
+    soundEffects.playPetForSpecies(pet.species);
     setIsPetted(true);
-    setTimeout(() => setIsPetted(false), 700);
+    setTimeout(() => setIsPetted(false), 800);
 
     const newHappiness = Math.min(100, pet.happiness + 10);
     const updated: PetState = {
@@ -55,7 +56,7 @@ export const TopPetCompanionBar: React.FC<Props> = ({
       timesPetted: pet.timesPetted + 1,
     };
     onUpdatePet(updated);
-    showFeedback(`${pet.name} schnurrt zufrieden! (+10 Laune)`);
+    showFeedback(`${soundConfig.soundIcon} "${soundConfig.soundWord}" – ${soundConfig.petActionMsg(pet.name)}`);
   };
 
   // Quick feed with first available food in inventory

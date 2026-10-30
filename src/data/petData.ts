@@ -39,6 +39,40 @@ export const PET_SPECIES: Record<PetSpecies, PetSpeciesInfo> = {
   },
 };
 
+export interface PetSpeciesSoundConfig {
+  soundWord: string;
+  soundIcon: string;
+  petActionMsg: (name: string) => string;
+  wakeUpMsg: (name: string) => string;
+}
+
+export const PET_SPECIES_SOUNDS: Record<PetSpecies, PetSpeciesSoundConfig> = {
+  dog: {
+    soundWord: 'Wuff!',
+    soundIcon: '🐶',
+    petActionMsg: (name: string) => `${name} bellt freudig und wedelt begeistert mit dem Schwanz! (+15 Laune) 🐾`,
+    wakeUpMsg: (name: string) => `${name} springt mit einem munteren "Wuff!" auf! ☀️`,
+  },
+  cat: {
+    soundWord: 'Miau!',
+    soundIcon: '🐱',
+    petActionMsg: (name: string) => `${name} schnurrt wohlig und schmiegt sich sanft an dich! (+15 Laune) ✨`,
+    wakeUpMsg: (name: string) => `${name} gähnt und streckt sich mit einem zarten "Miau!" ☀️`,
+  },
+  penguin: {
+    soundWord: 'Nöööt!',
+    soundIcon: '🐧',
+    petActionMsg: (name: string) => `${name} trötet vergnügt und watschelt stolz im Kreis! (+15 Laune) ❄️`,
+    wakeUpMsg: (name: string) => `${name} schüttelt das Gefieder mit einem lauten "Nöööt!" ☀️`,
+  },
+  axolotl: {
+    soundWord: 'Blubb!',
+    soundIcon: '🦎',
+    petActionMsg: (name: string) => `${name} blubbert glücklich und wackelt mit den Kiemen! (+15 Laune) 🫧`,
+    wakeUpMsg: (name: string) => `${name} taucht mit einem munteren "Blubb!" an die Oberfläche! ☀️`,
+  },
+};
+
 export const PET_FOODS: PetFood[] = [
   {
     id: 'cookie',

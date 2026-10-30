@@ -1,4 +1,4 @@
-// Web Audio API Synthesizer for instant, zero-latency ADHD feedback sounds
+import { PetSpecies } from '../types/quiz';
 
 export type SoundpackType = 'sound-standard' | 'sound-arcade' | 'sound-scifi' | 'sound-acoustic';
 
@@ -302,29 +302,127 @@ class SoundEffectsService {
     });
   }
 
-  // Cute pet stroke / purr sound
+  // Cute pet stroke / purr sound - fallback or default
   public playPet() {
+    this.playPetForSpecies('cat');
+  }
+
+  // Tierartspezifische Streichel-Synthesizer-Töne
+  public playPetForSpecies(species: PetSpecies) {
     if (this.isMuted) return;
     this.initContext();
     if (!this.ctx) return;
 
     const now = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
 
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(480, now);
-    osc.frequency.linearRampToValueAtTime(620, now + 0.12);
-    osc.frequency.linearRampToValueAtTime(540, now + 0.22);
+    if (species === 'dog') {
+      // Hund (Bello): Zweifaches freudiges Wuff-Wuff (Double Bark Pitch Drop)
+      [0, 0.11].forEach((offset, idx) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const t = now + offset;
 
-    gain.gain.setValueAtTime(0.08, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc.type = 'triangle';
+        const startFreq = idx === 0 ? 680 : 740;
+        const endFreq = idx === 0 ? 420 : 460;
 
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
+        osc.frequency.setValueAtTime(startFreq, t);
+        osc.frequency.exponentialRampToValueAtTime(endFreq, t + 0.08);
 
-    osc.start(now);
-    osc.stop(now + 0.25);
+        gain.gain.setValueAtTime(0.12, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(t);
+        osc.stop(t + 0.09);
+      });
+      return;
+    }
+
+    if (species === 'cat') {
+      // Katze (Mimi): Sanft ansteigendes Miau mit leichtem Schnurr-Tremolo
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(420, now);
+      osc.frequency.linearRampToValueAtTime(680, now + 0.14);
+      osc.frequency.linearRampToValueAtTime(520, now + 0.28);
+
+      gain.gain.setValueAtTime(0.09, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.30);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.30);
+      return;
+    }
+
+    if (species === 'penguin') {
+      // Pinguin (Pippo): Kühles Pinguin-Tröten / Squawk mit Eis-Klacken (Nöööt!)
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(320, now);
+      osc.frequency.linearRampToValueAtTime(490, now + 0.10);
+      osc.frequency.linearRampToValueAtTime(360, now + 0.20);
+
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.22);
+
+      // Patsch / Tap effect at the end
+      const tapOsc = this.ctx.createOscillator();
+      const tapGain = this.ctx.createGain();
+      tapOsc.type = 'sine';
+      tapOsc.frequency.setValueAtTime(800, now + 0.20);
+      tapOsc.frequency.exponentialRampToValueAtTime(200, now + 0.25);
+      tapGain.gain.setValueAtTime(0.06, now + 0.20);
+      tapGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      tapOsc.connect(tapGain);
+      tapGain.connect(this.ctx.destination);
+      tapOsc.start(now + 0.20);
+      tapOsc.stop(now + 0.25);
+      return;
+    }
+
+    if (species === 'axolotl') {
+      // Axolotl (Lotti): Unterwasser Blubber-Pops (Blubb-Plop!)
+      [0, 0.08].forEach((offset, idx) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const t = now + offset;
+
+        osc.type = 'sine';
+        const startFreq = idx === 0 ? 280 : 340;
+        const endFreq = idx === 0 ? 820 : 960;
+
+        osc.frequency.setValueAtTime(startFreq, t);
+        osc.frequency.exponentialRampToValueAtTime(endFreq, t + 0.05);
+
+        gain.gain.setValueAtTime(0.10, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(t);
+        osc.stop(t + 0.06);
+      });
+      return;
+    }
   }
 
   // Coin buy / spend sound

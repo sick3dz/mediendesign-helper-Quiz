@@ -1,26 +1,33 @@
-# Implementierungsplan: Durchgehender Fokus-Sprint Timer mit Live-Counter im Header
+# Implementation Plan: Tierartspezifische Streichel-Geräusche und Texte
 
-## Ziel
-Der Fokus-Sprint (Pomodoro-Lerneinheit) soll nicht mehr stoppen, wenn das Modal geschlossen wird oder der Nutzer zwischen Kapiteln, Modulen und Menüs navigiert. Der Timer läuft im Hintergrund weiter und der Live-Countdown wird prominent auf der Hauptseite im TopBar-Header angezeigt.
+Der Benutzer wünscht, dass beim Streicheln der Haustiere artenspezifische Töne (Synthesizer-Sounds) und passende Geräusche-Texte/Reaktionen (z. B. Hund: "Wuff!", Katze: "Miau!", Pinguin: "Nöööt!", Axolotl: "Blubb!") ausgegeben werden.
 
-## Änderungen
+## User Requirements & Clarifications
+- **Hund (Dog)**: "Wuff!" – Bell-Synthesizer-Sound & Text "Wuff! Bello wedelt freudig mit dem Schwanz!"
+- **Katze (Cat)**: "Miau!" – Schnurr/Miau-Frequency-Sweep & Text "Miau! Mimi schnurrt wohlig!"
+- **Pinguin (Penguin)**: "Nöööt!" – Pinguin-Tröten/Eis-Klacken & Text "Nöööt! Pippo watschelt vergnügt!"
+- **Axolotl (Axolotl)**: "Blubb!" – Unterwasser-Blubberton & Text "Blubb! Lotti blubbert glücklich im Wasser!"
 
-1. **Zentraler Sprint-State in `App.tsx`:**
-   - Anheben des Timer-States (`sprintSecondsLeft`, `isSprintActive`, `sprintTotalSeconds`, `sprintSoundType`, `isSprintDone`) in die Hauptkomponente `App.tsx`.
-   - Der `setInterval`-Countdown läuft global in `App.tsx`, unabhängig davon, welcher Tab oder welches Kapitel geöffnet ist.
+## Proposed Changes
 
-2. **Hintergrund-Audio (Lofi / White Noise):**
-   - Entfernen des automatischen `setIsActive(false)` und `ambientAudioService.stop()` beim Schließen des Modals.
-   - Der ausgewählte Hintergrundsound läuft solange weiter, wie der Sprint aktiv ist.
+### 1. Web Audio API Sound Synthesizer (`/src/services/audioService.ts`)
+- Erweitern der `SoundEffectsService`-Klasse um `playPetForSpecies(species: PetSpecies)`:
+  - **`dog`**: Synthetisiert zwei kurze prägnante Bark-Frequenz-Impulse (Wuff-Wuff).
+  - **`cat`**: Synthetisiert ein sanft ansteigendes Miau mit leichtem Schnurr-Vibrato.
+  - **`penguin`**: Synthetisiert ein moduliertes Pinguin-Tröten/Squawk mit metallisch-kühlem Oberton.
+  - **`axolotl`**: Synthetisiert einen resonant abperlendes Unterwasser-Blubber-Geräusch (Blubb-Plop).
 
-3. **Live-Counter im TopBar-Header (`TopBar.tsx`):**
-   - Der „Fokus“-Button im Header verwandelt sich bei aktiver Lerneinheit in ein auffälliges Live-Badge mit animiertem Zeitablauf (z. B. `⏱️ 04:32`).
-   - Ein Klick auf das Badge auf der Hauptseite öffnet jederzeit das Modal zum Anpassen von Sound, Lautstärke oder Pausieren.
+### 2. Artenspezifische Sound-Texte & Daten (`/src/data/petData.ts`)
+- Erstellen der Konfiguration `PET_SPECIES_SOUNDS`:
+  - `soundWord`: "Wuff!", "Miau!", "Nöööt!", "Blubb!"
+  - `petTexts`: Array aus abwechslungsreichen, liebevollen Reaktions-Texten pro Tierart.
+  - `wakeTexts`: Spezifische Texte beim Aufwecken.
 
-4. **Abschluss & Belohnung:**
-   - Nach Ablauf der Zeit (0:00) wird das Konfetti gezündet, +40 EXP vergeben und ein visueller Hinweis angezeigt.
+### 3. Haustier-Interaktion & UI-Anzeige (`/src/components/VirtualPetView.tsx` & `/src/components/TopPetCompanionBar.tsx`)
+- Anpassen der `handlePet()`-Funktion:
+  - Aufruf von `soundEffects.playPetForSpecies(pet.species)` anstelle des generischen Tones.
+  - Einblenden einer animierten Sound-Sprechblase mit dem artenspezifischen Geräusche-Text direkt über dem Haustier.
 
-## Verifikation
-- Wechseln zwischen Kapiteln und Modulen während laufendem Sprint.
-- Überprüfung der Live-Anzeige im Header (`TopBar`).
-- Build- und Syntaxprüfung (`tsc --noEmit` & `compile_applet`).
+## Verification
+- Ausführen von `lint_applet` (`tsc --noEmit`).
+- Ausführen von `compile_applet` (`npm run build`).
