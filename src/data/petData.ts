@@ -462,5 +462,64 @@ export function calculatePetDecay(pet: PetState): PetState {
   };
 }
 
+export function getDynamicPetThought(pet: PetState, statsXp: number = 0, seedIndex?: number): string {
+  if (!pet) return 'Bereit für die IHK-Prüfung! ★';
+
+  if (pet.isSleeping) {
+    const sleepQuotes = [
+      `Zzz... ${pet.name} träumt von 100 % in der IHK-Prüfung... 💤`,
+      `Chrrr... ${pet.name} ruht sich aus und lädt die Lernakkus auf... 🌙`,
+      `Zzz... Sanfte Träume von farbharmonischen Layouts... 💤`,
+    ];
+    return sleepQuotes[(seedIndex ?? Math.floor(Math.random() * sleepQuotes.length)) % sleepQuotes.length];
+  }
+
+  if ((pet.hunger ?? 85) <= 32) {
+    return `${pet.name}'s Magen knurrt leise... Ein kleiner Snack aus dem Shop wäre wunderbar! 🥪`;
+  }
+
+  if ((pet.happiness ?? 85) <= 35) {
+    return `${pet.name} schaut dich mit treuen Augen an... Zeit für eine Streicheleinheit! 💖`;
+  }
+
+  const hour = new Date().getHours();
+  const timeContext = hour >= 5 && hour < 12 ? 'morning' : hour >= 12 && hour < 18 ? 'afternoon' : 'evening';
+
+  const speciesQuotes: Record<PetSpecies, string[]> = {
+    dog: [
+      `${pet.name} schnüffelt neugierig nach neuen Wireframes & Layout-Tipps! 🐾`,
+      `Wuff! Ich habe einen kleinen Fehler im Raster aufgespürt! 🐕`,
+      `Design-Gründe sprechen klar für eine frische Lerneinheit! ⚡`,
+      `Ich halte dir treu die Treue bei jeder kniffligen IHK-Frage! 🐾`,
+      timeContext === 'morning' ? `Guten Morgen! Wuff – lass uns mit vollem Schwung lernen! ☀️` : timeContext === 'afternoon' ? `Nachmittags-Power! Wuff – lass uns das nächste Kapitel knacken! ⚡` : `Nachtschicht? Ich wache treu an deiner Seite! 🌙`,
+    ],
+    cat: [
+      `${pet.name} prüft mit Schnurrhaaren, ob dein Kontrast WCAG-konform ist! 🐱`,
+      `Miau! Gutes UI-Design schmiegt sich an wie eine warme Decke. ✨`,
+      `Sanfter Klick, geschmeidiges Micro-Feedback... So muss UX sein! 🐾`,
+      `Erst eine Runde Streicheln, dann die IHK-Bestnote! Miau! ✨`,
+      timeContext === 'morning' ? `Miau... Guten Morgen! Erst gähnen, dann IHK-Formeln lernen! ☀️` : timeContext === 'afternoon' ? `Geschmeidige Nachmittags-Session! Miau! 🌸` : `Späte Stunde? Ich schnurre beruhigend zu deinen Lernkarten... 🌙`,
+    ],
+    penguin: [
+      `${pet.name} bleibt cool wie Eis – Barrierefreiheit ist kein Hexenwerk! ❄️`,
+      `Nöööt! Tastatursteuerung & WCAG meistere ich im Schlaf! 🐧`,
+      `Ein Eis-Snack und eine Runde Spickzettel-Formeln, bitte! ❄️`,
+      `Watscheln wir direkt zum nächsten spannenden IHK-Kapitel! 🐧`,
+      timeContext === 'morning' ? `Frischer Morgenwind! Nöööt – bereit für Wissen! ☀️` : timeContext === 'afternoon' ? `Eiskalt fokussiert! Lass uns Module abschließen! ❄️` : `Kühler Kopf am Abend – so gelingt jede Prüfung! 🌙`,
+    ],
+    axolotl: [
+      `${pet.name} regeneriert frische Lernenergie im kühlen Wasser! 🫧`,
+      `Blubb! Schwimme mit Leichtigkeit durch jede Designkonzeption! 🦎`,
+      `Unterwasser-Fokus aktiviert... Lass uns wertvolles EXP sammeln! 🫧`,
+      `Interaktionsdesign ist mein natürlicher Lebensraum! Blubb! 🌊`,
+      timeContext === 'morning' ? `Blubb! Guten Morgen – munter auftauchen zum Lernen! ☀️` : timeContext === 'afternoon' ? `Sanfte Wellen & frisches Wissen am Nachmittag! 🫧` : `Abendliches Blubbern... Zeit für eine ruhige Fokus-Einheit! 🌙`,
+    ],
+  };
+
+  const pool = speciesQuotes[pet.species] || speciesQuotes.dog;
+  const idx = seedIndex !== undefined ? Math.abs(seedIndex) % pool.length : Math.floor(Math.random() * pool.length);
+  return pool[idx];
+}
+
 
 

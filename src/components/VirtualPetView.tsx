@@ -16,6 +16,7 @@ import {
   CHAPTER_SURPRISES,
   findAccessoryById,
   PET_SPECIES_SOUNDS,
+  getDynamicPetThought,
 } from '../data/petData';
 import {
   COSMETIC_THEMES,
@@ -95,6 +96,9 @@ export const VirtualPetView: React.FC<Props> = ({
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
   const [isRoadmapExpanded, setIsRoadmapExpanded] = useState(false);
   const [previewThemeId, setPreviewThemeId] = useState<string | null>(null);
+  const [previewAccessory, setPreviewAccessory] = useState<PetAccessory | null>(null);
+  const [previewFrame, setPreviewFrame] = useState<CosmeticItem | null>(null);
+  const [thoughtSeed, setThoughtSeed] = useState(0);
 
   // Level & progression are strictly tied to lifetime earned EXP (never decreases when spending!)
   const lifetimeProgressXp = stats.lifetimeXp ?? Math.max(xp, LEVEL_LADDER.find(l => l.level === (stats.level || 1))?.xp || 0);
@@ -114,6 +118,14 @@ export const VirtualPetView: React.FC<Props> = ({
       setActiveTab(initialTab);
     }
   }, [initialTab]);
+
+  // Auto-rotate pet thought bubble every 12 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setThoughtSeed(prev => prev + 1);
+    }, 12000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Live theme preview effect
   useEffect(() => {
@@ -159,6 +171,28 @@ export const VirtualPetView: React.FC<Props> = ({
       setPreviewThemeId(themeId);
       const targetTheme = COSMETIC_THEMES.find(t => t.id === themeId);
       showTemporaryFeedback(`👁️ Live-Vorschau für "${targetTheme?.name || themeId}" aktiv!`);
+    }
+  };
+
+  const handleTogglePreviewAccessory = (acc: PetAccessory) => {
+    soundEffects.playClick();
+    if (previewAccessory?.id === acc.id) {
+      setPreviewAccessory(null);
+      showTemporaryFeedback('Accessoire-Vorschau beendet.');
+    } else {
+      setPreviewAccessory(acc);
+      showTemporaryFeedback(`👁️ Live-Vorschau: "${acc.name}" auf ${pet.name} anprobiert!`);
+    }
+  };
+
+  const handleTogglePreviewFrame = (frame: CosmeticItem) => {
+    soundEffects.playClick();
+    if (previewFrame?.id === frame.id) {
+      setPreviewFrame(null);
+      showTemporaryFeedback('Rahmen-Vorschau beendet.');
+    } else {
+      setPreviewFrame(frame);
+      showTemporaryFeedback(`👁️ Live-Vorschau: Rahmen "${frame.name}" anprobiert!`);
     }
   };
 
@@ -426,15 +460,9 @@ export const VirtualPetView: React.FC<Props> = ({
     });
   };
 
-  // Thought Bubble
+  // Dynamic Thought Bubble
   const getThoughtBubble = () => {
-    if (pet.isSleeping) {
-      return `💤 Zzz... ${pet.name} träumt friedlich von perfekten Noten und leckeren Snacks.`;
-    }
-    if (pet.hunger < 35) return `🍕 Knurr! Ich habe ein bisschen Hunger! Ein Snack wäre herrlich.`;
-    if (pet.happiness < 40) return `🥺 Ein paar Streicheleinheiten würden mir jetzt guttun!`;
-    if (pet.happiness > 80) return `🌟 ${pet.name} fühlt sich fantastisch! Bereit für die IHK-Prüfung!`;
-    return `🐾 Hallo! Lass uns gemeinsam ein paar Fragen meistern!`;
+    return getDynamicPetThought(pet, xp, thoughtSeed);
   };
 
   const totalFoodInInventory = Object.values(pet.inventory.food).reduce((a, b) => a + b, 0);
@@ -692,12 +720,17 @@ export const VirtualPetView: React.FC<Props> = ({
           </div>
         )}
 
-        {/* Thought Bubble */}
+        {/* Dynamic Auto-Rotating Thought Bubble */}
         <div className="flex justify-center mb-3">
-          <div className="relative bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs max-w-md text-center">
-            {getThoughtBubble()}
-            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-100 dark:bg-slate-800 border-r border-b border-slate-200 dark:border-slate-700 rotate-45" />
-          </div>
+          <button
+            type="button"
+            onClick={() => setThoughtSeed(prev => prev + 1)}
+            className="relative bg-slate-100 dark:bg-slate-800 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 text-slate-800 dark:text-slate-200 text-xs font-semibold px-4.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs max-w-md text-center transition-all cursor-pointer active:scale-98 group"
+            title="Nächster Gedanke"
+          >
+            <span className="leading-relaxed">{getThoughtBubble()}</span>
+            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-100 dark:bg-slate-800 group-hover:bg-slate-200/80 dark:group-hover:bg-slate-700/80 border-r border-b border-slate-200 dark:border-slate-700 rotate-45 transition-colors" />
+          </button>
         </div>
 
         {/* Temporary Feedback Toast */}
@@ -715,7 +748,19 @@ export const VirtualPetView: React.FC<Props> = ({
               <span>"{soundConfig.soundWord}"</span>
             </div>
           )}
-          <PetAvatar pet={pet} isEating={isEating} isPetted={isPetted} size="lg" />
+          <PetAvatar
+            pet={pet}
+            isEating={isEating}
+            isPetted={isPetted}
+            size="lg"
+            previewOverride={{
+              equipped: {
+                ...(equippedCosmetics?.frame ? { frame: equippedCosmetics.frame } : {}),
+                ...(previewAccessory ? { [previewAccessory.category]: previewAccessory.id } : {}),
+                ...(previewFrame ? { frame: previewFrame.id } : {}),
+              },
+            }}
+          />
 
           {/* Interactive Care Action Buttons */}
           <div className="flex flex-wrap items-center justify-center gap-2.5 mt-6">
@@ -1066,20 +1111,39 @@ export const VirtualPetView: React.FC<Props> = ({
               {PET_ACCESSORIES.map(acc => {
                 const isOwned = pet.inventory.accessories.includes(acc.id);
                 const isEquipped = pet.equipped[acc.category] === acc.id;
+                const isPreviewActive = previewAccessory?.id === acc.id;
                 const xpCost = acc.xpPrice || Math.round(acc.price * 0.8);
                 const canAffordXp = xp >= xpCost;
 
                 return (
                   <div
                     key={acc.id}
-                    className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 flex flex-col justify-between space-y-3"
+                    className={`p-4 rounded-2xl border transition-all flex flex-col justify-between space-y-3 ${
+                      isPreviewActive
+                        ? 'border-amber-400 bg-amber-500/10 dark:bg-amber-950/30 ring-2 ring-amber-400/50'
+                        : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40'
+                    }`}
                   >
                     <div>
                       <div className="flex items-center justify-between">
                         <span className="text-3xl">{acc.icon}</span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                          {acc.category}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleTogglePreviewAccessory(acc)}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition-all flex items-center gap-1 cursor-pointer shadow-2xs ${
+                              isPreviewActive
+                                ? 'bg-amber-500 text-slate-950 ring-2 ring-amber-300'
+                                : 'bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 border border-indigo-200/80 dark:border-indigo-800/80'
+                            }`}
+                            title="Accessoire live anprobieren"
+                          >
+                            <Eye className="w-3 h-3" />
+                            <span>{isPreviewActive ? 'Anprobiert' : 'Anprobieren 👁️'}</span>
+                          </button>
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                            {acc.category}
+                          </span>
+                        </div>
                       </div>
                       <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-2">
                         {acc.name}
@@ -1092,7 +1156,10 @@ export const VirtualPetView: React.FC<Props> = ({
                     <div className="pt-2 border-t border-slate-200 dark:border-slate-700/60">
                       {isOwned ? (
                         <button
-                          onClick={() => handleToggleAccessory(acc)}
+                          onClick={() => {
+                            handleToggleAccessory(acc);
+                            setPreviewAccessory(null);
+                          }}
                           className={`w-full py-1.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                             isEquipped
                               ? 'bg-emerald-600 text-white hover:bg-emerald-700'
@@ -1104,7 +1171,10 @@ export const VirtualPetView: React.FC<Props> = ({
                         </button>
                       ) : (
                         <button
-                          onClick={() => handleBuyAccessory(acc)}
+                          onClick={() => {
+                            handleBuyAccessory(acc);
+                            setPreviewAccessory(null);
+                          }}
                           disabled={!canAffordXp}
                           className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs ${
                             canAffordXp
@@ -1344,19 +1414,38 @@ export const VirtualPetView: React.FC<Props> = ({
               {COSMETIC_FRAMES.map(item => {
                 const isOwned = unlockedCosmetics.includes(item.id);
                 const isEquipped = pet.equipped.frame === item.id;
+                const isPreviewActive = previewFrame?.id === item.id;
                 const canAffordXp = xp >= item.priceXp;
 
                 return (
                   <div
                     key={item.id}
-                    className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 flex flex-col justify-between space-y-3"
+                    className={`p-4 rounded-2xl border transition-all flex flex-col justify-between space-y-3 ${
+                      isPreviewActive
+                        ? 'border-amber-400 bg-amber-500/10 dark:bg-amber-950/30 ring-2 ring-amber-400/50'
+                        : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40'
+                    }`}
                   >
                     <div>
                       <div className="flex items-center justify-between">
                         <span className="text-3xl">{item.icon}</span>
-                        <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300">
-                          {item.tier}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleTogglePreviewFrame(item)}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition-all flex items-center gap-1 cursor-pointer shadow-2xs ${
+                              isPreviewActive
+                                ? 'bg-amber-500 text-slate-950 ring-2 ring-amber-300'
+                                : 'bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 border border-indigo-200/80 dark:border-indigo-800/80'
+                            }`}
+                            title="Rahmen live anprobieren"
+                          >
+                            <Eye className="w-3 h-3" />
+                            <span>{isPreviewActive ? 'Anprobiert' : 'Anprobieren 👁️'}</span>
+                          </button>
+                          <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300">
+                            {item.tier}
+                          </span>
+                        </div>
                       </div>
                       <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-2">
                         {item.name}
@@ -1369,7 +1458,10 @@ export const VirtualPetView: React.FC<Props> = ({
                     <div className="pt-2 border-t border-slate-200 dark:border-slate-700/60">
                       {isOwned ? (
                         <button
-                          onClick={() => handleEquipCosmetic(item)}
+                          onClick={() => {
+                            handleEquipCosmetic(item);
+                            setPreviewFrame(null);
+                          }}
                           className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs ${
                             isEquipped
                               ? 'bg-emerald-600 text-white'
@@ -1381,7 +1473,10 @@ export const VirtualPetView: React.FC<Props> = ({
                         </button>
                       ) : (
                         <button
-                          onClick={() => handleBuyCosmetic(item)}
+                          onClick={() => {
+                            handleBuyCosmetic(item);
+                            setPreviewFrame(null);
+                          }}
                           disabled={!canAffordXp}
                           className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs ${
                             canAffordXp
@@ -1440,32 +1535,63 @@ export const VirtualPetView: React.FC<Props> = ({
                   Du besitzt noch keine Tier-Accessoires. Besuche den Belohnungs-Shop!
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {ownedShopAccessories.map(acc => {
                     const isEquipped = pet.equipped[acc.category] === acc.id;
+                    const isPreviewActive = previewAccessory?.id === acc.id;
                     return (
-                      <button
+                      <div
                         key={acc.id}
-                        onClick={() => handleToggleAccessory(acc)}
-                        className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
-                          isEquipped
+                        className={`p-3.5 rounded-2xl border text-left transition-all flex items-center justify-between ${
+                          isPreviewActive
+                            ? 'border-amber-400 bg-amber-500/10 dark:bg-amber-950/30 ring-2 ring-amber-400/50'
+                            : isEquipped
                             ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-500 ring-2 ring-indigo-500/30'
-                            : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-indigo-300'
+                            : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'
                         }`}
                       >
-                        <div className="flex items-center gap-2.5">
-                          <span className="text-2xl">{acc.icon}</span>
-                          <div>
-                            <div className="text-xs font-bold text-slate-900 dark:text-white">
+                        <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                          <span className="text-2xl shrink-0">{acc.icon}</span>
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
                               {acc.name}
                             </div>
-                            <div className="text-[10px] text-slate-500 dark:text-slate-400 capitalize">
+                            <div className="text-[10px] text-slate-500 dark:text-slate-400 capitalize truncate">
                               {acc.category}
                             </div>
                           </div>
                         </div>
-                        {isEquipped && <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
-                      </button>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            onClick={() => handleTogglePreviewAccessory(acc)}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                              isPreviewActive
+                                ? 'bg-amber-500 text-slate-950 ring-2 ring-amber-300 font-extrabold'
+                                : 'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100'
+                            }`}
+                            title="Accessoire live anprobieren"
+                          >
+                            <Eye className="w-3 h-3" />
+                            <span>{isPreviewActive ? 'Anprobiert' : 'Anprobieren'}</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              handleToggleAccessory(acc);
+                              setPreviewAccessory(null);
+                            }}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                              isEquipped
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                            }`}
+                          >
+                            {isEquipped ? <Check className="w-3.5 h-3.5" /> : null}
+                            <span>{isEquipped ? 'Aktiv' : 'Anziehen'}</span>
+                          </button>
+                        </div>
+                      </div>
                     );
                   })}
                 </div>
@@ -1598,27 +1724,58 @@ export const VirtualPetView: React.FC<Props> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {COSMETIC_FRAMES.filter(f => unlockedCosmetics.includes(f.id)).map(item => {
                 const isEquipped = pet.equipped.frame === item.id;
+                const isPreviewActive = previewFrame?.id === item.id;
                 return (
-                  <button
+                  <div
                     key={item.id}
-                    onClick={() => handleEquipCosmetic(item)}
-                    className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
-                      isEquipped
+                    className={`p-3.5 rounded-2xl border text-left transition-all flex items-center justify-between ${
+                      isPreviewActive
+                        ? 'border-amber-400 bg-amber-500/10 dark:bg-amber-950/30 ring-2 ring-amber-400/50'
+                        : isEquipped
                         ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-500 ring-2 ring-indigo-500/30'
                         : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-2xl">{item.icon}</span>
-                      <div>
-                        <div className="text-xs font-bold text-slate-900 dark:text-white">
+                    <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                      <span className="text-2xl shrink-0">{item.icon}</span>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
                           {item.name}
                         </div>
-                        <div className="text-[10px] text-slate-500">{item.description}</div>
+                        <div className="text-[10px] text-slate-500 truncate">{item.description}</div>
                       </div>
                     </div>
-                    {isEquipped && <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
-                  </button>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        onClick={() => handleTogglePreviewFrame(item)}
+                        className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                          isPreviewActive
+                            ? 'bg-amber-500 text-slate-950 ring-2 ring-amber-300 font-extrabold'
+                            : 'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100'
+                        }`}
+                        title="Rahmen live anprobieren"
+                      >
+                        <Eye className="w-3 h-3" />
+                        <span>{isPreviewActive ? 'Anprobiert' : 'Anprobieren'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          handleEquipCosmetic(item);
+                          setPreviewFrame(null);
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                          isEquipped
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                        }`}
+                      >
+                        {isEquipped ? <Check className="w-3.5 h-3.5" /> : null}
+                        <span>{isEquipped ? 'Aktiv' : 'Anlegen'}</span>
+                      </button>
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -1626,66 +1783,114 @@ export const VirtualPetView: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Floating Theme Live Preview Control Bar */}
-      {previewThemeId && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-lg w-[92%] bg-slate-900/95 text-white border-2 border-indigo-500 rounded-2xl shadow-2xl p-3.5 backdrop-blur-md animate-in slide-in-from-bottom-5 duration-200">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span className="text-2xl shrink-0">
-                {COSMETIC_THEMES.find(t => t.id === previewThemeId)?.icon || '🎨'}
-              </span>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5 text-xs font-black text-white">
-                  <Eye className="w-3.5 h-3.5 text-amber-400 shrink-0 animate-pulse" />
-                  <span className="truncate">
-                    Vorschau: {COSMETIC_THEMES.find(t => t.id === previewThemeId)?.name}
-                  </span>
+      {/* Floating Live Preview Control Bar (Themes, Accessories & Animated Frames) */}
+      {(() => {
+        const activePreviewData = previewThemeId
+          ? {
+              type: 'theme' as const,
+              name: COSMETIC_THEMES.find(t => t.id === previewThemeId)?.name || 'Design-Thema',
+              icon: COSMETIC_THEMES.find(t => t.id === previewThemeId)?.icon || '🎨',
+              priceXp: COSMETIC_THEMES.find(t => t.id === previewThemeId)?.priceXp || 0,
+              isOwned: unlockedCosmetics.includes(previewThemeId),
+              onApply: () => {
+                const item = COSMETIC_THEMES.find(t => t.id === previewThemeId);
+                if (item) handleEquipCosmetic(item);
+                setPreviewThemeId(null);
+              },
+              onBuy: () => {
+                const item = COSMETIC_THEMES.find(t => t.id === previewThemeId);
+                if (item) handleBuyCosmetic(item);
+                setPreviewThemeId(null);
+              },
+            }
+          : previewAccessory
+          ? {
+              type: 'accessory' as const,
+              name: previewAccessory.name,
+              icon: previewAccessory.icon,
+              priceXp: previewAccessory.xpPrice || Math.round(previewAccessory.price * 0.8),
+              isOwned: pet.inventory.accessories.includes(previewAccessory.id),
+              onApply: () => {
+                handleToggleAccessory(previewAccessory);
+                setPreviewAccessory(null);
+              },
+              onBuy: () => {
+                handleBuyAccessory(previewAccessory);
+                setPreviewAccessory(null);
+              },
+            }
+          : previewFrame
+          ? {
+              type: 'frame' as const,
+              name: previewFrame.name,
+              icon: previewFrame.icon,
+              priceXp: previewFrame.priceXp,
+              isOwned: unlockedCosmetics.includes(previewFrame.id),
+              onApply: () => {
+                handleEquipCosmetic(previewFrame);
+                setPreviewFrame(null);
+              },
+              onBuy: () => {
+                handleBuyCosmetic(previewFrame);
+                setPreviewFrame(null);
+              },
+            }
+          : null;
+
+        if (!activePreviewData) return null;
+
+        return (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-lg w-[92%] bg-slate-900/95 text-white border-2 border-indigo-500 rounded-2xl shadow-2xl p-3.5 backdrop-blur-md animate-in slide-in-from-bottom-5 duration-200">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="text-2xl shrink-0">{activePreviewData.icon}</span>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 text-xs font-black text-white">
+                    <Eye className="w-3.5 h-3.5 text-amber-400 shrink-0 animate-pulse" />
+                    <span className="truncate">Live-Anprobe: {activePreviewData.name}</span>
+                  </div>
+                  <p className="text-[10px] text-slate-300 truncate mt-0.5">
+                    {activePreviewData.isOwned
+                      ? 'Freigeschaltet – Klicke Anwenden zum Tragen'
+                      : `Freischalten für ${activePreviewData.priceXp} EXP`}
+                  </p>
                 </div>
-                <p className="text-[10px] text-slate-300 truncate mt-0.5">
-                  {unlockedCosmetics.includes(previewThemeId)
-                    ? 'Freigeschaltet – Klicke Anwenden zum Speichern'
-                    : `Freischalten für ${COSMETIC_THEMES.find(t => t.id === previewThemeId)?.priceXp || 0} EXP`}
-                </p>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                {activePreviewData.isOwned ? (
+                  <button
+                    onClick={activePreviewData.onApply}
+                    className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all cursor-pointer shadow-xs"
+                  >
+                    Anwenden
+                  </button>
+                ) : (
+                  <button
+                    onClick={activePreviewData.onBuy}
+                    disabled={xp < activePreviewData.priceXp}
+                    className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                  >
+                    Kaufen
+                  </button>
+                )}
+
+                <button
+                  onClick={() => {
+                    setPreviewThemeId(null);
+                    setPreviewAccessory(null);
+                    setPreviewFrame(null);
+                  }}
+                  className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
+                  title="Vorschau beenden"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
             </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              {unlockedCosmetics.includes(previewThemeId) ? (
-                <button
-                  onClick={() => {
-                    const item = COSMETIC_THEMES.find(t => t.id === previewThemeId);
-                    if (item) handleEquipCosmetic(item);
-                    setPreviewThemeId(null);
-                  }}
-                  className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all cursor-pointer shadow-xs"
-                >
-                  Anwenden
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    const item = COSMETIC_THEMES.find(t => t.id === previewThemeId);
-                    if (item) handleBuyCosmetic(item);
-                    setPreviewThemeId(null);
-                  }}
-                  disabled={xp < (COSMETIC_THEMES.find(t => t.id === previewThemeId)?.priceXp || 0)}
-                  className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-all cursor-pointer shadow-xs disabled:opacity-50"
-                >
-                  Kaufen
-                </button>
-              )}
-
-              <button
-                onClick={() => setPreviewThemeId(null)}
-                className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
-                title="Vorschau beenden"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };

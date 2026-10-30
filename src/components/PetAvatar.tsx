@@ -6,10 +6,24 @@ interface Props {
   isEating?: boolean;
   isPetted?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  previewOverride?: {
+    equipped?: Partial<PetState['equipped']>;
+  };
 }
 
-export const PetAvatar: React.FC<Props> = ({ pet, isEating, isPetted, size = 'lg' }) => {
-  const { species, happiness, hunger, equipped } = pet;
+export const PetAvatar: React.FC<Props> = ({
+  pet,
+  isEating,
+  isPetted,
+  size = 'lg',
+  previewOverride,
+}) => {
+  const { species, happiness, hunger } = pet;
+  const equipped = {
+    ...pet.equipped,
+    ...(previewOverride?.equipped || {}),
+  };
+
   const isEcstatic = happiness >= 70;
   const isHungry = hunger <= 30;
 
@@ -23,31 +37,29 @@ export const PetAvatar: React.FC<Props> = ({ pet, isEating, isPetted, size = 'lg
 
   return (
     <div className={`relative ${sizeClasses} mx-auto flex items-center justify-center select-none transition-transform duration-300 ${
-      isEating ? 'animate-bounce scale-105' : isPetted ? 'scale-110' : isSleeping ? 'scale-95 opacity-90' : 'hover:scale-105'
+      isEating ? 'animate-bounce scale-105' : isPetted ? 'scale-110' : isSleeping ? 'scale-95 opacity-90' : 'animate-pet-breathe hover:scale-105'
     }`}>
       {/* Equipped Animated Pet Frame */}
       {equipped?.frame === 'frame-bronze' && (
-        <div className="absolute -inset-2 rounded-full border-2 border-amber-500/80 shadow-[0_0_15px_rgba(217,119,6,0.35)] pointer-events-none" />
+        <div className="absolute -inset-2 rounded-full border-2 border-amber-500/80 shadow-[0_0_15px_rgba(217,119,6,0.35)] pointer-events-none animate-pulse" />
       )}
       {equipped?.frame === 'frame-neon' && (
-        <div className="absolute -inset-2 rounded-full border-2 border-cyan-400 ring-2 ring-fuchsia-500 shadow-[0_0_20px_rgba(6,182,212,0.6)] animate-pulse pointer-events-none" />
+        <div className="absolute -inset-2.5 rounded-full border-2 border-cyan-400 ring-2 ring-fuchsia-500 shadow-[0_0_20px_rgba(6,182,212,0.8)] animate-pulse pointer-events-none" />
       )}
       {equipped?.frame === 'frame-stardust' && (
-        <div className="absolute -inset-2 rounded-full border-2 border-purple-400 ring-2 ring-indigo-400/80 shadow-[0_0_25px_rgba(168,85,247,0.5)] pointer-events-none">
-          <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-xs">✨</span>
-          <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs">⭐</span>
-          <span className="absolute top-1/2 -left-2 -translate-y-1/2 text-xs">✦</span>
-          <span className="absolute top-1/2 -right-2 -translate-y-1/2 text-xs">✧</span>
+        <div className="absolute -inset-2.5 rounded-full border-2 border-purple-400 ring-2 ring-indigo-400/80 shadow-[0_0_25px_rgba(168,85,247,0.6)] animate-pulse pointer-events-none">
+          <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-xs animate-spin-slow">✨</span>
+          <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs animate-bounce">⭐</span>
+          <span className="absolute top-1/2 -left-2 -translate-y-1/2 text-xs animate-pulse">✦</span>
+          <span className="absolute top-1/2 -right-2 -translate-y-1/2 text-xs animate-pulse">✧</span>
         </div>
       )}
       {equipped?.frame === 'frame-rainbow' && (
-        <div className="absolute -inset-2 rounded-full p-1 bg-gradient-to-tr from-rose-500 via-amber-400 via-emerald-400 to-indigo-500 pointer-events-none shadow-[0_0_25px_rgba(236,72,153,0.4)] opacity-85">
-          <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 opacity-20" />
-        </div>
+        <div className="absolute -inset-3 rounded-full border-[3.5px] border-amber-400 ring-2 ring-emerald-400 ring-offset-2 ring-offset-rose-500 shadow-[0_0_25px_rgba(236,72,153,0.7)] animate-spin-rainbow pointer-events-none" />
       )}
       {equipped?.frame === 'frame-divine' && (
-        <div className="absolute -inset-3 rounded-full border-4 border-amber-300 ring-4 ring-yellow-400 shadow-[0_0_35px_rgba(250,204,21,0.8)] animate-pulse pointer-events-none">
-          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-sm select-none">👑</div>
+        <div className="absolute -inset-3.5 rounded-full border-4 border-amber-300 ring-4 ring-yellow-400 shadow-[0_0_35px_rgba(250,204,21,0.9)] animate-pulse pointer-events-none">
+          <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-base select-none animate-bounce">👑</div>
         </div>
       )}
 
@@ -127,17 +139,14 @@ export const PetAvatar: React.FC<Props> = ({ pet, isEating, isPetted, size = 'lg
                 <path d="M78 88 Q86 94 94 88" />
                 <path d="M106 88 Q114 94 122 88" />
               </g>
-            ) : isEcstatic ? (
-              <g stroke="#1E293B" strokeWidth="3" fill="none" strokeLinecap="round">
-                <path d="M80 88 Q88 80 94 88" />
-                <path d="M106 88 Q112 80 120 88" />
-              </g>
             ) : (
-              <g fill="#1E293B">
-                <circle cx="85" cy="85" r="5" />
-                <circle cx="115" cy="85" r="5" />
-                <circle cx="87" cy="83" r="1.5" fill="#FFFFFF" />
-                <circle cx="117" cy="83" r="1.5" fill="#FFFFFF" />
+              <g className="animate-pet-blink" style={{ transformOrigin: '100px 85px' }}>
+                <ellipse cx="85" cy="85" rx="6.5" ry="7.5" fill="#0F172A" />
+                <ellipse cx="115" cy="85" rx="6.5" ry="7.5" fill="#0F172A" />
+                <circle cx="83" cy="82.5" r="2.8" fill="#FFFFFF" />
+                <circle cx="113" cy="82.5" r="2.8" fill="#FFFFFF" />
+                <circle cx="87.5" cy="87.5" r="1.3" fill="#FFFFFF" />
+                <circle cx="117.5" cy="87.5" r="1.3" fill="#FFFFFF" />
               </g>
             )}
 
@@ -183,19 +192,16 @@ export const PetAvatar: React.FC<Props> = ({ pet, isEating, isPetted, size = 'lg
                 <path d="M78 88 Q86 94 92 88" />
                 <path d="M108 88 Q114 94 122 88" />
               </g>
-            ) : isEcstatic ? (
-              <g stroke="#1E293B" strokeWidth="3" fill="none" strokeLinecap="round">
-                <path d="M78 88 Q86 80 92 88" />
-                <path d="M108 88 Q114 80 122 88" />
-              </g>
             ) : (
-              <g fill="#1E293B">
-                <ellipse cx="85" cy="86" rx="5" ry="6" fill="#059669" />
-                <ellipse cx="115" cy="86" rx="5" ry="6" fill="#059669" />
-                <circle cx="85" cy="86" r="3.5" fill="#0F172A" />
-                <circle cx="115" cy="86" r="3.5" fill="#0F172A" />
-                <circle cx="86" cy="84" r="1.5" fill="#FFFFFF" />
-                <circle cx="116" cy="84" r="1.5" fill="#FFFFFF" />
+              <g className="animate-pet-blink" style={{ transformOrigin: '100px 86px' }}>
+                <ellipse cx="85" cy="86" rx="7" ry="8" fill="#10B981" />
+                <ellipse cx="115" cy="86" rx="7" ry="8" fill="#10B981" />
+                <ellipse cx="85" cy="86" rx="4.5" ry="5.5" fill="#0F172A" />
+                <ellipse cx="115" cy="86" rx="4.5" ry="5.5" fill="#0F172A" />
+                <circle cx="83" cy="83" r="2.8" fill="#FFFFFF" />
+                <circle cx="113" cy="83" r="2.8" fill="#FFFFFF" />
+                <circle cx="87" cy="88" r="1.2" fill="#FFFFFF" />
+                <circle cx="117" cy="88" r="1.2" fill="#FFFFFF" />
               </g>
             )}
 
@@ -237,17 +243,14 @@ export const PetAvatar: React.FC<Props> = ({ pet, isEating, isPetted, size = 'lg
                 <path d="M78 82 Q84 88 90 82" />
                 <path d="M110 82 Q116 88 122 82" />
               </g>
-            ) : isEcstatic ? (
-              <g stroke="#0F172A" strokeWidth="3" fill="none" strokeLinecap="round">
-                <path d="M80 82 Q86 76 92 82" />
-                <path d="M108 82 Q114 76 120 82" />
-              </g>
             ) : (
-              <g fill="#0F172A">
-                <circle cx="84" cy="80" r="4.5" />
-                <circle cx="116" cy="80" r="4.5" />
-                <circle cx="86" cy="78" r="1.5" fill="#FFFFFF" />
-                <circle cx="118" cy="78" r="1.5" fill="#FFFFFF" />
+              <g className="animate-pet-blink" style={{ transformOrigin: '100px 80px' }}>
+                <circle cx="84" cy="80" r="6.5" fill="#0F172A" />
+                <circle cx="116" cy="80" r="6.5" fill="#0F172A" />
+                <circle cx="82" cy="77.5" r="2.8" fill="#FFFFFF" />
+                <circle cx="114" cy="77.5" r="2.8" fill="#FFFFFF" />
+                <circle cx="86" cy="82.5" r="1.2" fill="#FFFFFF" />
+                <circle cx="118" cy="82.5" r="1.2" fill="#FFFFFF" />
               </g>
             )}
 
@@ -298,17 +301,14 @@ export const PetAvatar: React.FC<Props> = ({ pet, isEating, isPetted, size = 'lg
                 <path d="M74 88 Q82 94 88 88" />
                 <path d="M112 88 Q118 94 126 88" />
               </g>
-            ) : isEcstatic ? (
-              <g stroke="#831843" strokeWidth="3" fill="none" strokeLinecap="round">
-                <path d="M74 88 Q82 82 88 88" />
-                <path d="M112 88 Q118 82 126 88" />
-              </g>
             ) : (
-              <g fill="#831843">
-                <circle cx="78" cy="86" r="5" />
-                <circle cx="122" cy="86" r="5" />
-                <circle cx="80" cy="84" r="1.8" fill="#FFFFFF" />
-                <circle cx="124" cy="84" r="1.8" fill="#FFFFFF" />
+              <g className="animate-pet-blink" style={{ transformOrigin: '100px 86px' }}>
+                <ellipse cx="78" cy="86" rx="6.5" ry="7" fill="#831843" />
+                <ellipse cx="122" cy="86" rx="6.5" ry="7" fill="#831843" />
+                <circle cx="76" cy="83.5" r="2.8" fill="#FFFFFF" />
+                <circle cx="120" cy="83.5" r="2.8" fill="#FFFFFF" />
+                <circle cx="80" cy="88" r="1.3" fill="#FFFFFF" />
+                <circle cx="124" cy="88" r="1.3" fill="#FFFFFF" />
               </g>
             )}
 

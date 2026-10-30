@@ -99,3 +99,44 @@ html.theme-monochrome button.bg-indigo-600:hover {
   background-color: #1e293b !important;
 }
 
+/* Animated Pet Frames Keyframes */
+@keyframes rainbowGlow {
+  0% { filter: hue-rotate(0deg); transform: scale(1); }
+  50% { filter: hue-rotate(180deg); transform: scale(1.02); }
+  100% { filter: hue-rotate(360deg); transform: scale(1); }
+}
+
+.animate-spin-rainbow {
+  animation: rainbowGlow 4s linear infinite;
+}
+
+/* Idle Pet Breathing Animation */
+@keyframes petBreathe {
+  0%, 100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(-3px) scaleY(1.02);
+  }
+}
+
+.animate-pet-breathe {
+  animation: petBreathe 3.6s ease-in-out infinite;
+}
+
+/* Pet Eye Blinking Animation */
+@keyframes petBlink {
+  0%, 94%, 98%, 100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.1);
+  }
+}
+
+.animate-pet-blink {
+  transform-origin: center;
+  animation: petBlink 4.2s ease-in-out infinite;
+}
+
+
