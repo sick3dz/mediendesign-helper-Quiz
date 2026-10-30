@@ -1,6 +1,6 @@
 {
-  "summary":  "Implementation plan for expanding the Data Sandbox with exam-relevant snippets and a dedicated 'Exam Check Mode'. This includes adding a quick-insert toolbar for Markdown tables, nested JSON, SVG/XML attributes, and complex IHK datasets, alongside a visual analysis layer that highlights common pitfalls and IHK-specific rules.",
-  "updatedAt":  "2026-10-30T16:32:28.188637015Z",
+  "summary":  "Add granular \"Learning Blocks\" to the Data Sandbox that insert at cursor position (instead of replacing), specifically teaching JSON types (Boolean/Null), XML features (Comments/CDATA), and Markdown advanced syntax (Footnotes).",
+  "updatedAt":  "2026-10-30T17:19:53.850393343Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

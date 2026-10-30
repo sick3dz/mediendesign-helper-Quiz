@@ -1,25 +1,25 @@
-# Implementation Plan - Data Sandbox Expansion & Exam Check Mode
+# Implementation Plan - Granular Learning Blocks
 
-Expanding the `DataSandboxView` to include advanced IHK-relevant data structures and a specialized "Prüfungs-Check-Modus" for highlighting common mistakes and critical concepts.
+Add specialized "Learning Blocks" to the Data Sandbox that allow users to insert individual structural elements. This helps users understand how each specific element functions within the data format.
 
-## 1. Quick-Insert Toolbar
-- Add a new UI section above the editor with categories:
-    - **JSON**: "Verschachtelte Liste (SaaS)", "Event-Daten (IHK Style)".
-    - **XML/SVG**: "SVG Icon (Pfad & Kreis)", "Produkt mit Attributen".
-    - **Markdown**: "Prüfungs-Tabelle", "Bild & Referenz".
-- Clicking these will replace the current editor content with the relevant snippet.
+## 1. Switch Insertion Logic
+- **Change**: Move from "Full Replace" back to "Insert at Cursor" for the new learning blocks.
+- **Implementation**: Update `insertSnippet` to handle `selectionStart` and `selectionEnd` of the textarea to splice in the new code.
 
-## 2. Prüfungs-Check-Modus (Toggle)
-- Add a high-visibility toggle switch in the header.
-- **State Logic**: When active, the visualizers will change their rendering mode to include:
-    - **Red Warnings**: For common syntax pitfalls (e.g., missing root in XML, single quotes in JSON).
-    - **Indigo IHK Tips**: Highlighting specific rules (e.g., "UTF-8 Necessity", "Attribute vs. Element").
+## 2. New Learning Blocks (IHK Focus)
+- **JSON**:
+  - `Boolean & Null`: `"active": true, "deleted": null`
+  - `Simple Array`: `["Item 1", "Item 2"]`
+  - `Nested Object`: `{"meta": {"id": 1}}`
+- **XML**:
+  - `Attribute Tag`: `<item id="1" status="new">Content</item>`
+  - `Comment`: `<!-- IHK: Hier steht ein Kommentar -->`
+  - `CDATA Section`: `<![CDATA[ <html-code> hier erlaubt ]]>`
+- **Markdown**:
+  - `Footnote`: `Der Text[^1]\n\n[^1]: Die Erklärung.`
+  - `Task List`: `- [x] Erledigt\n- [ ] Offen`
+  - `Nested List`: `- Ebene 1\n  - Ebene 2`
 
-## 3. Visualizer Enhancements
-- **JsonVisualizer**: Add logic to detect "Single Quotes" or "Missing Key Quotes" and display an "IHK Fallstrick" warning.
-- **XmlVisualizer**: Enhance regex to detect SVG elements and explain their role as XML-based vector data. Add "Root Element" check.
-- **MarkdownVisualizer**: Add specific handlers for `|` (tables) and `![alt](url)` (images) to explain accessibility (alt-text) which is a key IHK topic.
-
-## 4. Content & Data
-- Update `DataSandboxView.tsx` with a new `SNIPPETS` constant containing the advanced examples.
-- Refine the explanation texts to use even more "IHK-speak" (e.g., "Wohlgeformtheit", "Semantische Auszeichnung").
+## 3. UI Updates
+- **Visuals**: Use different styling (e.g., subtle borders or icons) to distinguish "Full Examples" from "Learning Blocks".
+- **Tooltips**: Update tooltips to explain the *technical* purpose of each block (e.g., "Boolean represents True/False").
