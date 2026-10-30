@@ -20,7 +20,7 @@ const DEFAULT_SETTINGS: UserSettings = {
 
 const DEFAULT_STATS: UserStats = {
   xp: 150, // Starting EXP bonus so learners can try feeding or styling their pet immediately!
-  coins: 0,
+  coins: 50, // Welcome coins bonus
   level: 1,
   streakDays: 1,
   lastActiveDate: new Date().toISOString().split('T')[0],
@@ -31,6 +31,13 @@ const DEFAULT_STATS: UserStats = {
   maxCombo: 0,
   earnedBadges: ['welcome'],
   pet: DEFAULT_PET_STATE,
+  unlockedCosmetics: ['theme-default', 'sound-standard', 'title-novice', 'frame-none'],
+  equippedCosmetics: {
+    theme: 'theme-default',
+    soundpack: 'sound-standard',
+    title: 'title-novice',
+    frame: 'frame-none',
+  },
   examScores: [],
 };
 
@@ -148,6 +155,13 @@ export function loadUserStats(): UserStats {
       ...DEFAULT_STATS,
       ...parsed,
       pet: decayedPet,
+      unlockedCosmetics: Array.isArray(parsed.unlockedCosmetics) && parsed.unlockedCosmetics.length > 0
+        ? parsed.unlockedCosmetics
+        : DEFAULT_STATS.unlockedCosmetics,
+      equippedCosmetics: {
+        ...DEFAULT_STATS.equippedCosmetics,
+        ...(parsed.equippedCosmetics || {}),
+      },
     };
   } catch {
     return DEFAULT_STATS;

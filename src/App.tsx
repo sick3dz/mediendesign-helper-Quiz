@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { CHAPTERS } from './data/chaptersData';
-import { UserStats, Badge, PetSpecies, PetState } from './types/quiz';
+import { UserStats, Badge, PetSpecies, PetState, EquippedCosmetics } from './types/quiz';
 import {
   loadUserStats,
   saveUserStats,
@@ -60,6 +60,30 @@ export default function App() {
       document.body.classList.remove('dark');
     }
   }, [settings.darkMode]);
+
+  // Sync active cosmetic theme on <html>
+  useEffect(() => {
+    const theme = stats.equippedCosmetics?.theme || 'theme-default';
+    const allThemes = [
+      'theme-default',
+      'theme-emerald',
+      'theme-sunset',
+      'theme-nordic',
+      'theme-cyberpunk',
+      'theme-gold',
+      'theme-monochrome',
+    ];
+    document.documentElement.classList.remove(...allThemes);
+    if (theme !== 'theme-default') {
+      document.documentElement.classList.add(theme);
+    }
+  }, [stats.equippedCosmetics?.theme]);
+
+  // Sync active soundpack in soundEffects
+  useEffect(() => {
+    const soundpack = stats.equippedCosmetics?.soundpack || 'sound-standard';
+    soundEffects.setSoundpack(soundpack);
+  }, [stats.equippedCosmetics?.soundpack]);
 
   // Initialize sound mute state
   useEffect(() => {
@@ -320,6 +344,18 @@ export default function App() {
     });
   };
 
+  const handleUpdateCosmetics = (unlocked: string[], equipped: EquippedCosmetics) => {
+    setStats(prev => {
+      const nextStats: UserStats = {
+        ...prev,
+        unlockedCosmetics: unlocked,
+        equippedCosmetics: equipped,
+      };
+      saveUserStats(nextStats);
+      return nextStats;
+    });
+  };
+
   const handleAdoptPet = (species: PetSpecies, name: string) => {
     setStats(prev => {
       const updatedPet: PetState = {
@@ -486,6 +522,7 @@ export default function App() {
                 onUpdatePet={handleUpdatePet}
                 onCoinsChange={handleCoinsChange}
                 onXpChange={handleXpChange}
+                onUpdateCosmetics={handleUpdateCosmetics}
                 onOpenAdoptionModal={() => setIsAdoptionModalOpen(true)}
                 onGoToGames={() => setActiveTab('minigames')}
                 onBack={() => setActiveTab('chapters')}

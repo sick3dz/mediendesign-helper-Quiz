@@ -387,6 +387,7 @@ export const DEFAULT_PET_STATE: PetState = {
   timesFed: 0,
   timesPetted: 0,
   timesPlayed: 0,
+  isSleeping: false,
 };
 
 export function calculatePetDecay(pet: PetState): PetState {
@@ -407,17 +408,22 @@ export function calculatePetDecay(pet: PetState): PetState {
   let currentHunger = pet.hunger ?? 85;
   let currentHappiness = pet.happiness ?? 85;
 
-  // Gentle decay: Hunger drops ~3 points per hour (~72 points/day)
-  currentHunger = Math.max(15, currentHunger - elapsedHours * 3);
+  // Immortal Pet Design: Gentle decay with strict safe floors (minimum 30%).
+  // The pet NEVER starves, NEVER dies, and NEVER loses items or leaves the user.
+  currentHunger = Math.max(30, currentHunger - elapsedHours * 2.5);
 
-  if (currentHunger < 30) {
-    currentHappiness = Math.max(15, currentHappiness - elapsedHours * 2);
+  if (currentHunger < 40) {
+    currentHappiness = Math.max(30, currentHappiness - elapsedHours * 1.5);
   }
+
+  // If away for more than 5 hours or tired, the pet peacefully sleeps
+  const isSleeping = elapsedHours >= 5 || Boolean(pet.isSleeping && currentHunger <= 40);
 
   return {
     ...pet,
     hunger: Math.round(currentHunger),
     happiness: Math.round(currentHappiness),
+    isSleeping,
     lastCareTimestamp: now,
   };
 }

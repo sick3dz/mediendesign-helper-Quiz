@@ -81,6 +81,16 @@ export const ChapterListView: React.FC<Props> = ({
     };
   };
 
+  const calculateChapterTotalXp = (chapter: Chapter) => {
+    const moduleExp = chapter.modules.length * 60;
+    const questionsExp = chapter.modules.reduce((acc, m) => acc + (m.quizQuestions?.length || 0) * 20, 0);
+    return moduleExp + questionsExp;
+  };
+
+  const calculateModuleXp = (module: Chapter['modules'][0]) => {
+    return 60 + (module.quizQuestions?.length || 0) * 20;
+  };
+
   const activeChapterStats = getChapterCompletion(currentChapter);
   const totalCompletedModules = stats.completedModules.length;
   const totalAllModules = chapters.reduce((acc, c) => acc + c.modules.length, 0);
@@ -93,6 +103,7 @@ export const ChapterListView: React.FC<Props> = ({
           {chapters.map((chapter) => {
             const isSelected = chapter.id === currentChapter.id;
             const { completed, total, isFullyCompleted } = getChapterCompletion(chapter);
+            const chapterXpReward = calculateChapterTotalXp(chapter);
 
             return (
               <button
@@ -147,6 +158,18 @@ export const ChapterListView: React.FC<Props> = ({
                   >
                     {chapter.title}
                   </h3>
+
+                  {/* Chapter EXP Reward Tag */}
+                  <div className="flex items-center gap-1 mt-1 text-[9px] font-bold font-mono">
+                    <span
+                      className={`flex items-center gap-0.5 ${
+                        isSelected ? 'text-amber-200' : 'text-amber-600 dark:text-amber-400'
+                      }`}
+                    >
+                      <Sparkles className="w-2.5 h-2.5" />
+                      +{chapterXpReward} EXP
+                    </span>
+                  </div>
                 </div>
 
                 {/* Micro Progress Bar */}
@@ -190,7 +213,11 @@ export const ChapterListView: React.FC<Props> = ({
               </span>
             </div>
 
-            <div className="flex items-center gap-3 text-xs text-slate-700 dark:text-slate-200 font-semibold">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-slate-700 dark:text-slate-200 font-semibold">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/70 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 font-bold font-mono shadow-2xs">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                <span>+{calculateChapterTotalXp(currentChapter)} EXP zu verdienen</span>
+              </div>
               <span className="flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
                 ~{currentChapter.modules.reduce((acc, m) => acc + m.estimatedMinutes, 0)} Min
@@ -283,6 +310,10 @@ export const ChapterListView: React.FC<Props> = ({
                         <div className="flex items-center gap-2">
                           <span className="text-[10px] font-mono font-semibold text-slate-400">
                             Modul {mIndex + 1}
+                          </span>
+                          <span className="text-[10px] font-bold font-mono px-1.5 py-0.2 rounded-md bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 flex items-center gap-1">
+                            <Sparkles className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
+                            +{calculateModuleXp(module)} EXP
                           </span>
                           {isCompleted && (
                             <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-sm bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">

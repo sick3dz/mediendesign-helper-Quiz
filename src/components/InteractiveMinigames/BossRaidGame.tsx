@@ -141,20 +141,20 @@ export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-6">
+    <div className="bg-slate-950 text-white rounded-2xl border border-slate-800 p-5 sm:p-6 shadow-xl space-y-5" style={{ backgroundColor: '#020617', color: '#ffffff' }}>
       {/* Boss vs Player Battle Stage */}
-      <div className="p-5 rounded-2xl bg-slate-900 text-white space-y-4 shadow-inner">
+      <div className="p-5 rounded-2xl bg-slate-900 text-white space-y-4 shadow-inner border border-slate-800/80" style={{ backgroundColor: '#0f172a' }}>
         {/* Boss Bar */}
         <div>
-          <div className="flex items-center justify-between text-xs font-bold mb-1">
-            <span className="flex items-center gap-1.5 text-rose-400">
+          <div className="flex items-center justify-between text-xs font-bold mb-1.5">
+            <span className="flex items-center gap-1.5 text-rose-400 font-extrabold">
               <Swords className="w-4 h-4" /> Boss: Der IHK-Prüfungsgigant
             </span>
-            <span className="font-mono text-rose-300">{bossHp} / 100 HP</span>
+            <span className="font-mono text-rose-300 font-extrabold">{bossHp} / 100 HP</span>
           </div>
-          <div className="w-full bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-700">
+          <div className="w-full bg-slate-800 h-3.5 rounded-full overflow-hidden border border-slate-700">
             <div
-              className="h-full bg-gradient-to-r from-rose-600 to-amber-500 transition-all duration-500"
+              className="h-full bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 transition-all duration-500 rounded-full"
               style={{ width: `${bossHp}%` }}
             />
           </div>
@@ -162,34 +162,38 @@ export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
 
         {/* Action Feed Message */}
         {lastActionText && (
-          <div className="text-center text-xs font-bold text-amber-300 bg-slate-800/80 py-1.5 px-3 rounded-xl border border-slate-700 animate-pulse">
+          <div className="text-center text-xs font-bold text-amber-300 bg-slate-800/90 py-2 px-3 rounded-xl border border-slate-700 animate-pulse">
             {lastActionText}
           </div>
         )}
 
         {/* Player Bar */}
         <div>
-          <div className="flex items-center justify-between text-xs font-bold mb-1">
-            <span className="flex items-center gap-1.5 text-emerald-400">
+          <div className="flex items-center justify-between text-xs font-bold mb-1.5">
+            <span className="flex items-center gap-1.5 text-emerald-400 font-extrabold">
               <Heart className="w-4 h-4 fill-emerald-500" /> Deine Lebenspunkte (HP)
             </span>
-            <span className="font-mono text-emerald-300">{playerHp} / 100 HP</span>
+            <span className="font-mono text-emerald-300 font-extrabold">{playerHp} / 100 HP</span>
           </div>
-          <div className="w-full bg-slate-800 h-3 rounded-full overflow-hidden border border-slate-700">
+          <div className="w-full bg-slate-800 h-3.5 rounded-full overflow-hidden border border-slate-700">
             <div
-              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
+              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500 rounded-full"
               style={{ width: `${playerHp}%` }}
             />
           </div>
         </div>
       </div>
 
-      {/* Question Card */}
-      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-800">
-        <h3 className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-1">
-          Kampf-Frage #{currentIndex + 1}
+      {/* Question Card - Guaranteed High-Contrast Dark RPG Card */}
+      <div
+        className="p-5 rounded-2xl bg-slate-900 border-2 border-indigo-500/40 shadow-lg text-white"
+        style={{ backgroundColor: '#0f172a', color: '#ffffff' }}
+      >
+        <h3 className="text-xs font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-pulse inline-block" />
+          KAMPF-FRAGE #{currentIndex + 1}
         </h3>
-        <p className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed">
+        <p className="text-sm sm:text-base font-bold text-slate-100 leading-relaxed" style={{ color: '#f8fafc' }}>
           {currentQ.question}
         </p>
       </div>
@@ -198,16 +202,16 @@ export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
       <div className="grid grid-cols-1 gap-2.5">
         {currentQ.options.map(opt => {
           const isSelected = selectedOptionId === opt.id;
-          let btnStyle =
-            'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:border-indigo-400';
+          let btnClasses =
+            'bg-slate-900/90 hover:bg-slate-800 border-slate-700 text-slate-100 hover:text-white hover:border-indigo-400';
 
           if (isAnswered) {
             if (opt.isCorrect) {
-              btnStyle = 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 text-emerald-900 dark:text-emerald-200 font-bold';
+              btnClasses = 'bg-emerald-950/80 border-emerald-500 text-emerald-200 font-bold shadow-xs';
             } else if (isSelected && !opt.isCorrect) {
-              btnStyle = 'bg-rose-50 dark:bg-rose-950/60 border-rose-500 text-rose-900 dark:text-rose-200 font-bold';
+              btnClasses = 'bg-rose-950/80 border-rose-500 text-rose-200 font-bold shadow-xs';
             } else {
-              btnStyle = 'opacity-50 bg-slate-100 dark:bg-slate-800 border-transparent';
+              btnClasses = 'opacity-40 bg-slate-900/60 border-slate-800 text-slate-400';
             }
           }
 
@@ -216,14 +220,15 @@ export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
               key={opt.id}
               onClick={() => handleSelectOption(opt.id)}
               disabled={isAnswered}
-              className={`p-3.5 rounded-xl border text-left text-xs font-semibold transition-all flex items-center justify-between gap-3 cursor-pointer ${btnStyle}`}
+              className={`p-3.5 sm:p-4 rounded-xl border text-left text-xs sm:text-sm font-semibold transition-all flex items-center justify-between gap-3 cursor-pointer ${btnClasses}`}
+              style={{ color: isAnswered && opt.isCorrect ? '#a7f3d0' : isAnswered && isSelected && !opt.isCorrect ? '#fecdd3' : '#f8fafc' }}
             >
-              <span>{opt.text}</span>
+              <span className="leading-snug">{opt.text}</span>
               {isAnswered && opt.isCorrect && (
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
               )}
               {isAnswered && isSelected && !opt.isCorrect && (
-                <XCircle className="w-4 h-4 text-rose-500 shrink-0" />
+                <XCircle className="w-5 h-5 text-rose-400 shrink-0" />
               )}
             </button>
           );

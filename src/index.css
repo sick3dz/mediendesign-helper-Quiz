@@ -37,3 +37,65 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* Custom Cosmetic Theme Accents */
+html.theme-emerald {
+  --primary-accent: #10b981;
+}
+html.theme-emerald button.bg-indigo-600 {
+  background-color: #059669 !important;
+}
+html.theme-emerald button.bg-indigo-600:hover {
+  background-color: #047857 !important;
+}
+
+html.theme-sunset {
+  --primary-accent: #f97316;
+}
+html.theme-sunset button.bg-indigo-600 {
+  background-color: #ea580c !important;
+}
+html.theme-sunset button.bg-indigo-600:hover {
+  background-color: #c2410c !important;
+}
+
+html.theme-nordic {
+  --primary-accent: #06b6d4;
+}
+html.theme-nordic button.bg-indigo-600 {
+  background-color: #0891b2 !important;
+}
+html.theme-nordic button.bg-indigo-600:hover {
+  background-color: #0e7490 !important;
+}
+
+html.theme-cyberpunk {
+  --primary-accent: #d946ef;
+}
+html.theme-cyberpunk button.bg-indigo-600 {
+  background-color: #c026d3 !important;
+}
+html.theme-cyberpunk button.bg-indigo-600:hover {
+  background-color: #a21caf !important;
+}
+
+html.theme-gold {
+  --primary-accent: #eab308;
+}
+html.theme-gold button.bg-indigo-600 {
+  background-color: #d97706 !important;
+}
+html.theme-gold button.bg-indigo-600:hover {
+  background-color: #b45309 !important;
+}
+
+html.theme-monochrome {
+  --primary-accent: #475569;
+}
+html.theme-monochrome button.bg-indigo-600 {
+  background-color: #334155 !important;
+}
+html.theme-monochrome button.bg-indigo-600:hover {
+  background-color: #1e293b !important;
+}
+

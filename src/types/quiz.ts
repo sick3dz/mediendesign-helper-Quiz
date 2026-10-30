@@ -78,13 +78,15 @@ export interface PetState {
   hasAdopted?: boolean;
   species: PetSpecies;
   name: string;
-  hunger: number; // 0 to 100 (100 = full)
-  happiness: number; // 0 to 100 (100 = ecstatic)
+  hunger: number; // 0 to 100 (never drops below safe comfy floor)
+  happiness: number; // 0 to 100 (never drops below safe comfy floor)
+  isSleeping?: boolean; // Pet peacefully naps when idle; wakes up instantly upon petting/feeding with 0 penalties
   lastCareTimestamp?: number; // Date.now() timestamp
   equipped: {
     head?: string;
     face?: string;
     neck?: string;
+    frame?: string; // Animated avatar aura/frame
   };
   inventory: {
     food: { [foodId: string]: number }; // quantity
@@ -95,9 +97,31 @@ export interface PetState {
   timesPlayed?: number;
 }
 
+export type CosmeticCategory = 'theme' | 'soundpack' | 'title' | 'frame';
+
+export interface CosmeticItem {
+  id: string;
+  category: CosmeticCategory;
+  name: string;
+  description: string;
+  icon: string;
+  priceCoins: number;
+  priceXp: number;
+  tier: 'starter' | 'mid' | 'high' | 'prestige';
+  previewColor?: string;
+  previewClass?: string;
+}
+
+export interface EquippedCosmetics {
+  theme?: string;
+  soundpack?: string;
+  title?: string;
+  frame?: string;
+}
+
 export interface UserStats {
   xp: number;
-  coins: number; // Redeemable in pet shop
+  coins: number; // Redeemable in pet shop alongside EXP
   level: number;
   streakDays: number;
   lastActiveDate: string;
@@ -108,6 +132,8 @@ export interface UserStats {
   maxCombo: number;
   earnedBadges: string[];
   pet: PetState;
+  unlockedCosmetics?: string[]; // IDs of purchased cosmetics
+  equippedCosmetics?: EquippedCosmetics;
   examScores: {
     date: string;
     score: number;
@@ -124,3 +150,4 @@ export interface Badge {
   icon: string;
   unlockedAt?: string;
 }
+

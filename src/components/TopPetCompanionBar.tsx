@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PetState, UserStats, PetFood } from '../types/quiz';
 import { PET_SPECIES, PET_FOODS } from '../data/petData';
+import { findCosmeticById } from '../data/cosmeticsData';
 import { PetAvatar } from './PetAvatar';
 import { soundEffects } from '../services/audioService';
 import {
@@ -100,14 +101,17 @@ export const TopPetCompanionBar: React.FC<Props> = ({
     showFeedback(`${foodItem.name} verfüttert! (+${foodItem.nutrition} Sättigung)`);
   };
 
-  const moodLabel =
-    pet.hunger < 35
-      ? 'Hungrig 🥪'
-      : pet.happiness > 75
-      ? 'Überglücklich! ✨'
-      : pet.happiness < 40
-      ? 'Braucht Liebe 🥺'
-      : 'Zufrieden 😊';
+  const moodLabel = pet.isSleeping
+    ? 'Schläft friedlich 💤'
+    : pet.hunger < 35
+    ? 'Hungrig 🥪'
+    : pet.happiness > 75
+    ? 'Überglücklich! ✨'
+    : pet.happiness < 40
+    ? 'Braucht Liebe 🥺'
+    : 'Zufrieden 😊';
+
+  const equippedTitle = stats.equippedCosmetics?.title;
 
   return (
     <div className="bg-white/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 transition-colors shadow-2xs">
@@ -119,13 +123,13 @@ export const TopPetCompanionBar: React.FC<Props> = ({
             <button
               onClick={handleQuickPet}
               className="relative shrink-0 group cursor-pointer focus:outline-none"
-              title="Klick zum Streicheln!"
+              title={pet.isSleeping ? 'Schläft friedlich – Klick zum Aufwecken!' : 'Klick zum Streicheln!'}
             >
               <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 active:scale-95">
                 <PetAvatar pet={pet} isEating={isEating} isPetted={isPetted} size="sm" />
               </div>
               <span className="absolute -bottom-1 -right-1 text-xs select-none">
-                {isPetted ? '💖' : '🐾'}
+                {pet.isSleeping ? '💤' : isPetted ? '💖' : '🐾'}
               </span>
             </button>
 
@@ -138,6 +142,11 @@ export const TopPetCompanionBar: React.FC<Props> = ({
                 <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded-md bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300">
                   {speciesInfo.title}
                 </span>
+                {equippedTitle && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-md bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 hidden sm:inline">
+                    ★ {findCosmeticById(equippedTitle)?.name || 'IHK-Prüfling'}
+                  </span>
+                )}
                 <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 hidden md:inline">
                   · {moodLabel}
                 </span>

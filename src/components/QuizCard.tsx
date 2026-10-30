@@ -139,7 +139,7 @@ export const QuizCard: React.FC<Props> = ({
 
         <div className="inline-flex items-center gap-2 p-3 bg-gradient-to-r from-indigo-50 to-amber-50 dark:from-indigo-950/40 dark:to-amber-950/40 rounded-xl border border-indigo-100 dark:border-indigo-900/50 font-mono text-sm font-bold text-indigo-700 dark:text-indigo-300 mb-6 tabular-nums">
           <Sparkles className="w-4 h-4 text-amber-500" />
-          <span>+{score} XP & Münzen für dein Haustier</span>
+          <span>+{score} ⚡ EXP für dein Haustier</span>
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-3">

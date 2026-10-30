@@ -19,21 +19,58 @@ export const PetAvatar: React.FC<Props> = ({ pet, isEating, isPetted, size = 'lg
     lg: 'w-48 h-48',
   }[size];
 
+  const isSleeping = Boolean(pet.isSleeping);
+
   return (
     <div className={`relative ${sizeClasses} mx-auto flex items-center justify-center select-none transition-transform duration-300 ${
-      isEating ? 'animate-bounce scale-105' : isPetted ? 'scale-110' : 'hover:scale-105'
+      isEating ? 'animate-bounce scale-105' : isPetted ? 'scale-110' : isSleeping ? 'scale-95 opacity-90' : 'hover:scale-105'
     }`}>
+      {/* Equipped Animated Pet Frame */}
+      {equipped?.frame === 'frame-bronze' && (
+        <div className="absolute -inset-2 rounded-full border-2 border-amber-500/80 shadow-[0_0_15px_rgba(217,119,6,0.35)] pointer-events-none" />
+      )}
+      {equipped?.frame === 'frame-neon' && (
+        <div className="absolute -inset-2 rounded-full border-2 border-cyan-400 ring-2 ring-fuchsia-500 shadow-[0_0_20px_rgba(6,182,212,0.6)] animate-pulse pointer-events-none" />
+      )}
+      {equipped?.frame === 'frame-stardust' && (
+        <div className="absolute -inset-2 rounded-full border-2 border-purple-400 ring-2 ring-indigo-400/80 shadow-[0_0_25px_rgba(168,85,247,0.5)] pointer-events-none">
+          <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-xs">✨</span>
+          <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs">⭐</span>
+          <span className="absolute top-1/2 -left-2 -translate-y-1/2 text-xs">✦</span>
+          <span className="absolute top-1/2 -right-2 -translate-y-1/2 text-xs">✧</span>
+        </div>
+      )}
+      {equipped?.frame === 'frame-rainbow' && (
+        <div className="absolute -inset-2 rounded-full p-1 bg-gradient-to-tr from-rose-500 via-amber-400 via-emerald-400 to-indigo-500 pointer-events-none shadow-[0_0_25px_rgba(236,72,153,0.4)] opacity-85">
+          <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 opacity-20" />
+        </div>
+      )}
+      {equipped?.frame === 'frame-divine' && (
+        <div className="absolute -inset-3 rounded-full border-4 border-amber-300 ring-4 ring-yellow-400 shadow-[0_0_35px_rgba(250,204,21,0.8)] animate-pulse pointer-events-none">
+          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-sm select-none">👑</div>
+        </div>
+      )}
+
       {/* Reactive heart animation when petted */}
       {isPetted && (
-        <div className="absolute -top-4 text-2xl animate-ping pointer-events-none">
+        <div className="absolute -top-4 text-2xl animate-ping pointer-events-none z-20">
           💖
         </div>
       )}
 
       {/* Reactive food crumbs when eating */}
       {isEating && (
-        <div className="absolute -bottom-2 text-xl animate-pulse pointer-events-none">
+        <div className="absolute -bottom-2 text-xl animate-pulse pointer-events-none z-20">
           ✨😋✨
+        </div>
+      )}
+
+      {/* Peaceful Sleep Floating Zzz Bubble */}
+      {isSleeping && (
+        <div className="absolute -top-4 right-1 flex flex-col items-center pointer-events-none select-none z-20 animate-bounce">
+          <span className="text-sm font-black text-indigo-500 dark:text-indigo-400 drop-shadow">Z</span>
+          <span className="text-xs font-bold text-indigo-400 dark:text-indigo-300 -mt-1 ml-2">z</span>
+          <span className="text-[10px] font-semibold text-indigo-300 dark:text-indigo-200 -mt-1 ml-3">z</span>
         </div>
       )}
 
@@ -71,7 +108,9 @@ export const PetAvatar: React.FC<Props> = ({ pet, isEating, isPetted, size = 'lg
             <path d="M94 102 Q100 98 106 102 Q100 110 94 102 Z" fill="#1E293B" />
 
             {/* Dog Mouth / Tongue */}
-            {isHungry ? (
+            {isSleeping ? (
+              <path d="M95 114 Q100 117 105 114" stroke="#1E293B" strokeWidth="2" fill="none" strokeLinecap="round" />
+            ) : isHungry ? (
               <path d="M95 118 Q100 114 105 118" stroke="#1E293B" strokeWidth="2.5" fill="none" strokeLinecap="round" />
             ) : isEcstatic ? (
               <g>
@@ -83,7 +122,12 @@ export const PetAvatar: React.FC<Props> = ({ pet, isEating, isPetted, size = 'lg
             )}
 
             {/* Dog Eyes */}
-            {isEcstatic ? (
+            {isSleeping ? (
+              <g stroke="#1E293B" strokeWidth="3" fill="none" strokeLinecap="round">
+                <path d="M78 88 Q86 94 94 88" />
+                <path d="M106 88 Q114 94 122 88" />
+              </g>
+            ) : isEcstatic ? (
               <g stroke="#1E293B" strokeWidth="3" fill="none" strokeLinecap="round">
                 <path d="M80 88 Q88 80 94 88" />
                 <path d="M106 88 Q112 80 120 88" />
@@ -134,7 +178,12 @@ export const PetAvatar: React.FC<Props> = ({ pet, isEating, isPetted, size = 'lg
             <line x1="140" y1="110" x2="120" y2="109" stroke="#475569" strokeWidth="1.5" strokeLinecap="round" />
 
             {/* Cat Eyes */}
-            {isEcstatic ? (
+            {isSleeping ? (
+              <g stroke="#1E293B" strokeWidth="3" fill="none" strokeLinecap="round">
+                <path d="M78 88 Q86 94 92 88" />
+                <path d="M108 88 Q114 94 122 88" />
+              </g>
+            ) : isEcstatic ? (
               <g stroke="#1E293B" strokeWidth="3" fill="none" strokeLinecap="round">
                 <path d="M78 88 Q86 80 92 88" />
                 <path d="M108 88 Q114 80 122 88" />
@@ -183,7 +232,12 @@ export const PetAvatar: React.FC<Props> = ({ pet, isEating, isPetted, size = 'lg
             <polygon points="94,94 106,94 100,105" fill="#F59E0B" />
 
             {/* Penguin Eyes */}
-            {isEcstatic ? (
+            {isSleeping ? (
+              <g stroke="#0F172A" strokeWidth="3" fill="none" strokeLinecap="round">
+                <path d="M78 82 Q84 88 90 82" />
+                <path d="M110 82 Q116 88 122 82" />
+              </g>
+            ) : isEcstatic ? (
               <g stroke="#0F172A" strokeWidth="3" fill="none" strokeLinecap="round">
                 <path d="M80 82 Q86 76 92 82" />
                 <path d="M108 82 Q114 76 120 82" />
@@ -239,7 +293,12 @@ export const PetAvatar: React.FC<Props> = ({ pet, isEating, isPetted, size = 'lg
             <path d="M88 108 Q100 118 112 108" stroke="#BE185D" strokeWidth="2.5" fill="none" strokeLinecap="round" />
 
             {/* Axolotl Cute Wide-set Eyes */}
-            {isEcstatic ? (
+            {isSleeping ? (
+              <g stroke="#831843" strokeWidth="3" fill="none" strokeLinecap="round">
+                <path d="M74 88 Q82 94 88 88" />
+                <path d="M112 88 Q118 94 126 88" />
+              </g>
+            ) : isEcstatic ? (
               <g stroke="#831843" strokeWidth="3" fill="none" strokeLinecap="round">
                 <path d="M74 88 Q82 82 88 88" />
                 <path d="M112 88 Q118 82 126 88" />
