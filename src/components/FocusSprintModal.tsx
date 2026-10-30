@@ -6,13 +6,11 @@ import confetti from 'canvas-confetti';
 import {
   Play,
   Pause,
-  RotateCcw,
   X,
   Sparkles,
   Volume2,
   VolumeX,
   Music,
-  Headphones,
   CloudRain,
   Wind,
   Gift,
@@ -27,9 +25,9 @@ import {
   Check,
   Heart,
   RefreshCw,
-  AlertTriangle,
   ArrowRight,
   ShieldAlert,
+  Clock,
 } from 'lucide-react';
 
 const MAX_UNITS = 20;
@@ -182,7 +180,6 @@ export const FocusSprintModal: React.FC<Props> = ({
   const isSessionFinished = isDone || unitsCompleted || totalAttempted >= MAX_UNITS;
 
   const handleAttemptClose = () => {
-    // If sprint is active or started but not finished, confirm before exit
     if ((isActive || hasStarted) && !isSessionFinished) {
       setShowExitConfirmModal(true);
     } else {
@@ -284,7 +281,6 @@ export const FocusSprintModal: React.FC<Props> = ({
       setTimeout(() => setShowComboToast(false), 2000);
     }
 
-    // SPACED RECALL LOGIC: Queue a recall question based on this card 2-3 positions down in the queue!
     if (currentKnowledgeItem && currentKnowledgeItem.type === 'knowledge') {
       const recallQuestion = createRecallQuestionFromKnowledge({
         title: currentKnowledgeItem.title,
@@ -305,6 +301,7 @@ export const FocusSprintModal: React.FC<Props> = ({
   };
 
   const currentItem = blitzPool[currentPoolIndex];
+  const durationPresets = [180, 300, 600, 900, 1500]; // 3, 5, 10, 15, 25 Min
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4">
@@ -324,7 +321,7 @@ export const FocusSprintModal: React.FC<Props> = ({
             <span>ADHS Fokus-Studio & Lofi-Radio</span>
           </div>
           <h3 className="text-xl font-black text-slate-900 dark:text-white">
-            5-Minuten Fokus Sprint
+            Fokus Sprint & Lerneinheit
           </h3>
         </div>
 
@@ -367,7 +364,7 @@ export const FocusSprintModal: React.FC<Props> = ({
                   Bereit für deinen Fokus-Sprint?
                 </h4>
                 <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">
-                  Wähle deinen Modus und starte die 5-Minuten Lerneinheit, wenn du bereit bist.
+                  Wähle deinen Modus und die gewünschte Zeitdauer, bevor es losgeht!
                 </p>
               </div>
 
@@ -403,6 +400,42 @@ export const FocusSprintModal: React.FC<Props> = ({
                 </button>
               </div>
 
+              {/* Duration Preset Selector */}
+              <div className="bg-white/80 dark:bg-slate-900/80 p-3 rounded-xl border border-indigo-100 dark:border-indigo-900/50 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>Dauer der Lerneinheit wählen:</span>
+                  </span>
+                  <span className="font-mono text-indigo-600 dark:text-indigo-400 font-extrabold">
+                    {Math.round(totalSeconds / 60)} Min
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-5 gap-1">
+                  {durationPresets.map(secs => {
+                    const minLabel = secs / 60;
+                    const isSelected = totalSeconds === secs;
+                    return (
+                      <button
+                        key={secs}
+                        onClick={() => {
+                          soundEffects.playClick();
+                          onReset(secs);
+                        }}
+                        className={`py-1.5 px-1 rounded-lg font-mono font-bold text-xs transition-all cursor-pointer text-center ${
+                          isSelected
+                            ? 'bg-indigo-600 text-white shadow-xs scale-102'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        {minLabel}m
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div className="text-left space-y-1.5 text-xs text-slate-700 dark:text-slate-300 bg-white/60 dark:bg-slate-900/60 p-3 rounded-xl border border-indigo-100 dark:border-indigo-900/50">
                 <div className="flex items-center gap-2 font-bold">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -420,7 +453,7 @@ export const FocusSprintModal: React.FC<Props> = ({
                 className="w-full py-3 px-5 bg-gradient-to-r from-amber-500 via-indigo-600 to-indigo-700 hover:from-amber-600 hover:to-indigo-800 text-white font-black text-sm rounded-2xl shadow-lg transition-all active:scale-98 cursor-pointer flex items-center justify-center gap-2 group"
               >
                 <Zap className="w-5 h-5 fill-amber-300 text-amber-300 group-hover:scale-110 transition-transform" />
-                <span>⚡ Fokus-Sprint JETZT STARTEN</span>
+                <span>⚡ Fokus-Sprint JETZT STARTEN ({Math.round(totalSeconds / 60)} Min)</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -429,7 +462,7 @@ export const FocusSprintModal: React.FC<Props> = ({
           /* ACTIVE SPRINT SESSION CONTROLS & CONTENT */
           <>
             {/* Mode Selector Tabs */}
-            <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl mb-4">
+            <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl mb-3">
               <button
                 onClick={() => {
                   soundEffects.playClick();
@@ -461,46 +494,75 @@ export const FocusSprintModal: React.FC<Props> = ({
             </div>
 
             {/* Compact Countdown Bar & Unit Counter */}
-            <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 mb-4">
-              <div className="flex items-center gap-2">
-                <div className="font-mono text-2xl font-black text-slate-900 dark:text-white tabular-nums">
-                  {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+            <div className="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 mb-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="font-mono text-2xl font-black text-slate-900 dark:text-white tabular-nums">
+                    {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+                  </div>
+                  <div className="flex flex-col text-[11px] font-bold">
+                    <span className="text-indigo-600 dark:text-indigo-400">
+                      {isSessionFinished ? '✓ Beendet' : isActive ? '● Sprint läuft' : 'Bereit'}
+                    </span>
+                    <span className="text-amber-600 dark:text-amber-400 font-mono text-[10px]">
+                      Einheit {Math.min(totalAttempted, MAX_UNITS)} / {MAX_UNITS}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex flex-col text-[11px] font-bold">
-                  <span className="text-indigo-600 dark:text-indigo-400">
-                    {isSessionFinished ? '✓ Beendet' : isActive ? '● Sprint läuft' : 'Bereit'}
-                  </span>
-                  <span className="text-amber-600 dark:text-amber-400 font-mono text-[10px]">
-                    Einheit {Math.min(totalAttempted, MAX_UNITS)} / {MAX_UNITS}
-                  </span>
+
+                <div className="flex items-center gap-2">
+                  {!isSessionFinished && (
+                    <button
+                      onClick={() => {
+                        soundEffects.playClick();
+                        onToggleActive();
+                      }}
+                      className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+                        isActive
+                          ? 'bg-amber-500 hover:bg-amber-600 text-white'
+                          : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                      }`}
+                    >
+                      {isActive ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                      <span>{isActive ? 'Pause' : 'Start'}</span>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={handleAttemptClose}
+                    className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
+                    title="Abbrechen / Beenden"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                {!isSessionFinished && (
-                  <button
-                    onClick={() => {
-                      soundEffects.playClick();
-                      onToggleActive();
-                    }}
-                    className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer ${
-                      isActive
-                        ? 'bg-amber-500 hover:bg-amber-600 text-white'
-                        : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                    }`}
-                  >
-                    {isActive ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                    <span>{isActive ? 'Pause' : 'Start'}</span>
-                  </button>
-                )}
-
-                <button
-                  onClick={handleAttemptClose}
-                  className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
-                  title="Abbrechen"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                </button>
+              {/* Quick Time Selector Bar */}
+              <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 dark:border-slate-700/60 text-[11px]">
+                <span className="text-slate-500 font-bold">Dauer:</span>
+                <div className="flex items-center gap-1">
+                  {durationPresets.map(secs => {
+                    const minLabel = secs / 60;
+                    const isSelected = totalSeconds === secs;
+                    return (
+                      <button
+                        key={secs}
+                        onClick={() => {
+                          soundEffects.playClick();
+                          onReset(secs);
+                        }}
+                        className={`px-2 py-0.5 rounded-md font-mono text-[11px] font-bold cursor-pointer transition-all ${
+                          isSelected
+                            ? 'bg-indigo-600 text-white shadow-2xs'
+                            : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        {minLabel}m
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
@@ -670,8 +732,8 @@ export const FocusSprintModal: React.FC<Props> = ({
               </div>
             ) : (
               /* PASSIVE FOKUS TIMER CARD */
-              <div className="mb-4 text-center py-4 px-2 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800">
-                <div className="relative w-32 h-32 mx-auto mb-3 flex items-center justify-center">
+              <div className="mb-4 text-center py-4 px-2 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+                <div className="relative w-36 h-36 mx-auto flex items-center justify-center">
                   <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
                     <circle
                       cx="50"
@@ -694,34 +756,43 @@ export const FocusSprintModal: React.FC<Props> = ({
                     />
                   </svg>
                   <div className="absolute flex flex-col items-center">
-                    <span className="font-mono text-2xl font-black text-slate-900 dark:text-white tabular-nums">
+                    <span className="font-mono text-3xl font-black text-slate-900 dark:text-white tabular-nums">
                       {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
                     </span>
-                    <span className="text-[10px] font-bold text-slate-400">
-                      {isActive ? 'Fokus aktiv' : 'Passiv'}
+                    <span className="text-[10px] font-bold text-slate-400 mt-0.5">
+                      {isActive ? 'Fokus aktiv' : 'Passiv Mode'}
                     </span>
                   </div>
                 </div>
 
-                {/* Presets */}
-                <div className="flex items-center justify-center gap-2 text-xs">
-                  <span className="text-slate-400 font-semibold text-[11px]">Dauer:</span>
-                  {[180, 300, 600].map(secs => (
-                    <button
-                      key={secs}
-                      onClick={() => {
-                        soundEffects.playClick();
-                        onReset(secs);
-                      }}
-                      className={`px-3 py-1 rounded-lg font-mono font-bold text-xs cursor-pointer transition-all ${
-                        totalSeconds === secs
-                          ? 'bg-indigo-600 text-white shadow-2xs'
-                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
-                      }`}
-                    >
-                      {secs / 60} Min
-                    </button>
-                  ))}
+                {/* Duration Presets */}
+                <div className="bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1.5">
+                  <span className="text-slate-500 font-bold text-xs flex items-center justify-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>Dauer der Lerneinheit wählen:</span>
+                  </span>
+                  <div className="flex items-center justify-center gap-1.5">
+                    {durationPresets.map(secs => {
+                      const minLabel = secs / 60;
+                      const isSelected = totalSeconds === secs;
+                      return (
+                        <button
+                          key={secs}
+                          onClick={() => {
+                            soundEffects.playClick();
+                            onReset(secs);
+                          }}
+                          className={`px-3 py-1.5 rounded-lg font-mono font-bold text-xs cursor-pointer transition-all ${
+                            isSelected
+                              ? 'bg-indigo-600 text-white shadow-xs'
+                              : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          {minLabel} Min
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             )}
@@ -732,7 +803,7 @@ export const FocusSprintModal: React.FC<Props> = ({
         <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-2.5">
           <div className="flex items-center justify-between text-xs">
             <span className="font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <Headphones className="w-3.5 h-3.5 text-indigo-500" />
+              <Clock className="w-3.5 h-3.5 text-indigo-500" />
               <span>Hintergrund-Audio (Lofi Soundscape)</span>
             </span>
             <span className="text-[10px] text-slate-400 font-medium">Web Audio</span>
