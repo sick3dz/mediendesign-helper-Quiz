@@ -19,6 +19,7 @@ import { soundEffects } from './services/audioService';
 import { TopBar, ActiveTab } from './components/TopBar';
 import { AdhdControlsBar } from './components/AdhdControlsBar';
 import { TopPetCompanionBar } from './components/TopPetCompanionBar';
+import { DailyMissionsBar } from './components/DailyMissionsBar';
 import { PetAdoptionModal } from './components/PetAdoptionModal';
 import { ChapterListView } from './components/ChapterListView';
 import { ModuleLearningView } from './components/ModuleLearningView';
@@ -223,12 +224,22 @@ export default function App() {
         }, 500);
       }
 
+      // Update daily mission for module learning
+      const missions = prev.dailyMissions || [];
+      const updatedMissions = missions.map(m => {
+        if (m.category === 'module') {
+          return { ...m, currentCount: m.currentCount + 1 };
+        }
+        return m;
+      });
+
       const nextStats: UserStats = {
         ...prev,
         pet: updatedPet,
         xp: newXp,
         coins: newCoins,
         level: levelInfo.level,
+        dailyMissions: updatedMissions,
         completedModules: updatedCompleted,
         answeredQuestionsCount: prev.answeredQuestionsCount + 1,
         earnedBadges: checkBadgeUnlocks({
@@ -241,6 +252,68 @@ export default function App() {
         }),
       };
 
+      saveUserStats(nextStats);
+      return nextStats;
+    });
+  };
+
+  const handleCorrectAnswer = () => {
+    setStats(prev => {
+      const missions = prev.dailyMissions || [];
+      const updatedMissions = missions.map(m => {
+        if (m.category === 'quiz') {
+          return { ...m, currentCount: m.currentCount + 1 };
+        }
+        return m;
+      });
+      const nextStats: UserStats = {
+        ...prev,
+        correctAnswersCount: prev.correctAnswersCount + 1,
+        dailyMissions: updatedMissions,
+      };
+      saveUserStats(nextStats);
+      return nextStats;
+    });
+  };
+
+  const handleFocusSprintCompleted = (earnedXp: number) => {
+    setStats(prev => {
+      const missions = prev.dailyMissions || [];
+      const updatedMissions = missions.map(m => {
+        if (m.category === 'focus') {
+          return { ...m, currentCount: m.currentCount + 1 };
+        }
+        return m;
+      });
+      const newXp = prev.xp + earnedXp;
+      const levelInfo = calculateLevel(newXp);
+      const nextStats: UserStats = {
+        ...prev,
+        xp: newXp,
+        level: levelInfo.level,
+        dailyMissions: updatedMissions,
+      };
+      saveUserStats(nextStats);
+      return nextStats;
+    });
+  };
+
+  const handleClaimDailyMission = (missionId: string) => {
+    setStats(prev => {
+      const missions = prev.dailyMissions || [];
+      const target = missions.find(m => m.id === missionId);
+      if (!target || target.isClaimed || target.currentCount < target.targetCount) {
+        return prev;
+      }
+      const updatedMissions = missions.map(m => (m.id === missionId ? { ...m, isClaimed: true } : m));
+      const newXp = prev.xp + target.rewardXp;
+      const levelInfo = calculateLevel(newXp);
+      const nextStats: UserStats = {
+        ...prev,
+        xp: newXp,
+        level: levelInfo.level,
+        dailyMissions: updatedMissions,
+      };
       saveUserStats(nextStats);
       return nextStats;
     });
@@ -487,6 +560,13 @@ export default function App() {
         onChangePet={() => setIsAdoptionModalOpen(true)}
       />
 
+      {/* Daily Quests / Missions Ribbon Bar */}
+      <DailyMissionsBar
+        missions={stats.dailyMissions || []}
+        onClaimReward={handleClaimDailyMission}
+        onOpenFocusSprint={() => setIsFocusSprintOpen(true)}
+      />
+
       {/* Main Content Arena */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-8">
         {selectedModuleMeta && currentChapter && currentModule ? (
@@ -496,6 +576,7 @@ export default function App() {
             bionic={settings.bionicReading}
             onBack={() => setSelectedModuleMeta(null)}
             onModuleCompleted={(modId, xp) => handleModuleCompleted(modId, xp)}
+            onCorrectAnswer={handleCorrectAnswer}
             onNextModule={handleNextModule}
             hasNextModule={hasNextModule}
           />
@@ -572,6 +653,7 @@ export default function App() {
       <FocusSprintModal
         isOpen={isFocusSprintOpen}
         onClose={() => setIsFocusSprintOpen(false)}
+        onSprintCompleted={handleFocusSprintCompleted}
       />
 
       {/* Backup & Restore Manager Modal */}

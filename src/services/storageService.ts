@@ -1,4 +1,4 @@
-import { UserStats, Badge } from '../types/quiz';
+import { UserStats, Badge, DailyMission } from '../types/quiz';
 import { DEFAULT_PET_STATE, calculatePetDecay } from '../data/petData';
 
 const STORAGE_KEY = 'mediengestalter_adhd_trainer_stats_v2';
@@ -18,12 +18,54 @@ const DEFAULT_SETTINGS: UserSettings = {
   darkMode: false,
 };
 
+export function getTodayDateString(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+export function generateDailyMissions(): DailyMission[] {
+  return [
+    {
+      id: 'mission-focus',
+      title: 'Fokus-Sprint',
+      description: 'Absolviere 1 fokussierte Lerneinheit',
+      targetCount: 1,
+      currentCount: 0,
+      rewardXp: 40,
+      isClaimed: false,
+      category: 'focus',
+      icon: '⏱️',
+    },
+    {
+      id: 'mission-module',
+      title: 'Modul-Wissen',
+      description: 'Schließe 2 IHK-Lernmodule ab',
+      targetCount: 2,
+      currentCount: 0,
+      rewardXp: 50,
+      isClaimed: false,
+      category: 'module',
+      icon: '📖',
+    },
+    {
+      id: 'mission-quiz',
+      title: 'Prüfungs-Check',
+      description: 'Beantworte 6 Quizfragen richtig',
+      targetCount: 6,
+      currentCount: 0,
+      rewardXp: 60,
+      isClaimed: false,
+      category: 'quiz',
+      icon: '🎯',
+    },
+  ];
+}
+
 const DEFAULT_STATS: UserStats = {
   xp: 150, // Starting EXP bonus so learners can try feeding or styling their pet immediately!
   coins: 50, // Welcome coins bonus
   level: 1,
   streakDays: 1,
-  lastActiveDate: new Date().toISOString().split('T')[0],
+  lastActiveDate: getTodayDateString(),
   completedModules: [],
   answeredQuestionsCount: 0,
   correctAnswersCount: 0,
@@ -38,6 +80,8 @@ const DEFAULT_STATS: UserStats = {
     title: 'title-novice',
     frame: 'frame-none',
   },
+  dailyMissions: generateDailyMissions(),
+  dailyMissionsDate: getTodayDateString(),
   examScores: [],
 };
 
@@ -151,10 +195,23 @@ export function loadUserStats(): UserStats {
     const parsed = JSON.parse(raw);
     const mergedPet = { ...DEFAULT_PET_STATE, ...(parsed.pet || {}) };
     const decayedPet = calculatePetDecay(mergedPet);
+    const today = getTodayDateString();
+
+    let dailyMissions = parsed.dailyMissions;
+    let dailyMissionsDate = parsed.dailyMissionsDate;
+
+    // Reset or initialize missions if new day
+    if (!dailyMissions || dailyMissionsDate !== today) {
+      dailyMissions = generateDailyMissions();
+      dailyMissionsDate = today;
+    }
+
     return {
       ...DEFAULT_STATS,
       ...parsed,
       pet: decayedPet,
+      dailyMissions,
+      dailyMissionsDate,
       unlockedCosmetics: Array.isArray(parsed.unlockedCosmetics) && parsed.unlockedCosmetics.length > 0
         ? parsed.unlockedCosmetics
         : DEFAULT_STATS.unlockedCosmetics,

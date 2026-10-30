@@ -1147,6 +1147,17 @@ export const CHAPTERS: Chapter[] = [
             ],
             examFavorite: true,
             merksatz: 'Datenschutz schützt die Person vor Datenmissbrauch. Datensicherheit schützt die Daten vor Verlust und Angriffen.'
+          },
+          {
+            id: 'n-sec-7',
+            title: 'Netzwerk-Gefahren & Schutz: DDoS, MitM & HTTPS',
+            coreConcept: 'Wie Webanwendungen sicher übertragen und geschützt werden.',
+            bulletPoints: [
+              'DDoS (Distributed Denial of Service): Ein Server wird durch Tausende gekaperte Rechner (Botnetz) mit Schein-Anfragen überlastet, bis Websites zusammenbrechen.',
+              'Man-in-the-Middle (MitM): Ein Angreifer klinkt sich unbemerkt in die Übertragung zwischen Browser und Server ein (z. B. im offenen WLAN), um Passwörter oder Zahlungsdaten mitzulesen.',
+              'HTTPS / TLS: Verschlüsselt den gesamten Datenverkehr asymmetrisch mit Zertifikaten. Pflicht für jedes Login- und Kontaktformular!'
+            ],
+            example: 'Ohne HTTPS kann jeder im selben Café-WLAN unverschlüsselte Formular-Eingaben im Klartext abfangen.'
           }
         ],
         quizQuestions: [
@@ -1185,6 +1196,30 @@ export const CHAPTERS: Chapter[] = [
               { id: 'b', text: 'Adware', isCorrect: false, explanation: 'Adware blendet Werbebanner ein.' },
               { id: 'c', text: 'Screenreader', isCorrect: false, explanation: 'Hilfsmittel für barrierefreies Lesen.' },
               { id: 'd', text: 'Affordance-Filter', isCorrect: false, explanation: 'Erfunden.' }
+            ]
+          },
+          {
+            id: 'q-sec-3-4',
+            chapterId: 'security',
+            moduleId: 'sec-3',
+            question: 'Ein Webshop ist plötzlich nicht mehr erreichbar, weil Tausende fremde Rechner gleichzeitig den Server mit Datenanfragen fluten. Um welche Angriffsart handelt es sich?',
+            options: [
+              { id: 'a', text: 'DDoS-Angriff (Distributed Denial of Service)', isCorrect: true, explanation: 'Richtig! Durch massenhafte Anfragen werden die Serverressourcen erschöpft, sodass reguläre Nutzer ausgesperrt werden.' },
+              { id: 'b', text: 'Wireframing', isCorrect: false, explanation: 'Das ist Konzeption.' },
+              { id: 'c', text: 'Single Source Publishing', isCorrect: false, explanation: 'Das ist medienneutrale Datenhaltung.' },
+              { id: 'd', text: 'Scrum Sprint Review', isCorrect: false, explanation: 'Agiles Meeting.' }
+            ]
+          },
+          {
+            id: 'q-sec-3-5',
+            chapterId: 'security',
+            moduleId: 'sec-3',
+            question: 'Warum ist die Verschlüsselung über HTTPS (TLS/SSL) für Webformulare rechtlich und technisch zwingend erforderlich?',
+            options: [
+              { id: 'a', text: 'Sie schützt Daten vor dem Abfangen durch Dritte (Man-in-the-Middle) auf dem Übertragungsweg und gewährleistet Authentizität', isCorrect: true, explanation: 'Exakt! HTTPS sichert den Transportweg zwischen Nutzer und Server ab.' },
+              { id: 'b', text: 'Damit der Webserver keine Festplatte benötigt', isCorrect: false, explanation: 'Technisch unsinnig.' },
+              { id: 'c', text: 'Damit Bilder automatisch in CMYK konvertiert werden', isCorrect: false, explanation: 'HTTPS hat nichts mit Farbräumen zu tun.' },
+              { id: 'd', text: 'Um Google-Werbung kostenfrei freizuschalten', isCorrect: false, explanation: 'Falsch.' }
             ]
           }
         ]

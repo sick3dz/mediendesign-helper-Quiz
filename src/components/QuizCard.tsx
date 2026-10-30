@@ -9,6 +9,7 @@ interface Props {
   questions: QuizQuestion[];
   bionic: boolean;
   onFinished: (score: number) => void;
+  onCorrectAnswer?: () => void;
   onBackToOverview?: () => void;
   onNextModule?: () => void;
   hasNextModule?: boolean;
@@ -18,6 +19,7 @@ export const QuizCard: React.FC<Props> = ({
   questions,
   bionic,
   onFinished,
+  onCorrectAnswer,
   onBackToOverview,
   onNextModule,
   hasNextModule = false,
@@ -66,6 +68,9 @@ export const QuizCard: React.FC<Props> = ({
       soundEffects.playCorrect(nextCombo);
       setScore(s => s + 100 * nextCombo);
       setCorrectCount(c => c + 1);
+      if (onCorrectAnswer) {
+        onCorrectAnswer();
+      }
     } else {
       soundEffects.playWrong();
       setCombo(0);

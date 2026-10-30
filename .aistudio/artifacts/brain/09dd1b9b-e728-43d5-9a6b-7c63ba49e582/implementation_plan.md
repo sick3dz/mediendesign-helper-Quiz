@@ -1,108 +1,128 @@
-# Implementierungsplan: Belohnungssystem, Kosmetik-Shop & stressfreie Haustier-Mechanik
+# Fokus-Audio, Tägliche Missionen & Lückenlose IHK-Lernmodule
 
-Dieser Plan führt ein umfassendes, motivierendes Belohnungssystem ein, das reichhaltige Belohnungsanreize mit gesunder Wirtschaftlichkeit (Coin-/XP-Sink) verbindet, neue Kosmetika für die gesamte Lernplattform freischaltet und das virtuelle Haustier garantiert unsterblich und stressfrei gestaltet.
-
----
-
-## 1. Übersicht der Kernziele
-
-1. **Haustier-Unsterblichkeit & Friedlicher Schlafmodus**:
-   - Das Haustier kann **niemals sterben**, verhungern oder weglaufen.
-   - Sinkt die Versorgung nach längerer Abwesenheit unter einen Schwellenwert, wechselt das Haustier in einen gemütlichen **"Schläft friedlich 💤"**-Modus (süße Schlaf-Animation mit schwebenden *Zzz*-Partikeln).
-   - Es gibt **keine negativen Strafen oder Punktabzüge**.
-   - Jede Interaktion (Füttern, Streicheln, ein Lernhäppchen oder Quiz lösen) weckt das Haustier sofort liebevoll auf ("Guten Morgen! Schön, dass du lernst! 🎉").
-
-2. **Wirtschafts- & Belohnungsbalance (Stufen-Preise)**:
-   - Klare Staffelung von Belohnungen, damit Coins & XP über die gesamte Lernreise wertvoll bleiben:
-     - **Starter-Stufe (30 – 150 Coins / XP)**: Snacks, Einsteiger-Titel & Accessoires.
-     - **Fortgeschritten (250 – 500 Coins / XP)**: Besondere Accessoires, animierte Standard-Rahmen.
-     - **High-Tier (750 – 1.200 Coins / XP)**: Vollständige Farbthemen & alternative Soundpacks.
-     - **Prestige-Tier (2.000 – 5.000 Coins / XP)**: Exklusive Meister-Titel (z. B. *"IHK-Prüfungsgott"*, *"Design-Halbgott"*), legendäre Regenbogen-Prisma-Rahmen und Cyber-Theme.
-   - Kauf wahlweise mit **Coins** ODER gesammelten **XP** (flexibles Ausgeben).
-
-3. **Seiten-Kosmetik (Vollwertige App-Anpassungen)**:
-   - **Farbthemen**:
-     - *Standard Slate/Indigo* (Klassisch sauber)
-     - *Cyberpunk Neon* (Futuristische Cyan-/Magenta-Akzente & Dark-Tech)
-     - *Forest Emerald* (Beruhigendes, fokussierendes Smaragdgrün)
-     - *Sunset Amber* (Warme Violett-/Goldorange-Atmosphäre)
-     - *Nordic Ice* (Frisches arktisches Eisblau & Mint)
-     - *Pastel Lavender* (Sanfte, augenschonende Pastelltöne)
-   - **Titel**:
-     - Wählbare Titel für den Profil- und TopBar-Header (z. B. *"Wireframe-Zauberer"*, *"Scrum-Titan"*, *"A11y-Schutzpatron"*, *"Pixel-Perfektionist"*).
-   - **Soundpacks (Web Audio API Synthesizer)**:
-     - *Modern Standard* (Klare Sinus- & Dreiecks-Glocken)
-     - *Retro 8-Bit Arcade* (Chiptune Square-Wave & Arpeggio-Fanfaren)
-     - *Sci-Fi Synth* (Futuristische Resonanz-Gleitklänge)
-     - *Cozy Acoustic* (Sanfte organische Klicks und warme Töne)
-   - **Animierte Pet-Rahmen**:
-     - *Goldener Schimmer* (Pulsierender Gold-Glanz)
-     - *Cyber Neon Matrix* (Rotierender Neon-Glow-Ring)
-     - *Regenbogen-Aura* (Fließender Prismen-Farbverlauf)
-     - *Sternenglanz* (Sanft glitzernde Partikel)
+Dieser Implementierungsplan beschreibt die gezielte Weiterentwicklung der Lernplattform:
+1. Eine erweiterte Fokus-Funktion mit integrierten Lofi- und White-Noise-Hintergrundsounds (synthetisiert über die Web Audio API für null Latenz und Offline-Verfügbarkeit).
+2. Drei tägliche, motivierende Missionen in einer kompakten Leiste direkt unter der TopBar mit Fortschrittsanzeige und sofortigem ⚡ EXP-Claim.
+3. Vollständige, lückenlose Aufbereitung aller 8 IHK-Kapitel in verdaulichen Wissens-Häppchen (Nuggets) und abprüfenden Quizfragen.
 
 ---
 
-## 2. Technische Architektur & Änderungen
+## User Review & Bestätigte Entscheidungen
 
-### A. Datenstrukturen (`src/types/quiz.ts` & `src/data/cosmeticsData.ts`)
-- Neue Schnittstellen für Kosmetik-Kataloge:
-  - `CosmeticTheme`: ID, Name, Beschreibung, Preis (Coins / XP), CSS-Variablen/Farbpalette, Vorschau-Farbkreis.
-  - `CosmeticSoundpack`: ID, Name, Beschreibung, Preis, Audiosynthese-Typ.
-  - `CosmeticTitle`: ID, Titel-Name, Beschreibung, Preis, Icon.
-  - `CosmeticFrame`: ID, Name, Beschreibung, Preis, CSS-Animationsklasse.
-- Erweiterung von `UserStats` / `UserSettings`:
-  - `unlockedCosmetics`: `{ themes: string[]; soundpacks: string[]; titles: string[]; frames: string[] }`
-  - `equippedCosmetics`: `{ activeTheme: string; activeSoundpack: string; activeTitle?: string; activeFrame?: string }`
+> [!IMPORTANT]
+> Folgende Entscheidungen wurden basierend auf deinen Antworten im interaktiven Frage-Schritt festgelegt:
 
-### B. Haustier-Logik (`src/data/petData.ts` & `src/components/PetAvatar.tsx`)
-- Aktualisierung von `calculatePetDecay`:
-  - Minimalwerte für Hunger und Glück auf sichere Wohlfühl-Grenzen festsetzen.
-  - Neuer Zustand `isSleeping: boolean` (aktiv, wenn hunger < 25 oder seit > 12h keine Pflege, ohne Lebensgefahr).
-  - Keine Malus-Multiplikatoren oder Strafen.
-- `PetAvatar.tsx`:
-  - Schlafende Augen (`-.-` / geschlossene Wimpern), schlafende Pose.
-  - Schwebende, animierte "Zzz"-Blasen über dem Kopf des Tiers.
-  - Integration der animierten Rahmen um den Avatar (Gold, Neon, Regenbogen, Sterne).
-
-### C. Sound-Synthesizer (`src/services/audioService.ts`)
-- Erweiterung der Web-Audio-Engine um Soundpack-Profile:
-  - Unterstützung für umschaltbare Soundcharakteristiken (`standard`, `arcade8bit`, `scifi`, `acoustic`).
-  - Automatische Berücksichtigung des aktuell ausgerüsteten Soundpacks bei Klick-, Richtig-, Combo- und Kaufeffekten.
-
-### D. App-Theming (`src/index.css` & `src/App.tsx`)
-- Bereitstellung von Theme-Farb-Klassen auf Dokumentenebene (`theme-cyberpunk`, `theme-emerald`, `theme-sunset`, `theme-nordic`, etc.).
-- Dynamisches Umschalten des aktiven Themes in Echtzeit ohne Seiten-Neuladen.
-
-### E. Überarbeiteter Shop & Kleiderschrank (`src/components/VirtualPetView.tsx` & `CosmeticsShopModal.tsx`)
-- Übersichtliche Reiter im Shop:
-  - 🍎 **Futter & Snacks** (Sofortige Stärkung des Haustiers)
-  - 🎩 **Tier-Accessoires** (Hüte, Brillen, Schleifen & Überraschungs-Gegenstände)
-  - 🎨 **App-Farbthemen** (Vollständige Farbpaletten mit Live-Vorschau)
-  - 🏷️ **Ehrentitel** (Wählbare Auszeichnungen für Profil & Header)
-  - 🎵 **Soundpacks** (Probehören per Klick vor dem Kauf)
-  - ✨ **Animierte Rahmen** (Vorschau direkt am eigenen Haustier)
-- Transparente Preis-Tags mit Anzeige von Coin- und XP-Kaufoptionen.
-- Schnelles Ausrüsten gekaufter Gegenstände mit einem Klick.
+- **Fokus-Erweiterung**: Synthetisierte, beruhigende Audio-Klangwelten (Lofi-Chillout-Akkorde, White Noise, sanftes Regenrauschen) direkt im Fokus-Timer mit Lautstärkeregler und One-Click-Mute.
+- **Tägliche Missionen (3 pro Tag)**: Kompakt und aufmerksamkeitsstark direkt unter der TopBar verankert; mit Echtzeit-Fortschrittsbalken, Belohnungsanzeige und individuellem "EXP abholen"-Claim-Button.
+- **Inhaltliche Modul-Häppchen**: Vollständige curriculare Abdeckung aller prüfungsrelevanten Themen aus den 8 IHK-Hauptgebieten in mundgerechte Lerneinheiten (Definition, Merksatz, Praxisbeispiel) und anschließenden Wissens-Checks.
 
 ---
 
-## 3. Verifikationsplan
+## 1. Übersicht & Kernkonzept
 
-### Automatisierte Tests & Build-Prüfung
-- `lint_applet`: TypeScript-Typensicherheit (`tsc --noEmit`) über alle neuen Interfaces und Zustände.
-- `compile_applet`: Erfolgreicher Vite-Build ohne Warnungen.
+- **Zielgruppe**: Mediengestalter Digital & Print / Digitalmedien-Prüflinge vor der IHK-Abschlussprüfung.
+- **Mehrwert**: 
+  - Erhöhte Konzentrationsfähigkeit durch akustische Abschirmung (Brown/White Noise & Lofi-Harmonien).
+  - Tägliche Lernroutine durch sichtbare Tagesziele mit echtem EXP-Fortschritt für den Kosmetik-Shop.
+  - Sicheres Bestehen durch lückenlose Prüfungs-Nuggets ohne Textwüsten.
 
-### Manuelle UX- & Funktionsprüfung
-1. **Haustier-Sicherheit**:
-   - Simulation längerer Inaktivität: Tier geht in den "Schläft friedlich 💤"-Zustand über.
-   - Klick auf "Streicheln" oder Füttern: Tier wacht sofort mit fröhlicher Animation und Sound auf.
-   - Verifizieren: Keine Lebensgefahr, keine negativen Punkte.
-2. **Kauf & Währungsausgabe**:
-   - Kauf eines günstigen Items (z. B. Snack oder Starter-Titel) und eines hochpreisigen Themes (z. B. 1.000 Coins).
-   - Prüfen, ob Kontostand korrekt abgezogen wird und gekaufte Artikel dauerhaft im Besitz bleiben.
-3. **Seiten-Kosmetik Live-Effekte**:
-   - Wechseln des Farbthemes: App passt Akzentfarben sofort an.
-   - Wechseln des Soundpacks: Feedback-Töne klingen sofort im gewählten Stil (z. B. 8-Bit Chiptune).
-   - Ausrüsten eines animierten Rahmens: Pet-Avatar wird in TopBar und Haustier-Ansicht vom animierten Glow umrahmt.
-   - Titel-Auswahl: Titel erscheint im oberen Profil-Bereich.
+---
+
+## 2. User Experience & Visuelles Design
+
+### A. Tägliche Missionsleiste (`DailyMissionsBar.tsx`)
+- **Platzierung**: Direkt unter der TopBar (über oder integriert in den oberen Bereich), schlank gestaltet (< 48px Höhe auf Mobile).
+- **Layout**:
+  - Links: Kleines Icon-Badge mit Tagesdatum und Streak-Status.
+  - Mitte: 3 dynamische Missionskarten im horizontalen Flow:
+    1. *Fokus-Sprint absolvieren* (z. B. 1 Fokus-Session abschließen).
+    2. *Wissens-Häppchen meistern* (z. B. 2 neue Module oder 5 Einheiten lesen).
+    3. *Quiz-Treffer landen* (z. B. 8 Quizfragen richtig beantworten).
+  - Rechts: Individueller Claim-Button (`+50 EXP abholen`), der nach Zielerreichung golden aufleuchtet und beim Klick Konfetti sowie Sound auslöst.
+- **Zero-Pill & Typografie**: Klare, ungerahmte Fortschrittszahlen (`2/3 erledigt`), saubere dezente Mini-Balken, lesbare Schrift mit Tabular-Numerals.
+
+### B. Verbesserte Fokus-Funktion (`FocusSprintModal.tsx`)
+- **Akustische Begleitung**:
+  - Drei Soundmodi: **Lofi Deep Focus** (sanfte, langsame Moll-Akkorde), **White Noise** (gleichmäßiges Rauschen zur Maskierung von Umgebungsgeräuschen) und **Rain Drift** (Rosa Rauschen mit weichen Frequenzen).
+  - Generiert rein clientseitig mit Web Audio API `AudioContext`, Biquad-Filtern und GainNodes (keine externen Audio-Dateien, keine Ladezeiten, absolut offline-sicher).
+  - Schieberegler für Lautstärke + schneller Stummschalt-Knopf.
+- **Sprint-Belohnung**:
+  - Bei erfolgreichem Abschluss des Sprints werden automatisch **+40 ⚡ EXP** gutgeschrieben, die direkt zur täglichen Fokus-Mission beitragen.
+
+### C. Vollständige Prüfungs-Module & Häppchen (`src/data/chaptersData.ts`)
+- **Didaktisches 3er-Schema pro Häppchen**:
+  1. *Kernkonzept*: 1 prägnanter Satz zum Verstehen.
+  2. *Prüfungs-Stichpunkte*: Maximal 3 Bullet-Points mit Fettungen für IHK-Schlüsselbegriffe.
+  3. *Prüfungs-Merksatz / Fallstrick*: "IHK-Falle" oder goldene Faustregel.
+- **Vollständigkeit der 8 IHK-Themenbereiche**:
+  - *Kapitel 1*: IxD, Norman-Prinzipien, 10 Nielsen-Heuristiken, UI/UX/IxD-Abgrenzung, Gesten & Touch-Ziele.
+  - *Kapitel 2*: Wireframe-Phasen (Low/Mid/High), Informationsarchitektur, Zonen & Grid-Systeme.
+  - *Kapitel 3*: Prototypen (horizontal vs. vertikal), Klickdummies, Usability-Testing-Methoden.
+  - *Kapitel 4*: IT-Sicherheit, Phishing, Ransomware, Man-in-the-Middle, Hash-Verfahren & DSGVO.
+  - *Kapitel 5*: Web Accessibility (WCAG 2.1 AA/AAA, 4 Prinzipien POUR, ARIA, Kontraste).
+  - *Kapitel 6*: Projektablauf (Scrum, Kanban, Wasserfall, Briefing, Meilensteine).
+  - *Kapitel 7*: Datenbanken (SQL, Primär-/Fremdschlüssel, Relationen 1:1/1:n/n:m, JSON vs. XML).
+  - *Kapitel 8*: Medienneutrale Workflows, Farbmanagement (RGB vs. CMYK, Profile), Vektor vs. Raster.
+
+---
+
+## 3. Produktentscheidungen & Trade-offs
+
+| Entscheidung | Gewählter Ansatz | Begründung |
+|---|---|---|
+| **Audio-Synthese** | Web Audio API Oscillator & Noise Buffer | 100% offline-fähig, unendlich loopbar, null Megabyte Download, keine Urheberrechts- oder Hosting-Probleme. |
+| **Missions-Speicherung** | Lokale Persistenz mit Tagesstempel | Tägliches automatisches Zurücksetzen um Mitternacht oder beim ersten Start am neuen Tag (`lastActiveDate`). |
+| **EXP-Verknüpfung** | Ein einheitliches EXP-Konto | Direktes Feedback: Fokus & Missionen schalten sofort Shop-Items und Kosmetika frei. |
+
+---
+
+## 4. Technische Architektur & Datenfluss
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│                           TopBar                              │
+└───────────────────────────────┬───────────────────────────────┘
+                                │
+┌───────────────────────────────▼───────────────────────────────┐
+│             DailyMissionsBar (3 Ziele & EXP-Claim)            │
+│  [Mission 1: Fokus]   [Mission 2: Module]   [Mission 3: Quiz] │
+└───────────────────────────────┬───────────────────────────────┘
+                                │
+        ┌───────────────────────┼───────────────────────┐
+        ▼                       ▼                       ▼
+┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
+│ FocusSprintModal │   │ ChapterListView  │   │  QuizCard / Hub  │
+│ - Lofi / Noise   │   │ - Vollständige   │   │ - Wissens-Checks │
+│ - Timer & EXP    │   │   IHK-Nuggets    │   │ - Combo & Treffer│
+└──────────────────┘   └──────────────────┘   └──────────────────┘
+        │                       │                       │
+        └───────────────────────┼───────────────────────┘
+                                ▼
+               ┌─────────────────────────────────┐
+               │    UserStats (EXP & Missionen)  │
+               │   - xp                          │
+               │   - dailyMissions               │
+               │   - completedModules            │
+               └─────────────────────────────────┘
+```
+
+### Zustands-Modell für Tägliche Missionen:
+```typescript
+interface DailyMission {
+  id: string;
+  title: string;
+  description: string;
+  targetCount: number;
+  currentCount: number;
+  rewardXp: number;
+  isClaimed: boolean;
+  category: 'focus' | 'module' | 'quiz';
+}
+```
+
+### Nächste Schritte nach deiner Freigabe:
+1. Erstellung des `ambientSoundService.ts` mit Web Audio Synthesizern für Lofi-Chords und Noise.
+2. Integration der Audio-Schieberegler und Fokus-EXP in `FocusSprintModal.tsx`.
+3. Erstellung und Einbindung der `DailyMissionsBar.tsx` in `App.tsx`.
+4. Inhaltliche Überprüfung und Komplettierung aller Wissens-Häppchen und Quizfragen in `chaptersData.ts`.
+5. Verifizierung mit `compile_applet` und `lint_applet`.

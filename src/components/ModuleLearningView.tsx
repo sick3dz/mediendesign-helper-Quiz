@@ -19,6 +19,7 @@ interface Props {
   bionic: boolean;
   onBack: () => void;
   onModuleCompleted: (moduleId: string, gainedXp: number) => void;
+  onCorrectAnswer?: () => void;
   onNextModule?: () => void;
   hasNextModule?: boolean;
 }
@@ -29,6 +30,7 @@ export const ModuleLearningView: React.FC<Props> = ({
   bionic,
   onBack,
   onModuleCompleted,
+  onCorrectAnswer,
   onNextModule,
   hasNextModule = false,
 }) => {
@@ -330,6 +332,7 @@ export const ModuleLearningView: React.FC<Props> = ({
           onFinished={score => {
             onModuleCompleted(module.id, score);
           }}
+          onCorrectAnswer={onCorrectAnswer}
           onBackToOverview={onBack}
           onNextModule={onNextModule}
           hasNextModule={hasNextModule}

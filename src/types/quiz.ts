@@ -119,6 +119,18 @@ export interface EquippedCosmetics {
   frame?: string;
 }
 
+export interface DailyMission {
+  id: string;
+  title: string;
+  description: string;
+  targetCount: number;
+  currentCount: number;
+  rewardXp: number;
+  isClaimed: boolean;
+  category: 'focus' | 'module' | 'quiz';
+  icon: string;
+}
+
 export interface UserStats {
   xp: number;
   coins: number; // Redeemable in pet shop alongside EXP
@@ -134,6 +146,8 @@ export interface UserStats {
   pet: PetState;
   unlockedCosmetics?: string[]; // IDs of purchased cosmetics
   equippedCosmetics?: EquippedCosmetics;
+  dailyMissions?: DailyMission[];
+  dailyMissionsDate?: string;
   examScores: {
     date: string;
     score: number;

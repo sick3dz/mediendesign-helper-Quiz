@@ -1,19 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import { soundEffects } from '../services/audioService';
-import { Play, Pause, RotateCcw, X, Sparkles, Coffee } from 'lucide-react';
+import { ambientAudioService, AmbientSoundType } from '../services/ambientAudioService';
+import {
+  Play,
+  Pause,
+  RotateCcw,
+  X,
+  Sparkles,
+  Coffee,
+  Volume2,
+  VolumeX,
+  Music,
+  Headphones,
+  CloudRain,
+  Wind,
+} from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  onSprintCompleted?: (earnedXp: number) => void;
 }
 
-export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose }) => {
+export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose, onSprintCompleted }) => {
   const [totalSeconds, setTotalSeconds] = useState(300); // 5 min default
   const [secondsLeft, setSecondsLeft] = useState(300);
   const [isActive, setIsActive] = useState(false);
   const [isDone, setIsDone] = useState(false);
+  const [soundType, setSoundType] = useState<AmbientSoundType>('lofi');
+  const [volume, setVolume] = useState<number>(0.35);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
 
+  // Sync ambient sound with timer running state
+  useEffect(() => {
+    if (isActive && soundType !== 'none') {
+      ambientAudioService.play(soundType);
+    } else {
+      ambientAudioService.stop();
+    }
+  }, [isActive, soundType]);
+
+  // Handle closing modal - stop audio cleanly
+  useEffect(() => {
+    if (!isOpen) {
+      ambientAudioService.stop();
+      setIsActive(false);
+    }
+  }, [isOpen]);
+
+  // Timer countdown
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (isActive && secondsLeft > 0) {
@@ -23,13 +59,21 @@ export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose }) => {
     } else if (secondsLeft === 0 && isActive) {
       setIsActive(false);
       setIsDone(true);
+      ambientAudioService.stop();
       soundEffects.playLevelUp();
-      confetti({ particleCount: 90, spread: 80 });
+      try {
+        confetti({ particleCount: 85, spread: 80, origin: { y: 0.3 } });
+      } catch {
+        // ignore
+      }
+      if (onSprintCompleted) {
+        onSprintCompleted(40);
+      }
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isActive, secondsLeft]);
+  }, [isActive, secondsLeft, onSprintCompleted]);
 
   if (!isOpen) return null;
 
@@ -44,6 +88,35 @@ export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose }) => {
     setTotalSeconds(secs);
     setSecondsLeft(secs);
     setIsDone(false);
+    ambientAudioService.stop();
+  };
+
+  const handleSelectSound = (type: AmbientSoundType) => {
+    soundEffects.playClick();
+    setSoundType(type);
+    if (isActive) {
+      if (type === 'none') {
+        ambientAudioService.stop();
+      } else {
+        ambientAudioService.play(type);
+      }
+    }
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVol = parseFloat(e.target.value);
+    setVolume(newVol);
+    ambientAudioService.setVolume(newVol);
+    if (isMuted && newVol > 0) {
+      setIsMuted(false);
+      ambientAudioService.setMuted(false);
+    }
+  };
+
+  const handleToggleMute = () => {
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+    ambientAudioService.setMuted(nextMuted);
   };
 
   const minutes = Math.floor(secondsLeft / 60);
@@ -52,28 +125,34 @@ export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 relative transition-colors">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 relative transition-colors max-h-[92vh] overflow-y-auto">
         <button
-          onClick={onClose}
+          onClick={() => {
+            ambientAudioService.stop();
+            onClose();
+          }}
           className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 rounded-lg transition-colors cursor-pointer"
           aria-label="Schließen"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-400 rounded-full text-xs font-semibold mb-2">
-            <Sparkles className="w-3.5 h-3.5" />
-            ADHS Hyperfocus Sprint
+        {/* Modal Header */}
+        <div className="text-center mb-5">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 rounded-full text-xs font-bold mb-2 border border-indigo-200/80 dark:border-indigo-800/80">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+            <span>Fokus-Sprint & Lofi-Studio</span>
           </div>
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white">5-Minuten Fokus-Session</h3>
+          <h3 className="text-xl font-black text-slate-900 dark:text-white">
+            Konzentrierte Lerneinheit
+          </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Kurze Sprints verhindern Überforderung und halten die Dopamin-Motivation hoch.
+            Reizreduzierte Sprint-Phase mit beruhigenden Hintergrundklängen (+40 ⚡ EXP Belohnung).
           </p>
         </div>
 
-        {/* Circular / Ring Progress Indicator */}
-        <div className="relative w-44 h-44 mx-auto mb-6 flex items-center justify-center">
+        {/* Circular Ring Progress Indicator */}
+        <div className="relative w-40 h-40 mx-auto mb-5 flex items-center justify-center">
           <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
             <circle
               cx="50"
@@ -96,39 +175,40 @@ export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose }) => {
             />
           </svg>
           <div className="absolute flex flex-col items-center">
-            <span className="font-mono text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight tabular-nums">
+            <span className="font-mono text-4xl font-black text-slate-900 dark:text-white tracking-tight tabular-nums">
               {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
             </span>
-            <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500 mt-1">
+            <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 mt-1">
               {isActive ? 'Sprint läuft...' : isDone ? 'Geschafft!' : 'Bereit'}
             </span>
           </div>
         </div>
 
+        {/* Done / Celebration Banner */}
         {isDone ? (
-          <div className="text-center p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800 mb-6">
-            <div className="flex items-center justify-center gap-1.5 text-emerald-800 dark:text-emerald-300 font-bold text-sm mb-1">
-              <Coffee className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              Fantastisch! Zeit für eine 2-Minuten-Pause.
+          <div className="text-center p-3.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800 mb-5 animate-in fade-in">
+            <div className="flex items-center justify-center gap-1.5 text-emerald-800 dark:text-emerald-300 font-extrabold text-sm mb-0.5">
+              <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" />
+              <span>Session gemeistert! +40 ⚡ EXP erhalten</span>
             </div>
             <p className="text-xs text-emerald-700 dark:text-emerald-400">
-              Trinke einen Schluck Wasser oder strecke dich kurz, bevor du weiterlernst!
+              Deine tägliche Fokus-Mission wurde aktualisiert. Zeit für 2 Minuten Pause!
             </p>
           </div>
         ) : null}
 
-        {/* Controls */}
-        <div className="flex items-center justify-center gap-3 mb-6">
+        {/* Primary Sprint Controls */}
+        <div className="flex items-center justify-center gap-3 mb-5">
           <button
             onClick={toggle}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm transition-colors shadow-xs cursor-pointer ${
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs transition-all shadow-xs cursor-pointer active:scale-98 ${
               isActive
                 ? 'bg-amber-600 hover:bg-amber-700 text-white'
                 : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white'
             }`}
           >
             {isActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-            {isActive ? 'Pause' : 'Sprint starten'}
+            <span>{isActive ? 'Pause' : 'Sprint starten'}</span>
           </button>
 
           <button
@@ -140,27 +220,108 @@ export const FocusSprintModal: React.FC<Props> = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* Preset choices */}
-        <div className="flex items-center justify-center gap-2 text-xs">
-          <span className="text-slate-400 dark:text-slate-500">Dauer:</span>
-          <button
-            onClick={() => reset(180)}
-            className={`px-2.5 py-1 rounded-md font-mono cursor-pointer ${totalSeconds === 180 ? 'bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300 font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
-          >
-            3 min
-          </button>
-          <button
-            onClick={() => reset(300)}
-            className={`px-2.5 py-1 rounded-md font-mono cursor-pointer ${totalSeconds === 300 ? 'bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300 font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
-          >
-            5 min
-          </button>
-          <button
-            onClick={() => reset(600)}
-            className={`px-2.5 py-1 rounded-md font-mono cursor-pointer ${totalSeconds === 600 ? 'bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300 font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
-          >
-            10 min
-          </button>
+        {/* Duration Presets */}
+        <div className="flex items-center justify-center gap-2 text-xs mb-5">
+          <span className="text-slate-400 dark:text-slate-500 font-semibold text-[11px]">Dauer:</span>
+          {[180, 300, 600].map(secs => (
+            <button
+              key={secs}
+              onClick={() => reset(secs)}
+              className={`px-3 py-1 rounded-lg font-mono font-bold text-xs cursor-pointer transition-all ${
+                totalSeconds === secs
+                  ? 'bg-indigo-600 text-white shadow-2xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              {secs / 60} Min
+            </button>
+          ))}
+        </div>
+
+        {/* Ambient Soundscape Selection */}
+        <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 space-y-3">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <Headphones className="w-3.5 h-3.5 text-indigo-500" />
+              <span>Hintergrund-Audio (ADHS-Fokus)</span>
+            </span>
+            <span className="text-[10px] text-slate-400 font-medium">Web Audio API</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-1.5">
+            <button
+              onClick={() => handleSelectSound('lofi')}
+              className={`p-2 rounded-xl border text-left text-xs font-bold flex items-center gap-2 cursor-pointer transition-all ${
+                soundType === 'lofi'
+                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
+                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-indigo-300'
+              }`}
+            >
+              <Music className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">Lofi Chords</span>
+            </button>
+
+            <button
+              onClick={() => handleSelectSound('white-noise')}
+              className={`p-2 rounded-xl border text-left text-xs font-bold flex items-center gap-2 cursor-pointer transition-all ${
+                soundType === 'white-noise'
+                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
+                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-indigo-300'
+              }`}
+            >
+              <Wind className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">White Noise</span>
+            </button>
+
+            <button
+              onClick={() => handleSelectSound('rain')}
+              className={`p-2 rounded-xl border text-left text-xs font-bold flex items-center gap-2 cursor-pointer transition-all ${
+                soundType === 'rain'
+                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
+                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-indigo-300'
+              }`}
+            >
+              <CloudRain className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">Rain Drift</span>
+            </button>
+
+            <button
+              onClick={() => handleSelectSound('none')}
+              className={`p-2 rounded-xl border text-left text-xs font-bold flex items-center gap-2 cursor-pointer transition-all ${
+                soundType === 'none'
+                  ? 'bg-slate-800 text-white border-slate-800 shadow-2xs'
+                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-400'
+              }`}
+            >
+              <VolumeX className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">Stumm (Aus)</span>
+            </button>
+          </div>
+
+          {/* Volume Control */}
+          {soundType !== 'none' && (
+            <div className="flex items-center gap-2.5 pt-1 text-xs">
+              <button
+                onClick={handleToggleMute}
+                className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer p-1"
+                title={isMuted ? 'Ton an' : 'Stumm schalten'}
+              >
+                {isMuted ? <VolumeX className="w-4 h-4 text-rose-500" /> : <Volume2 className="w-4 h-4" />}
+              </button>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={isMuted ? 0 : volume}
+                onChange={handleVolumeChange}
+                className="w-full accent-indigo-600 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg cursor-pointer"
+              />
+              <span className="font-mono text-[10px] text-slate-400 w-8 text-right">
+                {Math.round((isMuted ? 0 : volume) * 100)}%
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>
