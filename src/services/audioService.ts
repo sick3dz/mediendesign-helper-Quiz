@@ -207,6 +207,16 @@ class SoundEffectsService {
     });
   }
 
+  // Alias for playCorrect
+  public playSuccess(combo: number = 1) {
+    this.playCorrect(combo);
+  }
+
+  // Alias for playWrong
+  public playError() {
+    this.playWrong();
+  }
+
   // Gentle low tone for incorrect answer
   public playWrong() {
     if (this.isMuted) return;

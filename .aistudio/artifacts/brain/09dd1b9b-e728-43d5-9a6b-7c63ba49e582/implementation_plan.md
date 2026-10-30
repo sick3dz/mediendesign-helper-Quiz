@@ -1,26 +1,30 @@
-# Implementation Plan - ADHD Dopamine Boosters (Streak Combos, Sprint Loot Box & Pet High-Five)
+# Implementation Plan - Smart Spaced-Recall Sprint & 4-4-4 Box-Breathing Relaxation
 
-Introduce three lightweight, highly motivating ADHD mechanics to maximize engagement and reward focus without cluttering the user interface.
+Enhance the **Fokus-Sprint** with a 20-unit maximum cap, spaced flashcard recall logic, design-focused content filtering, and a post-sprint guided 4-4-4 Box-Breathing relaxation mode.
 
 ## Proposed Features
 
-### 1. Dopamin-Combos (`🔥 3er-Serie + Bonus EXP`)
-- **Module Learning**: Track consecutive correct answers (`streakCombo`).
-- **Reward**: On every 3rd consecutive correct answer:
-  - Display a floating toast (`🔥 3ER-COMBO! +25 EXTRA EXP!`).
-  - Trigger celebratory confetti burst.
-  - Award +25 extra EXP points directly.
+### 1. Relevanz-Filter & Rein Design-Inhalte
+- Remove non-design items (such as SQL database questions) from the active quiz pool.
+- Ensure 100% of questions and flashcards cover Mediengestaltung, Interaktionsdesign (IxD), UX/UI, Wireframing, Typografie, and Design-Konzept.
+- Professional category badges (e.g. `Design-Konzept • Interaktionsdesign`).
 
-### 2. Fokus-Sprint Mystery Loot Box (`🎁 Fokus-Belohnungskiste`)
-- **Sprint Completion**: When a 5-min or 15-min Focus Sprint finishes:
-  - Display an interactive "Mystery Loot Box" unboxing card.
-  - Unboxing awards a random surprise drop (e.g. 2x Glücks-Kekse, 1x Fokus Bubble Tea, or +100 Bonus EXP) with a celebratory unboxing sound and confetti.
+### 2. Smart Spaced Recall (Karteikarte ➔ 2-3 Schritte ➔ Abfrage)
+- When the user reads a **Karteikarte (Flashcard)**, automatically queue a matching **Quiz-Frage** 2 to 3 positions later in the sprint queue.
+- Directly tests active memory recall shortly after reading, cementing long-term knowledge without feeling overwhelming.
 
-### 3. Pet High-Five / Pfötchen-Geben (`🐾 High-Five Action`)
-- **Interactive High-Five**: Add a quick "🐾 High-Five" button to `TopPetCompanionBar.tsx` and `VirtualPetView.tsx`.
-- **Reaction**: Triggers a cheerful high-five sound, energetic pet bounce, +10 happiness boost, and encouraging motivational pop-up (*"✋ High-Five! Du rockst das!"*).
+### 3. Maximal 20 Einheiten Limit
+- Set a strict cap of **20 Einheiten (20 Units)** per Fokus-Sprint.
+- Live unit progress counter (`Einheit 7 / 20`).
+- Session completes automatically upon finishing the 20th unit, even if the 5-minute timer has not elapsed.
+
+### 4. Interaktiver 4-4-4 Box-Breathing Kreis
+- Upon session completion + Loot Box unboxing:
+  - Transition into an interactive **4-4-4 Box-Breathing Visualizer**.
+  - Animated pulsing circle guiding 4s Einatmen → 4s Halten → 4s Ausatmen → 4s Halten.
+  - Allows the user to relax, lower cognitive load, and decompress for the remaining time.
 
 ## Verification Plan
 1. Execute `lint_applet` (`tsc --noEmit`).
 2. Execute `compile_applet` (`npm run build`).
-3. Test streak combos, sprint loot box unboxing, and pet high-five interactions.
+3. Verify spaced recall queueing, 20-unit cap, design-only filtering, and box-breathing animation.
