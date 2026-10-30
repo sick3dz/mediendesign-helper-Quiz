@@ -354,6 +354,7 @@ export const VirtualPetView: React.FC<Props> = ({
         accessories: [...pet.inventory.accessories, acc.id],
       },
     };
+    if (previewAccessory?.id === acc.id) setPreviewAccessory(null);
     onUpdatePet(updated);
     showTemporaryFeedback(`🎉 ${acc.name} für ${cost} EXP gekauft und angelegt!`);
   };
@@ -386,6 +387,7 @@ export const VirtualPetView: React.FC<Props> = ({
     };
 
     if (item.category === 'frame') {
+      if (previewFrame?.id === item.id) setPreviewFrame(null);
       onUpdatePet({
         ...pet,
         equipped: {
@@ -419,6 +421,7 @@ export const VirtualPetView: React.FC<Props> = ({
     };
 
     if (item.category === 'frame') {
+      if (previewFrame?.id === item.id) setPreviewFrame(null);
       onUpdatePet({
         ...pet,
         equipped: {
@@ -440,6 +443,7 @@ export const VirtualPetView: React.FC<Props> = ({
   // 8. Toggle Pet Accessory
   const handleToggleAccessory = (acc: PetAccessory) => {
     soundEffects.playClick();
+    if (previewAccessory?.id === acc.id) setPreviewAccessory(null);
     const isCurrentlyEquipped = pet.equipped[acc.category] === acc.id;
     const nextEquipped = { ...pet.equipped };
 
@@ -771,9 +775,9 @@ export const VirtualPetView: React.FC<Props> = ({
             isEating={isEating}
             isPetted={isPetted}
             size="lg"
+            equippedCosmetics={equippedCosmetics}
             previewOverride={{
               equipped: {
-                ...(equippedCosmetics?.frame ? { frame: equippedCosmetics.frame } : {}),
                 ...(previewAccessory ? { [previewAccessory.category]: previewAccessory.id } : {}),
                 ...(previewFrame ? { frame: previewFrame.id } : {}),
               },

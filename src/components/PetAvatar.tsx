@@ -1,11 +1,12 @@
 import React from 'react';
-import { PetSpecies, PetState } from '../types/quiz';
+import { PetSpecies, PetState, EquippedCosmetics } from '../types/quiz';
 
 interface Props {
   pet: PetState;
   isEating?: boolean;
   isPetted?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  equippedCosmetics?: EquippedCosmetics;
   previewOverride?: {
     equipped?: Partial<PetState['equipped']>;
   };
@@ -16,10 +17,12 @@ export const PetAvatar: React.FC<Props> = ({
   isEating,
   isPetted,
   size = 'lg',
+  equippedCosmetics,
   previewOverride,
 }) => {
   const { species, happiness, hunger } = pet;
   const equipped = {
+    ...(equippedCosmetics?.frame ? { frame: equippedCosmetics.frame } : {}),
     ...pet.equipped,
     ...(previewOverride?.equipped || {}),
   };
@@ -28,9 +31,33 @@ export const PetAvatar: React.FC<Props> = ({
   const isHungry = hunger <= 30;
 
   const sizeClasses = {
-    sm: 'w-16 h-16',
-    md: 'w-32 h-32',
+    sm: 'w-10 h-10',
+    md: 'w-28 h-28',
     lg: 'w-48 h-48',
+  }[size];
+
+  const frameInsets = {
+    sm: {
+      bronze: '-inset-0.5 border',
+      neon: '-inset-0.5 border ring-1',
+      stardust: '-inset-0.5 border ring-1',
+      rainbow: '-inset-0.5 border-2 ring-1 ring-offset-1',
+      divine: '-inset-1 border-2 ring-1',
+    },
+    md: {
+      bronze: '-inset-1 border-1.5',
+      neon: '-inset-1.5 border-2 ring-1',
+      stardust: '-inset-1.5 border-2 ring-1',
+      rainbow: '-inset-1.5 border-[2.5px] ring-1.5 ring-offset-1.5',
+      divine: '-inset-2 border-3 ring-2',
+    },
+    lg: {
+      bronze: '-inset-2 border-2',
+      neon: '-inset-2.5 border-2 ring-2',
+      stardust: '-inset-2.5 border-2 ring-2',
+      rainbow: '-inset-3 border-[3.5px] ring-2 ring-offset-2',
+      divine: '-inset-3.5 border-4 ring-4',
+    },
   }[size];
 
   const isSleeping = Boolean(pet.isSleeping);
@@ -41,25 +68,29 @@ export const PetAvatar: React.FC<Props> = ({
     }`}>
       {/* Equipped Animated Pet Frame */}
       {equipped?.frame === 'frame-bronze' && (
-        <div className="absolute -inset-2 rounded-full border-2 border-amber-500/80 shadow-[0_0_15px_rgba(217,119,6,0.35)] pointer-events-none animate-pulse" />
+        <div className={`absolute ${frameInsets.bronze} rounded-full border-amber-500/80 shadow-[0_0_12px_rgba(217,119,6,0.35)] pointer-events-none animate-pulse`} />
       )}
       {equipped?.frame === 'frame-neon' && (
-        <div className="absolute -inset-2.5 rounded-full border-2 border-cyan-400 ring-2 ring-fuchsia-500 shadow-[0_0_20px_rgba(6,182,212,0.8)] animate-pulse pointer-events-none" />
+        <div className={`absolute ${frameInsets.neon} rounded-full border-cyan-400 ring-fuchsia-500 shadow-[0_0_15px_rgba(6,182,212,0.8)] animate-pulse pointer-events-none`} />
       )}
       {equipped?.frame === 'frame-stardust' && (
-        <div className="absolute -inset-2.5 rounded-full border-2 border-purple-400 ring-2 ring-indigo-400/80 shadow-[0_0_25px_rgba(168,85,247,0.6)] animate-pulse pointer-events-none">
-          <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-xs animate-spin-slow">✨</span>
-          <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs animate-bounce">⭐</span>
-          <span className="absolute top-1/2 -left-2 -translate-y-1/2 text-xs animate-pulse">✦</span>
-          <span className="absolute top-1/2 -right-2 -translate-y-1/2 text-xs animate-pulse">✧</span>
+        <div className={`absolute ${frameInsets.stardust} rounded-full border-purple-400 ring-indigo-400/80 shadow-[0_0_20px_rgba(168,85,247,0.6)] animate-pulse pointer-events-none`}>
+          {size !== 'sm' && (
+            <>
+              <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-xs animate-spin-slow">✨</span>
+              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs animate-bounce">⭐</span>
+              <span className="absolute top-1/2 -left-2 -translate-y-1/2 text-xs animate-pulse">✦</span>
+              <span className="absolute top-1/2 -right-2 -translate-y-1/2 text-xs animate-pulse">✧</span>
+            </>
+          )}
         </div>
       )}
       {equipped?.frame === 'frame-rainbow' && (
-        <div className="absolute -inset-3 rounded-full border-[3.5px] border-amber-400 ring-2 ring-emerald-400 ring-offset-2 ring-offset-rose-500 shadow-[0_0_25px_rgba(236,72,153,0.7)] animate-spin-rainbow pointer-events-none" />
+        <div className={`absolute ${frameInsets.rainbow} rounded-full border-amber-400 ring-emerald-400 ring-offset-rose-500 shadow-[0_0_20px_rgba(236,72,153,0.7)] animate-spin-rainbow pointer-events-none`} />
       )}
       {equipped?.frame === 'frame-divine' && (
-        <div className="absolute -inset-3.5 rounded-full border-4 border-amber-300 ring-4 ring-yellow-400 shadow-[0_0_35px_rgba(250,204,21,0.9)] animate-pulse pointer-events-none">
-          <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-base select-none animate-bounce">👑</div>
+        <div className={`absolute ${frameInsets.divine} rounded-full border-amber-300 ring-yellow-400 shadow-[0_0_25px_rgba(250,204,21,0.9)] animate-pulse pointer-events-none`}>
+          <div className={`absolute ${size === 'sm' ? '-top-2 text-[10px]' : size === 'md' ? '-top-3 text-xs' : '-top-4 text-base'} left-1/2 -translate-x-1/2 select-none animate-bounce`}>👑</div>
         </div>
       )}
 

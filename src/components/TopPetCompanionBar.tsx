@@ -130,18 +130,14 @@ export const TopPetCompanionBar: React.FC<Props> = ({
               className="relative shrink-0 group cursor-pointer focus:outline-none"
               title={pet.isSleeping ? 'Schläft friedlich – Klick zum Aufwecken!' : 'Klick zum Streicheln!'}
             >
-              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105 active:scale-95">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center overflow-visible transition-transform group-hover:scale-105 active:scale-95 relative">
                 <PetAvatar
                   pet={pet}
                   isEating={isEating}
                   isPetted={isPetted}
                   size="sm"
-                  previewOverride={{
-                    equipped: {
-                      ...(stats.equippedCosmetics?.frame ? { frame: stats.equippedCosmetics.frame } : {}),
-                      ...(previewOverride?.equipped || {}),
-                    },
-                  }}
+                  equippedCosmetics={stats.equippedCosmetics}
+                  previewOverride={previewOverride}
                 />
               </div>
               <span className="absolute -bottom-1 -right-1 text-xs select-none">
