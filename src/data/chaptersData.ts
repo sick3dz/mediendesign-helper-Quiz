@@ -975,10 +975,11 @@ export const CHAPTERS: Chapter[] = [
         nuggets: [
           {
             id: 'n-sec-1',
-            title: 'Die 4 Angriffsarten auf einen Blick',
+            title: 'Die Phishing-Angriffsarten auf einen Blick',
             coreConcept: 'Gefälschte Kommunikation zur Datenabfrage.',
             bulletPoints: [
               'Phishing: Betrug über gefälschte E-Mails oder Fake-Webseiten zur Erbeutung von Passwörtern oder Bankdaten.',
+              'Spear-Phishing: Ein gezielter, maßgeschneiderter Phishing-Angriff auf eine bestimmte Person oder Firma mit vorab recherchierten Details.',
               'Smishing: Phishing per SMS (z. B. "Paket konnte nicht zugestellt werden, zahlen Sie 1,99 €").',
               'Vishing: Phishing über Telefonanrufe (Voice Phishing; z. B. angeblicher Bankmitarbeiter fordert TAN).',
               'Pharming: Manipulation der Namensauflösung (DNS) – der Nutzer wird trotz richtiger Adresseingabe unbemerkt auf gefälschte Server geleitet.'
@@ -1550,23 +1551,26 @@ export const CHAPTERS: Chapter[] = [
         nuggets: [
           {
             id: 'n-proj-3',
-            title: 'Lastenheft vs. Pflichtenheft',
-            coreConcept: 'Klare Trennung zwischen Auftraggeber und Auftragnehmer.',
+            title: 'Lastenheft vs. Pflichtenheft & Change Request',
+            coreConcept: 'Klare Trennung zwischen Auftraggeber und Auftragnehmer sowie geordnete Änderungen.',
             bulletPoints: [
               'Lastenheft: Erstellt vom AUFTRAGGEBER (Kunde). Beschreibt das "WAS soll erreicht werden?" (Gesamtheit aller Anforderungen und Wünsche).',
-              'Pflichtenheft: Erstellt vom AUFTRAGNEHMER (Agentur/Entwickler). Beschreibt das "WIE wird das Ziel umgesetzt?" (Konkrete technische und gestalterische Umsetzungsschritte).'
+              'Pflichtenheft: Erstellt vom AUFTRAGNEHMER (Agentur/Entwickler). Beschreibt das "WIE wird das Ziel umgesetzt?" (Konkrete technische und gestalterische Umsetzungsschritte).',
+              'Nachträgliche Kundenwünsche: Werden neue Funktionen gewünscht, die nicht im Pflichtenheft stehen, erfolgt dies über einen formellen "Change Request" (Änderungsantrag) mit Überprüfung von Mehrkosten und Terminverzögerungen.'
             ],
             examFavorite: true,
-            merksatz: 'Lastenheft = WAS will der Kunde? (Auftraggeber) | Pflichtenheft = WIE setzt die Agentur es um? (Auftragnehmer).'
+            merksatz: 'Lastenheft = WAS (Kunde) | Pflichtenheft = WIE (Agentur) | Neue Wünsche = Change Request.'
           },
           {
             id: 'n-proj-4',
-            title: 'Meilensteine',
-            coreConcept: 'Wichtige Kontrollpunkte im Projekt.',
+            title: 'Meilensteine im Projektzeitplan',
+            coreConcept: 'Wichtige Kontrollpunkte im Gantt-Diagramm.',
             bulletPoints: [
-              'Definieren überprüfbare Etappenziele ohne eigene Zeitdauer (z. B. "Freigabe des Konzepts", "Fertigstellung des Wireframes", "Projektabnahme").',
-              'Dienen der Qualitätskontrolle und Terminüberwachung.'
-            ]
+              'Formale Eigenschaft im Zeitplan (Gantt-Diagramm): Ein Meilenstein besitzt exakt eine Zeitdauer von 0 Tagen! Er ist ein fixer Stichtag bzw. ein wichtiges Zwischenereignis.',
+              'Definiert überprüfbare Etappenziele ohne eigene Bearbeitungszeit (z. B. "Freigabe des Konzepts", "Fertigstellung des Wireframes", "Projektabnahme").',
+              'Dient der Qualitätskontrolle, Terminüberwachung und Freigabe von Projektphasen.'
+            ],
+            merksatz: 'Ein Meilenstein hat eine Dauer von 0 Tagen und markiert ein überprüfbares Zwischenereignis.'
           }
         ],
         quizQuestions: [
