@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Grid,
 } from 'lucide-react';
+import { soundEffects } from '../services/audioService';
 
 interface Props {
   chapters: Chapter[];
@@ -94,6 +95,13 @@ export const ChapterListView: React.FC<Props> = ({
   const activeChapterStats = getChapterCompletion(currentChapter);
   const totalCompletedModules = stats.completedModules.length;
   const totalAllModules = chapters.reduce((acc, c) => acc + c.modules.length, 0);
+
+  const [expandedChecklistIdx, setExpandedChecklistIdx] = useState<number | null>(null);
+
+  const toggleChecklistItem = (idx: number) => {
+    soundEffects.playClick();
+    setExpandedChecklistIdx(expandedChecklistIdx === idx ? null : idx);
+  };
 
   return (
     <div className="space-y-4 sm:space-y-5">
@@ -359,24 +367,71 @@ export const ChapterListView: React.FC<Props> = ({
 
           {/* Chapter Exam Checklist */}
           {currentChapter.examChecklist && currentChapter.examChecklist.length > 0 && (
-            <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
-              <div className="flex items-center gap-2 mb-2">
-                <CheckSquare className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                <h4 className="text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                  Prüfungs-Checkliste für Kapitel {currentChapter.number}
-                </h4>
+            <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border-2 border-indigo-100 dark:border-indigo-900/40 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300">
+                    <CheckSquare className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                      Prüfungs-Checkliste
+                    </h4>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
+                      Fokus-Themen für Kapitel {currentChapter.number}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                  {currentChapter.examChecklist.length} Punkte
+                </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                {currentChapter.examChecklist.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-2 text-[11px] text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900/60 p-1.5 px-2 rounded-lg border border-slate-100 dark:border-slate-800"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
-                    <span className="leading-tight truncate">{item}</span>
-                  </div>
-                ))}
+              <div className="grid grid-cols-1 gap-2">
+                {currentChapter.examChecklist.map((item, idx) => {
+                  const isExpanded = expandedChecklistIdx === idx;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => toggleChecklistItem(idx)}
+                      className={`w-full text-left p-3 rounded-xl border transition-all duration-300 flex flex-col gap-2 group cursor-pointer ${
+                        isExpanded
+                          ? 'bg-white dark:bg-slate-900 border-indigo-400 dark:border-indigo-500 shadow-md ring-4 ring-indigo-500/10'
+                          : 'bg-white/60 dark:bg-slate-900/40 border-slate-100 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black transition-colors ${
+                            isExpanded ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                          }`}>
+                            {idx + 1}
+                          </div>
+                          <span className={`text-xs font-bold transition-colors ${
+                            isExpanded ? 'text-indigo-700 dark:text-indigo-400' : 'text-slate-700 dark:text-slate-300'
+                          }`}>
+                            {item.task}
+                          </span>
+                        </div>
+                        <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-90 text-indigo-500' : 'text-slate-400'}`}>
+                          <ChevronRight className="w-4 h-4" />
+                        </div>
+                      </div>
+                      
+                      {isExpanded && (
+                        <div className="pl-9 pr-2 pb-1 animate-in slide-in-from-top-1 duration-200">
+                          <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium leading-relaxed border-l-2 border-indigo-200 dark:border-indigo-800 pl-3 py-1">
+                            {item.detail}
+                          </p>
+                          <div className="mt-2 flex items-center gap-1.5 text-[9px] font-bold text-indigo-500 uppercase tracking-wider">
+                            <Lightbulb className="w-3 h-3" />
+                            <span>Tipp: Präge dir diesen Punkt gut ein!</span>
+                          </div>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}

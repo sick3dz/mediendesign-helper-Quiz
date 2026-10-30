@@ -40,7 +40,7 @@ import {
   RefreshCw,
   Lock,
   Award,
-  Zap,
+  Star,
   ArrowLeft,
   Gamepad2,
   Volume2,
@@ -566,7 +566,7 @@ export const VirtualPetView: React.FC<Props> = ({
                   </span>
                 </div>
                 <span className="text-[11px] font-mono font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">
-                  Noch {levelInfo.xpNeededForNext} ⚡ EXP benötigt
+                  Noch {levelInfo.xpNeededForNext} ⭐ EXP benötigt
                 </span>
               </>
             )}
@@ -582,7 +582,7 @@ export const VirtualPetView: React.FC<Props> = ({
             </span>
             <div className="flex items-center gap-2">
               <span className="text-[11px] font-mono text-indigo-700 dark:text-indigo-300 font-bold bg-indigo-50 dark:bg-indigo-950/70 px-2 py-0.5 rounded-md border border-indigo-200/80 dark:border-indigo-800" title="Dieses Guthaben kannst du für Snacks und Zubehör ausgeben, ohne dein Level zu senken">
-                Guthaben: <strong className="tabular-nums">{xp}</strong> ⚡ EXP
+                Guthaben: <strong className="tabular-nums">{xp}</strong> ⭐ EXP
               </span>
               <span className="tabular-nums text-indigo-600 dark:text-indigo-400 font-extrabold">
                 {levelInfo.progressPercent}%
@@ -733,7 +733,7 @@ export const VirtualPetView: React.FC<Props> = ({
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 shadow-2xs"
               title="Dein verfügbares EXP-Guthaben zum Füttern und Einkleiden deines Haustiers"
             >
-              <Zap className="w-4 h-4 text-amber-500 fill-amber-500 shrink-0" />
+              <Star className="w-4 h-4 text-amber-500 fill-amber-500 shrink-0" />
               <span className="tabular-nums font-black text-sm">{xp}</span>
               <span className="text-[11px] font-semibold text-indigo-600/80 dark:text-indigo-400/80">EXP-Guthaben</span>
             </div>
@@ -1146,7 +1146,7 @@ export const VirtualPetView: React.FC<Props> = ({
                             : 'opacity-40 bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed'
                         }`}
                       >
-                        <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+                        <Star className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
                         <span>{xpCost} EXP kaufen</span>
                       </button>
                     </div>
@@ -1233,7 +1233,7 @@ export const VirtualPetView: React.FC<Props> = ({
                               : 'opacity-40 bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed'
                           }`}
                         >
-                          <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+                          <Star className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
                           <span>{xpCost} EXP freischalten</span>
                         </button>
                       )}
@@ -1320,7 +1320,7 @@ export const VirtualPetView: React.FC<Props> = ({
                               : 'opacity-40 bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed'
                           }`}
                         >
-                          <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+                          <Star className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
                           <span>{item.priceXp === 0 ? 'Gratis freischalten' : `${item.priceXp} EXP freischalten`}</span>
                         </button>
                       )}
@@ -1386,7 +1386,7 @@ export const VirtualPetView: React.FC<Props> = ({
                               : 'opacity-40 bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed'
                           }`}
                         >
-                          <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+                          <Star className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
                           <span>{item.priceXp === 0 ? 'Gratis freischalten' : `${item.priceXp} EXP freischalten`}</span>
                         </button>
                       )}
@@ -1448,7 +1448,7 @@ export const VirtualPetView: React.FC<Props> = ({
                               : 'opacity-40 bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed'
                           }`}
                         >
-                          <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+                          <Star className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
                           <span>{item.priceXp === 0 ? 'Gratis freischalten' : `${item.priceXp} EXP freischalten`}</span>
                         </button>
                       )}
@@ -1535,7 +1535,7 @@ export const VirtualPetView: React.FC<Props> = ({
                               : 'opacity-40 bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed'
                           }`}
                         >
-                          <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+                          <Star className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
                           <span>{item.priceXp === 0 ? 'Gratis freischalten' : `${item.priceXp} EXP freischalten`}</span>
                         </button>
                       )}

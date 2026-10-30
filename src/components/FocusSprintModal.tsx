@@ -202,6 +202,7 @@ export const FocusSprintModal: React.FC<Props> = ({
     setTotalAttempted(0);
     setBlitzCombo(0);
     setUnitsCompleted(false);
+    onClose(); // Close modal entirely on confirm exit
   };
 
   const handleRequestModeSwitch = (targetMode: 'passive' | 'active_quiz') => {
@@ -601,8 +602,8 @@ export const FocusSprintModal: React.FC<Props> = ({
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
                 }`}
               >
-                <Zap className={`w-4 h-4 fill-current text-amber-300 transition-transform duration-300 ${sprintMode === 'active_quiz' ? 'scale-110 rotate-12' : ''}`} />
-                <span>⚡ Aktiv: 20-Einheiten Mix</span>
+                <Star className={`w-4 h-4 fill-current text-amber-300 transition-transform duration-300 ${sprintMode === 'active_quiz' ? 'scale-110 rotate-12' : ''}`} />
+                <span>⭐ Aktiv: 20-Einheiten Mix</span>
               </button>
 
               <button

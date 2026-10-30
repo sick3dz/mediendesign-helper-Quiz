@@ -39,6 +39,11 @@ export interface LearningModule {
   miniGameType?: 'affordance' | 'phishing' | 'process_order' | 'wcag_match';
 }
 
+export interface ChecklistItem {
+  task: string;
+  detail: string;
+}
+
 export interface Chapter {
   id: string;
   number: number;
@@ -48,7 +53,7 @@ export interface Chapter {
   accentColor: string; // Tailwind color token
   modules: LearningModule[];
   examMerksatz: string;
-  examChecklist: string[];
+  examChecklist: ChecklistItem[];
 }
 
 export type PetSpecies = 'dog' | 'cat' | 'penguin' | 'axolotl';

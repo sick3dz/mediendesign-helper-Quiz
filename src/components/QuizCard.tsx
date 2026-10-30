@@ -3,7 +3,7 @@ import { QuizQuestion, QuizOption } from '../types/quiz';
 import { BionicText } from '../utils/bionicReading';
 import { soundEffects } from '../services/audioService';
 import confetti from 'canvas-confetti';
-import { Check, X, ArrowRight, RotateCcw, Award, Lightbulb, Zap, Sparkles } from 'lucide-react';
+import { Check, X, ArrowRight, RotateCcw, Award, Lightbulb, Star, Sparkles } from 'lucide-react';
 
 interface Props {
   questions: QuizQuestion[];
@@ -159,7 +159,7 @@ export const QuizCard: React.FC<Props> = ({
 
         <div className="inline-flex items-center gap-2 p-3 bg-gradient-to-r from-indigo-50 to-amber-50 dark:from-indigo-950/40 dark:to-amber-950/40 rounded-xl border border-indigo-100 dark:border-indigo-900/50 font-mono text-sm font-bold text-indigo-700 dark:text-indigo-300 mb-6 tabular-nums">
           <Sparkles className="w-4 h-4 text-amber-500" />
-          <span>+{score} ⚡ EXP für dein Haustier</span>
+          <span>+{score} ⭐ EXP für dein Haustier</span>
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-3">
@@ -247,7 +247,7 @@ export const QuizCard: React.FC<Props> = ({
         <div className="flex items-center gap-3">
           {combo > 1 && (
             <span className="font-bold text-amber-600 dark:text-amber-400 font-mono flex items-center gap-1 animate-pulse">
-              <Zap className="w-3.5 h-3.5 fill-amber-500" />
+              <Star className="w-3.5 h-3.5 fill-amber-500" />
               {combo}x Combo!
             </span>
           )}

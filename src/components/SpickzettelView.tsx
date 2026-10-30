@@ -192,7 +192,7 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
                 : 'bg-transparent text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
-            <Zap className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+            <Star className="w-3.5 h-3.5 text-amber-300 shrink-0" />
             <span className="hidden sm:inline whitespace-nowrap">Digital-Leitfaden</span>
             <span className="sm:hidden whitespace-nowrap text-[11px] font-bold">Leitfaden</span>
           </button>
@@ -496,7 +496,7 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
                       className="flex items-center gap-1.5 text-[11px] text-slate-700 dark:text-slate-300 font-medium"
                     >
                       <CheckSquare className="w-3 h-3 text-indigo-500 shrink-0" />
-                      <span>{item}</span>
+                      <span>{item.task}</span>
                     </div>
                   ))}
                 </div>

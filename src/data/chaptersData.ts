@@ -10,11 +10,11 @@ export const CHAPTERS: Chapter[] = [
     accentColor: 'indigo',
     examMerksatz: 'Interaktionsdesign gestaltet das Verhalten digitaler Produkte, damit Nutzer ihre Ziele effizient, verständlich und angenehm erreichen können.',
     examChecklist: [
-      'UI vs. UX vs. IxD Kernfragen beherrschen',
-      'Affordance vs. Signifier (Prüfungsfavorit!)',
-      'Donald Normans 7 Prinzipien benennen',
-      '10 Nielsen Usability-Heuristiken',
-      'Mobile Gestensteuerung & Button-Größen'
+      { task: 'UI vs. UX vs. IxD Kernfragen', detail: 'Beherrsche die 3 Leitfragen: Wie sieht es aus? (UI), Wie funktioniert es? (IxD), Wie fühlt es sich an? (UX).' },
+      { task: 'Affordance vs. Signifier', detail: 'Prüfungsfavorit! Affordance ist die Handlungsmöglichkeit (z.B. Griff), Signifier der Hinweis (z.B. Schild "Ziehen").' },
+      { task: 'Donald Normans 7 Prinzipien', detail: 'Discoverability, Feedback, Constraints, Mapping, Konsistenz, Affordance und Signifiers benennen können.' },
+      { task: '10 Nielsen-Heuristiken', detail: 'Der Goldstandard: Systemstatus, Reale Welt, Kontrolle, Konsistenz, Fehlerhilfe, Wiedererkennen, Flexibilität, Minimalismus, Fehlerdiagnose, Dokumentation.' },
+      { task: 'Mobile Gesten & Größen', detail: 'Buttons mind. 44x44px. Gesten wie Tap, Swipe, Pinch und Long Press sicher zuordnen.' }
     ],
     modules: [
       {
@@ -463,11 +463,11 @@ export const CHAPTERS: Chapter[] = [
     accentColor: 'blue',
     examMerksatz: 'Ein Wireframe ist eine vereinfachte, meist schwarz-weiße Darstellung einer Website oder App und dient der Planung von Struktur, Navigation und Nutzerführung, bevor das eigentliche Design entwickelt wird.',
     examChecklist: [
-      'Definition & Merksatz aufsagen können',
-      'Unterschied Wireframe vs. Mockup vs. Prototyp',
-      'Low-, Mid- und High-Fidelity Merkmale',
-      'Bestandteile: Header, Nav, Content, CTA, Sidebar, Footer',
-      'Typische Fehler (zu früh gestalten!)'
+      { task: 'Definition & Merksatz', detail: 'Wireframes sind schematische Baupläne ohne Farben/Bilder für Struktur, Navigation und Nutzerführung.' },
+      { task: 'Wireframe vs. Mockup vs. Prototyp', detail: 'Kenne die Kette: Aufbau (Wireframe) → Aussehen (Mockup) → Bedienung (Prototyp).' },
+      { task: 'Die 3 Fidelity-Stufen', detail: 'Low-Fidelity (Skizze), Mid-Fidelity (Digitaler Entwurf), High-Fidelity (Präziser Bauplan).' },
+      { task: 'Die 6 Standard-Zonen', detail: 'Header, Navigation, Content, Call-to-Action (CTA), Sidebar und Footer einplanen.' },
+      { task: 'Häufige Wireframe-Fehler', detail: 'Vermeide es, zu früh zu gestalten (Farben/Effekte), da dies von der Strukturdiskussion ablenkt.' }
     ],
     modules: [
       {
@@ -732,11 +732,11 @@ export const CHAPTERS: Chapter[] = [
     accentColor: 'emerald',
     examMerksatz: 'Ein Prototyp ist eine interaktive und testbare Vorstufe eines digitalen Produkts, mit der Funktionen, Navigation und Nutzerführung überprüft werden können, bevor die eigentliche Entwicklung beginnt.',
     examChecklist: [
-      'Definition Prototyp & Klickdummy',
-      'Horizontaler vs. Vertikaler Prototyp (Unterschied!)',
-      'Ablauf eines Usability-Tests (5 Schritte)',
-      'Warum Prototypen Kosten sparen',
-      'Tools: Figma, ProtoPie, InVision, Axure'
+      { task: 'Definition Prototyp & Klickdummy', detail: 'Ein Prototyp macht ein Konzept erlebbar, indem er Funktionen und Abläufe simuliert. Der Klickdummy ist die einfachste Form.' },
+      { task: 'Horizontal vs. Vertikal', detail: 'Horizontal zeigt viele Bereiche oberflächlich; Vertikal zeigt eine Kernfunktion in voller Tiefe.' },
+      { task: 'Ablauf Usability-Test', detail: '5 Schritte: Aufgabe stellen, Beobachten, Lautes Denken, Protokollieren, Optimieren.' },
+      { task: 'Warum Prototypen?', detail: 'Sie sparen Kosten (1-10-100 Regel), da Fehler vor der Programmierung behoben werden.' },
+      { task: 'Tools für Prototypen', detail: 'Gängige Werkzeuge: Figma, ProtoPie, InVision, Axure RP.' }
     ],
     modules: [
       {
@@ -958,11 +958,11 @@ export const CHAPTERS: Chapter[] = [
     accentColor: 'rose',
     examMerksatz: 'Internetbetrug umfasst betrügerische Handlungen im Internet, bei denen Täter durch Täuschung an Geld, persönliche Daten oder Zugänge gelangen. Zu den häufigsten Formen gehören Phishing, Fake-Shops, Social Engineering, Identitätsdiebstahl und Schadsoftware.',
     examChecklist: [
-      'Phishing, Smishing, Vishing, Pharming unterscheiden',
-      'Merkmale Fake-Shops (kein Impressum, nur Vorkasse)',
-      'Social Engineering & CEO-Fraud',
-      'Malware-Arten (Virus, Wurm, Trojaner, Ransomware, Spyware)',
-      'Datenschutz (Person) vs. Datensicherheit (Schutz vor Verlust/Diebstahl)'
+      { task: 'Die 4 Angriffsarten', detail: 'Unterscheide Phishing (Mail/Web), Smishing (SMS), Vishing (Anruf) und Pharming (DNS-Umleitung).' },
+      { task: 'Fake-Shop Merkmale', detail: 'Achte auf unrealistische Preise, fehlendes Impressum und erzwungene Vorkasse.' },
+      { task: 'Social Engineering & CEO-Fraud', detail: 'Manipulation von Menschen durch Autorität, Zeitdruck oder Hilfsbereitschaft.' },
+      { task: 'Malware-Arten', detail: 'Kenne Virus (Wirt), Wurm (Netzwerk), Trojaner (Tarnung), Ransomware (Erpressung) und Spyware (Spionage).' },
+      { task: 'Datenschutz vs. Datensicherheit', detail: 'Schutz der Person/Privatsphäre (Datenschutz) vs. Technischer Schutz vor Verlust/Angriff (Datensicherheit).' }
     ],
     modules: [
       {
@@ -1236,11 +1236,11 @@ export const CHAPTERS: Chapter[] = [
     accentColor: 'amber',
     examMerksatz: 'Web Accessibility bedeutet die barrierefreie Gestaltung digitaler Inhalte, sodass alle Menschen unabhängig von körperlichen, sensorischen oder kognitiven Einschränkungen Websites und Anwendungen wahrnehmen, verstehen, bedienen und nutzen können.',
     examChecklist: [
-      '4 Einschränkungsarten (visuell, auditiv, motorisch, kognitiv)',
-      'WCAG 4 Prinzipien POUR benennen und erklären',
-      'WCAG-Stufen A, AA (gesetzlicher Standard) und AAA',
-      'Semantisches HTML (<header>, <main>, <nav> vs. <div>)',
-      'Alt-Texte & Farbkontraste (nicht nur Farbe als Signal)'
+      { task: '4 Einschränkungsarten', detail: 'Gestalte für Visuelle, Auditive, Motorische und Kognitive Einschränkungen.' },
+      { task: 'WCAG Prinzipien (POUR)', detail: 'Perceivable (Wahrnehmbar), Operable (Bedienbar), Understandable (Verständlich), Robust (Technisch sauber).' },
+      { task: 'Konformitätsstufen (A, AA, AAA)', detail: 'Stufe AA ist der international empfohlene und oft gesetzlich geforderte Standard.' },
+      { task: 'Semantisches HTML', detail: 'Nutze bedeutungstragende Tags wie <nav>, <main>, <header> statt reiner "Div-Suppe" für Screenreader.' },
+      { task: 'Kontraste & Alt-Texte', detail: 'Mindestkontrast 4,5:1. Bilder für Blinde beschreiben; rein dekorative Bilder stumm schalten (alt="").' }
     ],
     modules: [
       {
@@ -1464,11 +1464,11 @@ export const CHAPTERS: Chapter[] = [
     accentColor: 'teal',
     examMerksatz: 'Der Projektablauf beschreibt die strukturierte Umsetzung eines Projekts von der Idee über Planung, Konzeption, Umsetzung und Test bis zum erfolgreichen Abschluss.',
     examChecklist: [
-      'Die 6 Projektphasen in richtiger Reihenfolge',
-      'Was definiert ein Projekt? (Ziel, Anfang/Ende, Ressourcen, Budget)',
-      'Lastenheft (Auftraggeber: Was?) vs. Pflichtenheft (Auftragnehmer: Wie?)',
-      'Meilensteine als wichtige Kontrollpunkte',
-      'Scrum-Begriffe: Sprint, Product Backlog, Sprint Backlog, Review, Retrospektive'
+      { task: 'Die 6 Projektphasen', detail: '1. Initiierung, 2. Planung, 3. Konzeption, 4. Umsetzung, 5. Testphase, 6. Abschluss.' },
+      { task: 'Definition Projekt', detail: 'Ein Projekt ist zeitlich begrenzt, hat klare Ziele, begrenzte Ressourcen und ein festes Budget.' },
+      { task: 'Lastenheft vs. Pflichtenheft', detail: 'Lastenheft (Was will der Kunde?) vs. Pflichtenheft (Wie wird es technisch umgesetzt?).' },
+      { task: 'Meilensteine', detail: 'Wichtige Kontrollpunkte im Projektablauf zur Überprüfung von Terminen und Zwischenergebnissen.' },
+      { task: 'Scrum-Begriffe', detail: 'Sprint (Arbeitsphase), Backlogs (Aufgabenlisten), Review (Abnahme) und Retrospektive (Team-Feedback).' }
     ],
     modules: [
       {
@@ -1704,17 +1704,12 @@ export const CHAPTERS: Chapter[] = [
     accentColor: 'cyan',
     examMerksatz: 'Datenbanken sichern Daten konsistent in Tabellen (SQL); für den schnellen, schlanken Datenaustausch zwischen Server und Frontend im Web ist JSON mit Schlüssel-Wert-Paaren der weltweite IHK-Standard!',
     examChecklist: [
-      'Tabellen, Datensätze (Zeilen) & Felder (Spalten) definieren',
-      'Primärschlüssel vs. Fremdschlüssel unterscheiden',
-      'Kardinalitäten beherrschen (1:1, 1:n, n:m über Zwischentabelle)',
-      'SQL CRUD-Befehle zuordnen (INSERT, SELECT, UPDATE, DELETE)',
-      'Wichtigkeit der WHERE-Klausel bei UPDATE und DELETE',
-      'Normalisierung: Redundanzen und Inkonsistenzen vermeiden',
-      'JSON-Grundprinzip: Schlüssel-Wert-Paare (Text in doppelten Anführungszeichen)',
-      'JSON-Syntax: Objekte { } (Gruppierung) vs. Arrays [ ] (Listen)',
-      'Erlaubte JSON-Datentypen (String, Number, Boolean, Null, Object, Array)',
-      'Die 4 Prüfungsgründe: Warum JSON statt XML? (Kompakt, Schnell, Nativ, Lesbar)',
-      'Web-APIs: Datenaustausch zwischen Server-JSON und Frontend-Interface'
+      { task: 'Tabellen & Datensätze', detail: 'Tabellen sammeln Themen; Datensätze (Zeilen) sind Einzelobjekte; Felder (Spalten) sind Eigenschaften.' },
+      { task: 'Primär- vs. Fremdschlüssel', detail: 'Primärschlüssel identifiziert eindeutig; Fremdschlüssel verweist auf andere Tabellen zur Verknüpfung.' },
+      { task: 'Kardinalitäten', detail: 'Beziehungen verstehen: 1:1, 1:n (Standard) und n:m (benötigt immer eine Zwischentabelle).' },
+      { task: 'SQL CRUD-Befehle', detail: 'INSERT (Anlegen), SELECT (Lesen), UPDATE (Ändern), DELETE (Löschen).' },
+      { task: 'Normalisierung & Konsistenz', detail: 'Redundanzen vermeiden, damit Daten an nur einer Stelle geändert werden müssen (Single Source of Truth).' },
+      { task: 'JSON-Syntax & Datentypen', detail: 'Schlüssel-Wert-Paare in { } und [ ]. Erlaubt: String, Number, Boolean, Null, Object, Array.' }
     ],
     modules: [
       {
@@ -2218,20 +2213,13 @@ export const CHAPTERS: Chapter[] = [
     accentColor: 'teal',
     examMerksatz: 'Medienneutrale Daten trennen Inhalt von der Gestaltung. Ein zentraler Datenbestand (Single Source) steuert über semantische Vorlagen Web, Print, App und Newsletter – Änderungen erfolgen fehlerfrei an nur einer Stelle!',
     examChecklist: [
-      'Definition: Medienneutrale Daten (ausgabeunabhängig & strukturiert)',
-      'Grundprinzip: Trennung von Inhalt, Struktur, Gestaltung & Ausgabe',
-      'Unterschied: Layoutbasierter vs. strukturbasierter Workflow',
-      'Semantik: H1 statt „fett 24pt“, Bedeutung vor visuellem Aussehen',
-      'Single Source Publishing (SSP): Ein Datenbestand für alle Medienkanäle',
-      'Ausgabemedien: Web (sRGB, 72/144 DPI) vs. Print (CMYK, 300 DPI, Beschnitt)',
-      'Metadaten vs. Inhalt (Bildrechte, Autor, Erstellungsdatum, Tags)',
-      'Warum ist ein fertiges PDF üblicherweise NICHT medienneutral?',
-      'Fehlerquellen: Fehlende Pflichtfelder, falsche Preise, inkonsistente Ausgaben',
-      'Der 5-Schritte-IHK-Ablauf von der Erfassung bis zur Qualitätskontrolle',
-      'XML-Wohlgeformtheit (Well-formed): 1 Root, Schließen aller Tags, kein Überkreuzen, Case-Sensitivity',
-      'XML-Zusatztechnologien: DTD/XSD (Gesetzbuch/Validierung), XPath (Adresse/Suche) & XSLT (Transformation)',
-      'Die IHK-Prüfungskette: XML (speichert) → DTD/XSD (prüft) → XPath (sucht) → XSLT (macht Design/HTML)',
-      'Vergleich: XML vs. JSON (Struktur, Lesbarkeit, Parsing-Speed, Web-APIs)'
+      { task: 'Medienneutrale Daten', detail: 'Inhalte sind unabhängig von der späteren Ausgabe (Print, Web, App) und strukturiert gespeichert.' },
+      { task: 'Inhalt/Struktur/Form', detail: 'Fundamentale Trennung von Inhalten (Text/Bild), logischer Struktur (Tags) und visuellem Layout (CSS).' },
+      { task: 'Single Source Publishing', detail: 'Ein zentraler Datenbestand (z.B. Datenbank) speist alle Medienkanäle fehlerfrei und gleichzeitig.' },
+      { task: 'Web vs. Print Spezifikationen', detail: 'Web: sRGB, 72/144 DPI. Print: CMYK, 300 DPI, Beschnittzugabe beachten.' },
+      { task: 'XML-Wohlgeformtheit', detail: 'Regeln: Ein Root-Element, alle Tags schließen, keine Überkreuzungen, Case-Sensitivity.' },
+      { task: 'Die IHK-Prüfungskette', detail: 'XML (speichert) → DTD/XSD (prüft) → XPath (sucht) → XSLT (macht Design/HTML).' },
+      { task: 'Vergleich: XML vs. JSON', detail: 'JSON ist kompakter, schneller im Parsing und nativ in Web-APIs integriert.' }
     ],
     modules: [
       {

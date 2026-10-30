@@ -145,7 +145,7 @@ export const ALL_BADGES: Badge[] = [
     id: 'agile_scrum',
     title: 'Sprint-Captain',
     description: 'Kapitel 6 Projektablauf & Scrum abgeschlossen',
-    icon: '⚡',
+    icon: '⭐',
   },
   {
     id: 'database_architect',
@@ -203,7 +203,7 @@ export const LEVEL_LADDER: LevelTier[] = [
     level: 4,
     title: 'IxD-Spezialist',
     xp: 1000,
-    icon: '⚡',
+    icon: '⭐',
     rewardTitle: 'IxD-Spezialist',
     rewardFood: { id: 'food-donut', name: 'Schoko-Streusel Donut', icon: '🍩', count: 4 },
     rewardDescription: 'Titel "IxD-Spezialist" + 4x Schoko-Donut',

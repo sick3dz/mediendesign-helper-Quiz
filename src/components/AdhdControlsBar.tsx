@@ -1,7 +1,7 @@
 import React from 'react';
 import { UserStats } from '../types/quiz';
 import { UserSettings, calculateLevel } from '../services/storageService';
-import { Volume2, VolumeX, Eye, Flame, Zap } from 'lucide-react';
+import { Volume2, VolumeX, Eye, Flame, Star } from 'lucide-react';
 import { soundEffects } from '../services/audioService';
 
 interface Props {
@@ -59,7 +59,7 @@ export const AdhdControlsBar: React.FC<Props> = ({ stats, settings, onUpdateSett
 
           {stats.currentCombo > 1 && (
             <span className="flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400 font-mono">
-              <Zap className="w-3.5 h-3.5 fill-amber-500" />
+              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
               {stats.currentCombo}x!
             </span>
           )}

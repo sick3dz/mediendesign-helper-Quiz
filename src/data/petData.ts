@@ -266,7 +266,7 @@ export const PET_ACCESSORIES: PetAccessory[] = [
     category: 'neck',
     price: 180,
     xpPrice: 120,
-    icon: '⚡',
+    icon: '⭐',
     description: 'Signalisiert blitzschnellen REST-API-Datenaustausch zwischen Frontend und Server.',
   },
 ];
@@ -505,9 +505,9 @@ export function getDynamicPetThought(pet: PetState, statsXp: number = 0, seedInd
     dog: [
       `${pet.name} schnüffelt neugierig nach neuen Wireframes & Layout-Tipps! 🐾`,
       `Wuff! Ich habe einen kleinen Fehler im Raster aufgespürt! 🐕`,
-      `Design-Gründe sprechen klar für eine frische Lerneinheit! ⚡`,
+      `Design-Gründe sprechen klar für eine frische Lerneinheit! ⭐`,
       `Ich halte dir treu die Treue bei jeder kniffligen IHK-Frage! 🐾`,
-      timeContext === 'morning' ? `Guten Morgen! Wuff – lass uns mit vollem Schwung lernen! ☀️` : timeContext === 'afternoon' ? `Nachmittags-Power! Wuff – lass uns das nächste Kapitel knacken! ⚡` : `Nachtschicht? Ich wache treu an deiner Seite! 🌙`,
+      timeContext === 'morning' ? `Guten Morgen! Wuff – lass uns mit vollem Schwung lernen! ☀️` : timeContext === 'afternoon' ? `Nachmittags-Power! Wuff – lass uns das nächste Kapitel knacken! ⭐` : `Nachtschicht? Ich wache treu an deiner Seite! 🌙`,
     ],
     cat: [
       `${pet.name} prüft mit Schnurrhaaren, ob dein Kontrast WCAG-konform ist! 🐱`,

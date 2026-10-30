@@ -895,7 +895,7 @@ export default function App() {
           <div className="flex items-center gap-4 text-[11px] text-slate-400 dark:text-slate-500">
             <span>{stats.pet.name} ({stats.pet.species})</span>
             <span aria-hidden="true">·</span>
-            <span className="font-mono tabular-nums font-semibold text-indigo-600 dark:text-indigo-400">⚡ {stats.xp} EXP</span>
+            <span className="font-mono tabular-nums font-semibold text-indigo-600 dark:text-indigo-400">⭐ {stats.xp} EXP</span>
           </div>
         </div>
       </footer>
