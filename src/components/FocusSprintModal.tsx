@@ -399,7 +399,6 @@ export const FocusSprintModal: React.FC<Props> = ({
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
-                  <Headphones className="w-3.5 h-3.5" />
                   <span>⏱️ Passiv: Timer</span>
                 </button>
               </div>
@@ -457,7 +456,6 @@ export const FocusSprintModal: React.FC<Props> = ({
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <Headphones className="w-4 h-4" />
                 <span>⏱️ Passiv: Timer</span>
               </button>
             </div>
