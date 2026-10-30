@@ -180,20 +180,21 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
         </p>
 
         {/* Primary Tab Switcher */}
-        <div className="grid grid-cols-3 gap-1.5 mt-5 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-semibold">
+        <div className="grid grid-cols-3 gap-1 sm:gap-1.5 mt-5 p-1 sm:p-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-semibold">
           <button
             onClick={() => {
               soundEffects.playClick();
               setActiveTab('digital-guide');
             }}
-            className={`py-2 px-2 sm:px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+            className={`py-2 px-1 sm:px-3 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer text-center ${
               activeTab === 'digital-guide'
                 ? 'bg-indigo-600 text-white shadow-xs font-extrabold'
                 : 'bg-transparent text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
             <Zap className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-            <span className="truncate">Digital-Leitfaden</span>
+            <span className="hidden sm:inline whitespace-nowrap">Digital-Leitfaden</span>
+            <span className="sm:hidden whitespace-nowrap text-[11px] font-bold">Leitfaden</span>
           </button>
 
           <button
@@ -201,14 +202,15 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
               soundEffects.playClick();
               setActiveTab('comparisons');
             }}
-            className={`py-2 px-2 sm:px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+            className={`py-2 px-1 sm:px-3 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer text-center ${
               activeTab === 'comparisons'
                 ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold border border-slate-200 dark:border-slate-700'
                 : 'bg-transparent text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
             <Layers className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
-            <span className="truncate">Schnell-Vergleiche</span>
+            <span className="hidden sm:inline whitespace-nowrap">Schnell-Vergleiche</span>
+            <span className="sm:hidden whitespace-nowrap text-[11px] font-bold">Vergleiche</span>
           </button>
 
           <button
@@ -216,14 +218,15 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
               soundEffects.playClick();
               setActiveTab('chapters');
             }}
-            className={`py-2 px-2 sm:px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+            className={`py-2 px-1 sm:px-3 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer text-center ${
               activeTab === 'chapters'
                 ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs font-bold border border-slate-200 dark:border-slate-700'
                 : 'bg-transparent text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
             <BookOpen className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
-            <span className="truncate">Kapitel-Merksätze</span>
+            <span className="hidden sm:inline whitespace-nowrap">Kapitel-Merksätze</span>
+            <span className="sm:hidden whitespace-nowrap text-[11px] font-bold">Merksätze</span>
           </button>
         </div>
 
@@ -338,11 +341,16 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
                   {prevTopicIndex !== null ? (
                     <button
                       onClick={() => handleSelectTopic(prevTopicIndex)}
-                      className="h-9 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400 text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs max-w-full truncate"
+                      className="h-9 px-3 sm:px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400 text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs max-w-full"
                       title={`Zu Kapitel ${prevTopicIndex + 1}: ${DIGITAL_GUIDE_TOPICS[prevTopicIndex].title}`}
                     >
                       <ArrowLeft className="w-4 h-4 shrink-0" />
-                      <span className="truncate">Kapitel {prevTopicIndex + 1}: {DIGITAL_GUIDE_TOPICS[prevTopicIndex].title.replace(/^\d+\.\s*(★\s*)?/, '')}</span>
+                      <span className="hidden sm:inline truncate max-w-[220px]">
+                        Kapitel {prevTopicIndex + 1}: {DIGITAL_GUIDE_TOPICS[prevTopicIndex].title.replace(/^\d+\.\s*(★\s*)?/, '')}
+                      </span>
+                      <span className="sm:hidden whitespace-nowrap">
+                        Kapitel {prevTopicIndex + 1}
+                      </span>
                     </button>
                   ) : (
                     <div />
@@ -355,10 +363,15 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
                   {nextTopicIndex !== null ? (
                     <button
                       onClick={() => handleSelectTopic(nextTopicIndex)}
-                      className="h-9 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ml-auto max-w-full truncate"
+                      className="h-9 px-3 sm:px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ml-auto max-w-full"
                       title={`Zu Kapitel ${nextTopicIndex + 1}: ${DIGITAL_GUIDE_TOPICS[nextTopicIndex].title}`}
                     >
-                      <span className="truncate">Weiter zu Kapitel {nextTopicIndex + 1}: {DIGITAL_GUIDE_TOPICS[nextTopicIndex].title.replace(/^\d+\.\s*(★\s*)?/, '')}</span>
+                      <span className="hidden sm:inline truncate max-w-[220px]">
+                        Weiter zu Kapitel {nextTopicIndex + 1}: {DIGITAL_GUIDE_TOPICS[nextTopicIndex].title.replace(/^\d+\.\s*(★\s*)?/, '')}
+                      </span>
+                      <span className="sm:hidden whitespace-nowrap">
+                        Kapitel {nextTopicIndex + 1}
+                      </span>
                       <ArrowRight className="w-4 h-4 shrink-0" />
                     </button>
                   ) : (
@@ -367,9 +380,10 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
                         soundEffects.playClick();
                         setActiveTab('comparisons');
                       }}
-                      className="h-9 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ml-auto"
+                      className="h-9 px-3 sm:px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ml-auto"
                     >
-                      <span>Weiter zu Schnell-Vergleichen</span>
+                      <span className="hidden sm:inline">Weiter zu Schnell-Vergleichen</span>
+                      <span className="sm:hidden">Zu Vergleichen</span>
                       <ArrowRight className="w-4 h-4 shrink-0" />
                     </button>
                   )}

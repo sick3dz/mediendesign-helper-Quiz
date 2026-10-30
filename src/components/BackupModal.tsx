@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Download, Upload, Copy, Check, AlertCircle, X, HardDrive, RefreshCw } from 'lucide-react';
-import { downloadBackupFile, generateBackupJson, restoreBackupJson, UserSettings } from '../services/storageService';
+import { Download, Upload, Copy, Check, AlertCircle, X, HardDrive, RefreshCw, Trash2, RotateCcw } from 'lucide-react';
+import { downloadBackupFile, generateBackupJson, restoreBackupJson, resetUserStatsToDefault, UserSettings } from '../services/storageService';
 import { UserStats } from '../types/quiz';
 import { soundEffects } from '../services/audioService';
 
@@ -14,6 +14,7 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
   const [copied, setCopied] = useState(false);
   const [pasteText, setPasteText] = useState('');
   const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Close on Escape key
@@ -78,6 +79,17 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
   const handlePasteSubmit = () => {
     if (!pasteText.trim()) return;
     processImportString(pasteText.trim());
+  };
+
+  const handleResetToZero = () => {
+    soundEffects.playClick();
+    const fresh = resetUserStatsToDefault();
+    setImportStatus({ type: 'success', message: 'Spielstand erfolgreich auf 0 EXP zurückgesetzt!' });
+    setTimeout(() => {
+      onBackupRestored(fresh);
+      setShowResetConfirm(false);
+      onClose();
+    }, 800);
   };
 
   return (
@@ -230,6 +242,54 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
                 </button>
               )}
             </div>
+          </div>
+
+          {/* Section 3: Reset to 0 EXP */}
+          <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                <RotateCcw className="w-3.5 h-3.5 text-rose-500" />
+                3. Spielstand auf 0 EXP zurücksetzen
+              </span>
+              <span className="text-[10px] text-rose-500 font-mono">Neustart</span>
+            </div>
+
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Möchtest du komplett von vorne anfangen? Setzt EXP auf 0 und setzt alle Kapitel zurück, damit du jede Belohnung frisch erspielen kannst.
+            </p>
+
+            {!showResetConfirm ? (
+              <button
+                type="button"
+                onClick={() => setShowResetConfirm(true)}
+                className="w-full py-2.5 px-4 bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/60 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Trash2 className="w-4 h-4 text-rose-500" />
+                <span>Spielstand auf 0 EXP zurücksetzen</span>
+              </button>
+            ) : (
+              <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl space-y-2">
+                <p className="text-xs font-medium text-rose-800 dark:text-rose-300 text-center">
+                  Bist du sicher? Alle bisherigen XP und Antworten werden auf 0 gesetzt!
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleResetToZero}
+                    className="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors shadow-xs"
+                  >
+                    Ja, auf 0 EXP zurücksetzen
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowResetConfirm(false)}
+                    className="flex-1 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+                  >
+                    Abbrechen
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

@@ -61,8 +61,8 @@ export function generateDailyMissions(): DailyMission[] {
 }
 
 const DEFAULT_STATS: UserStats = {
-  xp: 150, // Starting EXP bonus so learners can try feeding or styling their pet immediately!
-  coins: 50, // Welcome coins bonus
+  xp: 0, // Starts at 0 EXP so every point is earned through learning
+  coins: 0, // Starts at 0 coins
   level: 1,
   streakDays: 1,
   lastActiveDate: getTodayDateString(),
@@ -422,5 +422,16 @@ export function restoreBackupJson(jsonString: string): { success: boolean; stats
   } catch (err: any) {
     return { success: false, error: err.message || 'Dateien konnten nicht verarbeitet werden.' };
   }
+}
+
+export function resetUserStatsToDefault(): UserStats {
+  const freshStats: UserStats = {
+    ...DEFAULT_STATS,
+    pet: { ...DEFAULT_PET_STATE },
+    dailyMissions: generateDailyMissions(),
+    dailyMissionsDate: getTodayDateString(),
+  };
+  saveUserStats(freshStats);
+  return freshStats;
 }
 
