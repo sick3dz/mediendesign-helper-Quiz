@@ -264,7 +264,7 @@ export const FocusSprintModal: React.FC<Props> = ({
     const rewards = [
       '🍪 2x Glücks-Kekse für dein Haustier!',
       '🧋 1x Fokus Bubble-Tea geschenkt!',
-      '⚡ +100 Bonus EXP Guthaben!',
+      '⭐ +100 Bonus EXP Guthaben!',
       '🍎 1x Goldener Prüfungs-Apfel!',
     ];
     const item = rewards[Math.floor(Math.random() * rewards.length)];
@@ -476,7 +476,7 @@ export const FocusSprintModal: React.FC<Props> = ({
           <div className="space-y-4 mb-4">
             <div className="p-4 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/40 rounded-2xl border border-indigo-200 dark:border-indigo-800 text-center space-y-3">
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-600 text-white shadow-md">
-                <Zap className="w-6 h-6 fill-amber-300 text-amber-300" />
+                <Star className="w-6 h-6 fill-amber-300 text-amber-300" />
               </div>
               <div>
                 <h4 className="font-black text-slate-900 dark:text-white text-base">
@@ -497,8 +497,8 @@ export const FocusSprintModal: React.FC<Props> = ({
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700/50'
                   }`}
                 >
-                  <Zap className={`w-3.5 h-3.5 fill-current text-amber-300 transition-transform duration-300 ${sprintMode === 'active_quiz' ? 'scale-110 rotate-12' : ''}`} />
-                  <span>⚡ 20-Einheiten Mix</span>
+                  <Star className={`w-3.5 h-3.5 fill-current text-amber-300 transition-transform duration-300 ${sprintMode === 'active_quiz' ? 'scale-110 rotate-12' : ''}`} />
+                  <span>⭐ 20-Einheiten Mix</span>
                 </button>
 
                 <button
@@ -578,10 +578,10 @@ export const FocusSprintModal: React.FC<Props> = ({
                 onClick={handleStartSprintNow}
                 className="w-full py-3 px-5 bg-gradient-to-r from-amber-500 via-indigo-600 to-indigo-700 hover:from-amber-600 hover:to-indigo-800 text-white font-black text-sm rounded-2xl shadow-lg transition-all active:scale-98 cursor-pointer flex items-center justify-center gap-2 group"
               >
-                <Zap className="w-5 h-5 fill-amber-300 text-amber-300 group-hover:scale-110 transition-transform" />
+                <Star className="w-5 h-5 fill-amber-300 text-amber-300 group-hover:scale-110 transition-transform" />
                 <span>
                   {sprintMode === 'active_quiz'
-                    ? `⚡ Fokus-Sprint JETZT STARTEN (${Math.round(totalSeconds / 60)} Min)`
+                    ? `⭐ Fokus-Sprint JETZT STARTEN (${Math.round(totalSeconds / 60)} Min)`
                     : `⏱️ Fokus-Timer JETZT STARTEN (${Math.round(totalSeconds / 60)} Min)`}
                 </span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -782,7 +782,7 @@ export const FocusSprintModal: React.FC<Props> = ({
                       <span>{blitzCombo}</span>
                     </span>
                     <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300 font-bold text-[11px] rounded-full border border-indigo-300 dark:border-indigo-700">
-                      ⚡ {blitzScore} Pkt
+                      ⭐ {blitzScore} Pkt
                     </span>
                   </div>
                 </div>
@@ -876,7 +876,7 @@ export const FocusSprintModal: React.FC<Props> = ({
                       className="w-full mt-2 py-2.5 px-4 bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-700 hover:to-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all active:scale-98 cursor-pointer flex items-center justify-center gap-2"
                     >
                       <Check className="w-4 h-4 stroke-[3]" />
-                      <span>Gelesen & Gemerkt! (+10 ⚡ EXP)</span>
+                      <span>Gelesen & Gemerkt! (+10 ⭐ EXP)</span>
                     </button>
                   </div>
                 )}

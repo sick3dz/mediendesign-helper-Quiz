@@ -53,7 +53,7 @@ export const AdhdControlsBar: React.FC<Props> = ({ stats, settings, onUpdateSett
             className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 text-indigo-700 dark:text-indigo-400 font-bold font-mono hover:scale-105 transition-all cursor-pointer"
             title="Haustier mit verdienten EXP versorgen & einkleiden"
           >
-            <span>⚡</span>
+            <span>⭐</span>
             <span className="tabular-nums">{stats.xp} EXP</span>
           </button>
 
