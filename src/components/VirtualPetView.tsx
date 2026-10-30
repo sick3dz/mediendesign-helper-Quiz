@@ -52,6 +52,8 @@ import {
   ChevronUp,
   Trophy,
   Gift,
+  Eye,
+  X,
 } from 'lucide-react';
 
 interface Props {
@@ -92,6 +94,7 @@ export const VirtualPetView: React.FC<Props> = ({
   const [isPetted, setIsPetted] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
   const [isRoadmapExpanded, setIsRoadmapExpanded] = useState(false);
+  const [previewThemeId, setPreviewThemeId] = useState<string | null>(null);
 
   // Level & progression are strictly tied to lifetime earned EXP (never decreases when spending!)
   const lifetimeProgressXp = stats.lifetimeXp ?? Math.max(xp, LEVEL_LADDER.find(l => l.level === (stats.level || 1))?.xp || 0);
@@ -111,6 +114,53 @@ export const VirtualPetView: React.FC<Props> = ({
       setActiveTab(initialTab);
     }
   }, [initialTab]);
+
+  // Live theme preview effect
+  useEffect(() => {
+    const allThemes = [
+      'theme-default',
+      'theme-emerald',
+      'theme-sunset',
+      'theme-nordic',
+      'theme-cyberpunk',
+      'theme-gold',
+      'theme-monochrome',
+    ];
+
+    if (!previewThemeId) {
+      const activeTheme = equippedCosmetics.theme || 'theme-default';
+      document.documentElement.classList.remove(...allThemes);
+      if (activeTheme !== 'theme-default') {
+        document.documentElement.classList.add(activeTheme);
+      }
+      return;
+    }
+
+    document.documentElement.classList.remove(...allThemes);
+    if (previewThemeId !== 'theme-default') {
+      document.documentElement.classList.add(previewThemeId);
+    }
+
+    return () => {
+      const activeTheme = equippedCosmetics.theme || 'theme-default';
+      document.documentElement.classList.remove(...allThemes);
+      if (activeTheme !== 'theme-default') {
+        document.documentElement.classList.add(activeTheme);
+      }
+    };
+  }, [previewThemeId, equippedCosmetics.theme]);
+
+  const handleTogglePreviewTheme = (themeId: string) => {
+    soundEffects.playClick();
+    if (previewThemeId === themeId) {
+      setPreviewThemeId(null);
+      showTemporaryFeedback('Theme-Vorschau beendet.');
+    } else {
+      setPreviewThemeId(themeId);
+      const targetTheme = COSMETIC_THEMES.find(t => t.id === themeId);
+      showTemporaryFeedback(`👁️ Live-Vorschau für "${targetTheme?.name || themeId}" aktiv!`);
+    }
+  };
 
   const showTemporaryFeedback = (msg: string) => {
     setFeedbackMsg(msg);
@@ -1079,19 +1129,38 @@ export const VirtualPetView: React.FC<Props> = ({
               {COSMETIC_THEMES.map(item => {
                 const isOwned = unlockedCosmetics.includes(item.id);
                 const isEquipped = equippedCosmetics.theme === item.id;
+                const isPreviewActive = previewThemeId === item.id;
                 const canAffordXp = xp >= item.priceXp;
 
                 return (
                   <div
                     key={item.id}
-                    className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 flex flex-col justify-between space-y-3"
+                    className={`p-4 rounded-2xl border transition-all flex flex-col justify-between space-y-3 ${
+                      isPreviewActive
+                        ? 'border-amber-400 bg-amber-500/10 dark:bg-amber-950/30 ring-2 ring-amber-400/50'
+                        : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40'
+                    }`}
                   >
                     <div>
                       <div className="flex items-center justify-between">
                         <span className="text-3xl">{item.icon}</span>
-                        <div
-                          className={`w-6 h-6 rounded-full bg-gradient-to-tr ${item.previewClass} border border-white dark:border-slate-700 shadow-xs`}
-                        />
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleTogglePreviewTheme(item.id)}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition-all flex items-center gap-1 cursor-pointer shadow-2xs ${
+                              isPreviewActive
+                                ? 'bg-amber-500 text-slate-950 ring-2 ring-amber-300'
+                                : 'bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 border border-indigo-200/80 dark:border-indigo-800/80'
+                            }`}
+                            title="Theme live auf der ganzen Seite testen"
+                          >
+                            <Eye className="w-3 h-3" />
+                            <span>{isPreviewActive ? 'Vorschau aktiv' : 'Vorschau 👁️'}</span>
+                          </button>
+                          <div
+                            className={`w-5 h-5 rounded-full bg-gradient-to-tr ${item.previewClass} border border-white dark:border-slate-700 shadow-xs`}
+                          />
+                        </div>
                       </div>
                       <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-2">
                         {item.name}
@@ -1104,7 +1173,10 @@ export const VirtualPetView: React.FC<Props> = ({
                     <div className="pt-2 border-t border-slate-200 dark:border-slate-700/60">
                       {isOwned ? (
                         <button
-                          onClick={() => handleEquipCosmetic(item)}
+                          onClick={() => {
+                            handleEquipCosmetic(item);
+                            setPreviewThemeId(null);
+                          }}
                           className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs ${
                             isEquipped
                               ? 'bg-emerald-600 text-white'
@@ -1116,7 +1188,10 @@ export const VirtualPetView: React.FC<Props> = ({
                         </button>
                       ) : (
                         <button
-                          onClick={() => handleBuyCosmetic(item)}
+                          onClick={() => {
+                            handleBuyCosmetic(item);
+                            setPreviewThemeId(null);
+                          }}
                           disabled={!canAffordXp}
                           className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs ${
                             canAffordXp
@@ -1402,27 +1477,58 @@ export const VirtualPetView: React.FC<Props> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {COSMETIC_THEMES.filter(t => unlockedCosmetics.includes(t.id)).map(item => {
                 const isEquipped = equippedCosmetics.theme === item.id;
+                const isPreviewActive = previewThemeId === item.id;
                 return (
-                  <button
+                  <div
                     key={item.id}
-                    onClick={() => handleEquipCosmetic(item)}
-                    className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
-                      isEquipped
+                    className={`p-3.5 rounded-2xl border text-left transition-all flex items-center justify-between ${
+                      isPreviewActive
+                        ? 'border-amber-400 bg-amber-500/10 dark:bg-amber-950/30 ring-2 ring-amber-400/50'
+                        : isEquipped
                         ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-500 ring-2 ring-indigo-500/30'
                         : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-2xl">{item.icon}</span>
-                      <div>
-                        <div className="text-xs font-bold text-slate-900 dark:text-white">
+                    <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                      <span className="text-2xl shrink-0">{item.icon}</span>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
                           {item.name}
                         </div>
-                        <div className="text-[10px] text-slate-500">{item.description}</div>
+                        <div className="text-[10px] text-slate-500 truncate">{item.description}</div>
                       </div>
                     </div>
-                    {isEquipped && <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
-                  </button>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => handleTogglePreviewTheme(item.id)}
+                        className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                          isPreviewActive
+                            ? 'bg-amber-500 text-slate-950 ring-2 ring-amber-300 font-extrabold'
+                            : 'bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100'
+                        }`}
+                        title="Theme live testen"
+                      >
+                        <Eye className="w-3 h-3" />
+                        <span>{isPreviewActive ? 'Vorschau' : 'Vorschau'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          handleEquipCosmetic(item);
+                          setPreviewThemeId(null);
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                          isEquipped
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                        }`}
+                      >
+                        {isEquipped ? <Check className="w-3.5 h-3.5" /> : null}
+                        <span>{isEquipped ? 'Aktiv' : 'Anwenden'}</span>
+                      </button>
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -1517,6 +1623,67 @@ export const VirtualPetView: React.FC<Props> = ({
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Floating Theme Live Preview Control Bar */}
+      {previewThemeId && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-lg w-[92%] bg-slate-900/95 text-white border-2 border-indigo-500 rounded-2xl shadow-2xl p-3.5 backdrop-blur-md animate-in slide-in-from-bottom-5 duration-200">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="text-2xl shrink-0">
+                {COSMETIC_THEMES.find(t => t.id === previewThemeId)?.icon || '🎨'}
+              </span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 text-xs font-black text-white">
+                  <Eye className="w-3.5 h-3.5 text-amber-400 shrink-0 animate-pulse" />
+                  <span className="truncate">
+                    Vorschau: {COSMETIC_THEMES.find(t => t.id === previewThemeId)?.name}
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-300 truncate mt-0.5">
+                  {unlockedCosmetics.includes(previewThemeId)
+                    ? 'Freigeschaltet – Klicke Anwenden zum Speichern'
+                    : `Freischalten für ${COSMETIC_THEMES.find(t => t.id === previewThemeId)?.priceXp || 0} EXP`}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              {unlockedCosmetics.includes(previewThemeId) ? (
+                <button
+                  onClick={() => {
+                    const item = COSMETIC_THEMES.find(t => t.id === previewThemeId);
+                    if (item) handleEquipCosmetic(item);
+                    setPreviewThemeId(null);
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all cursor-pointer shadow-xs"
+                >
+                  Anwenden
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    const item = COSMETIC_THEMES.find(t => t.id === previewThemeId);
+                    if (item) handleBuyCosmetic(item);
+                    setPreviewThemeId(null);
+                  }}
+                  disabled={xp < (COSMETIC_THEMES.find(t => t.id === previewThemeId)?.priceXp || 0)}
+                  className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-all cursor-pointer shadow-xs disabled:opacity-50"
+                >
+                  Kaufen
+                </button>
+              )}
+
+              <button
+                onClick={() => setPreviewThemeId(null)}
+                className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
+                title="Vorschau beenden"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
