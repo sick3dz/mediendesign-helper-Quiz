@@ -27,12 +27,14 @@ import { ModuleLearningView } from './components/ModuleLearningView';
 import { ExamSimulatorView } from './components/ExamSimulatorView';
 import { SpickzettelView } from './components/SpickzettelView';
 import { MiniGamesHubView } from './components/MiniGamesHubView';
+import { DataSandboxView } from './components/DataSandboxView';
 import { FocusSprintModal } from './components/FocusSprintModal';
 import { BackupModal } from './components/BackupModal';
 import { ChapterSurpriseModal } from './components/ChapterSurpriseModal';
 import { CHAPTER_SURPRISES, ChapterSurprise, calculatePetDecay } from './data/petData';
 import { ambientAudioService, AmbientSoundType } from './services/ambientAudioService';
 import confetti from 'canvas-confetti';
+import { Star } from 'lucide-react';
 
 import { VirtualPetView } from './components/VirtualPetView';
 
@@ -820,6 +822,13 @@ export default function App() {
                 onBack={() => setActiveTab('chapters')}
               />
             )}
+
+            {activeTab === 'sandbox' && (
+              <DataSandboxView
+                bionic={settings.bionicReading}
+                onBack={() => setActiveTab('chapters')}
+              />
+            )}
           </>
         )}
       </main>
@@ -895,7 +904,10 @@ export default function App() {
           <div className="flex items-center gap-4 text-[11px] text-slate-400 dark:text-slate-500">
             <span>{stats.pet.name} ({stats.pet.species})</span>
             <span aria-hidden="true">·</span>
-            <span className="font-mono tabular-nums font-semibold text-indigo-600 dark:text-indigo-400">⭐ {stats.xp} EXP</span>
+            <span className="font-mono tabular-nums font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+              <Star className="w-3.5 h-3.5 fill-indigo-600 dark:fill-indigo-400" />
+              {stats.xp} EXP
+            </span>
           </div>
         </div>
       </footer>

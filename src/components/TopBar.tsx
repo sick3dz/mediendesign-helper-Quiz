@@ -7,9 +7,10 @@ import {
   Sparkles,
   Award,
   Gamepad2,
+  Code,
 } from 'lucide-react';
 
-export type ActiveTab = 'chapters' | 'pet' | 'exam' | 'spickzettel' | 'minigames';
+export type ActiveTab = 'chapters' | 'pet' | 'exam' | 'spickzettel' | 'minigames' | 'sandbox';
 
 interface Props {
   activeTab: ActiveTab;
@@ -196,6 +197,29 @@ export const TopBar: React.FC<Props> = ({
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
                     Speed-Quiz, Memory-Flip & Boss-Raid Mini-Games
+                  </p>
+                </div>
+              </button>
+
+              {/* Option 6: Daten-Sandbox */}
+              <button
+                onClick={() => handleMenuSelect('sandbox')}
+                className={`w-full p-2.5 rounded-xl text-left transition-all flex items-start gap-3 cursor-pointer ${
+                  activeTab === 'sandbox'
+                    ? 'bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/80 text-indigo-900 dark:text-indigo-200'
+                    : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-800 dark:text-slate-200'
+                }`}
+              >
+                <div className="p-2 rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5">
+                  <Code className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold flex items-center gap-1.5">
+                    <span>💻 Daten-Struktur Sandbox</span>
+                    {activeTab === 'sandbox' && <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />}
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
+                    JSON, XML & Markdown interaktiv verstehen
                   </p>
                 </div>
               </button>

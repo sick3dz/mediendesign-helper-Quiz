@@ -15,6 +15,7 @@ import {
   Award,
   ChevronRight,
   Grid,
+  Star,
 } from 'lucide-react';
 import { soundEffects } from '../services/audioService';
 
@@ -174,7 +175,7 @@ export const ChapterListView: React.FC<Props> = ({
                         isSelected ? 'text-amber-200' : 'text-amber-600 dark:text-amber-400'
                       }`}
                     >
-                      <Sparkles className="w-2.5 h-2.5" />
+                      <Star className="w-2.5 h-2.5 fill-amber-500" />
                       +{chapterXpReward} EXP
                     </span>
                   </div>
@@ -223,7 +224,7 @@ export const ChapterListView: React.FC<Props> = ({
 
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-slate-700 dark:text-slate-200 font-semibold">
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/70 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 font-bold font-mono shadow-2xs">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
                 <span>+{calculateChapterTotalXp(currentChapter)} EXP zu verdienen</span>
               </div>
               <span className="flex items-center gap-1">
@@ -320,7 +321,7 @@ export const ChapterListView: React.FC<Props> = ({
                             Modul {mIndex + 1}
                           </span>
                           <span className="text-[10px] font-bold font-mono px-1.5 py-0.2 rounded-md bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 flex items-center gap-1">
-                            <Sparkles className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
+                            <Star className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
                             +{calculateModuleXp(module)} EXP
                           </span>
                           {isCompleted && (
@@ -367,65 +368,86 @@ export const ChapterListView: React.FC<Props> = ({
 
           {/* Chapter Exam Checklist */}
           {currentChapter.examChecklist && currentChapter.examChecklist.length > 0 && (
-            <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border-2 border-indigo-100 dark:border-indigo-900/40 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300">
+            <div className="p-5 sm:p-6 rounded-3xl bg-indigo-50/40 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 shadow-2xs">
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center shadow-indigo-200 dark:shadow-indigo-900/40 shadow-lg">
                     <CheckSquare className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                    <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
                       Prüfungs-Checkliste
                     </h4>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
-                      Fokus-Themen für Kapitel {currentChapter.number}
+                      Absolut kritische IHK-Themen
                     </p>
                   </div>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-                  {currentChapter.examChecklist.length} Punkte
-                </span>
+                <div className="flex flex-col items-end">
+                   <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 mb-1">
+                    IHK RELEVANZ: HOCH
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">
+                    {currentChapter.examChecklist.length} Prüfsteine
+                  </span>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-2">
+              <div className="grid grid-cols-1 gap-3">
                 {currentChapter.examChecklist.map((item, idx) => {
                   const isExpanded = expandedChecklistIdx === idx;
                   return (
                     <button
                       key={idx}
                       onClick={() => toggleChecklistItem(idx)}
-                      className={`w-full text-left p-3 rounded-xl border transition-all duration-300 flex flex-col gap-2 group cursor-pointer ${
+                      className={`w-full text-left p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col gap-3 group cursor-pointer relative overflow-hidden ${
                         isExpanded
-                          ? 'bg-white dark:bg-slate-900 border-indigo-400 dark:border-indigo-500 shadow-md ring-4 ring-indigo-500/10'
-                          : 'bg-white/60 dark:bg-slate-900/40 border-slate-100 dark:border-slate-800 hover:border-indigo-200 dark:hover:border-indigo-700'
+                          ? 'bg-white dark:bg-slate-900 border-indigo-500 shadow-indigo-100 dark:shadow-indigo-950/40 shadow-xl scale-[1.01]'
+                          : 'bg-white/80 dark:bg-slate-900/60 border-slate-100 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-sm'
                       }`}
                     >
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black transition-colors ${
-                            isExpanded ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                      {/* Decorative background element for active item */}
+                      {isExpanded && (
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full -mr-16 -mt-16 blur-2xl pointer-events-none" />
+                      )}
+
+                      <div className="flex items-center justify-between w-full relative z-10">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black transition-all ${
+                            isExpanded 
+                              ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none shadow-md rotate-3' 
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/40 group-hover:text-indigo-500'
                           }`}>
                             {idx + 1}
                           </div>
-                          <span className={`text-xs font-bold transition-colors ${
-                            isExpanded ? 'text-indigo-700 dark:text-indigo-400' : 'text-slate-700 dark:text-slate-300'
+                          <span className={`text-xs sm:text-sm font-extrabold tracking-tight transition-colors ${
+                            isExpanded ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'
                           }`}>
                             {item.task}
                           </span>
                         </div>
-                        <div className={`transition-transform duration-300 ${isExpanded ? 'rotate-90 text-indigo-500' : 'text-slate-400'}`}>
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center bg-slate-50 dark:bg-slate-800 transition-all duration-300 ${isExpanded ? 'rotate-90 bg-indigo-600 text-white shadow-sm' : 'text-slate-400 group-hover:text-indigo-500'}`}>
                           <ChevronRight className="w-4 h-4" />
                         </div>
                       </div>
                       
                       {isExpanded && (
-                        <div className="pl-9 pr-2 pb-1 animate-in slide-in-from-top-1 duration-200">
-                          <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium leading-relaxed border-l-2 border-indigo-200 dark:border-indigo-800 pl-3 py-1">
-                            {item.detail}
-                          </p>
-                          <div className="mt-2 flex items-center gap-1.5 text-[9px] font-bold text-indigo-500 uppercase tracking-wider">
-                            <Lightbulb className="w-3 h-3" />
-                            <span>Tipp: Präge dir diesen Punkt gut ein!</span>
+                        <div className="pl-12 pr-2 pb-1 animate-in slide-in-from-top-2 fade-in duration-300 relative z-10">
+                          <div className="relative">
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-500 to-indigo-300 dark:from-indigo-600 dark:to-indigo-400 rounded-full" />
+                            <p className="pl-4 py-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                              {item.detail}
+                            </p>
+                          </div>
+                          
+                          <div className="mt-4 flex items-center gap-2.5 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50">
+                            <div className="w-6 h-6 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0">
+                              <Lightbulb className="w-3.5 h-3.5" />
+                            </div>
+                            <div className="text-[10px] sm:text-[11px]">
+                              <span className="font-black text-amber-900 dark:text-amber-200 block">IHK-MASTER-TIPP</span>
+                              <span className="text-amber-800 dark:text-amber-300 font-bold">In der Prüfung wird dieser Punkt oft als Transferaufgabe abgefragt. Präge ihn dir gut ein!</span>
+                            </div>
                           </div>
                         </div>
                       )}

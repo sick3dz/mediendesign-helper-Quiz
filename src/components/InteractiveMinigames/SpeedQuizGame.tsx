@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { EXAM_QUESTIONS } from '../../data/examQuestions';
 import { QuizQuestion } from '../../types/quiz';
 import { soundEffects } from '../../services/audioService';
-import { Timer, Zap, Trophy, RotateCcw, CheckCircle2, XCircle, Flame, Sparkles } from 'lucide-react';
+import { Timer, Star, Trophy, RotateCcw, CheckCircle2, XCircle, Flame, Sparkles } from 'lucide-react';
 
 interface Props {
   onComplete: (score: number) => void;
@@ -161,7 +161,7 @@ export const SpeedQuizGame: React.FC<Props> = ({ onComplete }) => {
           <div className="p-3 bg-indigo-50 dark:bg-indigo-950/60 rounded-xl border border-indigo-200 dark:border-indigo-800">
             <div className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">EXP Belohnung</div>
             <div className="text-lg font-extrabold text-indigo-700 dark:text-indigo-300 flex items-center justify-center gap-1">
-              <Sparkles className="w-4 h-4 text-amber-400" />
+              <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
               <span>+{totalXpEarned}</span>
             </div>
           </div>
@@ -200,7 +200,7 @@ export const SpeedQuizGame: React.FC<Props> = ({ onComplete }) => {
 
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 text-xs font-extrabold text-indigo-600 dark:text-indigo-400">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
             <span>+{totalXpEarned} EXP</span>
           </div>
           <div className="flex items-center gap-1 text-xs font-mono font-bold text-slate-700 dark:text-slate-300">

@@ -1,30 +1,25 @@
-# Implementation Plan - Smart Spaced-Recall Sprint & 4-4-4 Box-Breathing Relaxation
+# Implementation Plan - Data Sandbox Expansion & Exam Check Mode
 
-Enhance the **Fokus-Sprint** with a 20-unit maximum cap, spaced flashcard recall logic, design-focused content filtering, and a post-sprint guided 4-4-4 Box-Breathing relaxation mode.
+Expanding the `DataSandboxView` to include advanced IHK-relevant data structures and a specialized "Prüfungs-Check-Modus" for highlighting common mistakes and critical concepts.
 
-## Proposed Features
+## 1. Quick-Insert Toolbar
+- Add a new UI section above the editor with categories:
+    - **JSON**: "Verschachtelte Liste (SaaS)", "Event-Daten (IHK Style)".
+    - **XML/SVG**: "SVG Icon (Pfad & Kreis)", "Produkt mit Attributen".
+    - **Markdown**: "Prüfungs-Tabelle", "Bild & Referenz".
+- Clicking these will replace the current editor content with the relevant snippet.
 
-### 1. Relevanz-Filter & Rein Design-Inhalte
-- Remove non-design items (such as SQL database questions) from the active quiz pool.
-- Ensure 100% of questions and flashcards cover Mediengestaltung, Interaktionsdesign (IxD), UX/UI, Wireframing, Typografie, and Design-Konzept.
-- Professional category badges (e.g. `Design-Konzept • Interaktionsdesign`).
+## 2. Prüfungs-Check-Modus (Toggle)
+- Add a high-visibility toggle switch in the header.
+- **State Logic**: When active, the visualizers will change their rendering mode to include:
+    - **Red Warnings**: For common syntax pitfalls (e.g., missing root in XML, single quotes in JSON).
+    - **Indigo IHK Tips**: Highlighting specific rules (e.g., "UTF-8 Necessity", "Attribute vs. Element").
 
-### 2. Smart Spaced Recall (Karteikarte ➔ 2-3 Schritte ➔ Abfrage)
-- When the user reads a **Karteikarte (Flashcard)**, automatically queue a matching **Quiz-Frage** 2 to 3 positions later in the sprint queue.
-- Directly tests active memory recall shortly after reading, cementing long-term knowledge without feeling overwhelming.
+## 3. Visualizer Enhancements
+- **JsonVisualizer**: Add logic to detect "Single Quotes" or "Missing Key Quotes" and display an "IHK Fallstrick" warning.
+- **XmlVisualizer**: Enhance regex to detect SVG elements and explain their role as XML-based vector data. Add "Root Element" check.
+- **MarkdownVisualizer**: Add specific handlers for `|` (tables) and `![alt](url)` (images) to explain accessibility (alt-text) which is a key IHK topic.
 
-### 3. Maximal 20 Einheiten Limit
-- Set a strict cap of **20 Einheiten (20 Units)** per Fokus-Sprint.
-- Live unit progress counter (`Einheit 7 / 20`).
-- Session completes automatically upon finishing the 20th unit, even if the 5-minute timer has not elapsed.
-
-### 4. Interaktiver 4-4-4 Box-Breathing Kreis
-- Upon session completion + Loot Box unboxing:
-  - Transition into an interactive **4-4-4 Box-Breathing Visualizer**.
-  - Animated pulsing circle guiding 4s Einatmen → 4s Halten → 4s Ausatmen → 4s Halten.
-  - Allows the user to relax, lower cognitive load, and decompress for the remaining time.
-
-## Verification Plan
-1. Execute `lint_applet` (`tsc --noEmit`).
-2. Execute `compile_applet` (`npm run build`).
-3. Verify spaced recall queueing, 20-unit cap, design-only filtering, and box-breathing animation.
+## 4. Content & Data
+- Update `DataSandboxView.tsx` with a new `SNIPPETS` constant containing the advanced examples.
+- Refine the explanation texts to use even more "IHK-speak" (e.g., "Wohlgeformtheit", "Semantische Auszeichnung").

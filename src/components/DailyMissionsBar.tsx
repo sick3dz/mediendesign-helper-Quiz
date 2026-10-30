@@ -105,7 +105,7 @@ export const DailyMissionsBar: React.FC<Props> = ({
 
             {hasUnclaimed && (
               <span className="flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 animate-bounce">
-                <Sparkles className="w-3 h-3 fill-slate-950" />
+                <Star className="w-3 h-3 fill-slate-950" />
                 EXP abholbereit!
               </span>
             )}
@@ -192,7 +192,8 @@ export const DailyMissionsBar: React.FC<Props> = ({
                         className="w-full py-1.5 px-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-98 transition-all"
                       >
                         <Sparkles className="w-3.5 h-3.5 fill-slate-950" />
-                        <span>+{m.rewardXp} ⭐ EXP einlösen!</span>
+                        <Star className="w-3.5 h-3.5 fill-slate-950" />
+                        <span>+{m.rewardXp} EXP einlösen!</span>
                       </button>
                     ) : m.isClaimed ? (
                       <div className="flex items-center justify-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 py-0.5">

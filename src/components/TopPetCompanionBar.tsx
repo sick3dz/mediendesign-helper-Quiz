@@ -12,6 +12,7 @@ import {
   RefreshCw,
   ExternalLink,
   Gamepad2,
+  Star,
 } from 'lucide-react';
 
 interface Props {
@@ -255,7 +256,7 @@ export const TopPetCompanionBar: React.FC<Props> = ({
               className="h-8 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95 whitespace-nowrap shrink-0"
               title="Gib deine verdienten EXP-Punkte im Shop aus"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <Star className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
               <span>EXP-Shop</span>
             </button>
 

@@ -19,9 +19,9 @@ import {
   Database,
   MousePointer,
   XCircle,
-  Zap,
   Lightbulb,
   Filter,
+  Star,
 } from 'lucide-react';
 import { soundEffects } from '../services/audioService';
 

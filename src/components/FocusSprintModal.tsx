@@ -14,7 +14,6 @@ import {
   CloudRain,
   Wind,
   Gift,
-  Zap,
   CheckCircle2,
   XCircle,
   Flame,

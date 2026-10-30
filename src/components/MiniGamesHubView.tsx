@@ -13,7 +13,7 @@ import {
   ShieldAlert,
   Layers,
   CheckCircle2,
-  Zap,
+  Star,
   Swords,
   Brain,
   Trophy,
@@ -43,7 +43,7 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
       title: 'Speed-Quiz Quest (Timer & Combo)',
       desc: 'Beantworte IHK-Fragen gegen die tickende Uhr! Sammle Serien-Combos für maximale Bonuspunkte.',
       badge: '⚡ Speed-Run',
-      icon: Zap,
+      icon: Star,
       xpBonus: 'Bis zu +200 EXP',
     },
     {
