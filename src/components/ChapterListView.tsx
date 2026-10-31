@@ -25,7 +25,7 @@ interface Props {
   bionic: boolean;
   selectedChapterId?: string;
   onSelectChapter?: (chapterId: string) => void;
-  onSelectModule: (chapterId: string, moduleId: string) => void;
+  onSelectModule: (chapterId: string, moduleId: string, level?: 1 | 2) => void;
   onStartExam: () => void;
   onOpenGames?: () => void;
   onGoToSpickzettel?: () => void;
@@ -76,10 +76,15 @@ export const ChapterListView: React.FC<Props> = ({
     const completed = chapter.modules.filter(m =>
       stats.completedModules.includes(m.id)
     ).length;
+    const completedLevel2 = chapter.modules.filter(m =>
+      stats.completedModulesLevel2?.includes(m.id)
+    ).length;
     return {
       completed,
+      completedLevel2,
       total: chapter.modules.length,
       isFullyCompleted: completed === chapter.modules.length && chapter.modules.length > 0,
+      isFullyMastered: completedLevel2 === chapter.modules.length && chapter.modules.length > 0,
     };
   };
 
@@ -111,7 +116,7 @@ export const ChapterListView: React.FC<Props> = ({
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-1.5 sm:gap-2">
           {chapters.map((chapter) => {
             const isSelected = chapter.id === currentChapter.id;
-            const { completed, total, isFullyCompleted } = getChapterCompletion(chapter);
+            const { completed, total, isFullyCompleted, isFullyMastered } = getChapterCompletion(chapter);
             const chapterXpReward = calculateChapterTotalXp(chapter);
 
             return (
@@ -136,14 +141,25 @@ export const ChapterListView: React.FC<Props> = ({
                       KAP {chapter.number}
                     </span>
 
-                    {isFullyCompleted ? (
+                    {isFullyMastered ? (
+                      <span
+                        className={`inline-flex items-center text-[9px] font-bold px-1 py-0.2 rounded-full ${
+                          isSelected
+                            ? 'bg-amber-400 text-slate-950 font-black'
+                            : 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300'
+                        }`}
+                        title="Alle Module auf Level 2 Meisterstufe abgeschlossen!"
+                      >
+                        <Star className="w-2.5 h-2.5 fill-current" />
+                      </span>
+                    ) : isFullyCompleted ? (
                       <span
                         className={`inline-flex items-center text-[9px] font-bold px-1 py-0.2 rounded-full ${
                           isSelected
                             ? 'bg-indigo-700 text-emerald-300'
                             : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
                         }`}
-                        title="Abgeschlossen"
+                        title="Abgeschlossen (Level 1)"
                       >
                         <CheckCircle2 className="w-2.5 h-2.5" />
                       </span>
@@ -291,11 +307,17 @@ export const ChapterListView: React.FC<Props> = ({
             <div className="space-y-2.5">
               {currentChapter.modules.map((module, mIndex) => {
                 const isCompleted = stats.completedModules.includes(module.id);
+                const isLevel2Completed = stats.completedModulesLevel2?.includes(module.id);
+                const baseXp = calculateModuleXp(module);
+                const level2Xp = Math.round(baseXp * 1.5);
+
                 return (
                   <div
                     key={module.id}
                     className={`p-3 sm:p-3.5 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                      isCompleted
+                      isLevel2Completed
+                        ? 'bg-amber-50/30 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/40'
+                        : isCompleted
                         ? 'bg-emerald-50/30 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40'
                         : 'bg-white dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700'
                     }`}
@@ -303,12 +325,16 @@ export const ChapterListView: React.FC<Props> = ({
                     <div className="flex items-start gap-3 flex-1 min-w-0">
                       <div
                         className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                          isCompleted
+                          isLevel2Completed
+                            ? 'bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-black shadow-xs'
+                            : isCompleted
                             ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300'
                             : 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400'
                         }`}
                       >
-                        {isCompleted ? (
+                        {isLevel2Completed ? (
+                          <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                        ) : isCompleted ? (
                           <CheckCircle2 className="w-4 h-4" />
                         ) : (
                           <BookOpen className="w-4 h-4" />
@@ -316,19 +342,25 @@ export const ChapterListView: React.FC<Props> = ({
                       </div>
 
                       <div className="space-y-0.5 min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                           <span className="text-[10px] font-mono font-semibold text-slate-400">
                             Modul {mIndex + 1}
                           </span>
                           <span className="text-[10px] font-bold font-mono px-1.5 py-0.2 rounded-md bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 flex items-center gap-1">
                             <Star className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
-                            +{calculateModuleXp(module)} EXP
+                            +{baseXp} EXP
                           </span>
-                          {isCompleted && (
-                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-sm bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">
-                              Erledigt ✓
+                          {isLevel2Completed ? (
+                            <span className="text-[9px] font-black px-1.5 py-0.2 rounded-md bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-700/80 text-amber-800 dark:text-amber-300 flex items-center gap-1">
+                              <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
+                              Lvl 2 Meister ★
                             </span>
-                          )}
+                          ) : isCompleted ? (
+                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-md bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 flex items-center gap-0.5">
+                              <CheckCircle2 className="w-2.5 h-2.5" />
+                              Lvl 1 erledigt ✓
+                            </span>
+                          ) : null}
                         </div>
 
                         <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-snug">
@@ -349,17 +381,42 @@ export const ChapterListView: React.FC<Props> = ({
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => onSelectModule(currentChapter.id, module.id)}
-                      className={`h-8 px-3.5 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 self-start sm:self-center shadow-xs ${
-                        isCompleted
-                          ? 'bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
-                          : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                      }`}
-                    >
-                      <span>{isCompleted ? 'Wiederholen' : 'Starten'}</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 shrink-0 self-start sm:self-center">
+                      {!isCompleted ? (
+                        <button
+                          onClick={() => onSelectModule(currentChapter.id, module.id, 1)}
+                          className="h-8 px-3.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                        >
+                          <span>Starten</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      ) : (
+                        <>
+                          {/* Primary Gold Level 2 Mastery Button */}
+                          <button
+                            onClick={() => onSelectModule(currentChapter.id, module.id, 2)}
+                            className={`h-8 px-3 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 ${
+                              isLevel2Completed
+                                ? 'bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 hover:bg-amber-200 dark:hover:bg-amber-900'
+                                : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 shadow-amber-200/50 dark:shadow-none'
+                            }`}
+                            title={`Level 2 Meister-Check starten (${level2Xp} EXP / +50% Bonus)`}
+                          >
+                            <Star className={`w-3.5 h-3.5 ${isLevel2Completed ? 'fill-amber-500 text-amber-500' : 'fill-slate-950 text-slate-950'}`} />
+                            <span>{isLevel2Completed ? 'Lvl 2 wiederholen' : 'Lvl 2 Meister (+50% EXP)'}</span>
+                          </button>
+
+                          {/* Secondary Level 1 Review Button */}
+                          <button
+                            onClick={() => onSelectModule(currentChapter.id, module.id, 1)}
+                            className="h-8 px-2.5 rounded-lg text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                            title="Level 1 Grundlagen wiederholen"
+                          >
+                            Lvl 1
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 );
               })}

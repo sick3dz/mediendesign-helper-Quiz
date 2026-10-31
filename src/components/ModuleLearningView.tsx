@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { LearningModule, Chapter } from '../types/quiz';
+import { getModuleLevel2Questions } from '../data/chaptersData';
 import { BionicText } from '../utils/bionicReading';
 import { soundEffects } from '../services/audioService';
 import { QuizCard } from './QuizCard';
@@ -11,14 +12,17 @@ import { SqlBuilderWidget } from './SqlBuilderWidget';
 import { JsonInspectorWidget } from './JsonInspectorWidget';
 import { CrossmediaPublishingWidget } from './CrossmediaPublishingWidget';
 import { XmlInspectorWidget } from './XmlInspectorWidget';
-import { ArrowLeft, ArrowRight, CheckCircle2, Star, Sparkles, HelpCircle, Gamepad2, Lightbulb } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Star, Sparkles, HelpCircle, Gamepad2, Lightbulb, Zap } from 'lucide-react';
 
 interface Props {
   chapter: Chapter;
   module: LearningModule;
   bionic: boolean;
+  initialLevel?: 1 | 2;
+  isLevel1Completed?: boolean;
+  isLevel2Completed?: boolean;
   onBack: () => void;
-  onModuleCompleted: (moduleId: string, gainedXp: number) => void;
+  onModuleCompleted: (moduleId: string, gainedXp: number, level: 1 | 2) => void;
   onCorrectAnswer?: () => void;
   onNextModule?: () => void;
   hasNextModule?: boolean;
@@ -28,15 +32,21 @@ export const ModuleLearningView: React.FC<Props> = ({
   chapter,
   module,
   bionic,
+  initialLevel = 1,
+  isLevel1Completed = false,
+  isLevel2Completed = false,
   onBack,
   onModuleCompleted,
   onCorrectAnswer,
   onNextModule,
   hasNextModule = false,
 }) => {
+  const [currentLevel, setCurrentLevel] = useState<1 | 2>(initialLevel);
   const [currentNuggetIndex, setCurrentNuggetIndex] = useState(0);
   const [stepIndex, setStepIndex] = useState(0); // Tracks how many parts of the nugget are revealed
-  const [viewState, setViewState] = useState<'learn' | 'minigame' | 'quiz'>('learn');
+  const [viewState, setViewState] = useState<'learn' | 'minigame' | 'quiz'>(
+    initialLevel === 2 ? 'quiz' : 'learn'
+  );
 
   const nuggetViewRef = useRef<HTMLDivElement>(null);
 
@@ -92,8 +102,10 @@ export const ModuleLearningView: React.FC<Props> = ({
     }
   };
 
+  const activeQuestions = currentLevel === 2 ? getModuleLevel2Questions(module) : module.quizQuestions;
+
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-4 sm:space-y-5">
       {/* Header with Back button and progress */}
       <div className="flex items-center justify-between">
         <button
@@ -110,6 +122,106 @@ export const ModuleLearningView: React.FC<Props> = ({
           <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[150px] sm:max-w-md">{module.title}</span>
         </div>
       </div>
+
+      {/* Level Switcher (Level 1: Grundlagen vs Level 2: Meisterstufe) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+          <button
+            onClick={() => {
+              soundEffects.playClick();
+              setCurrentLevel(1);
+            }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              currentLevel === 1
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <span>Level 1: Grundlagen</span>
+            {isLevel1Completed && (
+              <span className="text-emerald-600 dark:text-emerald-400 font-bold text-[11px]">✓</span>
+            )}
+          </button>
+
+          <button
+            onClick={() => {
+              if (!isLevel1Completed) return;
+              soundEffects.playClick();
+              setCurrentLevel(2);
+              setViewState('quiz');
+            }}
+            disabled={!isLevel1Completed}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+              currentLevel === 2
+                ? 'bg-amber-500 text-slate-950 shadow-xs font-black'
+                : isLevel1Completed
+                ? 'text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40'
+                : 'text-slate-400'
+            }`}
+            title={isLevel1Completed ? 'Level 2 Meisterstufe spielen' : 'Erst Level 1 abschließen zum Freischalten'}
+          >
+            <Star className={`w-3.5 h-3.5 ${currentLevel === 2 ? 'fill-slate-950' : 'fill-amber-500 text-amber-500'}`} />
+            <span>Level 2: Meister</span>
+            <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-amber-200/80 dark:bg-amber-900/60 text-slate-950 dark:text-amber-100 font-bold">
+              +50% EXP
+            </span>
+            {isLevel2Completed && <span className="text-amber-600 dark:text-amber-400 font-bold">★</span>}
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2 px-2 text-xs">
+          {currentLevel === 2 ? (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold font-mono text-amber-600 dark:text-amber-400">
+              <Zap className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+              1.5x EXP Multiplikator aktiv!
+            </span>
+          ) : isLevel1Completed ? (
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+              Tipp: Schalte auf <strong>Level 2</strong> für 50% mehr EXP!
+            </span>
+          ) : (
+            <span className="text-[11px] text-slate-400">
+              Schließe Level 1 ab, um Level 2 freizuschalten.
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Level 2 Mastery Context Banner */}
+      {currentLevel === 2 && (
+        <div className="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black shadow-amber-200 dark:shadow-none shadow-sm shrink-0">
+              <Star className="w-5 h-5 fill-slate-950" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-slate-900 dark:text-white">
+                  IHK-Transferfragen & Praxisfälle
+                </span>
+                <span className="text-[10px] font-mono font-black px-1.5 py-0.2 rounded bg-amber-200 dark:bg-amber-900/80 text-amber-900 dark:text-amber-100">
+                  LEVEL 2 MEISTER
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5">
+                Beantworte anspruchsvolle Situationsaufgaben aus realen IHK-Prüfungen und sichere dir <strong>50% mehr EXP</strong>.
+              </p>
+            </div>
+          </div>
+
+          {viewState !== 'quiz' && (
+            <button
+              onClick={() => {
+                soundEffects.playClick();
+                setViewState('quiz');
+              }}
+              className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold shrink-0 cursor-pointer shadow-xs whitespace-nowrap self-start sm:self-auto"
+            >
+              Zum Meister-Quiz ({activeQuestions.length})
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Mode navigation tabs (Learn / MiniGame / Quiz) */}
       <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-lg text-xs font-medium">
@@ -152,12 +264,14 @@ export const ModuleLearningView: React.FC<Props> = ({
           }}
           className={`flex-1 py-1.5 px-3 rounded-md transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
             viewState === 'quiz'
-              ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs font-bold'
+              ? currentLevel === 2
+                ? 'bg-amber-500 text-slate-950 shadow-xs font-black'
+                : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs font-bold'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <HelpCircle className="w-3.5 h-3.5" />
-          <span>Quiz ({module.quizQuestions.length})</span>
+          <span>{currentLevel === 2 ? 'Meister-Quiz' : 'Quiz'} ({activeQuestions.length})</span>
         </button>
       </div>
 
@@ -284,7 +398,8 @@ export const ModuleLearningView: React.FC<Props> = ({
           {module.miniGameType === 'affordance' && (
             <AffordanceSignifierGame
               onComplete={score => {
-                onModuleCompleted(module.id, score);
+                const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
+                onModuleCompleted(module.id, finalXp, currentLevel);
               }}
             />
           )}
@@ -292,7 +407,8 @@ export const ModuleLearningView: React.FC<Props> = ({
           {module.miniGameType === 'phishing' && (
             <PhishingDetectorGame
               onComplete={score => {
-                onModuleCompleted(module.id, score);
+                const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
+                onModuleCompleted(module.id, finalXp, currentLevel);
               }}
             />
           )}
@@ -300,7 +416,8 @@ export const ModuleLearningView: React.FC<Props> = ({
           {module.miniGameType === 'process_order' && (
             <ProcessSorterGame
               onComplete={score => {
-                onModuleCompleted(module.id, score);
+                const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
+                onModuleCompleted(module.id, finalXp, currentLevel);
               }}
             />
           )}
@@ -308,7 +425,8 @@ export const ModuleLearningView: React.FC<Props> = ({
           {module.miniGameType === 'wcag_match' && (
             <WcagMatchGame
               onComplete={score => {
-                onModuleCompleted(module.id, score);
+                const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
+                onModuleCompleted(module.id, finalXp, currentLevel);
               }}
             />
           )}
@@ -316,7 +434,7 @@ export const ModuleLearningView: React.FC<Props> = ({
           <div className="mt-4 text-center">
             <button
               onClick={() => setViewState('quiz')}
-              className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors inline-flex items-center gap-1"
+              className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors inline-flex items-center gap-1 cursor-pointer"
             >
               Weiter zum Wissens-Check <ArrowRight className="w-3.5 h-3.5" />
             </button>
@@ -327,10 +445,12 @@ export const ModuleLearningView: React.FC<Props> = ({
       {/* 3. QUIZ VIEW */}
       {viewState === 'quiz' && (
         <QuizCard
-          questions={module.quizQuestions}
+          questions={activeQuestions}
           bionic={bionic}
+          isLevel2={currentLevel === 2}
           onFinished={score => {
-            onModuleCompleted(module.id, score);
+            const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
+            onModuleCompleted(module.id, finalXp, currentLevel);
           }}
           onCorrectAnswer={onCorrectAnswer}
           onBackToOverview={onBack}

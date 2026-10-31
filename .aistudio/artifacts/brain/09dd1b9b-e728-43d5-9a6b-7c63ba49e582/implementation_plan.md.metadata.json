@@ -1,6 +1,6 @@
 {
-  "summary":  "Add granular \"Learning Blocks\" to the Data Sandbox that insert at cursor position (instead of replacing), specifically teaching JSON types (Boolean/Null), XML features (Comments/CDATA), and Markdown advanced syntax (Footnotes).",
-  "updatedAt":  "2026-10-30T17:19:53.850393343Z",
+  "summary":  "Plan zur Überarbeitung der Level-2-Schwierigkeit:\n- Balancierte Antwortlängen für alle 4 Optionen (kein Längenvorzug für die richtige Antwort).\n- Plausible Distraktoren mit echten IHK-Fallen, Scheinfachbegriffen und typischen Agentur-Irrtümern.\n- Sofortige detaillierte IHK-Prüfer-Erklärung (\"Warum diese Falle verlockend war\").\n- Spezifisches UI-Feedback für entlarvte Prüfungsfallen in QuizCard.",
+  "updatedAt":  "2026-10-31T14:33:46.237431027Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

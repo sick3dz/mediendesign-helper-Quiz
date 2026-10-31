@@ -68,6 +68,7 @@ const DEFAULT_STATS: UserStats = {
   streakDays: 1,
   lastActiveDate: getTodayDateString(),
   completedModules: [],
+  completedModulesLevel2: [],
   answeredQuestionsCount: 0,
   correctAnswersCount: 0,
   currentCombo: 0,
@@ -158,6 +159,18 @@ export const ALL_BADGES: Badge[] = [
     title: 'Prüfungsbereit',
     description: 'Abschlussprüfungs-Simulator mit Note 1 oder 2 bestanden',
     icon: '🏆',
+  },
+  {
+    id: 'master_first',
+    title: 'Meister-Aufsteiger',
+    description: 'Erstes Modul auf Level 2 gemeistert (+50% EXP)',
+    icon: '⭐',
+  },
+  {
+    id: 'master_chapter',
+    title: 'IHK-Fachmeister',
+    description: 'Alle Module eines Kapitels auf Meisterstufe (Level 2) abgeschlossen',
+    icon: '👑',
   },
 ];
 
@@ -315,6 +328,8 @@ export function loadUserStats(): UserStats {
       xp: parsedXp,
       lifetimeXp,
       pet: decayedPet,
+      completedModules: Array.isArray(parsed.completedModules) ? parsed.completedModules : [],
+      completedModulesLevel2: Array.isArray(parsed.completedModulesLevel2) ? parsed.completedModulesLevel2 : [],
       dailyMissions,
       dailyMissionsDate,
       unlockedCosmetics: Array.isArray(parsed.unlockedCosmetics) && parsed.unlockedCosmetics.length > 0

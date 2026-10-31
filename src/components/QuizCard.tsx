@@ -3,11 +3,12 @@ import { QuizQuestion, QuizOption } from '../types/quiz';
 import { BionicText } from '../utils/bionicReading';
 import { soundEffects } from '../services/audioService';
 import confetti from 'canvas-confetti';
-import { Check, X, ArrowRight, RotateCcw, Award, Lightbulb, Star, Sparkles } from 'lucide-react';
+import { Check, X, ArrowRight, RotateCcw, Award, Lightbulb, Star, Sparkles, AlertTriangle } from 'lucide-react';
 
 interface Props {
   questions: QuizQuestion[];
   bionic: boolean;
+  isLevel2?: boolean;
   onFinished: (score: number) => void;
   onCorrectAnswer?: () => void;
   onBackToOverview?: () => void;
@@ -18,6 +19,7 @@ interface Props {
 export const QuizCard: React.FC<Props> = ({
   questions,
   bionic,
+  isLevel2 = false,
   onFinished,
   onCorrectAnswer,
   onBackToOverview,
@@ -199,6 +201,7 @@ export const QuizCard: React.FC<Props> = ({
   }
 
   const selectedOption = currentQuestion.options.find(o => o.id === selectedOptionId);
+  const correctOption = currentQuestion.options.find(o => o.isCorrect);
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-xs transition-colors space-y-6 relative">
@@ -326,18 +329,62 @@ export const QuizCard: React.FC<Props> = ({
 
       {/* Explanatory Feedback when answered */}
       {selectedOption && (
-        <div className={`p-4 rounded-xl border text-xs leading-relaxed space-y-1.5 animate-fade-in ${
+        <div className={`p-4 rounded-xl border text-xs leading-relaxed space-y-2.5 animate-fade-in ${
           selectedOption.isCorrect
             ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/60 text-emerald-900 dark:text-emerald-200'
             : 'bg-rose-50/70 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/60 text-rose-900 dark:text-rose-200'
         }`}>
-          <div className="font-bold flex items-center gap-1.5">
-            {selectedOption.isCorrect ? '✓ Richtig!' : '✗ Leider nicht ganz richtig'}
+          <div className="font-bold flex items-center gap-2 text-sm">
+            {selectedOption.isCorrect ? (
+              <>
+                <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>{isLevel2 ? '✓ Meisterhaft analysiert!' : '✓ Richtig!'}</span>
+              </>
+            ) : (
+              <>
+                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <span className="text-amber-900 dark:text-amber-200">
+                  {selectedOption.trapExplanation || isLevel2
+                    ? '⚠️ IHK-Prüfungsfalle entlarvt!'
+                    : '✗ Leider nicht ganz richtig'}
+                </span>
+              </>
+            )}
           </div>
-          <p>{selectedOption.explanation}</p>
+
+          {!selectedOption.isCorrect ? (
+            <div className="space-y-2 pt-1">
+              {/* Trap explanation */}
+              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/25 text-amber-950 dark:text-amber-200 text-xs">
+                <div className="font-bold text-[11px] text-amber-800 dark:text-amber-300 uppercase tracking-wide mb-1 flex items-center gap-1.5">
+                  <span>Warum diese Antwortoption verlockend war:</span>
+                </div>
+                <p className="leading-relaxed">
+                  {selectedOption.trapExplanation || selectedOption.explanation}
+                </p>
+              </div>
+
+              {/* Correct answer display */}
+              {correctOption && (
+                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-950 dark:text-emerald-200 text-xs">
+                  <div className="font-bold text-[11px] text-emerald-800 dark:text-emerald-300 uppercase tracking-wide mb-1 flex items-center gap-1.5">
+                    <span>✓ Fachlich korrekte IHK-Lösung:</span>
+                  </div>
+                  <p className="font-semibold text-xs text-emerald-900 dark:text-emerald-100 mb-0.5">
+                    {correctOption.text}
+                  </p>
+                  <p className="text-[11px] text-emerald-800/90 dark:text-emerald-300/90 leading-relaxed">
+                    {correctOption.explanation}
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-xs leading-relaxed">{selectedOption.explanation}</p>
+          )}
 
           {currentQuestion.merksatz && (
-            <div className="pt-2 border-t border-emerald-200/50 dark:border-emerald-800/50 flex items-start gap-1.5 font-semibold text-emerald-800 dark:text-emerald-300">
+            <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/60 flex items-start gap-1.5 font-semibold text-emerald-800 dark:text-emerald-300">
               <Lightbulb className="w-3.5 h-3.5 shrink-0 mt-0.5" />
               <span>Prüfungs-Merksatz: {currentQuestion.merksatz}</span>
             </div>
@@ -346,7 +393,7 @@ export const QuizCard: React.FC<Props> = ({
           {currentQuestion.examTip && (
             <div className="pt-2 border-t border-indigo-200/50 dark:border-indigo-800/50 flex items-start gap-1.5 text-indigo-800 dark:text-indigo-300 font-semibold">
               <Lightbulb className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-              <span>Tipp: {currentQuestion.examTip}</span>
+              <span>IHK-Prüfer-Tipp: {currentQuestion.examTip}</span>
             </div>
           )}
         </div>

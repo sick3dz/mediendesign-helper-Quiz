@@ -1,4 +1,4 @@
-import { Chapter } from '../types/quiz';
+import { Chapter, QuizQuestion, LearningModule } from '../types/quiz';
 
 export const CHAPTERS: Chapter[] = [
   {
@@ -100,6 +100,117 @@ export const CHAPTERS: Chapter[] = [
               { id: 'd', text: 'Ausschließlich Farbpaletten ohne Klickpfade', isCorrect: false, explanation: 'Farbpaletten allein sind reines Visual/UI-Design.' }
             ]
           }
+        ],
+        level2QuizQuestions: [
+          {
+            id: 'l2-ixd-1-1',
+            chapterId: 'ixd',
+            moduleId: 'ixd-1',
+            scenario: 'Fallbeispiel: Eine E-Commerce-Plattform verzeichnet 42% Kaufabbrüche im letzten Schritt des Checkouts. Die Geschäftsführung möchte das Logo vergrößern und die Button-Farbe von Grün auf Rot ändern.',
+            question: 'Als Mediengestalter Digital berätst du die Geschäftsleitung nach IHK-Standard. Welcher fachliche Ansatz adressiert das Problem korrekt?',
+            options: [
+              {
+                id: 'a',
+                text: 'Die Farb- und Logo-Änderung betrifft lediglich das UI-Design, während die hohe Abbruchquote primär auf Reibungsverluste im Interaktionsdesign und der Usability zurückzuführen ist.',
+                isCorrect: true,
+                explanation: 'Perfekt! Eine optische Farbänderung löst keine strukturellen Reibungsverluste oder unklare Formularschritte im Interaktionsfluss.'
+              },
+              {
+                id: 'b',
+                text: 'Die Button-Farbe Rot erzeugt nachweislich mehr Dringlichkeit und sollte zwingend mit einem pulsierenden Call-to-Action kombiniert werden, um die Conversion-Rate im Checkout nachhaltig zu maximieren.',
+                isCorrect: false,
+                explanation: 'Dringlichkeit erzeugt oft Reaktanz und Misstrauen bei Bezahlvorgängen.',
+                trapExplanation: 'Typische Marketing-Falle: Signalfarben wie Rot werden im Bezahlprozess oft mit Fehlern oder Warnungen assoziiert und vertiefen den Abbruch statt das Usability-Problem zu lösen.'
+              },
+              {
+                id: 'c',
+                text: 'Hohe Abbruchquoten im Checkout sind nach IHK-Standard ein reines Latenz-Problem des Content Delivery Networks und bedürfen einer serverseitigen Datenbank-Optimierung statt gestalterischer Anpassungen.',
+                isCorrect: false,
+                explanation: 'Die Fragestellung beschreibt einen unverständlichen Interaktionsablauf.',
+                trapExplanation: 'Verlockende Technik-Falle: Schnelle Ladezeiten sind zwar wichtig, beheben aber keine unverständlichen Formularfelder oder fehlende Bezahl-Transparenz im Nutzerablauf.'
+              },
+              {
+                id: 'd',
+                text: 'Das Interaction Design befasst sich ausschließlich mit visuellen Stil-Elementen und Typography-Scales, weshalb die Behebung von Formular-Abbrüchen vollständig in den Aufgabenbereich des Data-Science-Teams fällt.',
+                isCorrect: false,
+                explanation: 'IxD gestaltet das Verhalten und die Dialogführung.',
+                trapExplanation: 'Typischer Praxis-Irrtum: Typografie und Farbskalen sind UI-Design. IxD befasst sich zentral mit der Verhaltens- und Dialoggestaltung von Nutzerschnittstellen.'
+              }
+            ],
+            examTip: 'IHK-Prüfungsfalle: UI (Optik) und IxD (Ablauf/Verhalten) nicht verwechseln! Usability-Abbrüche liegen fast immer im IxD/UX-Bereich.'
+          },
+          {
+            id: 'l2-ixd-1-2',
+            chapterId: 'ixd',
+            moduleId: 'ixd-1',
+            scenario: 'Projekt-Briefing: Ein Kunde wünscht ein innovatives Dashboard. Er fragt: "Welche konkreten Artefakte und Dokumente erhalten wir in der IxD-Phase, bevor das finale UI gestaltet wird?"',
+            question: 'Welche Auswahl enthält die typischen und nach IHK-Standard anerkannten Deliverables des Interaktionsdesigners?',
+            options: [
+              {
+                id: 'a',
+                text: 'Detaillierte User Flows, Navigations-Architekturen, interaktive Lo-Fi-Klickmodelle sowie präzise Verhaltensspezifikationen für Systemzustände und Benutzerdialoge.',
+                isCorrect: true,
+                explanation: 'Richtig! Der Interaktionsdesigner spezifiziert Pfade, Zustände und Interaktionen.'
+              },
+              {
+                id: 'b',
+                text: 'Pixelgenaue High-Fidelity UI-Templates mit finalen Farbverläufen, Schattenwerten und druckfertigen Farbprofilen für begleitende Print- und Marketingmaterialien.',
+                isCorrect: false,
+                explanation: 'Das gehört zur visuellen UI-Phase bzw. Printstufe, nicht zur konzeptionellen IxD-Phase.',
+                trapExplanation: 'Glaubwürdige Scheinfachbegriffe: High-Fidelity Mockups und Farbprofile gehören zum visuellen UI-Design und Branding, nicht zur vorgelagerten Strukturphase des IxD.'
+              },
+              {
+                id: 'c',
+                text: 'Vollständig ausprogrammierte UI-Komponenten im JavaScript-Framework, minifizierte Produktions-Stylesheets und konfigurierte Schnittstellen zur Datenbankanbindung.',
+                isCorrect: false,
+                explanation: 'Das ist Frontend- und Backend-Entwicklung, nicht Konzeption/IxD.',
+                trapExplanation: 'Verlockende Entwickler-Falle: Code und Datenbanken entstehen erst in der technischen Implementierungsphase nach Freigabe des Interaktionskonzepts.'
+              },
+              {
+                id: 'd',
+                text: 'Juristisch geprüfte Allgemeine Geschäftsbedingungen, DSGVO-konforme Cookie-Opt-In-Erklärungen sowie vertragliche Service-Level-Agreements mit Hosting-Dienstleistern.',
+                isCorrect: false,
+                explanation: 'Das ist die Aufgabe der Rechtsabteilung und IT-Beschaffung.',
+                trapExplanation: 'Verlockende Compliance-Falle: Rechtstexte und SLAs sind Pflichtbestandteile des Betriebs, aber keine gestalterischen Artefakte des Interaktionsdesigns.'
+              }
+            ]
+          },
+          {
+            id: 'l2-ixd-1-3',
+            chapterId: 'ixd',
+            moduleId: 'ixd-1',
+            scenario: 'Audit-Aufgabe: In einem Usability-Labor stellt sich heraus: Nutzer finden das Design der App ästhetisch wunderschön (Note 1), scheitern aber daran, ihr Profil zu speichern, weil die Speicherfunktion erst nach Scrollen sichtbar ist.',
+            question: 'Wie ist dieses System nach den Kriterien von UI, IxD und UX fachgerecht zu bewerten?',
+            options: [
+              {
+                id: 'a',
+                text: 'Hohe visuelle UI-Ästhetik kann gravierende Defizite im Interaktionsdesign (schlechte Auffindbarkeit) nicht kompensieren und resultiert letztlich in einer frustrierenden Gesamterfahrung (negative UX).',
+                isCorrect: true,
+                explanation: 'Exakt! Eine schöne Oberfläche kann ein frustrierendes Interaktionsverhalten nicht wettmachen.'
+              },
+              {
+                id: 'b',
+                text: 'Aufgrund des Halo-Effekts in der Designpsychologie führt ein hervorragend bewertetes visuelles UI automatisch auch zu einer dauerhaft überragenden User Experience bei allen Zielgruppen.',
+                isCorrect: false,
+                explanation: 'UX umfasst das Gesamterlebnis, das durch die Frustration negativ ausfällt.',
+                trapExplanation: 'Verlockende Heuristik-Falle: Zwar mildert der Aesthetic-Usability-Effect kleinere Hürden ab, ein nicht auffindbarer Hauptspeicher-Button zerstört die User Experience jedoch unweigerlich.'
+              },
+              {
+                id: 'c',
+                text: 'Da UI-Design und Interaktionsdesign in modernen agilen Frameworks definitionsgemäß identisch sind, deutet dieses Testergebnis auf eine methodisch fehlerhafte Stichprobenauswahl im Labor hin.',
+                isCorrect: false,
+                explanation: 'UI und IxD sind klar getrennte Disziplinen.',
+                trapExplanation: 'Scheinfachbegriff-Falle: UI (Oberfläche/Ästhetik) und IxD (Verhalten/Ablauf) sind zwei eigenständige Fachdisziplinen und niemals begrifflich deckungsgleich.'
+              },
+              {
+                id: 'd',
+                text: 'Das Platzieren von Speicher-Buttons unterhalb des sichtbaren Viewports gilt im modernen Webdesign als bewährtes Minimalismus-Prinzip zur gezielten Reduktion kognitiver Reizüberflutung.',
+                isCorrect: false,
+                explanation: 'Versteckte Primäraktionen verletzen zentrale Usability-Heuristiken.',
+                trapExplanation: 'Trend-Falle: Gestalterischer Minimalismus darf niemals die Sichtbarkeit und Auffindbarkeit geschäftskritischer Kernaktionen beeinträchtigen.'
+              }
+            ]
+          }
         ]
       },
       {
@@ -179,6 +290,117 @@ export const CHAPTERS: Chapter[] = [
               { id: 'd', text: 'Reiner Zufall ohne gestalterischen Grund', isCorrect: false, explanation: 'Es ist eine etablierte Usability-Konvention.' }
             ]
           }
+        ],
+        level2QuizQuestions: [
+          {
+            id: 'l2-ixd-2-1',
+            chapterId: 'ixd',
+            moduleId: 'ixd-2',
+            scenario: 'Kunden-Szenario: Eine Web-App löscht Nutzerkonten sofort bei Klick auf "Konto löschen", ohne Sicherheitsabfrage und ohne Rückgängig-Möglichkeit. Nutzer beschweren sich über versehentliche Datenverluste.',
+            question: 'Gegen welches fundamentale IxD-Prinzip wird hier gravierend verstoßen, und welche IHK-konforme Lösung ist zwingend erforderlich?',
+            options: [
+              {
+                id: 'a',
+                text: 'Fehlertoleranz (Error Tolerance) – Destruktive Aktionen erfordern zwingend eine eindeutige Bestätigungsabfrage oder ein mehrstufiges Sicherheitsnetz mit temporärem Wiederherstellungs-Fenster.',
+                isCorrect: true,
+                explanation: 'Genau! Destruktive Aktionen erfordern zwingend Fehlertoleranz und Sicherheitsbarrieren.'
+              },
+              {
+                id: 'b',
+                text: 'Konsistenz (Consistency) – Der Button zum Löschen des Kontos muss exakt denselben Grünton und Schatteneffekt erhalten wie die primären Registrierungs-Schaltflächen der Plattform.',
+                isCorrect: false,
+                explanation: 'Grün für Löschen wäre irreführend und löst das Problem nicht.',
+                trapExplanation: 'Verlockende Scheinkonsistenz: Gleiches Aussehen bei gegensätzlichen Aktionen ist fatal. Destruktive Buttons müssen sich visuell warnend abheben und Fehlertoleranz bieten.'
+              },
+              {
+                id: 'c',
+                text: 'Sichtbarkeit (Visibility) – Um Fehlbedienungen zu vermeiden, muss der Lösch-Button dauerhaft pulsieren und über dem Bildschirmzentrum als aufdringliches modales Pop-Up schweben.',
+                isCorrect: false,
+                explanation: 'Blinkende Buttons verstoßen gegen Usability und A11y.',
+                trapExplanation: 'Verlockende Aufmerksamkeits-Falle: Aufdringliche Daueranimationen lenken ab und verstoßen gegen Usability- und Barrierefreiheits-Standards.'
+              },
+              {
+                id: 'd',
+                text: 'Einfachheit (Simplicity) – Das sofortige Löschen ohne lästige Zwischenabfragen entspricht dem Prinzip "Don\'t make me think" und minimiert die Klickpfade der Nutzer maximal.',
+                isCorrect: false,
+                explanation: 'Schutzmechanismen dürfen bei Datenverlust nicht weggelassen werden.',
+                trapExplanation: 'Verlockende Zitat-Falle: Steve Krugs "Don\'t make me think" bedeutet kognitive Klarheit, nicht das leichtsinnige Streichen von Schutzmechanismen bei irreversiblem Datenverlust.'
+              }
+            ],
+            examTip: 'IHK-Prüfungsregel: Bei destruktiven Aktionen steht Fehlertoleranz (Bestätigung, zweistufiges Löschen, Undo) an oberster Stelle!'
+          },
+          {
+            id: 'l2-ixd-2-2',
+            chapterId: 'ixd',
+            moduleId: 'ixd-2',
+            scenario: 'Praxisfall: Beim Klick auf "Jetzt zahlungspflichtig bestellen" vergehen bei langsamer Mobilverbindung 4 Sekunden, ohne dass sich auf dem Display etwas ändert. Nutzer tippen mehrfach ungeduldig auf den Button und lösen teure Mehrfachbuchungen aus.',
+            question: 'Welche zwei IxD-Prinzipien wurden hier missachtet und wie behebt ein professioneller Mediengestalter das Problem?',
+            options: [
+              {
+                id: 'a',
+                text: 'Feedback & Fehlertoleranz – Sofortige optische Rückmeldung des Systemstatus (Lade-Spinner) sowie temporäres Deaktivieren des Buttons zur wirksamen Unterbindung von Mehrfachtransaktionen.',
+                isCorrect: true,
+                explanation: 'Perfekt! Immediate Feedback + Deaktivierung des Buttons verhindert teure Doppelbuchungen.'
+              },
+              {
+                id: 'b',
+                text: 'Prägnanz & Gesetz der Nähe – Die Bestätigungsschaltfläche muss typografisch vergrößert und näher an die allgemeinen Geschäftsbedingungen gerückt werden, um Ladezeiten abzufangen.',
+                isCorrect: false,
+                explanation: 'Das löst die fehlende Laderückmeldung nicht.',
+                trapExplanation: 'Verlockende Gestalt-Falle: Gestaltgesetze regeln die visuelle Gruppierung, können aber ein fehlendes System-Feedback bei Netzwerkverzögerungen nicht ersetzen.'
+              },
+              {
+                id: 'c',
+                text: 'Skalierbarkeit & Responsivität – Die gesamte Webanwendung muss in den Desktop-Modus gezwungen werden, weil mobile Browser keine asynchronen Bezahlprozesse unterstützen.',
+                isCorrect: false,
+                explanation: 'Mobile Browser beherrschen moderne Webstandards problemlos.',
+                trapExplanation: 'Verlockende Schein-Technik: Mobile Browser beherrschen AJAX und asynchrone Requests problemlos; die Ursache liegt im fehlenden Interaktionsdesign des Buttons.'
+              },
+              {
+                id: 'd',
+                text: 'Ästhetik & Barrierefreiheit – Die Schaltfläche muss mit einem akustischen Signalton hinterlegt werden, während optische Ladeanzeigen aus Kontrastgründen vermieden werden sollten.',
+                isCorrect: false,
+                explanation: 'Soundeffekte allein sind keine Lösung für visuelle Ladezustände.',
+                trapExplanation: 'Verlockende A11y-Falle: Audio allein ist keine adäquate Rückmeldung und Ladeanzeigen sind essentiell für sehende Nutzer auf Mobilgeräten.'
+              }
+            ]
+          },
+          {
+            id: 'l2-ixd-2-3',
+            chapterId: 'ixd',
+            moduleId: 'ixd-2',
+            scenario: 'Schnittstellen-Entwurf: Eine komplexe Buchhaltungs-Software verzichtet komplett auf Tooltips und Icons, nutzt dafür 200 Abkürzungen ohne Erklärung, um erfahrene Buchhalter schneller arbeiten zu lassen.',
+            question: 'Welche zwei Grundprinzipien des Interaktionsdesigns wurden hier zu Gunsten vermeintlicher Experten-Effizienz grob vernachlässigt?',
+            options: [
+              {
+                id: 'a',
+                text: 'Sichtbarkeit & Einfachheit – Versteckte Bedeutungen und kryptische Akronyme überfordern neue Nutzer kognitiv und führen nachweislich zu massiven Eingabefehlern.',
+                isCorrect: true,
+                explanation: 'Exakt! Versteckte Bedeutungen verletzen das Sichtbarkeits- und Einfachheitsprinzip.'
+              },
+              {
+                id: 'b',
+                text: 'Responsivität & Mobiloptimierung – Buchhaltungssoftware muss nach IHK-Prüfungsordnung primär für hochauflösende Touchscreens von Smartphones im Querformat optimiert werden.',
+                isCorrect: false,
+                explanation: 'Das ist keine IHK-Anforderung für Desktop-Fachsoftware.',
+                trapExplanation: 'Verlockende Mobil-Falle: Buchhaltungssoftware läuft am Desktop; das fundamentale Problem liegt im kognitiven Design (Sichtbarkeit/Klarheit).'
+              },
+              {
+                id: 'c',
+                text: 'Datenschutz & Barrierefreiheit – Fachbegriffe dürfen in Softwareoberflächen laut DSGVO nur nach vorheriger schriftlicher Einverständniserklärung des Datenschutzbeauftragten abgekürzt werden.',
+                isCorrect: false,
+                explanation: 'Die DSGVO regelt personenbezogene Daten, nicht Akronyme.',
+                trapExplanation: 'Verlockende DSGVO-Falle: Die DSGVO regelt personenbezogene Daten, nicht die semantische Verständlichkeit von Interface-Beschriftungen.'
+              },
+              {
+                id: 'd',
+                text: 'Feedback & Latenzzeit – Fehlende Tooltips deuten zwingend auf eine Überlastung der internen GPU-Render-Engine hin und verlangsamen die Bildwiederholrate drastisch.',
+                isCorrect: false,
+                explanation: 'Tooltips haben keinen Bezug zur GPU-Hardwareüberlastung.',
+                trapExplanation: 'Verlockende Hardware-Falle: Tooltips belasten keine Render-Engine; das Problem ist die fehlende visuelle Erklärung für den Nutzer (Sichtbarkeit).'
+              }
+            ]
+          }
         ]
       },
       {
@@ -251,6 +473,81 @@ export const CHAPTERS: Chapter[] = [
               { id: 'b', text: 'Phishing-Vektor', isCorrect: false, explanation: 'Hat nichts mit IT-Angriffen zu tun.' },
               { id: 'c', text: 'Low-Fidelity Mockup', isCorrect: false, explanation: 'Das betrifft eine Konzeptionsstufe.' },
               { id: 'd', text: 'Auditiver Screenreader', isCorrect: false, explanation: 'Ein Screenreader ist ein Hilfsmittel für Blinde.' }
+            ]
+          }
+        ],
+        level2QuizQuestions: [
+          {
+            id: 'l2-ixd-3-1',
+            chapterId: 'ixd',
+            moduleId: 'ixd-3',
+            scenario: 'Fallanalyse: In einer minimalistischen Web-Applikation wurden sämtliche Buttons durch graue, flache Textzeilen ohne Umrandung, ohne Schatten und ohne Unterstreichung ersetzt. Nutzer übersehen diese Klickflächen reihenweise.',
+            question: 'Wie lässt sich dieses Usability-Versagen nach den theoretischen Prinzipien von Donald Norman kognitionspsychologisch präzise erklären?',
+            options: [
+              {
+                id: 'a',
+                text: 'Den interaktiven Elementen fehlen wahrnehmbare Signifier, weshalb die an sich vorhandene Klick-Affordance für den Nutzer visuell vollkommen verborgen bleibt.',
+                isCorrect: true,
+                explanation: 'Perfekt! Signifier machen bestehende Affordances erst für das menschliche Auge erkennbar.'
+              },
+              {
+                id: 'b',
+                text: 'Die Benutzeroberfläche besitzt eine fehlerhafte physikalische Affordance, da digitale Flachbildschirme prinzipiell keine echten taktilen Interaktionsmöglichkeiten bieten können.',
+                isCorrect: false,
+                explanation: 'Auf Bildschirmen existiert die Klickbarkeit als digitale Affordance.',
+                trapExplanation: 'Verlockende Theorie-Falle: Auf Touchscreens/Bildschirmen existiert die Klickbarkeit als digitale Affordance sehr wohl; ihr fehlt hier schlicht das wahrnehmbare Signal (Signifier).'
+              },
+              {
+                id: 'c',
+                text: 'Hier liegt eine schwere Störung des Mappings vor, weil Textlinks nach internationaler ISO-Norm zwingend in vertikaler Achse angeordnet sein müssen.',
+                isCorrect: false,
+                explanation: 'Mapping betrifft die Zuordnung von Steuerung und Wirkung, nicht Textlinks.',
+                trapExplanation: 'Verlockende ISO-Falle: Mapping beschreibt die räumliche Zuordnung von Regler und Wirkung, nicht die visuelle Kennzeichnung anklickbarer Textlinks.'
+              },
+              {
+                id: 'd',
+                text: 'Es handelt sich um einen methodisch gewollten Constraint, der unerfahrene Benutzer gezielt vor einer Überlastung durch zu viele Klickoptionen schützen soll.',
+                isCorrect: false,
+                explanation: 'Constraints dürfen wichtige Kernfunktionen nicht unsichtbar machen.',
+                trapExplanation: 'Verlockende Scheinerklärung: Constraints schränken Aktionen zur Fehlervermeidung ein, dürfen aber niemals primäre Navigations- und Funktionslinks unsichtbar maskieren.'
+              }
+            ],
+            examTip: 'IHK-Lieblingsthema: Don Norman unterscheidet strikt zwischen Affordance (Handlungspotenzial) und Signifier (visueller Hinweis/Signal)!'
+          },
+          {
+            id: 'l2-ixd-3-2',
+            chapterId: 'ixd',
+            moduleId: 'ixd-3',
+            scenario: 'Hardware-Interface: An einem Audio-Mischpult bewegt ein Mediengestalter einen Schieberegler nach links, woraufhin die Audio-Lautstärke im rechten Kopfhörer drastisch lauter wird.',
+            question: 'Welches Kernprinzip nach Donald Norman ist hier elementar verletzt und führt zu einer sofortigen Fehlbedienung des Anwenders?',
+            options: [
+              {
+                id: 'a',
+                text: 'Natural Mapping – Die räumliche Bewegungsrichtung des Reglers entspricht nicht der resultierenden akustischen Raum- und Pegelwirkung im mentalen Modell des Nutzers.',
+                isCorrect: true,
+                explanation: 'Richtig! Mapping erfordert eine intuitive, logische Übereinstimmung von Steuerung und Wirkung.'
+              },
+              {
+                id: 'b',
+                text: 'Discoverability – Die Regler sind auf dem Mischpult für den Anwender physisch unsichtbar und können daher unter Studiobedingungen nicht lokalisiert werden.',
+                isCorrect: false,
+                explanation: 'Die Regler sind sichtbar, aber falsch zugeordnet.',
+                trapExplanation: 'Verlockende Begriffsfalle: Die Regler sind gut zu sehen (Discoverability ist gegeben); der Fehler liegt in der widersinnigen Zuordnung von Richtung und Auswirkung (Mapping).'
+              },
+              {
+                id: 'c',
+                text: 'Externe Konsistenz – Lautstärkeregler müssen laut europäischem Arbeitsschutz zwingend als rotierende Drehknöpfe mit haptischem Rastwiderstand ausgeführt sein.',
+                isCorrect: false,
+                explanation: 'Schieberegler sind im professionellen Audiobereich Standard.',
+                trapExplanation: 'Verlockende Normen-Falle: Schieberegler sind im Audiobereich Standard; das Problem ist die vertauschte Richtungs- und Kanalzuordnung.'
+              },
+              {
+                id: 'd',
+                text: 'Kognitiver Constraint – Durch die Linksverschiebung wird eine absichtliche Sicherheitssperre aktiviert, um das Gehör des Tontechnikers vor Übersteuerungen zu bewahren.',
+                isCorrect: false,
+                explanation: 'Die Lautstärke wird lauter, keine Sperre greift.',
+                trapExplanation: 'Verlockende Schutzbehauptung: Die Lautstärke wird lauter statt leiser; hier liegt kein Constraint vor, sondern eine gravierende Fehlzuordnung.'
+              }
             ]
           }
         ]
@@ -562,6 +859,81 @@ export const CHAPTERS: Chapter[] = [
               { id: 'b', text: 'Ausschließlich in grellen Neonfarben', isCorrect: false, explanation: 'Nein, das würde massiv ablenken.' },
               { id: 'c', text: 'In den finalen CI-Farben des Kunden', isCorrect: false, explanation: 'Das gehört erst ins spätere Mockup.' },
               { id: 'd', text: 'Immer mit goldenem Hintergrund', isCorrect: false, explanation: 'Falsch.' }
+            ]
+          }
+        ],
+        level2QuizQuestions: [
+          {
+            id: 'l2-wf-1-1',
+            chapterId: 'wireframe',
+            moduleId: 'wf-1',
+            scenario: 'Kunden-Präsentation: Ein Kunde beschwert sich beim Betrachten der ersten Wireframe-Entwürfe: "Warum ist hier alles nur grau, wo sind unsere bunten Werbefotos und unser neues Firmenlogo?"',
+            question: 'Wie argumentierst du als angehender Mediengestalter Digital fachlich fundiert nach IHK-Standard?',
+            options: [
+              {
+                id: 'a',
+                text: 'Wireframes dienen ausschließlich der Prüfung von Informationsarchitektur, Hierarchie und Nutzerführung; visuelle Farben und Bilder würden den Fokus von diesen fundamentalen Strukturfragen ablenken.',
+                isCorrect: true,
+                explanation: 'Exakt! Der bewusste Verzicht auf Farbe lenkt die Aufmerksamkeit auf Inhalt, Lesefluss und Funktionalität.'
+              },
+              {
+                id: 'b',
+                text: 'Wireframes dürfen laut DIN EN ISO 9241 grundsätzlich nicht in Farbe gerendert werden, da farbige Vektorelemente die Latenzzeit des Browser-Layout-Engines signifikant verlangsamen.',
+                isCorrect: false,
+                explanation: 'Die ISO 9241 regelt Ergonomie, verbietet aber keine Farben aus Render-Gründen.',
+                trapExplanation: 'Glaubwürdiger Scheinfachbegriff: Die ISO 9241 regelt Mensch-System-Interaktion, verbietet aber keine Farben aus Performance-Gründen; Graustufen sind ein didaktisches und methodisches Werkzeug.'
+              },
+              {
+                id: 'c',
+                text: 'Das Corporate Design darf erst nach dem Go-Live der Web-Applikation auf dem Produktionsserver implementiert werden, um rechtliche Abmahnungen durch die Wettbewerbszentrale zu vermeiden.',
+                isCorrect: false,
+                explanation: 'Das CD wird in der Mockup-Phase vor Go-Live ausgearbeitet.',
+                trapExplanation: 'Verlockende Rechts-Falle: Das Corporate Design wird in der nachfolgenden Mockup-Phase sorgfältig ausgearbeitet; die Wettbewerbszentrale mahnt keine internen Wireframe-Skizzen ab.'
+              },
+              {
+                id: 'd',
+                text: 'Graustufen-Wireframes sind nach aktuellen Webstandards zwingend erforderlich, um bereits in der Konzeptionsphase die automatisierte WCAG-AAA-Konformität für farbenblinde Screenreader-Nutzer lückenlos nachzuweisen.',
+                isCorrect: false,
+                explanation: 'WCAG betrifft das finale Design, nicht frühe Wireframes.',
+                trapExplanation: 'Verlockende A11y-Falle: Barrierefreiheit erfordert Kontraste im finalen UI; Wireframes sind jedoch interne Arbeitsartefakte und kein A11y-Audit-Nachweis.'
+              }
+            ],
+            examTip: 'IHK-Prüfungsfokus: Wireframes = Struktur/Inhalt in Graustufen; Mockup = Visuelle Gestaltung mit CI-Farben!'
+          },
+          {
+            id: 'l2-wf-1-2',
+            chapterId: 'wireframe',
+            moduleId: 'wf-1',
+            scenario: 'Stakeholder-Meeting: Ein Projektleiter schlägt vor, die Wireframe-Phase komplett zu überspringen und direkt mit der Programmierung der React-Komponenten zu beginnen, um "drei Wochen Entwicklungszeit zu sparen".',
+            question: 'Welches zentrale IHK-Wirtschaftlichkeits-Argument entkräftet diesen Vorschlag am wirksamsten?',
+            options: [
+              {
+                id: 'a',
+                text: 'Strukturelle Fehlentscheidungen im späteren Quellcode zu korrigieren verursacht um ein Vielfaches höhere Kosten und Verzögerungen als schnelle Anpassungen in konzeptionellen Wireframes.',
+                isCorrect: true,
+                explanation: 'Genau! Frühe Änderungen an Boxen und Skizzen kosten fast nichts, späte Umbauten im fertigen Code gefährden das Budget.'
+              },
+              {
+                id: 'b',
+                text: 'Ohne vorliegende Wireframes verweigern moderne Versionskontrollsysteme wie Git das Einchecken und Mergen von Produktions-Branches in die finale Entwicklungsumgebung.',
+                isCorrect: false,
+                explanation: 'Git überprüft keine Designphasen.',
+                trapExplanation: 'Verlockende Dev-Falle: Git ist ein Werkzeug für Quellcodeverwaltung und prüft keine Designphasen; das Risiko liegt in den immensen Kosten späten Code-Refactorings.'
+              },
+              {
+                id: 'c',
+                text: 'Das Überspringen der Wireframe-Phase führt automatisch zum sofortigen Erlöschen aller Urheberrechte und gewerblichen Schutzrechte an der programmierten Web-Software.',
+                isCorrect: false,
+                explanation: 'Urheberrecht entsteht mit der Schöpfung, unabhängig von Zwischenphasen.',
+                trapExplanation: 'Verlockende Rechts-Falle: Das Urheberrecht entsteht unabhängig von Zwischenschritten; die Begründung gegen das Überspringen ist rein wirtschaftlich und prozessual.'
+              },
+              {
+                id: 'd',
+                text: 'Frontend-Entwickler dürfen nach den Tarifverträgen der Medienbranche erst dann mit dem Coden beginnen, wenn vom Kunden ein beidseitig unterschriebenes Papier-Wireframe vorliegt.',
+                isCorrect: false,
+                explanation: 'Tarifverträge enthalten keine Regeln über Wireframe-Signaturen.',
+                trapExplanation: 'Verlockende Tarif-Falle: Tarifverträge regeln Arbeitsbedingungen und Vergütung, aber keine verbindlichen Wireframe-Unterzeichnungen.'
+              }
             ]
           }
         ]
@@ -1146,6 +1518,81 @@ export const CHAPTERS: Chapter[] = [
               { id: 'd', text: 'Einen automatischen Virenscan', isCorrect: false, explanation: 'Schutzmaßnahme, kein Angriff.' }
             ]
           }
+        ],
+        level2QuizQuestions: [
+          {
+            id: 'l2-sec-1-1',
+            chapterId: 'security',
+            moduleId: 'sec-1',
+            scenario: 'Forensischer Vorfall: Ein Mitarbeiter gibt im Browser die korrekte, vertraute Bank-URL www.hausbank-secure.de per Hand ein, landet jedoch auf einer täuschend echten Betrügerseite, weil der lokale Router manipuliert wurde.',
+            question: 'Welcher spezifische Cyber-Angriffsvektor liegt hier nach IHK-Definition exakt vor?',
+            options: [
+              {
+                id: 'a',
+                text: 'Pharming – Durch Manipulation der Namensauflösung (DNS-Spoofing oder Host-Datei) wird der Datenverkehr trotz korrekter URL-Eingabe auf einen betrügerischen Server umgeleitet.',
+                isCorrect: true,
+                explanation: 'Genau! Pharming leitet Anfragen auf DNS- oder Routerebene um, sodass die echte Adresse den falschen Server ansteuert.'
+              },
+              {
+                id: 'b',
+                text: 'Smishing – Der Angriff erfolgte primär über eine verschlüsselte Kurznachricht, die im Hintergrund automatisiert Sicherheitszertifikate auf dem mobilen Endgerät überschrieben hat.',
+                isCorrect: false,
+                explanation: 'Smishing ist SMS-Phishing, keine DNS-Umleitung.',
+                trapExplanation: 'Verlockende Begriffsverwechslung: Smishing nutzt SMS-Nachrichten; die Umleitung trotz manueller Eingabe der echten Domain im Browser ist die klassische Definition von Pharming.'
+              },
+              {
+                id: 'c',
+                text: 'Vishing – Ein Telefon-Betrüger hat sich über Voice-Over-IP in die Sprachschnittstelle der Firewall eingewählt und das SSL-Zertifikat des Webservers entwertet.',
+                isCorrect: false,
+                explanation: 'Vishing ist Betrug per Telefon/Sprachanruf.',
+                trapExplanation: 'Verlockende Scheintechnik: Vishing ist Social Engineering per Telefon (z. B. falscher Support); Manipulation der Domainauflösung ist Pharming.'
+              },
+              {
+                id: 'd',
+                text: 'Typosquatting – Der Nutzer hat sich beim Eintippen der Bank-Domain unbemerkt vertippt und ist auf einer absichtlich registrierten Tippfehler-Domain gelandet.',
+                isCorrect: false,
+                explanation: 'Das Szenario nennt ausdrücklich die korrekte URL-Eingabe.',
+                trapExplanation: 'Prüfungsfalle: Das Szenario betont explizit, dass die korrekte URL eingetippt wurde! Bei Typosquatting nutzt der Betrüger Tippfehler (z. B. amaz0n.de).'
+              }
+            ],
+            examTip: 'IHK-Unterscheidung: Phishing = Ködern per Nachricht/Link; Pharming = Technische Manipulation der Namensauflösung (DNS)!'
+          },
+          {
+            id: 'l2-sec-1-2',
+            chapterId: 'security',
+            moduleId: 'sec-1',
+            scenario: 'Social Engineering: Eine Mitarbeiterin im Rechnungswesen erhält eine E-Mail mit der internen Signatur des Vorstandsvorsitzenden. Sie wird angewiesen, unter strengster Geheimhaltung sofort 85.000 € für eine angebliche Firmenübernahme auf ein Auslandskonto anzuweisen.',
+            question: 'Wie klassifiziert die IHK diesen Cyber-Angriff und welche Schutzmaßnahme ist im Unternehmensprozess zwingend erforderlich?',
+            options: [
+              {
+                id: 'a',
+                text: 'CEO-Fraud (Chef-Masche) – Wirksamer Schutz erfordert ein verbindliches Vier-Augen-Prinzip und telefonische Rückversicherung über vorab bekannte interne Kanäle bei ungewöhnlichen Überweisungen.',
+                isCorrect: true,
+                explanation: 'Perfekt! CEO-Fraud nutzt Autoritätsgläubigkeit aus und kann nur durch organisatorische Freigabeprozesse verhindert werden.'
+              },
+              {
+                id: 'b',
+                text: 'DDoS-Angriff – Die Buchhaltungsabteilung muss unverzüglich die Netzwerkkabel aller Arbeitsplatzrechner trennen und die Bandbreite des Firmenanschlusses verdoppeln.',
+                isCorrect: false,
+                explanation: 'DDoS ist eine technische Serverüberlastung.',
+                trapExplanation: 'Verlockende Abkürzungsfalle: DDoS ist eine technische Serverüberlastung durch Datenmüll; hier liegt zwischenmenschliche Manipulation (Social Engineering / CEO-Fraud) vor.'
+              },
+              {
+                id: 'c',
+                text: 'Cross-Site-Scripting – Es müssen sämtliche Datenbankabfragen der Finanzbuchhaltung mit parametrisierten SQL-Statements gegen unbefugte Skriptinjektionen gehärtet werden.',
+                isCorrect: false,
+                explanation: 'XSS ist eine Schwachstelle in Web-Apps, kein Betrugsdelikt.',
+                trapExplanation: 'Verlockende Entwicklerfalle: XSS ist eine Web-Sicherheitslücke im Frontend; gegen CEO-Fraud helfen organisatorische Freigabeprozesse (Vier-Augen-Prinzip).'
+              },
+              {
+                id: 'd',
+                text: 'Ransomware – Die Festplatten aller Firmenrechner wurden durch die E-Mail bereits asymmetrisch verschlüsselt und bedürfen eines kostenpflichtigen Entschlüsselungs-Keys.',
+                isCorrect: false,
+                explanation: 'Es liegt kein Schadprogramm/Kryptotrojaner vor.',
+                trapExplanation: 'Verlockende Malware-Falle: Ransomware erpresst Lösegeld durch Datenverschlüsselung; hier versucht der Angreifer die Mitarbeiterin durch psychologischen Druck zur Überweisung zu bewegen.'
+              }
+            ]
+          }
         ]
       },
       {
@@ -1452,6 +1899,81 @@ export const CHAPTERS: Chapter[] = [
               { id: 'b', text: 'Schaltflächen möglichst winzig gestalten', isCorrect: false, explanation: 'Das führt zu Fehlklicks.' },
               { id: 'c', text: 'Ausschließlich Mausgesten mit Kreisbewegungen erzwingen', isCorrect: false, explanation: 'Komplett barrierefeindlich.' },
               { id: 'd', text: 'Den Kontrast auf 1:1 reduzieren', isCorrect: false, explanation: 'Macht Text unsichtbar.' }
+            ]
+          }
+        ],
+        level2QuizQuestions: [
+          {
+            id: 'l2-a11y-1-1',
+            chapterId: 'a11y',
+            moduleId: 'a11y-1',
+            scenario: 'Barrierefreiheits-Audit: Eine Webagentur gestaltet einen Button für eine Online-Apotheke. Der Button hat hellgrauen Text (#999999) auf weißem Hintergrund (#FFFFFF) in 14px Schriftgröße. Der Kunde argumentiert, das wirke "besonders edel".',
+            question: 'Wie beurteilt ein zertifizierter Mediengestalter diese Gestaltung anhand der Web Content Accessibility Guidelines (WCAG 2.1 Konformitätsstufe AA)?',
+            options: [
+              {
+                id: 'a',
+                text: 'Der Entwurf scheitert am WCAG-Erfolgskriterium für Mindestkontraste, da für normalen Fließtext und Buttons ein Kontrastverhältnis von mindestens 4,5:1 zwingend vorgeschrieben ist.',
+                isCorrect: true,
+                explanation: 'Exakt! 4,5:1 ist der verbindliche Mindestkontrast für normale Schriftgrößen unter Stufe AA.'
+              },
+              {
+                id: 'b',
+                text: 'Die Gestaltung ist konform nach WCAG Stufe AA, da die 4,5:1 Kontrastregel laut europäischem Recht ausschließlich für rein redaktionelle Fließtexte in Blogs gilt.',
+                isCorrect: false,
+                explanation: 'Buttons und Formularfelder fallen genauso unter die Kontrastanforderungen.',
+                trapExplanation: 'Typischer Praxis-Irrtum: Interaktive Komponenten wie Buttons und Formularfelder müssen denselben Kontrastanforderungen genügen wie redaktioneller Fließtext.'
+              },
+              {
+                id: 'c',
+                text: 'Der Entwurf ist barrierefrei, sofern in den CSS-Stylesheets ein alternativer Mouseover-Hover-Effekt mit schwarzem Hintergrund hinterlegt ist.',
+                isCorrect: false,
+                explanation: 'Kontraste müssen im Ruhezustand genügen.',
+                trapExplanation: 'Verlockende Hover-Falle: Kontraste müssen im Standard-Ruhezustand barrierefrei sein; Tastatur- und Touch-Nutzer können den Hover-Effekt nicht auslösen.'
+              },
+              {
+                id: 'd',
+                text: 'Farbkontraste spielen für die Barrierefreiheit keine Rolle mehr, da moderne Betriebssysteme fehlerhafte Webfarben durch KI-Filter automatisch in 21:1 Echtzeitkontraste umwandeln.',
+                isCorrect: false,
+                explanation: 'Betriebssysteme ersetzen keine barrierefreie Gestaltung.',
+                trapExplanation: 'Verlockende KI-Falle: Betriebssysteme reparieren unzureichende Kontraste nicht automatisch; Gestalter tragen die rechtliche und fachliche Verantwortung für Barrierefreiheit.'
+              }
+            ],
+            examTip: 'IHK-Standardwert: Mindestkontrast für normalen Text nach WCAG AA beträgt 4,5:1 (bei Großtext ab 18pt bzw. 14pt fett reicht 3:1)!'
+          },
+          {
+            id: 'l2-a11y-1-2',
+            chapterId: 'a11y',
+            moduleId: 'a11y-1',
+            scenario: 'Usability-Test mit Tastatur-Nutzern: Eine E-Learning-Website lässt sich mit der Tab-Taste bedienen, jedoch wurde die blaue Umrandung des aktiven Elements per CSS ("outline: none") komplett entfernt.',
+            question: 'Welches gravierende Barrierefreiheits-Problem entsteht dadurch für sehende Tastatur-Nutzer (z. B. motorisch eingeschränkte Menschen)?',
+            options: [
+              {
+                id: 'a',
+                text: 'Der sichtbare Fokus-Indikator fehlt vollständig, wodurch der Nutzer nicht mehr nachvollziehen kann, welches interaktive Element gerade ausgewählt ist.',
+                isCorrect: true,
+                explanation: 'Richtig! Ein klar sichtbarer Tastaturfokus ist ein zentrales WCAG-Kriterium für motorisch eingeschränkte Nutzer.'
+              },
+              {
+                id: 'b',
+                text: 'Die Website verliert ihre HTTPS-Verschlüsselung, weil CSS-Regeln ohne sichtbare Rahmen von TLS-Zertifikatsstellen blockiert werden.',
+                isCorrect: false,
+                explanation: 'CSS-Styling hat keinen Einfluss auf HTTPS.',
+                trapExplanation: 'Verlockende Sicherheits-Falle: TLS-Verschlüsselung schützt den Übertragungsweg und hat keinerlei technischen Bezug zu visuellen CSS-Fokusringen.'
+              },
+              {
+                id: 'c',
+                text: 'Der Screenreader stürzt sofort ab, da Sprachausgaben zwingend auf die visuelle Outline-Eigenschaft zur Generierung von Audiosignalen angewiesen sind.',
+                isCorrect: false,
+                explanation: 'Screenreader lesen den DOM-Baum, nicht die visuelle Outline.',
+                trapExplanation: 'Verlockende Screenreader-Falle: Screenreader orientieren sich am HTML-DOM-Baum; der fehlende Fokusindikator trifft primär sehende Tastaturnutzer.'
+              },
+              {
+                id: 'd',
+                text: 'Es entsteht kein Problem, da "outline: none" in modernen Responsive-Design-Frameworks als barrierefreie Best-Practice empfohlen wird.',
+                isCorrect: false,
+                explanation: 'outline: none ohne Alternative ist eine der schlimmsten A11y-Sünden.',
+                trapExplanation: 'Gefährlicher Praxis-Irrtum: "outline: none" ohne optischen Ersatz ist eine der gravierendsten Barrieren im modernen Webdesign.'
+              }
             ]
           }
         ]
@@ -3091,3 +3613,64 @@ export const CHAPTERS: Chapter[] = [
     ]
   }
 ];
+
+/**
+ * Returns Level 2 (Mastery / IHK-Transfer) questions for a module.
+ * If explicitly defined in level2QuizQuestions, returns those;
+ * otherwise transforms base questions into scenario-rich IHK transfer questions
+ * with balanced option lengths and detailed trap explanations.
+ */
+export function getModuleLevel2Questions(module: LearningModule): QuizQuestion[] {
+  if (module.level2QuizQuestions && module.level2QuizQuestions.length > 0) {
+    return module.level2QuizQuestions;
+  }
+
+  return module.quizQuestions.map(q => {
+    // Find target length from correct option so distractors are balanced
+    const correctOpt = q.options.find(o => o.isCorrect);
+    const targetWords = correctOpt ? correctOpt.text.split(/\s+/).length : 15;
+
+    const balancedOptions = q.options.map(opt => {
+      if (opt.isCorrect) {
+        return opt;
+      }
+
+      const words = opt.text.trim().split(/\s+/);
+      let enhancedText = opt.text.trim();
+
+      // If distractor is visibly shorter than the target length, expand with plausible professional context
+      if (words.length < Math.max(12, Math.round(targetWords * 0.75))) {
+        if (enhancedText.toLowerCase().startsWith('ausschließlich') || enhancedText.toLowerCase().startsWith('nur')) {
+          enhancedText = `${enhancedText}, da dies nach oberflächlicher Betrachtung den geringsten initialen Gestaltungsaufwand erfordert.`;
+        } else if (enhancedText.endsWith('.')) {
+          enhancedText = `${enhancedText.slice(0, -1)}, was in manchen Praxis-Teams zwar vermutet wird, den IHK-Standards jedoch widerspricht.`;
+        } else {
+          enhancedText = `${enhancedText} – eine in der Praxis häufig gewählte Fehleinschätzung, die fachliche Qualitätskriterien missachtet.`;
+        }
+      }
+
+      return {
+        ...opt,
+        text: enhancedText,
+        trapExplanation:
+          opt.trapExplanation ||
+          `Glaubwürdiger Praxis-Irrtum: ${opt.explanation} In IHK-Prüfungen wird diese Option oft gewählt, da sie oberflächlich wie eine pragmatische Abkürzung wirkt, aber fundamentale Fachstandards außer Acht lässt.`
+      };
+    });
+
+    return {
+      ...q,
+      id: `l2-${q.id}`,
+      question: `[IHK-Meisterfall] ${q.question}`,
+      scenario:
+        q.scenario ||
+        'Praxis-Szenario: In einem anspruchsvollen Kundenprojekt soll eine IHK-konforme und transferorientierte Entscheidung getroffen werden:',
+      options: balancedOptions,
+      examTip:
+        q.examTip ||
+        'IHK-Prüfer-Tipp: Achte bei dieser Transferfrage besonders auf die exakte Begriffstrennung, da alle 4 Optionen plausibel klingen!',
+    };
+  });
+}
+
+

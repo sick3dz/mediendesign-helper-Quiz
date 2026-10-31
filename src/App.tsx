@@ -44,6 +44,7 @@ export default function App() {
   const [selectedModuleMeta, setSelectedModuleMeta] = useState<{
     chapterId: string;
     moduleId: string;
+    level?: 1 | 2;
   } | null>(null);
 
   const [stats, setStats] = useState<UserStats>(() => loadUserStats());
@@ -194,6 +195,16 @@ export default function App() {
     const dbDone = CHAPTERS[6]?.modules.every(m => currentStats.completedModules.includes(m.id));
     if (dbDone && !newlyEarned.includes('database_architect')) newlyEarned.push('database_architect');
 
+    // Level 2 Mastery Badges
+    const lvl2List = currentStats.completedModulesLevel2 || [];
+    if (lvl2List.length >= 1 && !newlyEarned.includes('master_first')) {
+      newlyEarned.push('master_first');
+    }
+    const anyChapterLvl2Done = CHAPTERS.some(ch => ch.modules.length > 0 && ch.modules.every(m => lvl2List.includes(m.id)));
+    if (anyChapterLvl2Done && !newlyEarned.includes('master_chapter')) {
+      newlyEarned.push('master_chapter');
+    }
+
     return newlyEarned;
   };
 
@@ -227,12 +238,17 @@ export default function App() {
     };
   };
 
-  const handleModuleCompleted = (moduleId: string, gainedXp: number) => {
+  const handleModuleCompleted = (moduleId: string, gainedXp: number, level: 1 | 2 = 1) => {
     setStats(prev => {
       const alreadyCompleted = prev.completedModules.includes(moduleId);
       const updatedCompleted = alreadyCompleted
         ? prev.completedModules
         : [...prev.completedModules, moduleId];
+
+      const curLvl2 = prev.completedModulesLevel2 || [];
+      const updatedLvl2 = level === 2 && !curLvl2.includes(moduleId)
+        ? [...curLvl2, moduleId]
+        : curLvl2;
 
       const curLifetime = prev.lifetimeXp ?? prev.xp;
       const newLifetimeXp = curLifetime + gainedXp;
@@ -271,7 +287,7 @@ export default function App() {
       }
 
       // Check for level ups and reward free food packages
-      const { level, updatedPet } = grantLevelUpRewards(prev, newLifetimeXp, basePet);
+      const { level: userLevel, updatedPet } = grantLevelUpRewards(prev, newLifetimeXp, basePet);
 
       // Update daily mission for module learning
       const missions = prev.dailyMissions || [];
@@ -288,9 +304,10 @@ export default function App() {
         xp: newXp,
         lifetimeXp: newLifetimeXp,
         coins: newCoins,
-        level,
+        level: userLevel,
         dailyMissions: updatedMissions,
         completedModules: updatedCompleted,
+        completedModulesLevel2: updatedLvl2,
         answeredQuestionsCount: prev.answeredQuestionsCount + 1,
         earnedBadges: checkBadgeUnlocks({
           ...prev,
@@ -299,6 +316,7 @@ export default function App() {
           lifetimeXp: newLifetimeXp,
           coins: newCoins,
           completedModules: updatedCompleted,
+          completedModulesLevel2: updatedLvl2,
           answeredQuestionsCount: prev.answeredQuestionsCount + 1,
         }),
       };
@@ -760,8 +778,11 @@ export default function App() {
             chapter={currentChapter}
             module={currentModule}
             bionic={settings.bionicReading}
+            initialLevel={selectedModuleMeta.level || 1}
+            isLevel1Completed={stats.completedModules.includes(currentModule.id)}
+            isLevel2Completed={Boolean(stats.completedModulesLevel2?.includes(currentModule.id))}
             onBack={() => setSelectedModuleMeta(null)}
-            onModuleCompleted={(modId, xp) => handleModuleCompleted(modId, xp)}
+            onModuleCompleted={(modId, xp, lvl) => handleModuleCompleted(modId, xp, lvl)}
             onCorrectAnswer={handleCorrectAnswer}
             onNextModule={handleNextModule}
             hasNextModule={hasNextModule}
@@ -775,7 +796,7 @@ export default function App() {
                 bionic={settings.bionicReading}
                 selectedChapterId={selectedChapterId}
                 onSelectChapter={setSelectedChapterId}
-                onSelectModule={(cId, mId) => setSelectedModuleMeta({ chapterId: cId, moduleId: mId })}
+                onSelectModule={(cId, mId, lvl) => setSelectedModuleMeta({ chapterId: cId, moduleId: mId, level: lvl || 1 })}
                 onStartExam={() => setActiveTab('exam')}
                 onOpenGames={() => setActiveTab('minigames')}
                 onGoToSpickzettel={() => setActiveTab('spickzettel')}

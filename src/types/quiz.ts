@@ -5,6 +5,7 @@ export interface QuizOption {
   text: string;
   isCorrect: boolean;
   explanation: string;
+  trapExplanation?: string; // Spezifische IHK-Prüfer-Erklärung, warum diese Falle verlockend wirkte
 }
 
 export interface QuizQuestion {
@@ -36,6 +37,7 @@ export interface LearningModule {
   estimatedMinutes: number;
   nuggets: LearningNugget[];
   quizQuestions: QuizQuestion[];
+  level2QuizQuestions?: QuizQuestion[]; // IHK-Transfer & Praxisfälle für Meisterstufe (Level 2)
   miniGameType?: 'affordance' | 'phishing' | 'process_order' | 'wcag_match';
 }
 
@@ -144,6 +146,7 @@ export interface UserStats {
   streakDays: number;
   lastActiveDate: string;
   completedModules: string[];
+  completedModulesLevel2?: string[]; // Module, die auf Meisterstufe (Level 2) abgeschlossen wurden
   answeredQuestionsCount: number;
   correctAnswersCount: number;
   currentCombo: number;
