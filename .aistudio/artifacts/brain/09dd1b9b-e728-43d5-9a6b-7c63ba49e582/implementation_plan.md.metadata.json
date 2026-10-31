@@ -1,6 +1,6 @@
 {
-  "summary":  "Plan zur Überarbeitung der Level-2-Schwierigkeit:\n- Balancierte Antwortlängen für alle 4 Optionen (kein Längenvorzug für die richtige Antwort).\n- Plausible Distraktoren mit echten IHK-Fallen, Scheinfachbegriffen und typischen Agentur-Irrtümern.\n- Sofortige detaillierte IHK-Prüfer-Erklärung (\"Warum diese Falle verlockend war\").\n- Spezifisches UI-Feedback für entlarvte Prüfungsfallen in QuizCard.",
-  "updatedAt":  "2026-10-31T14:33:46.237431027Z",
+  "summary":  "Architektur- und Designplan für das ausführliche Prüfungs-Themen-Dossier (Modales Info-Fenster) in der Prüfungs-Checkliste mit IHK-Definitionen, Agentur-Praxisbeispielen, IHK-Prüfungsfragen/Musterantworten, Prüfer-Warnungen und Modul-Direktverlinkung.",
+  "updatedAt":  "2026-10-31T14:51:44.238315126Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

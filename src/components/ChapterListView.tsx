@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Chapter, UserStats } from '../types/quiz';
+import { Chapter, UserStats, ChecklistItem } from '../types/quiz';
 import { ALL_BADGES } from '../services/storageService';
 import { BionicText } from '../utils/bionicReading';
 import {
@@ -18,6 +18,8 @@ import {
   Star,
 } from 'lucide-react';
 import { soundEffects } from '../services/audioService';
+import { ChecklistDetailModal } from './ChecklistDetailModal';
+import { getChecklistDossier } from '../data/checklistDetailsData';
 
 interface Props {
   chapters: Chapter[];
@@ -103,6 +105,7 @@ export const ChapterListView: React.FC<Props> = ({
   const totalAllModules = chapters.reduce((acc, c) => acc + c.modules.length, 0);
 
   const [expandedChecklistIdx, setExpandedChecklistIdx] = useState<number | null>(null);
+  const [selectedChecklistModal, setSelectedChecklistModal] = useState<{ chapter: Chapter; item: ChecklistItem } | null>(null);
 
   const toggleChecklistItem = (idx: number) => {
     soundEffects.playClick();
@@ -453,14 +456,18 @@ export const ChapterListView: React.FC<Props> = ({
               <div className="grid grid-cols-1 gap-3">
                 {currentChapter.examChecklist.map((item, idx) => {
                   const isExpanded = expandedChecklistIdx === idx;
+                  const enrichedItem: ChecklistItem = {
+                    ...item,
+                    moreInfo: item.moreInfo || getChecklistDossier(item.task, item.detail, currentChapter.title, currentChapter.modules[0]?.id),
+                  };
+
                   return (
-                    <button
+                    <div
                       key={idx}
-                      onClick={() => toggleChecklistItem(idx)}
-                      className={`w-full text-left p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col gap-3 group cursor-pointer relative overflow-hidden ${
+                      className={`w-full text-left p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col gap-3 relative overflow-hidden ${
                         isExpanded
                           ? 'bg-white dark:bg-slate-900 border-indigo-500 shadow-indigo-100 dark:shadow-indigo-950/40 shadow-xl scale-[1.01]'
-                          : 'bg-white/80 dark:bg-slate-900/60 border-slate-100 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-sm'
+                          : 'bg-white/80 dark:bg-slate-900/60 border-slate-100 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-xs'
                       }`}
                     >
                       {/* Decorative background element for active item */}
@@ -468,7 +475,12 @@ export const ChapterListView: React.FC<Props> = ({
                         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full -mr-16 -mt-16 blur-2xl pointer-events-none" />
                       )}
 
-                      <div className="flex items-center justify-between w-full relative z-10">
+                      {/* Header Row (Click to toggle) */}
+                      <button
+                        type="button"
+                        onClick={() => toggleChecklistItem(idx)}
+                        className="flex items-center justify-between w-full relative z-10 cursor-pointer group text-left"
+                      >
                         <div className="flex items-center gap-4">
                           <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black transition-all ${
                             isExpanded 
@@ -483,13 +495,13 @@ export const ChapterListView: React.FC<Props> = ({
                             {item.task}
                           </span>
                         </div>
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center bg-slate-50 dark:bg-slate-800 transition-all duration-300 ${isExpanded ? 'rotate-90 bg-indigo-600 text-white shadow-sm' : 'text-slate-400 group-hover:text-indigo-500'}`}>
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center bg-slate-50 dark:bg-slate-800 transition-all duration-300 ${isExpanded ? 'rotate-90 bg-indigo-600 text-white shadow-xs' : 'text-slate-400 group-hover:text-indigo-500'}`}>
                           <ChevronRight className="w-4 h-4" />
                         </div>
-                      </div>
+                      </button>
                       
                       {isExpanded && (
-                        <div className="pl-12 pr-2 pb-1 animate-in slide-in-from-top-2 fade-in duration-300 relative z-10">
+                        <div className="pl-12 pr-2 pb-1 animate-in slide-in-from-top-2 fade-in duration-300 relative z-10 space-y-4">
                           <div className="relative">
                             <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-500 to-indigo-300 dark:from-indigo-600 dark:to-indigo-400 rounded-full" />
                             <p className="pl-4 py-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
@@ -497,7 +509,7 @@ export const ChapterListView: React.FC<Props> = ({
                             </p>
                           </div>
                           
-                          <div className="mt-4 flex items-center gap-2.5 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50">
+                          <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50">
                             <div className="w-6 h-6 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0">
                               <Lightbulb className="w-3.5 h-3.5" />
                             </div>
@@ -506,9 +518,33 @@ export const ChapterListView: React.FC<Props> = ({
                               <span className="text-amber-800 dark:text-amber-300 font-bold">In der Prüfung wird dieser Punkt oft als Transferaufgabe abgefragt. Präge ihn dir gut ein!</span>
                             </div>
                           </div>
+
+                          {/* Action Button: Open Detailed IHK Dossier Modal */}
+                          <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                            <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+                              Ausführliche Definition · Praxisbeispiel · Prüfungsfrage & Antwort
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                soundEffects.playClick();
+                                setSelectedChecklistModal({
+                                  chapter: currentChapter,
+                                  item: enrichedItem,
+                                });
+                              }}
+                              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer active:scale-95"
+                            >
+                              <BookOpen className="w-3.5 h-3.5" />
+                              <span>Ausführliche IHK-Infos öffnen</span>
+                              <ArrowRight className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
                       )}
-                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -585,6 +621,17 @@ export const ChapterListView: React.FC<Props> = ({
           })}
         </div>
       </section>
+
+      {/* Detailed IHK Checklist Modal */}
+      {selectedChecklistModal && (
+        <ChecklistDetailModal
+          item={selectedChecklistModal.item}
+          chapter={selectedChecklistModal.chapter}
+          bionic={bionic}
+          onClose={() => setSelectedChecklistModal(null)}
+          onSelectModule={onSelectModule}
+        />
+      )}
     </div>
   );
 };

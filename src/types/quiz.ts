@@ -41,9 +41,28 @@ export interface LearningModule {
   miniGameType?: 'affordance' | 'phishing' | 'process_order' | 'wcag_match';
 }
 
+export interface ChecklistDetailInfo {
+  definition: string;
+  keywords: string[];
+  practicalExample: {
+    context: string;
+    application: string;
+  };
+  examQuestion: {
+    questionText: string;
+    points?: number;
+    sampleAnswer: string;
+    scoringCriteria?: string[];
+  };
+  examinerWarning: string;
+  relatedModuleId?: string;
+  relatedModuleName?: string;
+}
+
 export interface ChecklistItem {
   task: string;
   detail: string;
+  moreInfo?: ChecklistDetailInfo;
 }
 
 export interface Chapter {

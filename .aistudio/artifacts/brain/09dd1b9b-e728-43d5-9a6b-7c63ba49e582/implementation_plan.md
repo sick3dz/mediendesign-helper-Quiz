@@ -1,61 +1,134 @@
-# Level-2-Schwierigkeits-Upgrade: IHK-Prüfungsfallen & Balancierte Antworten
+# Prüfungs-Checkliste: Ausführliches IHK-Themen-Dossier (Modal & Deep-Dive)
 
-Optimierung des Antwortdesigns für Level 2 (Meisterstufe): Beseitigung des "Längenvorzugs" durch exakt gleich lange, professionell formulierte Optionen und Integration plausibler IHK-Fallen mit sofortiger Aufklärung.
+Detaillierte Wissensvertiefung für jeden Prüfstein der Prüfungs-Checkliste („Absolut kritische IHK-Themen“) über ein fokussiertes modales Info-Fenster mit IHK-Musterdefinitionen, konkreten Agentur-Praxisbeispielen, typischen Prüfungsfragen samt Musterlösungen, Prüfer-Warnungen und einem direkten Absprung ins entsprechende Lernmodul.
 
-## User Review & Critical Decisions
+## User Review & Bestätigte Entscheidungen
 
 > [!IMPORTANT]
-> Alle Kernentscheidungen wurden mit dem Nutzer abgestimmt:
-> - **Art der Fallen**: Glaubwürdige Scheinfachbegriffe und typische Praxis-Irrtümer aus echten IHK-Prüfungen.
-> - **Antwortlängen**: Alle 4 Optionen sind annähernd gleich lang und gleich detailreich formuliert (kein Längenvorteil mehr).
-> - **Feedback-Tiefe**: Sofortige IHK-Prüfer-Erklärung bei falscher Antwort ("Warum diese Falle verlockend war").
+> Alle 3 Kernentscheidungen wurden im Klärungsinterview mit dem Nutzer verbindlich abgestimmt:
+
+- **Modales Info-Fenster**: Die ausführlichen Themen-Infos öffnen sich per Klick auf einen prominenten Button („Ausführliches Themen-Dossier öffnen“) als fokussiertes modales Dialogfenster mit strukturierter Detailansicht.
+- **Inhaltliche 4-Säulen-Struktur**:
+  1. *Wichtige IHK-Schlagwörter & Definition*: Präzise, normgerechte Fachbegriff-Erklärung.
+  2. *Konkretes Praxisbeispiel*: Reale Agentur-/Projekt-Situation zur Veranschaulichung.
+  3. *Typische IHK-Prüfungsfrage & Musterantwort*: Authentische Prüfungsaufgabe mit vollständiger Punkte-Musterlösung.
+  4. *IHK-Prüfer-Warnung*: Aufdeckung verbreiteter Denkfehler und typischer Punktabzüge.
+- **Direktlink zum Lernmodul**: Am Fuß des Modals befindet sich ein Call-to-Action-Button, der den Nutzer direkt in das passende interaktive Lernmodul weiterleitet.
 
 ---
 
-## 1. Overview & Core Concept
+## 1. Übersicht & Kernkonzept
 
-### Problem & Zielsetzung
-- **Problem**: Bei vielen Multiple-Choice-Fragen (auch Level 1) ist die richtige Antwort oft die längste oder die einzige ausführlich begründete. Prüflinge erkennen die Lösung dadurch oft an der Textlänge statt am Fachwissen.
-- **Lösung für Level 2**:
-  1. **Längen-Symmetrie**: Alle 4 Antworten haben dieselbe Wortanzahl (ca. 14–22 Wörter) und denselben professionellen Duktus.
-  2. **Plausible Distraktoren**: Die 3 falschen Optionen klingen wie echte Fachantworten, enthalten aber subtile, IHK-typische Denkfehler (z. B. Verwechslung von Affordance mit Signifier, falsche Gesetzesbezüge im A11y-Recht, Scheinfachbegriffe in der Druckvorstufe).
-  3. **Didaktisches Prüfer-Feedback**: Klickt ein Nutzer auf einen Distraktor, erklärt das System sofort: *"Warum diese IHK-Falle verlockend war: Du hast Begriff X mit Y verwechselt. Merke für die Prüfung..."*
+- **Was es tut**: Lernende können in der Prüfungs-Checkliste jedes kritische IHK-Thema aufklappen und mit einem Klick das vollständige „IHK-Themen-Dossier“ als modales Overlay aufrufen. Dadurch wird die Checkliste vom reinen Stichpunkt-Merker zum vollwertigen Prüfungskompendium.
+- **Zielgruppe**: Angehende Mediengestalter Digital & Print / Digitalexperten in der Prüfungsvorbereitung (Abschlussprüfung Teil 1 & Teil 2).
+- **Mehrwert**: Kein langes Suchen mehr – direkter Zusammenhang zwischen Checklisten-Prüfstein, Theorie, Praxisbeispiel, konkreter IHK-Frage und Lernmodul.
 
 ---
 
 ## 2. User Experience & Visual Design
 
-### Prüfer-Fallen-Feedback in `QuizCard`
-Wenn der Nutzer im Level-2-Quiz eine falsche Antwort wählt:
-- Die gewählte falsche Antwort wird rot markiert.
-- Die korrekte Antwort wird grün markiert.
-- Eine dezente IHK-Prüfer-Box erscheint:
-  - Header: `⚠️ IHK-Prüfungsfalle entlarvt`
-  - Erklärung des Distraktors: Warum diese Antwort verlockend klang und worin der exakte Fehler lag.
-  - Prüfer-Tipp zur Vermeidung des Fehlers in der echten IHK-Klausur.
+### User Flow
+```
+[Checkliste: Prüfstein antippen]
+            │
+            ▼
+[Item klappt auf mit Kurzbeschreibung & IHK-Master-Tipp]
+            │
+            ▼
+[Button: "Ausführliches Themen-Dossier öffnen ➔"]
+            │
+            ▼
+[Modal öffnet sich: 4 strukturierte Inhaltsbereiche]
+ ├── 1. IHK-Schlagwörter & Kern-Definition
+ ├── 2. Praxisbeispiel aus dem Agenturalltag
+ ├── 3. IHK-Prüfungsfrage mit Musterantwort
+ └── 4. IHK-Prüfer-Warnung (Typische Denkfehler)
+            │
+     ┌──────┴────────────────────────┐
+     ▼                               ▼
+[Modal schließen]        [Button: "Direkt zum Lernmodul ➔"]
+```
+
+### Visuelle Gestaltung & Layout (Frontend-Design-Richtlinien)
+- **Modales Dialogfenster**:
+  - Zentriertes Overlay mit sanftem Backdrop-Blur (`backdrop-blur-sm bg-slate-950/60`).
+  - Maximale Breite `max-w-2xl` auf Desktop, responsives Sheet mit vollem Viewport-Padding auf Mobilgeräten.
+  - Klares Schließen über `ESC`-Taste, Klick außerhalb des Modals oder den oberen `✕`-Button.
+- **Typografie & Farbcodierung**:
+  - Überschriften mit klarem Kontrast (`text-slate-900 dark:text-white font-extrabold`).
+  - Farbliche Akzentuierung der 4 Sektionen:
+    - *Definition*: Indigoblau (`bg-indigo-50/70 border-indigo-200 text-indigo-900`)
+    - *Agentur-Praxis*: Smaragdgrün (`bg-emerald-50/70 border-emerald-200 text-emerald-900`)
+    - *IHK-Prüfungsfrage & Antwort*: Schiefergrau/Violett mit Zitatblock
+    - *Prüfer-Warnung*: Bernstein/Amber (`bg-amber-50/70 border-amber-200 text-amber-900`)
+- **Zero-Pill-Disziplin**: Keine dekorativen Pill-Inseln; stattdessen klare hierarchische Überschriften und Icons mit Text-Labels.
 
 ---
 
-## 3. Technische Umsetzung & Datenmodell
+## 3. Technische Architektur & Datenmodell
 
-### A. Überarbeitung von `chaptersData.ts`
-- **Symmetrische Level-2-Fragen**:
-  - Konkrete Ausarbeitung für Kernmodule aller Themenbereiche:
-    - **Kapitel 1 (IxD)**: z. B. Norman-Prinzipien (Affordance vs. Signifier), Nielsen-Heuristiken.
-    - **Kapitel 2 (Wireframe)**: z. B. Fidelity-Stufen, Responsive Breakpoints vs. Fluid Grid.
-    - **Kapitel 4 (IT-Sicherheit)**: z. B. Spear-Phishing vs. CEO-Fraud, HTTPS-Zertifikatsvalidierung.
-    - **Kapitel 5 (A11y)**: z. B. WCAG AA vs. AAA Anforderungen, ARIA-Labels vs. Semantisches HTML.
-    - **Kapitel 7 (SQL & JSON)**: z. B. Foreign Key vs. SQL-Injection-Sanitizing, JSON-Datentypen.
-    - **Kapitel 8 (Crossmedia)**: z. B. eciRGB vs. ISO Coated v2 Farbraum-Konvertierungszeitpunkte.
-- **Aktualisierung des dynamischen Level-2-Generators (`getModuleLevel2Questions`)**:
-  - Sicherstellen, dass auch generierte Level-2-Optionen gleichmäßig formuliert und mit IHK-Prüfer-Fallenhinweisen versehen werden.
+### Datenmodell-Erweiterung (`src/types/quiz.ts`)
+```typescript
+export interface ChecklistDetailInfo {
+  definition: string;
+  keywords: string[];
+  practicalExample: {
+    context: string;
+    application: string;
+  };
+  examQuestion: {
+    questionText: string;
+    points: number;
+    sampleAnswer: string;
+    scoringCriteria: string[];
+  };
+  examinerWarning: string;
+  relatedModuleId?: string;
+  relatedModuleName?: string;
+}
 
-### B. UI-Anpassung in `QuizCard.tsx`
-- Anzeige des erweiterten Prüfer-Fallen-Hinweises (`examTrapReason`), wenn `isLevel2` aktiv ist.
+export interface ChecklistItem {
+  task: string;
+  detail: string;
+  moreInfo?: ChecklistDetailInfo;
+}
+```
+
+### Komponenten-Hierarchie
+```
+┌────────────────────────────────────────────────────────┐
+│ ChapterListView                                        │
+│  └── Prüfungs-Checkliste ("Absolut kritische Themen") │
+│       └── Checklist-Item (Expanded Card)               │
+│            └── [Button: "Ausführliches Dossier öffnen"]│
+└───────────────────────────┬────────────────────────────┘
+                            │ (öffnet State)
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│ ChecklistDetailModal                                   │
+│  ├── Header: Prüfstein-Titel & Kapitel-Badge           │
+│  ├── Sektion 1: IHK-Schlagwörter & Definition          │
+│  ├── Sektion 2: Praxisbeispiel aus der Agentur         │
+│  ├── Sektion 3: IHK-Prüfungsfrage & Musterlösung       │
+│  ├── Sektion 4: Prüfer-Warnung vor Denkfehlern         │
+│  └── Footer: [Direkt zum Lernmodul] + [Schließen]      │
+└────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 4. Verifikation
-- Prüfung der visuellen Symmetrie der Antworten in Level 2.
-- Testen des Prüfer-Fallen-Feedbacks bei Auswahl falscher Distraktoren.
-- Kompilierung (`compile_applet`) und Linting (`lint_applet`).
+## 4. Umsetzungsschritte
+
+1. **Typdefinitionen erweitern (`src/types/quiz.ts`)**:
+   - `ChecklistDetailInfo` Schnittstelle definieren und optional in `ChecklistItem` einbinden.
+2. **Daten anreichern (`src/data/chaptersData.ts`)**:
+   - Für die Prüfsteine in allen Kapiteln (IxD, Wireframing, Prototyping, IT-Sicherheit, Accessibility, Projektmanagement, etc.) tiefgehende, praxiserprobte IHK-Dossiers mit Definition, Praxisbeispiel, IHK-Frage/Musterantwort, Prüferwarnung und passendem `relatedModuleId` hinterlegen.
+   - Fallback-Generierung bereitstellen, damit ausnahmslos jeder Prüfstein ein vollständiges Dossier besitzt.
+3. **Modalkomponente erstellen (`src/components/ChecklistDetailModal.tsx`)**:
+   - Barrierefreies Modal mit sauberem Fokus-Management, Keyboard-Listener (`Escape`), Bionic-Reading-Unterstützung und flüssigen Übergängen.
+4. **Verdrahtung in `ChapterListView.tsx`**:
+   - State `selectedChecklistDetail: { chapter: Chapter; item: ChecklistItem } | null` einbinden.
+   - In jedem aufklappbaren Checklisten-Eintrag den Button zur Detailansicht ergänzen.
+   - Absprung zum Lernmodul über den bestehenden Callback `onSelectModule(chapterId, moduleId)` verbinden.
+5. **Verifikation**:
+   - `lint_applet` & `compile_applet` ausführen und Build validieren.
