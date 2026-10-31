@@ -24,7 +24,7 @@ export const PetAdoptionModal: React.FC<Props> = ({
     currentPet.name || PET_SPECIES[selectedSpecies].defaultName
   );
 
-  const speciesList: PetSpecies[] = ['dog', 'cat', 'penguin', 'axolotl'];
+  const speciesList: PetSpecies[] = ['dog', 'cat', 'penguin', 'axolotl', 'unicorn'];
 
   const handleSelectSpecies = (species: PetSpecies) => {
     setSelectedSpecies(species);
@@ -96,8 +96,8 @@ export const PetAdoptionModal: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* 4 Species Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        {/* Species Selection Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
           {speciesList.map(species => {
             const info = PET_SPECIES[species];
             const isSelected = selectedSpecies === species;
@@ -106,6 +106,7 @@ export const PetAdoptionModal: React.FC<Props> = ({
               cat: '🐱',
               penguin: '🐧',
               axolotl: '🦎',
+              unicorn: '🦄',
             };
 
             return (

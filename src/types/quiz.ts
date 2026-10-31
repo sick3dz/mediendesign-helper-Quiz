@@ -77,7 +77,7 @@ export interface Chapter {
   examChecklist: ChecklistItem[];
 }
 
-export type PetSpecies = 'dog' | 'cat' | 'penguin' | 'axolotl';
+export type PetSpecies = 'dog' | 'cat' | 'penguin' | 'axolotl' | 'unicorn';
 
 export interface PetAccessory {
   id: string;
@@ -100,6 +100,22 @@ export interface PetFood {
   description: string;
 }
 
+export type GadgetInteractionType = 'bounce' | 'laser' | 'magic_wand' | 'fidget';
+
+export interface PetGadget {
+  id: string;
+  name: string;
+  category: 'gadget';
+  price: number;
+  xpPrice: number;
+  icon: string;
+  description: string;
+  interactionType: GadgetInteractionType;
+  happinessBonus: number;
+  soundName: 'bounce' | 'laser' | 'magic' | 'click';
+  actionMessage: (petName: string) => string;
+}
+
 export interface PetState {
   hasAdopted?: boolean;
   species: PetSpecies;
@@ -113,10 +129,12 @@ export interface PetState {
     face?: string;
     neck?: string;
     frame?: string; // Animated avatar aura/frame
+    gadget?: string; // Active gadget placed beside the pet
   };
   inventory: {
     food: { [foodId: string]: number }; // quantity
     accessories: string[]; // owned accessory IDs
+    gadgets?: string[]; // owned gadget IDs
   };
   timesFed: number;
   timesPetted: number;

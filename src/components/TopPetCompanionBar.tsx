@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PetState, UserStats, PetFood } from '../types/quiz';
-import { PET_SPECIES, PET_FOODS, PET_SPECIES_SOUNDS } from '../data/petData';
+import { PET_SPECIES, PET_FOODS, PET_SPECIES_SOUNDS, findGadgetById } from '../data/petData';
 import { findCosmeticById } from '../data/cosmeticsData';
 import { PetAvatar } from './PetAvatar';
 import { soundEffects } from '../services/audioService';
@@ -42,6 +42,7 @@ export const TopPetCompanionBar: React.FC<Props> = ({
 
   const [isPetted, setIsPetted] = useState(false);
   const [isEating, setIsEating] = useState(false);
+  const [isGadgetInteracting, setIsGadgetInteracting] = useState(false);
   const [quickFeedback, setQuickFeedback] = useState<string | null>(null);
 
   const showFeedback = (text: string) => {
@@ -151,6 +152,7 @@ export const TopPetCompanionBar: React.FC<Props> = ({
                   pet={pet}
                   isEating={isEating}
                   isPetted={isPetted}
+                  isGadgetActive={isGadgetInteracting}
                   size="sm"
                   equippedCosmetics={stats.equippedCosmetics}
                   previewOverride={previewOverride}
@@ -249,6 +251,35 @@ export const TopPetCompanionBar: React.FC<Props> = ({
               <Utensils className="w-3.5 h-3.5 text-amber-500" />
               <span className="hidden md:inline">Füttern {availableFoodEntry ? `(${availableFoodEntry[1]})` : ''}</span>
             </button>
+
+            {/* Quick Gadget Play Button */}
+            {pet.equipped.gadget && findGadgetById(pet.equipped.gadget) && (() => {
+              const activeGadget = findGadgetById(pet.equipped.gadget);
+              if (!activeGadget) return null;
+              return (
+                <button
+                  onClick={() => {
+                    soundEffects.playGadgetSound(activeGadget.soundName);
+                    setIsGadgetInteracting(true);
+                    setTimeout(() => setIsGadgetInteracting(false), 1250);
+                    const newHappiness = Math.min(100, pet.happiness + activeGadget.happinessBonus);
+                    const updated: PetState = {
+                      ...pet,
+                      isSleeping: false,
+                      happiness: newHappiness,
+                      timesPlayed: (pet.timesPlayed || 0) + 1,
+                    };
+                    onUpdatePet(updated);
+                    showFeedback(activeGadget.actionMessage(pet.name));
+                  }}
+                  className="px-2.5 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/40 border border-purple-200 dark:border-purple-900/60 text-purple-700 dark:text-purple-300 text-xs font-bold flex items-center gap-1 transition-all cursor-pointer shadow-2xs active:scale-95"
+                  title={`${activeGadget.name} anstupsen`}
+                >
+                  <span className="text-xs">{activeGadget.icon}</span>
+                  <span className="hidden md:inline">{activeGadget.name}</span>
+                </button>
+              );
+            })()}
 
             {/* Dedicated EXP-Shop Button */}
             <button

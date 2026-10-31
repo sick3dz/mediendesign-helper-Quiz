@@ -303,7 +303,25 @@ export function loadUserStats(): UserStats {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_STATS;
     const parsed = JSON.parse(raw);
-    const mergedPet = { ...DEFAULT_PET_STATE, ...(parsed.pet || {}) };
+    const rawPet = parsed.pet || {};
+    const mergedPet = {
+      ...DEFAULT_PET_STATE,
+      ...rawPet,
+      equipped: {
+        ...DEFAULT_PET_STATE.equipped,
+        ...(rawPet.equipped || {}),
+      },
+      inventory: {
+        ...DEFAULT_PET_STATE.inventory,
+        ...(rawPet.inventory || {}),
+        gadgets: Array.isArray(rawPet.inventory?.gadgets) && rawPet.inventory.gadgets.length > 0
+          ? rawPet.inventory.gadgets
+          : ['bouncing_ball'],
+      },
+    };
+    if (!mergedPet.equipped.gadget && mergedPet.inventory.gadgets?.includes('bouncing_ball')) {
+      mergedPet.equipped.gadget = 'bouncing_ball';
+    }
     const decayedPet = calculatePetDecay(mergedPet);
     const today = getTodayDateString();
 

@@ -1,4 +1,4 @@
-import { PetSpecies, PetAccessory, PetFood, PetState } from '../types/quiz';
+import { PetSpecies, PetAccessory, PetFood, PetState, PetGadget } from '../types/quiz';
 
 export interface PetSpeciesInfo {
   species: PetSpecies;
@@ -36,6 +36,13 @@ export const PET_SPECIES: Record<PetSpecies, PetSpeciesInfo> = {
     title: 'IxD-Axolotl',
     description: 'Regeneriert verlorene Energie im Nu und schwimmt fröhlich durch jede Designkonzeption.',
     favoriteFood: 'Wasser-Snack',
+  },
+  unicorn: {
+    species: 'unicorn',
+    defaultName: 'Sternchen',
+    title: 'Kreativ-Einhorn',
+    description: 'Bringt magische Inspiration in Farbwelten und lässt deine kreativen Ideen im IHK-Design erstrahlen.',
+    favoriteFood: 'Magischer Sternenstaub',
   },
 };
 
@@ -80,6 +87,14 @@ export const PET_SPECIES_SOUNDS: Record<PetSpecies, PetSpeciesSoundConfig> = {
     highFiveActionMsg: (name: string) => `${name} wackelt freudig mit der Flosse an deiner Hand! High-Five! 🫧 (+10 Laune)`,
     petActionMsg: (name: string) => `${name} blubbert glücklich und wackelt mit den Kiemen! (+15 Laune) 🫧`,
     wakeUpMsg: (name: string) => `${name} taucht mit einem munteren "Blubb!" an die Oberfläche! ☀️`,
+  },
+  unicorn: {
+    soundWord: 'Wieher! ✨',
+    soundIcon: '🦄',
+    highFiveLabel: 'Huf geben! ✨',
+    highFiveActionMsg: (name: string) => `${name} tippt mit dem glitzernden Huf an deine Hand! High-Five! ✨ (+10 Laune)`,
+    petActionMsg: (name: string) => `${name} wiehert magisch und das Horn funkelt in Regenbogenfarben! (+15 Laune) 🦄✨`,
+    wakeUpMsg: (name: string) => `${name} erwacht mit einem glitzernden Wiehern und schüttelt die Mähne! ☀️✨`,
   },
 };
 
@@ -143,6 +158,26 @@ export const PET_FOODS: PetFood[] = [
     nutrition: 100,
     happiness: 100,
     description: 'Füllt Hunger und Laune komplett auf 100%!',
+  },
+  {
+    id: 'stardust',
+    name: 'Magischer Sternenstaub',
+    price: 110,
+    xpPrice: 85,
+    icon: '✨',
+    nutrition: 50,
+    happiness: 70,
+    description: 'Glitzert geheimnisvoll und lässt das Kreativ-Einhorn vor Freude strahlen.',
+  },
+  {
+    id: 'rainbow_cupcake',
+    name: 'Regenbogen-Cupcake',
+    price: 140,
+    xpPrice: 110,
+    icon: '🧁',
+    nutrition: 70,
+    happiness: 85,
+    description: 'Bunt gestrudelter Feinschmecker-Cupcake mit glänzenden magischen Streuseln.',
   },
 ];
 
@@ -413,6 +448,65 @@ export function findAccessoryById(id: string): PetAccessory | undefined {
   return ALL_AVAILABLE_ACCESSORIES.find(a => a.id === id);
 }
 
+export const PET_GADGETS: PetGadget[] = [
+  {
+    id: 'bouncing_ball',
+    name: 'Bunter Hüpfball',
+    category: 'gadget',
+    price: 0,
+    xpPrice: 0,
+    icon: '⚽',
+    description: 'Gratis Starter-Spielzeug: Springt fröhlich mit Squash-and-Stretch-Physik!',
+    interactionType: 'bounce',
+    happinessBonus: 12,
+    soundName: 'bounce',
+    actionMessage: (petName: string) => `${petName} jagt begeistert dem bunten Hüpfball hinterher! Boing! ⚽ (+12 Laune)`,
+  },
+  {
+    id: 'laser_pointer',
+    name: 'Neon-Laserpointer',
+    category: 'gadget',
+    price: 120,
+    xpPrice: 80,
+    icon: '🔦',
+    description: 'Projiziert einen flitzenden roten Laserpunkt – pure Jagdfreude!',
+    interactionType: 'laser',
+    happinessBonus: 18,
+    soundName: 'laser',
+    actionMessage: (petName: string) => `${petName} hechtet flink dem roten Laserpunkt nach! Zapp! 🔴 (+18 Laune)`,
+  },
+  {
+    id: 'magic_wand',
+    name: 'Sternen-Zauberstab',
+    category: 'gadget',
+    price: 220,
+    xpPrice: 150,
+    icon: '🪄',
+    description: 'Schwingt auf und hüllt dein Haustier in funkelnden Sternenstaub!',
+    interactionType: 'magic_wand',
+    happinessBonus: 25,
+    soundName: 'magic',
+    actionMessage: (petName: string) => `Magischer Sternenstaub sprüht um ${petName} herum! Zauberhaft! ✨ (+25 Laune)`,
+  },
+  {
+    id: 'fidget_cube',
+    name: 'ADHS Fokus-Würfel',
+    category: 'gadget',
+    price: 160,
+    xpPrice: 110,
+    icon: '🎲',
+    description: 'Taktiles Klick- und Dreh-Gadget: Beruhigt Nerven und bringt sanften Fokus.',
+    interactionType: 'fidget',
+    happinessBonus: 15,
+    soundName: 'click',
+    actionMessage: (petName: string) => `Klick-Klack! ${petName} findet durch das rhythmische Klicken sofortige Ruhe! 🎲 (+15 Laune)`,
+  },
+];
+
+export function findGadgetById(id: string): PetGadget | undefined {
+  return PET_GADGETS.find(g => g.id === id);
+}
+
 export const DEFAULT_PET_STATE: PetState = {
   hasAdopted: false, // User selects first!
   species: 'dog',
@@ -420,13 +514,16 @@ export const DEFAULT_PET_STATE: PetState = {
   hunger: 85,
   happiness: 85,
   lastCareTimestamp: Date.now(),
-  equipped: {},
+  equipped: {
+    gadget: 'bouncing_ball',
+  },
   inventory: {
     food: {
       cookie: 3, // starts with 3 free welcome treats
       snack_meal: 1,
     },
     accessories: [],
+    gadgets: ['bouncing_ball'],
   },
   timesFed: 0,
   timesPetted: 0,
@@ -529,6 +626,13 @@ export function getDynamicPetThought(pet: PetState, statsXp: number = 0, seedInd
       `Unterwasser-Fokus aktiviert... Lass uns wertvolles EXP sammeln! 🫧`,
       `Interaktionsdesign ist mein natürlicher Lebensraum! Blubb! 🌊`,
       timeContext === 'morning' ? `Blubb! Guten Morgen – munter auftauchen zum Lernen! ☀️` : timeContext === 'afternoon' ? `Sanfte Wellen & frisches Wissen am Nachmittag! 🫧` : `Abendliches Blubbern... Zeit für eine ruhige Fokus-Einheit! 🌙`,
+    ],
+    unicorn: [
+      `${pet.name}'s Horn funkelt voller kreativer Ideen für dein nächstes Design! 🦄✨`,
+      `Wieher! Ein Hauch Sternenstaub verwandelt jedes Layout in pure Magie! 🌈`,
+      `Farbharmonien und Kontraste strahlen heute besonders zauberhaft! ✨`,
+      `Mit kreativem Gespür meistern wir jede knifflige IHK-Aufgabe! 🌟`,
+      timeContext === 'morning' ? `Magischer Sonnenaufgang! Wieher – lass uns kreativ durchstarten! ☀️✨` : timeContext === 'afternoon' ? `Bunte Nachmittags-Inspiration! Das Horn leuchtet vor Tatendrang! 🦄🌈` : `Ein funkelnder Sternenhimmel für deine abendliche Lern-Session! 🌙✨`,
     ],
   };
 

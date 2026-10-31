@@ -1,6 +1,6 @@
 {
-  "summary":  "Architektur- und Designplan für das ausführliche Prüfungs-Themen-Dossier (Modales Info-Fenster) in der Prüfungs-Checkliste mit IHK-Definitionen, Agentur-Praxisbeispielen, IHK-Prüfungsfragen/Musterantworten, Prüfer-Warnungen und Modul-Direktverlinkung.",
-  "updatedAt":  "2026-10-31T14:51:44.238315126Z",
+  "summary":  "Detaillierter Implementierungsplan für interaktive Haustier-Gadgets:\n- Neues Spielzeug-System mit Platzierung direkt neben dem Haustier im SVG-Avatar\n- Physik-Hüpfen und Interaktions-Animationen mit Laune-Bonus (+Soundeffekte)\n- Starter- und EXP-Shop-Sortiment: Bunter Hüpfball (Gratis), Neon-Laserpointer (EXP) und Magischer Zauberstab (EXP)\n- Integration in Datenmodelle, PetAvatar, VirtualPetView (Shop & Garderobe) und TopPetCompanionBar",
+  "updatedAt":  "2026-10-31T17:25:23.006115102Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

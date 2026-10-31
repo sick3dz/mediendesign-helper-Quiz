@@ -1,5 +1,7 @@
-import React from 'react';
-import { PetSpecies, PetState, EquippedCosmetics } from '../types/quiz';
+import React, { useState } from 'react';
+import { PetSpecies, PetState, EquippedCosmetics, PetGadget } from '../types/quiz';
+import { findGadgetById } from '../data/petData';
+import { soundEffects } from '../services/audioService';
 
 interface Props {
   pet: PetState;
@@ -10,6 +12,9 @@ interface Props {
   previewOverride?: {
     equipped?: Partial<PetState['equipped']>;
   };
+  onInteractGadget?: (gadget: PetGadget) => void;
+  isGadgetInteracting?: boolean;
+  isGadgetActive?: boolean;
 }
 
 export const PetAvatar: React.FC<Props> = ({
@@ -19,12 +24,32 @@ export const PetAvatar: React.FC<Props> = ({
   size = 'lg',
   equippedCosmetics,
   previewOverride,
+  onInteractGadget,
+  isGadgetInteracting,
+  isGadgetActive: externalGadgetActive,
 }) => {
   const { species, happiness, hunger } = pet;
   const equipped = {
     ...(equippedCosmetics?.frame ? { frame: equippedCosmetics.frame } : {}),
     ...pet.equipped,
     ...(previewOverride?.equipped || {}),
+  };
+
+  const [internalGadgetActive, setInternalGadgetActive] = useState(false);
+  const isGadgetActive = Boolean(isGadgetInteracting || externalGadgetActive || internalGadgetActive);
+
+  const activeGadgetId = equipped?.gadget;
+  const gadget = activeGadgetId ? findGadgetById(activeGadgetId) : undefined;
+
+  const handleGadgetClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!gadget) return;
+    setInternalGadgetActive(true);
+    soundEffects.playGadgetSound(gadget.soundName);
+    if (onInteractGadget) {
+      onInteractGadget(gadget);
+    }
+    setTimeout(() => setInternalGadgetActive(false), 1250);
   };
 
   const isEcstatic = happiness >= 70;
@@ -64,7 +89,7 @@ export const PetAvatar: React.FC<Props> = ({
 
   return (
     <div className={`relative ${sizeClasses} mx-auto flex items-center justify-center select-none transition-transform duration-300 ${
-      isEating ? 'animate-bounce scale-105' : isPetted ? 'scale-110' : isSleeping ? 'scale-95 opacity-90' : 'animate-pet-breathe hover:scale-105'
+      isEating ? 'animate-bounce scale-105' : isPetted ? 'scale-110' : isGadgetActive ? 'scale-105 animate-pet-gadget-shake' : isSleeping ? 'scale-95 opacity-90' : 'animate-pet-breathe hover:scale-105'
     }`}>
       {/* Equipped Animated Pet Frame */}
       {equipped?.frame === 'frame-bronze' && (
@@ -98,6 +123,16 @@ export const PetAvatar: React.FC<Props> = ({
       {isPetted && (
         <div className="absolute -top-4 text-2xl animate-ping pointer-events-none z-20">
           💖
+        </div>
+      )}
+
+      {/* Reactive gadget play reaction with celebratory mood badge */}
+      {isGadgetActive && gadget && (
+        <div className="absolute -top-6 flex items-center gap-1.5 bg-white/95 dark:bg-slate-900/95 px-3 py-1 rounded-full shadow-lg border border-purple-300 dark:border-purple-700 animate-bounce pointer-events-none z-30">
+          <span className="text-sm">{gadget.icon}</span>
+          <span className="text-xs font-black bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            +{gadget.happinessBonus} Laune!
+          </span>
         </div>
       )}
 
@@ -142,6 +177,22 @@ export const PetAvatar: React.FC<Props> = ({
             <stop offset="50%" stopColor="#10B981" />
             <stop offset="75%" stopColor="#3B82F6" />
             <stop offset="100%" stopColor="#8B5CF6" />
+          </linearGradient>
+          <linearGradient id="unicorn-horn-grad" x1="0%" y1="100%" x2="50%" y2="0%">
+            <stop offset="0%" stopColor="#F59E0B" />
+            <stop offset="35%" stopColor="#FBBF24" />
+            <stop offset="70%" stopColor="#FDE047" />
+            <stop offset="100%" stopColor="#FEF08A" />
+          </linearGradient>
+          <linearGradient id="unicorn-body-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="100%" stopColor="#F3E8FF" />
+          </linearGradient>
+          <linearGradient id="unicorn-mane-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#F472B6" />
+            <stop offset="30%" stopColor="#C084FC" />
+            <stop offset="70%" stopColor="#38BDF8" />
+            <stop offset="100%" stopColor="#FDE047" />
           </linearGradient>
         </defs>
 
@@ -366,6 +417,104 @@ export const PetAvatar: React.FC<Props> = ({
             {/* Stubby Paws */}
             <ellipse cx="80" cy="168" rx="8" ry="6" fill="#FBCFE8" />
             <ellipse cx="120" cy="168" rx="8" ry="6" fill="#FBCFE8" />
+          </g>
+        )}
+
+        {/* 5. UNICORN (Sternchen) */}
+        {species === 'unicorn' && (
+          <g>
+            {/* Flowing Pastel Rainbow Mane (Back/Side Locks) */}
+            <g>
+              {/* Pink lock */}
+              <path d="M58 80 C36 82 28 118 42 142 C50 134 54 116 62 100 Z" fill="#F472B6" />
+              {/* Purple/Lilac lock */}
+              <path d="M54 96 C30 108 26 142 46 160 C52 148 56 130 64 118 Z" fill="#C084FC" />
+              {/* Sky Blue lock */}
+              <path d="M142 80 C164 82 172 118 158 142 C150 134 146 116 138 100 Z" fill="#38BDF8" />
+              {/* Pastel Yellow lock */}
+              <path d="M146 96 C170 108 174 142 154 160 C148 148 144 130 136 118 Z" fill="#FDE047" />
+            </g>
+
+            {/* Unicorn Ears */}
+            <g>
+              {/* Left Ear */}
+              <polygon points="64,74 50,38 78,58" fill="#FFFFFF" stroke="#E9D5FF" strokeWidth="1.5" />
+              <polygon points="63,70 54,45 74,60" fill="#FCE7F3" />
+              {/* Right Ear */}
+              <polygon points="136,74 150,38 122,58" fill="#FFFFFF" stroke="#E9D5FF" strokeWidth="1.5" />
+              <polygon points="137,70 146,45 126,60" fill="#FCE7F3" />
+            </g>
+
+            {/* Unicorn Body */}
+            <ellipse cx="100" cy="142" rx="45" ry="38" fill="url(#unicorn-body-grad)" />
+            <ellipse cx="100" cy="146" rx="28" ry="24" fill="#FAF5FF" />
+
+            {/* Rose-Gold / Shimmer Hooves */}
+            <ellipse cx="78" cy="168" rx="11" ry="7.5" fill="#F472B6" />
+            <ellipse cx="78" cy="166" rx="7" ry="2.5" fill="#FBCFE8" />
+            <ellipse cx="122" cy="168" rx="11" ry="7.5" fill="#F472B6" />
+            <ellipse cx="122" cy="166" rx="7" ry="2.5" fill="#FBCFE8" />
+
+            {/* Unicorn Head */}
+            <circle cx="100" cy="95" r="45" fill="url(#unicorn-body-grad)" />
+
+            {/* Pastel Mane Fringe / Bangs on Forehead */}
+            <path d="M82 64 Q94 76 90 84 Q82 78 82 64 Z" fill="#F472B6" />
+            <path d="M118 64 Q106 76 110 84 Q118 78 118 64 Z" fill="#38BDF8" />
+            <path d="M96 62 Q100 78 94 86 Q90 74 96 62 Z" fill="#FDE047" />
+            <path d="M104 62 Q100 78 106 86 Q110 74 104 62 Z" fill="#C084FC" />
+
+            {/* Unicorn Muzzle */}
+            <ellipse cx="100" cy="108" rx="22" ry="16" fill="#FDF2F8" />
+            <circle cx="95" cy="106" r="1.8" fill="#EC4899" />
+            <circle cx="105" cy="106" r="1.8" fill="#EC4899" />
+
+            {/* Unicorn Mouth Reaction */}
+            {isSleeping ? (
+              <path d="M96 114 Q100 117 104 114" stroke="#7E22CE" strokeWidth="2" fill="none" strokeLinecap="round" />
+            ) : isHungry ? (
+              <path d="M96 118 Q100 113 104 118" stroke="#7E22CE" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+            ) : isEcstatic ? (
+              <g>
+                <path d="M94 113 Q100 120 106 113" stroke="#7E22CE" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+                <path d="M97 116 Q100 123 103 116 Z" fill="#F472B6" />
+              </g>
+            ) : (
+              <path d="M95 113 Q100 118 105 113" stroke="#7E22CE" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+            )}
+
+            {/* Sparkly Eyes */}
+            {isSleeping ? (
+              <g stroke="#6B21A8" strokeWidth="2.8" fill="none" strokeLinecap="round">
+                <path d="M78 88 Q85 94 92 88" />
+                <path d="M108 88 Q115 94 122 88" />
+                {/* Gentle eyelashes */}
+                <path d="M76 89 L73 86" />
+                <path d="M124 89 L127 86" />
+              </g>
+            ) : (
+              <g className="animate-pet-blink" style={{ transformOrigin: '100px 85px' }}>
+                <ellipse cx="85" cy="85" rx="7.5" ry="8.5" fill="#581C87" />
+                <ellipse cx="115" cy="85" rx="7.5" ry="8.5" fill="#581C87" />
+                {/* Violet Iris */}
+                <circle cx="85" cy="86" r="5" fill="#7C3AED" />
+                <circle cx="115" cy="86" r="5" fill="#7C3AED" />
+                {/* Starlight twin highlights */}
+                <circle cx="82.5" cy="82" r="3" fill="#FFFFFF" />
+                <circle cx="112.5" cy="82" r="3" fill="#FFFFFF" />
+                <circle cx="87.5" cy="87.5" r="1.4" fill="#FFFFFF" />
+                <circle cx="117.5" cy="87.5" r="1.4" fill="#FFFFFF" />
+                {/* Eyelash flick */}
+                <path d="M78 82 Q80 78 83 78" stroke="#581C87" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+                <path d="M122 82 Q120 78 117 78" stroke="#581C87" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+              </g>
+            )}
+
+            {/* Rosy Sparkle Cheeks */}
+            <circle cx="74" cy="98" r="7" fill="#F472B6" opacity="0.45" />
+            <circle cx="126" cy="98" r="7" fill="#F472B6" opacity="0.45" />
+            <text x="74" y="99" fontSize="6" textAnchor="middle" fill="#FFFFFF" opacity="0.8">✦</text>
+            <text x="126" y="99" fontSize="6" textAnchor="middle" fill="#FFFFFF" opacity="0.8">✦</text>
           </g>
         )}
 
@@ -596,6 +745,136 @@ export const PetAvatar: React.FC<Props> = ({
             <circle cx="-20" cy="-16" r="3" fill="#EF4444" />
             <circle cx="0" cy="-20" r="3.5" fill="#3B82F6" />
             <circle cx="20" cy="-16" r="3" fill="#10B981" />
+          </g>
+        )}
+
+        {/* ======================================================== */}
+        {/* UNICORN MAJESTIC HORN (Layered so it projects through     */}
+        {/* hats, crowns, beanies and headsets majestically!)        */}
+        {/* ======================================================== */}
+        {species === 'unicorn' && (
+          <g id="unicorn-horn-protruding">
+            {/* Horn Aura / Magic glow */}
+            <ellipse cx="100" cy="36" rx="15" ry="28" fill="#FDE047" opacity="0.22" className="animate-pulse" />
+
+            {/* Hat penetration rim when headgear is equipped */}
+            {equipped.head && (
+              <g>
+                <ellipse cx="100" cy="49" rx="10" ry="4" fill="#F59E0B" opacity="0.4" />
+                <ellipse cx="100" cy="48" rx="8" ry="3" fill="#FEF08A" opacity="0.85" stroke="#D97706" strokeWidth="1" />
+              </g>
+            )}
+
+            {/* Golden Spiral Horn Base to Tip */}
+            <polygon points="100,10 93,65 107,65" fill="url(#unicorn-horn-grad)" stroke="#D97706" strokeWidth="1.2" />
+
+            {/* Spiraling golden ridges */}
+            <path d="M94 57 Q100 61 106 57" stroke="#FEF08A" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+            <path d="M95 47 Q100 51 105 47" stroke="#FEF08A" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+            <path d="M96 37 Q100 41 104 37" stroke="#FEF08A" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+            <path d="M97 27 Q100 31 103 27" stroke="#FEF08A" strokeWidth="2" fill="none" strokeLinecap="round" />
+            <path d="M98.5 18 Q100 21 101.5 18" stroke="#FEF08A" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+
+            {/* Shimmering Tip Star & Glint */}
+            <polygon points="100,2 102.5,7.5 108,10 102.5,12.5 100,18 97.5,12.5 92,10 97.5,7.5" fill="#FEF08A" />
+            <circle cx="100" cy="10" r="2.2" fill="#FFFFFF" />
+            <circle cx="100" cy="10" r="3.5" fill="#FDE047" opacity="0.6" className="animate-pulse" />
+          </g>
+        )}
+
+        {/* ======================================================== */}
+        {/* PET INTERACTIVE GADGET (Permanently anchored beside pet)  */}
+        {/* ======================================================== */}
+        {size !== 'sm' && gadget && (
+          <g
+            id="pet-active-gadget"
+            transform="translate(156, 168)"
+            onClick={handleGadgetClick}
+            className="cursor-pointer group select-none"
+            tabIndex={0}
+            role="button"
+            aria-label={`${gadget.name} anstupsen`}
+          >
+            {/* Floor Contact Shadow */}
+            <ellipse
+              cx="0"
+              cy="9"
+              rx={gadget.id === 'laser_pointer' ? "15" : "13"}
+              ry="4"
+              fill="currentColor"
+              className={`text-slate-300/80 dark:text-slate-800 ${
+                isGadgetActive && gadget.id === 'bouncing_ball' ? 'animate-gadget-ball-shadow' : ''
+              }`}
+            />
+
+            {/* 1. BOUNCING BALL */}
+            {gadget.id === 'bouncing_ball' && (
+              <g className={isGadgetActive ? 'animate-gadget-ball-active' : 'animate-gadget-idle group-hover:scale-110 transition-transform'}>
+                <circle cx="0" cy="0" r="13" fill="#06B6D4" stroke="#0891B2" strokeWidth="1.2" />
+                <path d="M-13,0 A13,13 0 0,1 13,0 Z" fill="#F59E0B" />
+                <path d="M0,-13 A13,13 0 0,1 0,13 Z" fill="#EC4899" opacity="0.85" />
+                <circle cx="0" cy="0" r="4.5" fill="#FFFFFF" />
+                <polygon points="0,-3 1,-1 3.5,-1 1.5,0.5 2.5,3 0,1.5 -2.5,3 -1.5,0.5 -3.5,-1 -1,-1" fill="#6366F1" />
+              </g>
+            )}
+
+            {/* 2. NEON LASERPOINTER */}
+            {gadget.id === 'laser_pointer' && (
+              <g>
+                <g className={isGadgetActive ? 'animate-gadget-laser-device' : 'animate-gadget-idle group-hover:scale-105 transition-transform'}>
+                  <rect x="-14" y="-4" width="26" height="8" rx="3" fill="#0F172A" stroke="#06B6D4" strokeWidth="1.2" />
+                  <rect x="-10" y="-2" width="6" height="4" rx="1" fill="#06B6D4" opacity="0.7" className={isGadgetActive ? 'animate-pulse' : ''} />
+                  <circle cx="8" cy="0" r="2.2" fill="#EF4444" />
+                  <rect x="-14" y="-3" width="3" height="6" rx="1" fill="#94A3B8" />
+                </g>
+
+                {/* Laser Dot sweeping ground in front of pet */}
+                {isGadgetActive && (
+                  <g pointerEvents="none" className="animate-gadget-laser-dot">
+                    <line x1="8" y1="0" x2="-20" y2="0" stroke="#EF4444" strokeWidth="1.5" strokeOpacity="0.7" strokeDasharray="3 2" />
+                    <circle cx="0" cy="0" r="4" fill="#EF4444" />
+                    <circle cx="0" cy="0" r="1.8" fill="#FFFFFF" />
+                  </g>
+                )}
+              </g>
+            )}
+
+            {/* 3. MAGIC WAND */}
+            {gadget.id === 'magic_wand' && (
+              <g>
+                <g className={isGadgetActive ? 'animate-gadget-wand-active' : 'animate-gadget-idle group-hover:scale-105 transition-transform'}>
+                  <rect x="-16" y="-2" width="30" height="4" rx="1.5" fill="#78350F" stroke="#B45309" strokeWidth="0.8" />
+                  <rect x="-16" y="-2.5" width="8" height="5" rx="1" fill="#F59E0B" />
+                  <polygon
+                    points="14,-9 16,-3 22,-3 17,1 19,7 14,3 9,7 11,1 6,-3 12,-3"
+                    fill="#FDE047"
+                    stroke="#D97706"
+                    strokeWidth="0.8"
+                  />
+                  <circle cx="14" cy="-1" r="2.5" fill="#FFFFFF" />
+                </g>
+
+                {/* Wand Tip gentle shimmer during cast */}
+                {isGadgetActive && (
+                  <g pointerEvents="none" transform="translate(14, -1)">
+                    <circle cx="0" cy="0" r="8" fill="none" stroke="#FDE047" strokeWidth="1.2" className="animate-pulse" />
+                    <text x="-4" y="3" fontSize="8" fill="#FDE047">✨</text>
+                  </g>
+                )}
+              </g>
+            )}
+
+            {/* 4. FIDGET CUBE */}
+            {gadget.id === 'fidget_cube' && (
+              <g className={isGadgetActive ? 'animate-gadget-fidget-active' : 'animate-gadget-idle group-hover:scale-110 transition-transform'}>
+                <polygon points="0,-12 11,-6 0,0 -11,-6" fill="#818CF8" stroke="#4F46E5" strokeWidth="1" />
+                <polygon points="-11,-6 0,0 0,11 -11,5" fill="#4F46E5" stroke="#3730A3" strokeWidth="1" />
+                <polygon points="0,0 11,-6 11,5 0,11" fill="#6366F1" stroke="#4338CA" strokeWidth="1" />
+                <circle cx="-1" cy="-6" r="2.5" fill="#22D3EE" />
+                <circle cx="-5" cy="3" r="1.5" fill="#F43F5E" />
+                <circle cx="5" cy="3" r="1.5" fill="#FBBF24" />
+              </g>
+            )}
           </g>
         )}
       </svg>

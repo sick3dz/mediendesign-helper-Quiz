@@ -433,6 +433,31 @@ class SoundEffectsService {
       });
       return;
     }
+
+    if (species === 'unicorn') {
+      // Einhorn (Sternchen): Magischer Glitzer-Harfenlauf mit schimmerndem Glockenklang (Wieher! ✨)
+      const freqs = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+      freqs.forEach((freq, idx) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const t = now + idx * 0.045;
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, t);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.05, t + 0.12);
+
+        gain.gain.setValueAtTime(0.08, t);
+        gain.gain.exponentialRampToValueAtTime(0.0005, t + 0.16);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(t);
+        osc.stop(t + 0.16);
+      });
+      return;
+    }
   }
 
   // Coin buy / spend sound
@@ -457,6 +482,128 @@ class SoundEffectsService {
 
     osc.start(now);
     osc.stop(now + 0.28);
+  }
+
+  // Gadget Interaction Sounds
+  public playGadgetBounce() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    // Bouncing spring: 2 fast decaying bounces
+    [0, 0.12].forEach((offset, idx) => {
+      if (!this.ctx) return;
+      const t = now + offset;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sine';
+      const startF = idx === 0 ? 220 : 330;
+      const peakF = idx === 0 ? 520 : 620;
+      osc.frequency.setValueAtTime(startF, t);
+      osc.frequency.exponentialRampToValueAtTime(peakF, t + 0.05);
+      osc.frequency.exponentialRampToValueAtTime(260, t + 0.10);
+
+      gain.gain.setValueAtTime(idx === 0 ? 0.14 : 0.09, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.11);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.11);
+    });
+  }
+
+  public playGadgetLaser() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(980, now);
+    osc.frequency.exponentialRampToValueAtTime(180, now + 0.09);
+
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.10);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.10);
+  }
+
+  public playGadgetMagic() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const notes = [784, 988, 1318, 1568];
+    notes.forEach((freq, idx) => {
+      if (!this.ctx) return;
+      const t = now + idx * 0.04;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, t);
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.04, t + 0.12);
+
+      gain.gain.setValueAtTime(0.07, t);
+      gain.gain.exponentialRampToValueAtTime(0.0008, t + 0.14);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.14);
+    });
+  }
+
+  public playGadgetClick() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    [0, 0.04].forEach((offset, idx) => {
+      if (!this.ctx) return;
+      const t = now + offset;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(idx === 0 ? 560 : 720, t);
+
+      gain.gain.setValueAtTime(0.09, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.03);
+    });
+  }
+
+  public playGadgetSound(soundName: 'bounce' | 'laser' | 'magic' | 'click') {
+    switch (soundName) {
+      case 'bounce':
+        this.playGadgetBounce();
+        break;
+      case 'laser':
+        this.playGadgetLaser();
+        break;
+      case 'magic':
+        this.playGadgetMagic();
+        break;
+      case 'click':
+        this.playGadgetClick();
+        break;
+    }
   }
 }
 

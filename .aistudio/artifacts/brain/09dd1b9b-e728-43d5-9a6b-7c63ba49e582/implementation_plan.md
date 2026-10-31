@@ -1,134 +1,123 @@
-# Prüfungs-Checkliste: Ausführliches IHK-Themen-Dossier (Modal & Deep-Dive)
+# Interaktive Haustier-Gadgets & Spielzeuge
 
-Detaillierte Wissensvertiefung für jeden Prüfstein der Prüfungs-Checkliste („Absolut kritische IHK-Themen“) über ein fokussiertes modales Info-Fenster mit IHK-Musterdefinitionen, konkreten Agentur-Praxisbeispielen, typischen Prüfungsfragen samt Musterlösungen, Prüfer-Warnungen und einem direkten Absprung ins entsprechende Lernmodul.
+Einführung eines neuen interaktiven Spielzeug- und Gadget-Systems für das virtuelle Haustier. Ein ausgewähltes Gadget liegt sichtbar neben dem Begleiter auf dem Boden und reagiert auf Klick mit lebendigen physikalischen Animationen (Hüpfen, Laser-Jagd, Zaubersterne), partikelgestützten Tier-Reaktionen, Soundeffekten und einem Laune-Bonus.
 
-## User Review & Bestätigte Entscheidungen
+## Bestätigte Benutzervorgaben
 
-> [!IMPORTANT]
-> Alle 3 Kernentscheidungen wurden im Klärungsinterview mit dem Nutzer verbindlich abgestimmt:
-
-- **Modales Info-Fenster**: Die ausführlichen Themen-Infos öffnen sich per Klick auf einen prominenten Button („Ausführliches Themen-Dossier öffnen“) als fokussiertes modales Dialogfenster mit strukturierter Detailansicht.
-- **Inhaltliche 4-Säulen-Struktur**:
-  1. *Wichtige IHK-Schlagwörter & Definition*: Präzise, normgerechte Fachbegriff-Erklärung.
-  2. *Konkretes Praxisbeispiel*: Reale Agentur-/Projekt-Situation zur Veranschaulichung.
-  3. *Typische IHK-Prüfungsfrage & Musterantwort*: Authentische Prüfungsaufgabe mit vollständiger Punkte-Musterlösung.
-  4. *IHK-Prüfer-Warnung*: Aufdeckung verbreiteter Denkfehler und typischer Punktabzüge.
-- **Direktlink zum Lernmodul**: Am Fuß des Modals befindet sich ein Call-to-Action-Button, der den Nutzer direkt in das passende interaktive Lernmodul weiterleitet.
+- **Interaktionsmechanik**: Physik-Hüpfen mit direkter Tier-Reaktion (Hinterherschauen, Freudentanz) und Laune-Bonus.
+- **Platzierung**: Direkt neben dem Haustier im Avatar mit interaktivem Klick-Trigger.
+- **Sortiment & Freischaltung**:
+  - **Bunter Hüpfball (`bouncing_ball`)**: Gratis für alle Lernenden ab Tag 1!
+  - **Neon-Laserpointer (`laser_pointer`)**: Freischaltbar über EXP im Shop (80 EXP / 120 Coins).
+  - **Magischer Sternen-Zauberstab (`magic_wand`)**: Exklusives Magie-Gadget für 150 EXP / 220 Coins.
+  - **Bonus – Taktiler Fidget-Würfel (`fidget_cube`)**: ADHS-Fokusspielzeug für 110 EXP / 160 Coins.
 
 ---
 
-## 1. Übersicht & Kernkonzept
+## 1. Datenmodell & Typen
 
-- **Was es tut**: Lernende können in der Prüfungs-Checkliste jedes kritische IHK-Thema aufklappen und mit einem Klick das vollständige „IHK-Themen-Dossier“ als modales Overlay aufrufen. Dadurch wird die Checkliste vom reinen Stichpunkt-Merker zum vollwertigen Prüfungskompendium.
-- **Zielgruppe**: Angehende Mediengestalter Digital & Print / Digitalexperten in der Prüfungsvorbereitung (Abschlussprüfung Teil 1 & Teil 2).
-- **Mehrwert**: Kein langes Suchen mehr – direkter Zusammenhang zwischen Checklisten-Prüfstein, Theorie, Praxisbeispiel, konkreter IHK-Frage und Lernmodul.
-
----
-
-## 2. User Experience & Visual Design
-
-### User Flow
-```
-[Checkliste: Prüfstein antippen]
-            │
-            ▼
-[Item klappt auf mit Kurzbeschreibung & IHK-Master-Tipp]
-            │
-            ▼
-[Button: "Ausführliches Themen-Dossier öffnen ➔"]
-            │
-            ▼
-[Modal öffnet sich: 4 strukturierte Inhaltsbereiche]
- ├── 1. IHK-Schlagwörter & Kern-Definition
- ├── 2. Praxisbeispiel aus dem Agenturalltag
- ├── 3. IHK-Prüfungsfrage mit Musterantwort
- └── 4. IHK-Prüfer-Warnung (Typische Denkfehler)
-            │
-     ┌──────┴────────────────────────┐
-     ▼                               ▼
-[Modal schließen]        [Button: "Direkt zum Lernmodul ➔"]
-```
-
-### Visuelle Gestaltung & Layout (Frontend-Design-Richtlinien)
-- **Modales Dialogfenster**:
-  - Zentriertes Overlay mit sanftem Backdrop-Blur (`backdrop-blur-sm bg-slate-950/60`).
-  - Maximale Breite `max-w-2xl` auf Desktop, responsives Sheet mit vollem Viewport-Padding auf Mobilgeräten.
-  - Klares Schließen über `ESC`-Taste, Klick außerhalb des Modals oder den oberen `✕`-Button.
-- **Typografie & Farbcodierung**:
-  - Überschriften mit klarem Kontrast (`text-slate-900 dark:text-white font-extrabold`).
-  - Farbliche Akzentuierung der 4 Sektionen:
-    - *Definition*: Indigoblau (`bg-indigo-50/70 border-indigo-200 text-indigo-900`)
-    - *Agentur-Praxis*: Smaragdgrün (`bg-emerald-50/70 border-emerald-200 text-emerald-900`)
-    - *IHK-Prüfungsfrage & Antwort*: Schiefergrau/Violett mit Zitatblock
-    - *Prüfer-Warnung*: Bernstein/Amber (`bg-amber-50/70 border-amber-200 text-amber-900`)
-- **Zero-Pill-Disziplin**: Keine dekorativen Pill-Inseln; stattdessen klare hierarchische Überschriften und Icons mit Text-Labels.
-
----
-
-## 3. Technische Architektur & Datenmodell
-
-### Datenmodell-Erweiterung (`src/types/quiz.ts`)
+### A. Erweiterung in `src/types/quiz.ts`
 ```typescript
-export interface ChecklistDetailInfo {
-  definition: string;
-  keywords: string[];
-  practicalExample: {
-    context: string;
-    application: string;
-  };
-  examQuestion: {
-    questionText: string;
-    points: number;
-    sampleAnswer: string;
-    scoringCriteria: string[];
-  };
-  examinerWarning: string;
-  relatedModuleId?: string;
-  relatedModuleName?: string;
+export interface PetGadget {
+  id: string;
+  name: string;
+  icon: string;
+  price: number;
+  xpPrice: number;
+  description: string;
+  interactionType: 'bounce' | 'laser' | 'magic_wand' | 'fidget';
+  happinessBonus: number;
+  soundName: 'bounce' | 'laser' | 'magic' | 'click';
+  actionMessage: (petName: string) => string;
 }
 
-export interface ChecklistItem {
-  task: string;
-  detail: string;
-  moreInfo?: ChecklistDetailInfo;
+export interface PetInventory {
+  food: Record<string, number>;
+  accessories: string[];
+  gadgets?: string[]; // IDs der freigeschalteten Gadgets
+}
+
+export interface PetEquipped {
+  head?: string;
+  face?: string;
+  neck?: string;
+  frame?: string;
+  gadget?: string; // Aktives Gadget neben dem Haustier
 }
 ```
 
-### Komponenten-Hierarchie
-```
-┌────────────────────────────────────────────────────────┐
-│ ChapterListView                                        │
-│  └── Prüfungs-Checkliste ("Absolut kritische Themen") │
-│       └── Checklist-Item (Expanded Card)               │
-│            └── [Button: "Ausführliches Dossier öffnen"]│
-└───────────────────────────┬────────────────────────────┘
-                            │ (öffnet State)
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│ ChecklistDetailModal                                   │
-│  ├── Header: Prüfstein-Titel & Kapitel-Badge           │
-│  ├── Sektion 1: IHK-Schlagwörter & Definition          │
-│  ├── Sektion 2: Praxisbeispiel aus der Agentur         │
-│  ├── Sektion 3: IHK-Prüfungsfrage & Musterlösung       │
-│  ├── Sektion 4: Prüfer-Warnung vor Denkfehlern         │
-│  └── Footer: [Direkt zum Lernmodul] + [Schließen]      │
-└────────────────────────────────────────────────────────┘
-```
+### B. Gadget-Katalog in `src/data/petData.ts`
+1. **`bouncing_ball` (Bunter Hüpfball)**:
+   - Preis: 0 Coins / 0 EXP (Gratis-Starter)
+   - Typ: `'bounce'`
+   - Effekt: Ball hüpft dynamisch mit Squash-and-Stretch-Physik; Haustier hüpft mit (+12 Laune).
+   - Sound: Elastischer Boing-Klack.
+2. **`laser_pointer` (Neon-Laserpointer)**:
+   - Preis: 120 Coins / 80 EXP
+   - Typ: `'laser'`
+   - Effekt: Projiziert einen flitzenden roten Laserpunkt auf den Boden; das Haustier jagt dem Punkt mit den Augen und Pfoten nach (+18 Laune).
+   - Sound: Futuritischer Zap-Pew.
+3. **`magic_wand` (Magischer Sternen-Zauberstab)**:
+   - Preis: 220 Coins / 150 EXP
+   - Typ: `'magic_wand'`
+   - Effekt: Schwingt auf, sprüht Sternenstaub und Funken; das Haustier erstrahlt im Zauberglanz (+25 Laune).
+   - Sound: Glitzerndes Harfen-Klingeln.
+4. **`fidget_cube` (ADHS Fokus-Würfel)**:
+   - Preis: 160 Coins / 110 EXP
+   - Typ: `'fidget'`
+   - Effekt: Schalter und Rädchen klicken im Rhythmus; beruhigt das Haustier (+15 Laune).
+   - Sound: Haptisches Klick-Klack.
 
 ---
 
-## 4. Umsetzungsschritte
+## 2. Visuelle Darstellung & Interaktion in `PetAvatar.tsx`
 
-1. **Typdefinitionen erweitern (`src/types/quiz.ts`)**:
-   - `ChecklistDetailInfo` Schnittstelle definieren und optional in `ChecklistItem` einbinden.
-2. **Daten anreichern (`src/data/chaptersData.ts`)**:
-   - Für die Prüfsteine in allen Kapiteln (IxD, Wireframing, Prototyping, IT-Sicherheit, Accessibility, Projektmanagement, etc.) tiefgehende, praxiserprobte IHK-Dossiers mit Definition, Praxisbeispiel, IHK-Frage/Musterantwort, Prüferwarnung und passendem `relatedModuleId` hinterlegen.
-   - Fallback-Generierung bereitstellen, damit ausnahmslos jeder Prüfstein ein vollständiges Dossier besitzt.
-3. **Modalkomponente erstellen (`src/components/ChecklistDetailModal.tsx`)**:
-   - Barrierefreies Modal mit sauberem Fokus-Management, Keyboard-Listener (`Escape`), Bionic-Reading-Unterstützung und flüssigen Übergängen.
-4. **Verdrahtung in `ChapterListView.tsx`**:
-   - State `selectedChecklistDetail: { chapter: Chapter; item: ChecklistItem } | null` einbinden.
-   - In jedem aufklappbaren Checklisten-Eintrag den Button zur Detailansicht ergänzen.
-   - Absprung zum Lernmodul über den bestehenden Callback `onSelectModule(chapterId, moduleId)` verbinden.
-5. **Verifikation**:
-   - `lint_applet` & `compile_applet` ausführen und Build validieren.
+### A. Platzierung & SVG-Layering
+- Das aktive Gadget wird rechts neben dem Haustier auf der Bodenebene platziert (`x ~ 152–165, y ~ 160–175`), verankert auf dem weichen Bodenschatten.
+- Durch `cursor-pointer` und sanftes Schweben/Wackeln lädt das Gadget zum Antippen ein.
+
+### B. Interaktions-Trigger & Animationen
+- Klick auf das Gadget löst eine 800ms–1200ms Animationssequenz aus:
+  - **Ball**: SVG-Transformations-Bounce mit Sprungkurve, Squash am Boden (`scaleY(0.7) scaleX(1.3)`) und Zurückrollen.
+  - **Laser**: Roter Lichtkegel und Laserpunkt huscht über die SVG-Leinwand (`cx=80 -> cx=140`), Augen des Haustiers folgen dem Punkt.
+  - **Zauberstab**: Hebt sich an, rotiert um 25 Grad und entlässt bunte Stern-Partikel (`✦ ✨ ⭐`).
+  - **Fidget-Würfel**: Dreht sich mit Klick-Vibration und Schalter-Umlegung.
+- Haustier reagiert simultan:
+  - Zeigt Herzchen (`💖`), Freudensprung (`animate-bounce`) oder Augenweitung.
+  - Laune steigt direkt im State (+10 bis +25 Laune).
+
+---
+
+## 3. UI-Integration: Shop & Ausrüstung
+
+### A. EXP-Belohnungs-Shop (`VirtualPetView.tsx`)
+- Neue Kategorie **„Gadgets & Spielzeuge“** im Shop (`shopCategory === 'gadgets'`).
+- Live-Vorschau: Spieler können das Spielzeug direkt im Avatar anprobieren und antesten, bevor sie es für EXP oder Coins freischalten.
+- Klare Kennzeichnung: Gratis-Starter vs. EXP-Freischaltung.
+
+### B. Stil- & Ausrüstungs-Atelier (Garderobe)
+- Eigener Tab **„Gadgets“** in der Garderobe.
+- Schnelles Wechseln zwischen Ball, Laserpointer, Zauberstab oder Ablegen.
+
+### C. Top-Leiste (`TopPetCompanionBar.tsx`)
+- Gadget-Button oder Mini-Widget in der Companion-Bar, um das Spielzeug auch während des Quiz-Lernens schnell anzutippen.
+
+---
+
+## 4. Audio-Service (`audioService.ts`)
+
+- Neue WebAudio-Synthesizer-Klänge:
+  - `playGadgetBounce()`: Dumpfer, elastischer Bouncing-Ton mit abnehmender Periodendauer.
+  - `playGadgetLaser()`: Scharfer Frequenz-Sweep (800Hz -> 200Hz).
+  - `playGadgetMagic()`: Glockenspiel-Arpeggio mit Echo.
+  - `playGadgetClick()`: Doppelter Schalter-Klick.
+
+---
+
+## 5. Verifikation & Qualitätskriterien (Erfolgreich Abgeschlossen ✅)
+
+1. ✅ **Interaktion**: Klick auf den Ball/Laser/Zauberstab/Fidget-Würfel startet unverzüglich Physik-Animation, Sound und Laune-Steigerung (+12 bis +25 Laune).
+2. ✅ **Outfit-Kompatibilität**: Das Gadget liegt separat rechts neben dem Tier und kollidiert mit keinem der 15+ Hüte, Brillen, Umhänge oder Kapitel-Trophäen.
+3. ✅ **Persistenz**: Ausgerüstetes Gadget und Besitzstatus bleiben im `localStorage` sicher erhalten (inklusive nahtloser Migration für bestehende Spielstände).
+4. ✅ **Starter-Garantie**: Jeder Benutzer startet automatisch mit dem Bunten Hüpfball im Inventar und hat ihn direkt ausgerüstet.
+5. ✅ **Code-Qualität**: `lint_applet` (TypeScript strict) und `compile_applet` (Vite Build) laufen fehlerfrei durch.

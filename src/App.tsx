@@ -662,11 +662,12 @@ export default function App() {
     ? currentChapter.modules.find(m => m.id === selectedModuleMeta?.moduleId)
     : null;
 
-  const speciesEmojiMap = {
+  const speciesEmojiMap: Record<PetSpecies, string> = {
     dog: '🐶',
     cat: '🐱',
     penguin: '🐧',
     axolotl: '🦎',
+    unicorn: '🦄',
   };
 
   // Determine next module

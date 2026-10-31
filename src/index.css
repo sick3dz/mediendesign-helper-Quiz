@@ -161,3 +161,168 @@ html.theme-monochrome button.bg-indigo-600:hover {
 .animate-rise-fade {
   animation: riseAndFade 3s ease-in-out infinite;
 }
+
+/* ==========================================================================
+   Pet Gadget Interaction & Joy Animation Keyframes
+   ========================================================================== */
+
+/* Subtiler, verspielter 'Shake'-Effekt für das Haustier beim Spielen mit Gadgets */
+@keyframes petGadgetShake {
+  0% {
+    transform: translateY(0) rotate(0deg) scale(1.05);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  14% {
+    transform: translateY(-2.5px) rotate(-2deg) scale(1.06, 1.04);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  28% {
+    transform: translateY(0px) rotate(2.2deg) scale(1.04, 1.06);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  42% {
+    transform: translateY(-2.5px) rotate(-1.8deg) scale(1.055, 1.045);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  56% {
+    transform: translateY(0px) rotate(1.6deg) scale(1.045, 1.055);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  70% {
+    transform: translateY(-1.5px) rotate(-1deg) scale(1.05, 1.05);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  84% {
+    transform: translateY(0px) rotate(0.6deg) scale(1.05, 1.05);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg) scale(1.05);
+  }
+}
+
+.animate-pet-gadget-shake {
+  transform-origin: 50% 80%;
+  animation: petGadgetShake 1.25s cubic-bezier(0.37, 0, 0.63, 1) forwards;
+}
+
+.animate-pet-gadget-joy {
+  transform-origin: 50% 80%;
+  animation: petGadgetShake 1.25s cubic-bezier(0.37, 0, 0.63, 1) forwards;
+}
+
+/* 1. Bouncing Ball Physics (Squash & Stretch, Bouncing right in place next to pet) */
+@keyframes gadgetBallBouncePhysics {
+  0% {
+    transform: translateY(0) scale(1, 1) rotate(0deg);
+  }
+  12% {
+    transform: translateY(3px) scale(1.22, 0.78) rotate(10deg);
+  }
+  38% {
+    transform: translateY(-44px) scale(0.92, 1.1) rotate(-90deg);
+  }
+  62% {
+    transform: translateY(2px) scale(1.18, 0.82) rotate(-180deg);
+  }
+  78% {
+    transform: translateY(-16px) scale(0.96, 1.04) rotate(-270deg);
+  }
+  90% {
+    transform: translateY(1px) scale(1.08, 0.94) rotate(-330deg);
+  }
+  100% {
+    transform: translateY(0) scale(1, 1) rotate(-360deg);
+  }
+}
+
+@keyframes gadgetBallShadowPhysics {
+  0% { transform: scale(1); opacity: 0.7; }
+  12% { transform: scale(1.25); opacity: 0.85; }
+  38% { transform: scale(0.45); opacity: 0.25; }
+  62% { transform: scale(1.2); opacity: 0.8; }
+  78% { transform: scale(0.7); opacity: 0.45; }
+  90% { transform: scale(1.05); opacity: 0.75; }
+  100% { transform: scale(1); opacity: 0.7; }
+}
+
+.animate-gadget-ball-active {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: gadgetBallBouncePhysics 1.25s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.animate-gadget-ball-shadow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: gadgetBallShadowPhysics 1.25s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+/* 2. Neon Laser Pointer - Device slight angle flick */
+@keyframes gadgetLaserSweep {
+  0% { transform: rotate(-15deg); }
+  25% { transform: rotate(-32deg); }
+  55% { transform: rotate(-10deg); }
+  80% { transform: rotate(-24deg); }
+  100% { transform: rotate(-15deg); }
+}
+
+@keyframes gadgetLaserDotSweep {
+  0% { transform: translate(-20px, 0); opacity: 0; }
+  15% { transform: translate(-35px, 0); opacity: 1; }
+  45% { transform: translate(-85px, -2px); opacity: 1; }
+  70% { transform: translate(-40px, 1px); opacity: 1; }
+  90% { transform: translate(-25px, 0); opacity: 0.6; }
+  100% { transform: translate(-20px, 0); opacity: 0; }
+}
+
+.animate-gadget-laser-device {
+  transform-origin: 0 0;
+  animation: gadgetLaserSweep 1.25s cubic-bezier(0.42, 0, 0.58, 1) forwards;
+}
+
+.animate-gadget-laser-dot {
+  animation: gadgetLaserDotSweep 1.25s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+/* 3. Magic Wand - Gentle flourishing wave */
+@keyframes gadgetWandFlourish {
+  0% { transform: rotate(-20deg) scale(1); }
+  25% { transform: translateY(-16px) rotate(-42deg) scale(1.1); }
+  55% { transform: translateY(-24px) rotate(-14deg) scale(1.15); }
+  80% { transform: translateY(-8px) rotate(-30deg) scale(1.05); }
+  100% { transform: rotate(-20deg) scale(1); }
+}
+
+.animate-gadget-wand-active {
+  transform-origin: 0 0;
+  animation: gadgetWandFlourish 1.25s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+}
+
+/* 4. Fidget Cube Tactile Wobble */
+@keyframes gadgetFidgetTactile {
+  0% { transform: scale(1) rotate(0deg); }
+  20% { transform: scale(1.12, 0.92) rotate(-8deg); }
+  40% { transform: scale(0.95, 1.1) rotate(8deg); }
+  65% { transform: scale(1.06, 0.96) rotate(-4deg); }
+  85% { transform: scale(0.98, 1.02) rotate(2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.animate-gadget-fidget-active {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: gadgetFidgetTactile 1.25s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+/* Idle Lifeline Wobble - stays anchored at local (0, 0) */
+@keyframes gadgetIdleLife {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.animate-gadget-idle {
+  animation: gadgetIdleLife 2.8s ease-in-out infinite;
+}
+
+

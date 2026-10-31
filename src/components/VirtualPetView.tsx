@@ -5,6 +5,7 @@ import {
   UserStats,
   PetAccessory,
   PetFood,
+  PetGadget,
   CosmeticItem,
   EquippedCosmetics,
   CosmeticCategory,
@@ -13,8 +14,10 @@ import {
   PET_SPECIES,
   PET_FOODS,
   PET_ACCESSORIES,
+  PET_GADGETS,
   CHAPTER_SURPRISES,
   findAccessoryById,
+  findGadgetById,
   PET_SPECIES_SOUNDS,
   getDynamicPetThought,
 } from '../data/petData';
@@ -70,8 +73,8 @@ interface Props {
   onPreviewOverrideChange?: (preview: { equipped?: Partial<PetState['equipped']> } | undefined) => void;
 }
 
-type ShopCategory = 'food' | 'accessories' | 'themes' | 'soundpacks' | 'titles' | 'frames';
-type WardrobeCategory = 'accessories' | 'themes' | 'soundpacks' | 'titles' | 'frames';
+type ShopCategory = 'food' | 'accessories' | 'gadgets' | 'themes' | 'soundpacks' | 'titles' | 'frames';
+type WardrobeCategory = 'accessories' | 'gadgets' | 'themes' | 'soundpacks' | 'titles' | 'frames';
 
 export const VirtualPetView: React.FC<Props> = ({
   stats,
@@ -95,28 +98,31 @@ export const VirtualPetView: React.FC<Props> = ({
   const [newName, setNewName] = useState(pet.name);
   const [isEating, setIsEating] = useState(false);
   const [isPetted, setIsPetted] = useState(false);
+  const [isGadgetInteracting, setIsGadgetInteracting] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
   const [isRoadmapExpanded, setIsRoadmapExpanded] = useState(false);
   const [previewThemeId, setPreviewThemeId] = useState<string | null>(null);
   const [previewAccessory, setPreviewAccessory] = useState<PetAccessory | null>(null);
+  const [previewGadget, setPreviewGadget] = useState<PetGadget | null>(null);
   const [previewFrame, setPreviewFrame] = useState<CosmeticItem | null>(null);
   const [thoughtSeed, setThoughtSeed] = useState(0);
 
-  // Sync live accessory & frame preview to external listener (TopBar companion)
+  // Sync live accessory, gadget & frame preview to external listener (TopBar companion)
   useEffect(() => {
     if (onPreviewOverrideChange) {
-      if (!previewAccessory && !previewFrame) {
+      if (!previewAccessory && !previewFrame && !previewGadget) {
         onPreviewOverrideChange(undefined);
       } else {
         onPreviewOverrideChange({
           equipped: {
             ...(previewAccessory ? { [previewAccessory.category]: previewAccessory.id } : {}),
             ...(previewFrame ? { frame: previewFrame.id } : {}),
+            ...(previewGadget ? { gadget: previewGadget.id } : {}),
           },
         });
       }
     }
-  }, [previewAccessory, previewFrame, onPreviewOverrideChange]);
+  }, [previewAccessory, previewFrame, previewGadget, onPreviewOverrideChange]);
 
   // Level & progression are strictly tied to lifetime earned EXP (never decreases when spending!)
   const lifetimeProgressXp = stats.lifetimeXp ?? Math.max(xp, LEVEL_LADDER.find(l => l.level === (stats.level || 1))?.xp || 0);
@@ -378,6 +384,95 @@ export const VirtualPetView: React.FC<Props> = ({
     if (previewAccessory?.id === acc.id) setPreviewAccessory(null);
     onUpdatePet(updated);
     showTemporaryFeedback(`🎉 ${acc.name} für ${cost} EXP gekauft und angelegt!`);
+  };
+
+  // Gadget Interactions & Purchasing
+  const handleTogglePreviewGadget = (gadgetItem: PetGadget) => {
+    soundEffects.playClick();
+    if (previewGadget?.id === gadgetItem.id) {
+      setPreviewGadget(null);
+      showTemporaryFeedback('Gadget-Vorschau beendet.');
+    } else {
+      setPreviewGadget(gadgetItem);
+      showTemporaryFeedback(`👁️ Live-Vorschau: "${gadgetItem.name}" angetestet!`);
+    }
+  };
+
+  const handleToggleGadget = (gadgetItem: PetGadget) => {
+    soundEffects.playClick();
+    const isEquipped = pet.equipped.gadget === gadgetItem.id;
+    const updated: PetState = {
+      ...pet,
+      equipped: {
+        ...pet.equipped,
+        gadget: isEquipped ? undefined : gadgetItem.id,
+      },
+    };
+    if (previewGadget?.id === gadgetItem.id) setPreviewGadget(null);
+    onUpdatePet(updated);
+    showTemporaryFeedback(
+      isEquipped
+        ? `Gadget "${gadgetItem.name}" weggepackt.`
+        : `Gadget "${gadgetItem.name}" liegt jetzt neben ${pet.name}! 🎾`
+    );
+  };
+
+  const handleBuyGadget = (gadgetItem: PetGadget) => {
+    const ownedGadgets = pet.inventory.gadgets || ['bouncing_ball'];
+    if (ownedGadgets.includes(gadgetItem.id)) {
+      handleToggleGadget(gadgetItem);
+      return;
+    }
+
+    const cost = gadgetItem.xpPrice;
+    if (xp < cost) {
+      soundEffects.playWrong();
+      showTemporaryFeedback(`Nicht genug EXP! Du benötigst ${cost} EXP.`);
+      return;
+    }
+
+    soundEffects.playCoin();
+    if (onXpChange) {
+      onXpChange(xp - cost);
+    }
+
+    try {
+      confetti({ particleCount: 50, spread: 60 });
+    } catch {}
+
+    const updated: PetState = {
+      ...pet,
+      equipped: {
+        ...pet.equipped,
+        gadget: gadgetItem.id,
+      },
+      inventory: {
+        ...pet.inventory,
+        gadgets: [...ownedGadgets, gadgetItem.id],
+      },
+    };
+    if (previewGadget?.id === gadgetItem.id) setPreviewGadget(null);
+    onUpdatePet(updated);
+    showTemporaryFeedback(`🎉 ${gadgetItem.name} für ${cost} EXP freigeschaltet und platziert!`);
+  };
+
+  const handlePlayGadget = (gadgetItem?: PetGadget) => {
+    const targetGadget = gadgetItem || (pet.equipped.gadget ? findGadgetById(pet.equipped.gadget) : undefined);
+    if (!targetGadget) return;
+
+    setIsGadgetInteracting(true);
+    soundEffects.playGadgetSound(targetGadget.soundName);
+
+    const newHappiness = Math.min(100, pet.happiness + targetGadget.happinessBonus);
+    const updated: PetState = {
+      ...pet,
+      isSleeping: false,
+      happiness: newHappiness,
+      timesPlayed: (pet.timesPlayed || 0) + 1,
+    };
+    onUpdatePet(updated);
+    showTemporaryFeedback(targetGadget.actionMessage(pet.name));
+    setTimeout(() => setIsGadgetInteracting(false), 1250);
   };
 
   // 6. Buying Cosmetic Item (Themes, Soundpacks, Titles, Frames - strictly using EXP points)
@@ -801,11 +896,14 @@ export const VirtualPetView: React.FC<Props> = ({
               equipped: {
                 ...(previewAccessory ? { [previewAccessory.category]: previewAccessory.id } : {}),
                 ...(previewFrame ? { frame: previewFrame.id } : {}),
+                ...(previewGadget ? { gadget: previewGadget.id } : {}),
               },
             }}
+            onInteractGadget={handlePlayGadget}
+            isGadgetInteracting={isGadgetInteracting}
           />
 
-          {/* Interactive Care Action Buttons */}
+          {/* Interactive Care & Gadget Action Buttons */}
           <div className="flex flex-wrap items-center justify-center gap-2.5 mt-6">
             <button
               onClick={handleHighFive}
@@ -822,6 +920,17 @@ export const VirtualPetView: React.FC<Props> = ({
               <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
               <span>{pet.isSleeping ? 'Wecken & Streicheln' : 'Streicheln (+15 Laune)'}</span>
             </button>
+
+            {pet.equipped.gadget && findGadgetById(pet.equipped.gadget) && (
+              <button
+                onClick={() => handlePlayGadget(findGadgetById(pet.equipped.gadget!))}
+                className="px-4 py-2 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900/60 rounded-xl text-xs font-bold flex items-center gap-2 transition-transform active:scale-95 cursor-pointer shadow-xs"
+                title={`${findGadgetById(pet.equipped.gadget!)?.name} anstupsen`}
+              >
+                <span className="text-sm">{findGadgetById(pet.equipped.gadget!)?.icon}</span>
+                <span>{findGadgetById(pet.equipped.gadget!)?.name} anstupsen</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -1045,6 +1154,21 @@ export const VirtualPetView: React.FC<Props> = ({
             <button
               onClick={() => {
                 soundEffects.playClick();
+                setShopCategory('gadgets');
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                shopCategory === 'gadgets'
+                  ? 'bg-indigo-600 text-white shadow-2xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
+              }`}
+            >
+              <Gamepad2 className="w-3.5 h-3.5" />
+              <span>Spielzeuge & Gadgets</span>
+            </button>
+
+            <button
+              onClick={() => {
+                soundEffects.playClick();
                 setShopCategory('themes');
               }}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
@@ -1235,6 +1359,116 @@ export const VirtualPetView: React.FC<Props> = ({
                         >
                           <Star className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
                           <span>{xpCost} EXP freischalten</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* SHOP: Gadgets & Interactive Toys */}
+          {shopCategory === 'gadgets' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+              {PET_GADGETS.map(gadgetItem => {
+                const ownedGadgets = pet.inventory.gadgets || ['bouncing_ball'];
+                const isOwned = ownedGadgets.includes(gadgetItem.id);
+                const isEquipped = pet.equipped.gadget === gadgetItem.id;
+                const isPreviewActive = previewGadget?.id === gadgetItem.id;
+                const canAffordXp = xp >= gadgetItem.xpPrice;
+
+                return (
+                  <div
+                    key={gadgetItem.id}
+                    className={`p-4 rounded-2xl border transition-all flex flex-col justify-between space-y-3 ${
+                      isPreviewActive
+                        ? 'border-amber-400 bg-amber-500/10 dark:bg-amber-950/30 ring-2 ring-amber-400/50'
+                        : isEquipped
+                        ? 'border-indigo-400 bg-indigo-50/70 dark:bg-indigo-950/40 ring-1 ring-indigo-400/50'
+                        : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-3xl">{gadgetItem.icon}</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleTogglePreviewGadget(gadgetItem)}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition-all flex items-center gap-1 cursor-pointer shadow-2xs ${
+                              isPreviewActive
+                                ? 'bg-amber-500 text-slate-950 ring-2 ring-amber-300'
+                                : 'bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 border border-indigo-200/80 dark:border-indigo-800/80'
+                            }`}
+                            title="Gadget live antesten"
+                          >
+                            <Eye className="w-3 h-3" />
+                            <span>{isPreviewActive ? 'Im Avatar aktiv' : 'Live testen 👁️'}</span>
+                          </button>
+                          <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md ${
+                            gadgetItem.price === 0
+                              ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300'
+                              : 'bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300'
+                          }`}>
+                            {gadgetItem.price === 0 ? 'Gratis' : `${gadgetItem.xpPrice} EXP`}
+                          </span>
+                        </div>
+                      </div>
+
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-2">
+                        {gadgetItem.name}
+                      </h4>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                        {gadgetItem.description}
+                      </p>
+                      <div className="mt-2 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                        <Sparkles className="w-3 h-3" />
+                        <span>+{gadgetItem.happinessBonus} Laune bei Interaktion</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-200 dark:border-slate-700/60">
+                      {isOwned ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              handleToggleGadget(gadgetItem);
+                              setPreviewGadget(null);
+                            }}
+                            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs ${
+                              isEquipped
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-300'
+                            }`}
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>{isEquipped ? 'Liegt neben Tier' : 'Platzieren'}</span>
+                          </button>
+                          {isEquipped && (
+                            <button
+                              onClick={() => handlePlayGadget(gadgetItem)}
+                              className="py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all cursor-pointer shadow-2xs flex items-center gap-1"
+                              title="Direkt spielen"
+                            >
+                              <span>Spielen</span>
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            handleBuyGadget(gadgetItem);
+                            setPreviewGadget(null);
+                          }}
+                          disabled={!canAffordXp}
+                          className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs ${
+                            canAffordXp
+                              ? 'bg-indigo-600 text-white hover:bg-indigo-700 active:scale-98'
+                              : 'opacity-40 bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed'
+                          }`}
+                        >
+                          <Star className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+                          <span>{gadgetItem.xpPrice === 0 ? 'Gratis freischalten' : `${gadgetItem.xpPrice} EXP freischalten`}</span>
                         </button>
                       )}
                     </div>
