@@ -1,6 +1,13 @@
 import { PetSpecies } from '../types/quiz';
 
-export type SoundpackType = 'sound-standard' | 'sound-arcade' | 'sound-scifi' | 'sound-acoustic';
+export type SoundpackType =
+  | 'sound-standard'
+  | 'sound-arcade'
+  | 'sound-scifi'
+  | 'sound-acoustic'
+  | 'sound-lofi'
+  | 'sound-fantasy'
+  | 'sound-mechanical';
 
 class SoundEffectsService {
   private ctx: AudioContext | null = null;
@@ -32,7 +39,16 @@ class SoundEffectsService {
   }
 
   public setSoundpack(packId: string) {
-    if (['sound-standard', 'sound-arcade', 'sound-scifi', 'sound-acoustic'].includes(packId)) {
+    const validPacks: SoundpackType[] = [
+      'sound-standard',
+      'sound-arcade',
+      'sound-scifi',
+      'sound-acoustic',
+      'sound-lofi',
+      'sound-fantasy',
+      'sound-mechanical',
+    ];
+    if (validPacks.includes(packId as SoundpackType)) {
       this.soundpack = packId as SoundpackType;
     } else {
       this.soundpack = 'sound-standard';
@@ -90,6 +106,45 @@ class SoundEffectsService {
       gain.connect(this.ctx.destination);
       osc.start(now);
       osc.stop(now + 0.04);
+      return;
+    }
+
+    if (this.soundpack === 'sound-lofi') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(320, now);
+      osc.frequency.exponentialRampToValueAtTime(220, now + 0.035);
+      gain.gain.setValueAtTime(0.10, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.035);
+      return;
+    }
+
+    if (this.soundpack === 'sound-fantasy') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1046.5, now);
+      osc.frequency.exponentialRampToValueAtTime(1568, now + 0.05);
+      gain.gain.setValueAtTime(0.07, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.08);
+      return;
+    }
+
+    if (this.soundpack === 'sound-mechanical') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(140, now);
+      osc.frequency.exponentialRampToValueAtTime(65, now + 0.025);
+      gain.gain.setValueAtTime(0.16, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.025);
       return;
     }
 
@@ -185,6 +240,88 @@ class SoundEffectsService {
       return;
     }
 
+    if (this.soundpack === 'sound-lofi') {
+      // Warm jazz maj7 chords: Eb4, G4, Bb4, D5
+      const jazzNotes = [311.13, 392.00, 466.16, 587.33];
+      jazzNotes.forEach((freq, idx) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const startTime = now + (idx * 0.04);
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq + (pitchOffset * 0.5), startTime);
+
+        gain.gain.setValueAtTime(0.09, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.45);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + 0.45);
+      });
+      return;
+    }
+
+    if (this.soundpack === 'sound-fantasy') {
+      // Glistening harp glissando: F#5, A5, C#6, E6, G#6
+      const harpNotes = [739.99, 880.00, 1108.73, 1318.51, 1661.22];
+      harpNotes.forEach((freq, idx) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const startTime = now + (idx * 0.045);
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq + (pitchOffset * 0.6), startTime);
+
+        gain.gain.setValueAtTime(0.11, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.40);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + 0.40);
+      });
+      return;
+    }
+
+    if (this.soundpack === 'sound-mechanical') {
+      // 3 rapid thocks + vintage typewriter return chime
+      const thockTimes = [0, 0.04, 0.08];
+      thockTimes.forEach((offset, idx) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const t = now + offset;
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(140 + idx * 30, t);
+        osc.frequency.exponentialRampToValueAtTime(70, t + 0.025);
+        gain.gain.setValueAtTime(0.14, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.025);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.025);
+      });
+
+      // Typewriter bell chime
+      const bellOsc = this.ctx.createOscillator();
+      const bellGain = this.ctx.createGain();
+      const bellTime = now + 0.12;
+      bellOsc.type = 'sine';
+      bellOsc.frequency.setValueAtTime(1320 + pitchOffset, bellTime);
+      bellGain.gain.setValueAtTime(0.12, bellTime);
+      bellGain.gain.exponentialRampToValueAtTime(0.0001, bellTime + 0.35);
+      bellOsc.connect(bellGain);
+      bellGain.connect(this.ctx.destination);
+      bellOsc.start(bellTime);
+      bellOsc.stop(bellTime + 0.35);
+      return;
+    }
+
     // Default standard
     const notes = [baseFreq + pitchOffset, (baseFreq * 1.25) + pitchOffset, (baseFreq * 1.5) + pitchOffset];
     notes.forEach((freq, idx) => {
@@ -237,6 +374,45 @@ class SoundEffectsService {
       gain.connect(this.ctx.destination);
       osc.start(now);
       osc.stop(now + 0.18);
+      return;
+    }
+
+    if (this.soundpack === 'sound-lofi') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(240, now);
+      osc.frequency.exponentialRampToValueAtTime(150, now + 0.22);
+      gain.gain.setValueAtTime(0.09, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.24);
+      return;
+    }
+
+    if (this.soundpack === 'sound-fantasy') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(294, now + 0.25);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.26);
+      return;
+    }
+
+    if (this.soundpack === 'sound-mechanical') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(110, now);
+      osc.frequency.exponentialRampToValueAtTime(50, now + 0.08);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.09);
       return;
     }
 
@@ -589,7 +765,34 @@ class SoundEffectsService {
     });
   }
 
-  public playGadgetSound(soundName: 'bounce' | 'laser' | 'magic' | 'click') {
+  public playGadgetQuack() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    // Two quick nasal quacks (quack-quack!)
+    [0, 0.12].forEach((offset) => {
+      if (!this.ctx) return;
+      const t = now + offset;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(540, t);
+      osc.frequency.exponentialRampToValueAtTime(360, t + 0.08);
+
+      gain.gain.setValueAtTime(0.08, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.09);
+    });
+  }
+
+  public playGadgetSound(soundName: 'bounce' | 'laser' | 'magic' | 'click' | 'quack') {
     switch (soundName) {
       case 'bounce':
         this.playGadgetBounce();
@@ -602,6 +805,9 @@ class SoundEffectsService {
         break;
       case 'click':
         this.playGadgetClick();
+        break;
+      case 'quack':
+        this.playGadgetQuack();
         break;
     }
   }

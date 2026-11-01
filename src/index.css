@@ -99,6 +99,46 @@ html.theme-monochrome button.bg-indigo-600:hover {
   background-color: #1e293b !important;
 }
 
+html.theme-sakura {
+  --primary-accent: #f43f5e;
+}
+html.theme-sakura button.bg-indigo-600 {
+  background-color: #e11d48 !important;
+}
+html.theme-sakura button.bg-indigo-600:hover {
+  background-color: #be123c !important;
+}
+
+html.theme-coffee {
+  --primary-accent: #b45309;
+}
+html.theme-coffee button.bg-indigo-600 {
+  background-color: #92400e !important;
+}
+html.theme-coffee button.bg-indigo-600:hover {
+  background-color: #78350f !important;
+}
+
+html.theme-deepspace {
+  --primary-accent: #6366f1;
+}
+html.theme-deepspace button.bg-indigo-600 {
+  background-color: #4f46e5 !important;
+}
+html.theme-deepspace button.bg-indigo-600:hover {
+  background-color: #4338ca !important;
+}
+
+html.theme-synthwave {
+  --primary-accent: #ec4899;
+}
+html.theme-synthwave button.bg-indigo-600 {
+  background-color: #db2777 !important;
+}
+html.theme-synthwave button.bg-indigo-600:hover {
+  background-color: #be185d !important;
+}
+
 /* Animated Pet Frames Keyframes */
 @keyframes rainbowGlow {
   0% { filter: hue-rotate(0deg); transform: scale(1); }

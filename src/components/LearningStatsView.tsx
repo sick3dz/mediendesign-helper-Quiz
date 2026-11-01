@@ -28,6 +28,10 @@ interface Props {
   onBack?: () => void;
   onStartReview?: () => void;
   onGoToChapter?: (chapterId: string) => void;
+  onGoToAchievements?: () => void;
+  onUpdateStats?: (updatedStats: UserStats) => void;
+  onXpChange?: (newXp: number) => void;
+  onCoinsChange?: (newCoins: number) => void;
 }
 
 export const LearningStatsView: React.FC<Props> = ({ 
@@ -36,7 +40,11 @@ export const LearningStatsView: React.FC<Props> = ({
   bionic = false, 
   onBack, 
   onStartReview, 
-  onGoToChapter 
+  onGoToChapter,
+  onGoToAchievements,
+  onUpdateStats,
+  onXpChange,
+  onCoinsChange
 }) => {
   const [expandedQuestionId, setExpandedQuestionId] = useState<string | null>(null);
   const [dossierQuestion, setDossierQuestion] = useState<QuizQuestion | null>(null);
@@ -355,6 +363,40 @@ export const LearningStatsView: React.FC<Props> = ({
           <p className="text-xs text-indigo-800/80 dark:text-indigo-300/80 leading-relaxed">
             Dein Lern-Algorithmus priorisiert Fragen, die du zuletzt falsch beantwortet hast oder die schon länger her sind. So festigst du dein IHK-Wissen am effektivsten.
           </p>
+        </div>
+      </div>
+
+      {/* Erfolge / Badges Section Moved to Dedicated Gamification View */}
+      <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
+        <div className="bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-emerald-500/10 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center justify-center text-2xl shadow-xs shrink-0">
+              🏆
+            </div>
+            <div>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                Gamification & Belohnungen
+              </span>
+              <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                Errungenschaften & Meilensteine
+              </h4>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                Alle freigeschalteten Abzeichen, Quiz-Meilensteine und XP-Belohnungen im eigenen Menübereich.
+              </p>
+            </div>
+          </div>
+          {onGoToAchievements && (
+            <button
+              onClick={() => {
+                soundEffects.playClick();
+                onGoToAchievements();
+              }}
+              className="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer flex items-center gap-2"
+            >
+              <span>Zu den Errungenschaften</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 

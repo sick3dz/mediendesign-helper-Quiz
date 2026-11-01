@@ -31,9 +31,6 @@ import {
 } from '../data/cosmeticsData';
 import { calculateLevel, LEVEL_LADDER, LevelTier } from '../services/storageService';
 import { PetAvatar } from './PetAvatar';
-import { LearningStatsView } from './LearningStatsView';
-import { PetAchievementsSection } from './PetAchievementsSection';
-import { CHAPTERS } from '../data/chaptersData';
 import { soundEffects } from '../services/audioService';
 import confetti from 'canvas-confetti';
 import {
@@ -63,11 +60,11 @@ import {
   X,
 } from 'lucide-react';
 
-export type GamificationTab = 'pet' | 'shop' | 'inventory' | 'achievements';
+export type GamificationTab = 'pet' | 'shop' | 'inventory';
 
 interface Props {
   stats: UserStats;
-  initialTab?: 'pet' | 'shop' | 'inventory' | 'achievements' | 'care' | 'wardrobe' | 'adopt';
+  initialTab?: 'pet' | 'shop' | 'inventory' | 'care' | 'wardrobe' | 'adopt';
   onUpdatePet: (updatedPet: PetState) => void;
   onCoinsChange?: (newCoins: number) => void;
   onXpChange?: (newXp: number) => void;
@@ -99,7 +96,6 @@ export const VirtualPetView: React.FC<Props> = ({
   const getMappedTab = (tab?: string): GamificationTab => {
     if (tab === 'shop') return 'shop';
     if (tab === 'inventory' || tab === 'wardrobe') return 'inventory';
-    if (tab === 'achievements') return 'achievements';
     return 'pet';
   };
 
@@ -112,12 +108,21 @@ export const VirtualPetView: React.FC<Props> = ({
   const [isPetted, setIsPetted] = useState(false);
   const [isGadgetInteracting, setIsGadgetInteracting] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
-  const [isRoadmapExpanded, setIsRoadmapExpanded] = useState(false);
   const [previewThemeId, setPreviewThemeId] = useState<string | null>(null);
   const [previewAccessory, setPreviewAccessory] = useState<PetAccessory | null>(null);
   const [previewGadget, setPreviewGadget] = useState<PetGadget | null>(null);
   const [previewFrame, setPreviewFrame] = useState<CosmeticItem | null>(null);
+  const [tryOnItem, setTryOnItem] = useState<{
+    type: 'accessory' | 'gadget' | 'frame' | 'theme';
+    item: any;
+  } | null>(null);
+  const [tryOnSpecies, setTryOnSpecies] = useState<PetSpecies>(pet.species);
   const [thoughtSeed, setThoughtSeed] = useState(0);
+
+  const handleOpenTryOnModal = (type: 'accessory' | 'gadget' | 'frame' | 'theme', item: any) => {
+    setTryOnSpecies(pet.species);
+    setTryOnItem({ type, item });
+  };
 
   // Sync live accessory, gadget & frame preview to external listener (TopBar companion)
   useEffect(() => {
@@ -173,6 +178,10 @@ export const VirtualPetView: React.FC<Props> = ({
       'theme-cyberpunk',
       'theme-gold',
       'theme-monochrome',
+      'theme-sakura',
+      'theme-coffee',
+      'theme-deepspace',
+      'theme-synthwave',
     ];
 
     if (!previewThemeId) {
@@ -647,11 +656,11 @@ export const VirtualPetView: React.FC<Props> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-                Gamification & Belohnungen
+                {activeTab === 'shop' ? 'EXP Shop & Belohnungen' : 'Haustier & Gefährte'}
               </span>
             </div>
             <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-tight">
-              Lern-Erfolge & Gefährte
+              {activeTab === 'shop' ? 'EXP Shop' : activeTab === 'inventory' ? 'Inventar & Schrank' : 'Haustier Lounge'}
             </h2>
           </div>
         </div>
@@ -669,236 +678,91 @@ export const VirtualPetView: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Main 4-Tab Navigation Segment Control */}
+      {/* Navigation Tabs (Inventar is available in both Lounge and Shop!) */}
       <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 dark:bg-slate-950 rounded-2xl text-xs font-bold border border-slate-200 dark:border-slate-800 overflow-x-auto no-scrollbar">
-        <button
-          onClick={() => {
-            soundEffects.playClick();
-            setActiveTab('pet');
-          }}
-          className={`py-2 px-3.5 sm:px-4 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
-            activeTab === 'pet'
-              ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs font-black'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold'
-          }`}
-        >
-          <span>🐾 Gefährte</span>
-        </button>
+        {activeTab === 'shop' || (initialTab === 'shop' && activeTab === 'inventory') ? (
+          <>
+            <button
+              onClick={() => {
+                soundEffects.playClick();
+                setActiveTab('shop');
+              }}
+              className={`py-2 px-3.5 sm:px-4 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+                activeTab === 'shop'
+                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 font-black'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold'
+              }`}
+            >
+              <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" />
+              <span>⭐ EXP Shop Artikel</span>
+            </button>
 
-        <button
-          onClick={() => {
-            soundEffects.playClick();
-            setActiveTab('shop');
-          }}
-          className={`py-2 px-3.5 sm:px-4 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
-            activeTab === 'shop'
-              ? 'bg-indigo-600 text-white shadow-xs font-black'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold'
-          }`}
-        >
-          <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-          <span>🛍️ Shop</span>
-        </button>
+            <button
+              onClick={() => {
+                soundEffects.playClick();
+                setActiveTab('inventory');
+              }}
+              className={`py-2 px-3.5 sm:px-4 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+                activeTab === 'inventory'
+                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 font-black'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold'
+              }`}
+            >
+              <Shirt className="w-3.5 h-3.5 shrink-0" />
+              <span>🎒 Mein Inventar & Vorrat</span>
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => {
+                soundEffects.playClick();
+                setActiveTab('pet');
+              }}
+              className={`py-2 px-3.5 sm:px-4 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+                activeTab === 'pet'
+                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 font-black'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold'
+              }`}
+            >
+              <span>🏠 Haustier & Zimmer</span>
+            </button>
 
-        <button
-          onClick={() => {
-            soundEffects.playClick();
-            setActiveTab('inventory');
-          }}
-          className={`py-2 px-3.5 sm:px-4 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
-            activeTab === 'inventory'
-              ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs font-black'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold'
-          }`}
-        >
-          <Shirt className="w-3.5 h-3.5 shrink-0" />
-          <span>🎒 Inventar</span>
-        </button>
+            <button
+              onClick={() => {
+                soundEffects.playClick();
+                setActiveTab('inventory');
+              }}
+              className={`py-2 px-3.5 sm:px-4 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+                activeTab === 'inventory'
+                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 font-black'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold'
+              }`}
+            >
+              <Shirt className="w-3.5 h-3.5 shrink-0" />
+              <span>🎒 Inventar & Schrank</span>
+            </button>
 
-        <button
-          onClick={() => {
-            soundEffects.playClick();
-            setActiveTab('achievements');
-          }}
-          className={`py-2 px-3.5 sm:px-4 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
-            activeTab === 'achievements'
-              ? 'bg-amber-500 text-slate-950 shadow-xs font-black'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-semibold'
-          }`}
-        >
-          <Trophy className="w-3.5 h-3.5 shrink-0" />
-          <span>🏆 Erfolge</span>
-        </button>
-
-        <button
-          onClick={() => {
-            soundEffects.playClick();
-            if (onOpenAdoptionModal) {
-              onOpenAdoptionModal();
-            }
-          }}
-          className="ml-auto py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white whitespace-nowrap shrink-0"
-          title="Anderes Haustier auswählen"
-        >
-          <RefreshCw className="w-3.5 h-3.5 shrink-0" />
-          <span className="hidden sm:inline">Tier wechseln</span>
-        </button>
+            <button
+              onClick={() => {
+                soundEffects.playClick();
+                if (onOpenAdoptionModal) {
+                  onOpenAdoptionModal();
+                }
+              }}
+              className="ml-auto py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white whitespace-nowrap shrink-0"
+              title="Anderes Haustier auswählen"
+            >
+              <RefreshCw className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Tier wechseln</span>
+            </button>
+          </>
+        )}
       </div>
 
       {/* 1. PET COMPANION TAB */}
       {activeTab === 'pet' && (
         <div className="space-y-6">
-          {/* Prominent Level & Rewards Roadmap Card */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-xs transition-colors space-y-4">
-            {/* Level Header Strip */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center text-2xl shadow-2xs shrink-0">
-                  <span>{levelInfo.icon}</span>
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-                      Aktueller Rang
-                    </span>
-                    <span className="text-xs font-mono font-bold px-1.5 py-0.2 rounded-md bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300">
-                      Level {levelInfo.level}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">
-                    {levelInfo.title}
-                  </h3>
-                </div>
-              </div>
-
-              {/* Next Level & EXP Remaining Badge */}
-              <div className="flex flex-col sm:items-end text-xs">
-                {levelInfo.isMaxLevel ? (
-                  <span className="font-extrabold text-amber-600 dark:text-amber-400 flex items-center gap-1 font-mono">
-                    <Trophy className="w-4 h-4" /> Maximaler Rang erreicht! 👑
-                  </span>
-                ) : (
-                  <>
-                    <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white">
-                      <span className="text-slate-400">Nächstes Ziel:</span>
-                      <span className="text-indigo-600 dark:text-indigo-400">
-                        Level {levelInfo.nextTier?.level} ({levelInfo.nextTier?.title})
-                      </span>
-                    </div>
-                    <span className="text-[11px] font-mono font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">
-                      Noch {levelInfo.xpNeededForNext} ⭐ EXP benötigt
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* EXP Progress Bar & Stats */}
-            <div className="space-y-1.5">
-              <div className="flex flex-wrap items-center justify-between gap-1 text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
-                <span className="flex items-center gap-1.5">
-                  <span>Rang-Fortschritt:</span>
-                  <strong className="text-slate-900 dark:text-white tabular-nums">{lifetimeProgressXp}</strong> / {levelInfo.nextLevelXp} EXP
-                </span>
-                <span className="tabular-nums text-indigo-600 dark:text-indigo-400 font-extrabold">
-                  {levelInfo.progressPercent}%
-                </span>
-              </div>
-
-              <div className="w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden p-0.5 border border-slate-200/60 dark:border-slate-800">
-                <div
-                  className="h-full bg-gradient-to-r from-indigo-500 via-indigo-600 to-amber-500 rounded-full transition-all duration-500 shadow-xs"
-                  style={{ width: `${levelInfo.progressPercent}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Next Level Rewards Preview Banner */}
-            {levelInfo.nextTier && (
-              <div className="p-3 rounded-2xl bg-gradient-to-r from-indigo-50/70 via-purple-50/50 to-amber-50/70 dark:from-indigo-950/40 dark:via-purple-950/30 dark:to-amber-950/40 border border-indigo-100 dark:border-indigo-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
-                <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
-                  <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-400 shrink-0">
-                    <Gift className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="font-extrabold text-slate-900 dark:text-white">
-                      Belohnung bei Level {levelInfo.nextTier.level}:
-                    </span>{' '}
-                    <span className="text-slate-600 dark:text-slate-300 font-medium">
-                      {levelInfo.nextTier.rewardDescription}
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => {
-                    soundEffects.playClick();
-                    setIsRoadmapExpanded(prev => !prev);
-                  }}
-                  className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 transition-colors cursor-pointer self-start sm:self-auto shrink-0 whitespace-nowrap"
-                >
-                  <span>{isRoadmapExpanded ? 'Stufenleiter minimieren' : 'Alle 7 Stufen ansehen'}</span>
-                  {isRoadmapExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                </button>
-              </div>
-            )}
-
-            {/* Expandable Level Ladder Drawer */}
-            {isRoadmapExpanded && (
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2 animate-in fade-in duration-200">
-                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-                  Vollständiger Lern- & Belohnungspfad (Level 1 bis 7)
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {LEVEL_LADDER.map(tier => {
-                    const isCurrent = tier.level === levelInfo.level;
-                    const isPassed = xp >= tier.xp;
-
-                    return (
-                      <div
-                        key={tier.level}
-                        className={`p-3 rounded-2xl border text-left transition-all flex items-start gap-3 ${
-                          isCurrent
-                            ? 'bg-indigo-50/80 dark:bg-indigo-950/60 border-indigo-400 dark:border-indigo-700 ring-2 ring-indigo-500/20'
-                            : isPassed
-                            ? 'bg-slate-50/80 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 opacity-80'
-                            : 'bg-white dark:bg-slate-900/60 border-dashed border-slate-200 dark:border-slate-800 opacity-60'
-                        }`}
-                      >
-                        <span className="text-2xl select-none shrink-0 mt-0.5">{tier.icon}</span>
-                        <div className="min-w-0 flex-1 space-y-0.5">
-                          <div className="flex items-center justify-between gap-1">
-                            <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
-                              Lvl {tier.level}: {tier.title}
-                            </span>
-                            {isCurrent ? (
-                              <span className="text-[9px] font-bold font-mono px-1.5 py-0.2 rounded-full bg-indigo-600 text-white shrink-0">
-                                Aktuell ★
-                              </span>
-                            ) : isPassed ? (
-                              <span className="text-[9px] font-bold font-mono text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 shrink-0">
-                                <Check className="w-3 h-3" /> Erreicht
-                              </span>
-                            ) : (
-                              <span className="text-[9px] font-bold font-mono text-slate-400 shrink-0">
-                                {tier.xp} EXP
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="text-[11px] text-slate-600 dark:text-slate-300 font-medium leading-snug">
-                            🎁 {tier.rewardDescription}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Pet Showcase Room Card */}
           <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm relative overflow-hidden transition-colors">
             {/* Top Room Ribbon */}
@@ -987,9 +851,9 @@ export const VirtualPetView: React.FC<Props> = ({
             )}
 
             {/* Pet Stage with Reactive PetAvatar */}
-            <div className="relative py-6 flex flex-col items-center justify-center">
+            <div className="relative py-10 flex flex-col items-center justify-center">
               {isPetted && (
-                <div className="absolute top-0 z-20 px-4 py-1.5 bg-amber-400 text-slate-900 font-black text-sm rounded-2xl shadow-lg border-2 border-amber-300 animate-bounce flex items-center gap-1.5 pointer-events-none">
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 px-4 py-1.5 bg-amber-400 text-slate-900 font-black text-sm rounded-2xl shadow-lg border-2 border-amber-300 animate-bounce flex items-center gap-1.5 pointer-events-none whitespace-nowrap">
                   <span className="text-base">{soundConfig.soundIcon}</span>
                   <span>"{soundConfig.soundWord}"</span>
                 </div>
@@ -1009,11 +873,22 @@ export const VirtualPetView: React.FC<Props> = ({
                 }}
                 onInteractGadget={handlePlayGadget}
                 isGadgetInteracting={isGadgetInteracting}
-                onClick={handlePet}
+                onClick={() => {
+                  soundEffects.playClick();
+                  setActiveTab('pet');
+                }}
               />
 
-              {/* Interactive Trick Button */}
-              <div className="flex items-center justify-center mt-5">
+              {/* Interactive Actions */}
+              <div className="flex items-center justify-center gap-3 mt-5">
+                <button
+                  onClick={handlePet}
+                  className="px-5 py-2.5 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900/60 rounded-xl text-xs font-bold flex items-center gap-2 transition-transform active:scale-95 cursor-pointer shadow-xs"
+                >
+                  <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
+                  <span>Streicheln ❤️</span>
+                </button>
+
                 <button
                   onClick={handleHighFive}
                   className="px-5 py-2.5 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60 rounded-xl text-xs font-bold flex items-center gap-2 transition-transform active:scale-95 cursor-pointer shadow-xs"
@@ -1127,20 +1002,6 @@ export const VirtualPetView: React.FC<Props> = ({
             )}
           </div>
         </div>
-      )}
-
-      {/* 0. ACHIEVEMENTS TAB */}
-      {activeTab === 'achievements' && (
-        <PetAchievementsSection
-          stats={stats}
-          onUpdateStats={(updatedStats) => {
-            onUpdatePet(updatedStats.pet);
-            if (onXpChange) onXpChange(updatedStats.xp);
-            if (onCoinsChange) onCoinsChange(updatedStats.coins);
-          }}
-          onXpChange={onXpChange}
-          onCoinsChange={onCoinsChange}
-        />
       )}
 
 
@@ -1335,16 +1196,12 @@ export const VirtualPetView: React.FC<Props> = ({
                         <span className="text-3xl">{acc.icon}</span>
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => handleTogglePreviewAccessory(acc)}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition-all flex items-center gap-1 cursor-pointer shadow-2xs ${
-                              isPreviewActive
-                                ? 'bg-amber-500 text-slate-950 ring-2 ring-amber-300'
-                                : 'bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 border border-indigo-200/80 dark:border-indigo-800/80'
-                            }`}
-                            title="Accessoire live anprobieren"
+                            onClick={() => handleOpenTryOnModal('accessory', acc)}
+                            className="px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition-all flex items-center gap-1 cursor-pointer shadow-2xs bg-amber-500 hover:bg-amber-400 text-slate-950 active:scale-95"
+                            title="Gegenstand im Anprobier-Studio mit Live-Vorschau ansehen"
                           >
                             <Eye className="w-3 h-3" />
-                            <span>{isPreviewActive ? 'Anprobiert' : 'Anprobieren 👁️'}</span>
+                            <span>Anprobieren 👁️</span>
                           </button>
                           <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
                             {acc.category}
@@ -1425,16 +1282,12 @@ export const VirtualPetView: React.FC<Props> = ({
                         <span className="text-3xl">{gadgetItem.icon}</span>
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => handleTogglePreviewGadget(gadgetItem)}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition-all flex items-center gap-1 cursor-pointer shadow-2xs ${
-                              isPreviewActive
-                                ? 'bg-amber-500 text-slate-950 ring-2 ring-amber-300'
-                                : 'bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 border border-indigo-200/80 dark:border-indigo-800/80'
-                            }`}
-                            title="Gadget live antesten"
+                            onClick={() => handleOpenTryOnModal('gadget', gadgetItem)}
+                            className="px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition-all flex items-center gap-1 cursor-pointer shadow-2xs bg-amber-500 hover:bg-amber-400 text-slate-950 active:scale-95"
+                            title="Gadget in der Anprobier-Kabine ansehen"
                           >
                             <Eye className="w-3 h-3" />
-                            <span>{isPreviewActive ? 'Im Avatar aktiv' : 'Live testen 👁️'}</span>
+                            <span>Live testen 👁️</span>
                           </button>
                           <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md ${
                             gadgetItem.price === 0
@@ -1532,16 +1385,12 @@ export const VirtualPetView: React.FC<Props> = ({
                         <span className="text-3xl">{item.icon}</span>
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => handleTogglePreviewTheme(item.id)}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition-all flex items-center gap-1 cursor-pointer shadow-2xs ${
-                              isPreviewActive
-                                ? 'bg-amber-500 text-slate-950 ring-2 ring-amber-300'
-                                : 'bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 border border-indigo-200/80 dark:border-indigo-800/80'
-                            }`}
-                            title="Theme live auf der ganzen Seite testen"
+                            onClick={() => handleOpenTryOnModal('theme', item)}
+                            className="px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition-all flex items-center gap-1 cursor-pointer shadow-2xs bg-amber-500 hover:bg-amber-400 text-slate-950 active:scale-95"
+                            title="Theme in der Vorschau-Kabine ansehen"
                           >
                             <Eye className="w-3 h-3" />
-                            <span>{isPreviewActive ? 'Vorschau aktiv' : 'Vorschau 👁️'}</span>
+                            <span>Vorschau 👁️</span>
                           </button>
                           <div
                             className={`w-5 h-5 rounded-full bg-gradient-to-tr ${item.previewClass} border border-white dark:border-slate-700 shadow-xs`}
@@ -1747,16 +1596,12 @@ export const VirtualPetView: React.FC<Props> = ({
                         <span className="text-3xl">{item.icon}</span>
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => handleTogglePreviewFrame(item)}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition-all flex items-center gap-1 cursor-pointer shadow-2xs ${
-                              isPreviewActive
-                                ? 'bg-amber-500 text-slate-950 ring-2 ring-amber-300'
-                                : 'bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 border border-indigo-200/80 dark:border-indigo-800/80'
-                            }`}
-                            title="Rahmen live anprobieren"
+                            onClick={() => handleOpenTryOnModal('frame', item)}
+                            className="px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition-all flex items-center gap-1 cursor-pointer shadow-2xs bg-amber-500 hover:bg-amber-400 text-slate-950 active:scale-95"
+                            title="Rahmen in der Vorschau-Kabine ansehen"
                           >
                             <Eye className="w-3 h-3" />
-                            <span>{isPreviewActive ? 'Anprobiert' : 'Anprobieren 👁️'}</span>
+                            <span>Anprobieren 👁️</span>
                           </button>
                           <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300">
                             {item.tier}
@@ -2330,6 +2175,320 @@ export const VirtualPetView: React.FC<Props> = ({
           </div>
         );
       })()}
+
+      {/* ======================================================== */}
+      {/* LARGE CENTERED TRY-ON & PREVIEW MODAL                    */}
+      {/* ======================================================== */}
+      {tryOnItem && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-fade-in"
+          onClick={() => setTryOnItem(null)}
+        >
+          <div 
+            className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] transition-all"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                  <Eye className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white leading-none">
+                    Anprobier-Studio & Live-Vorschau
+                  </h3>
+                  <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                    Probiere den Gegenstand direkt aus und teste ihn auf allen Haustieren!
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setTryOnItem(null)}
+                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                title="Schließen"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Species Selector Bar */}
+            <div className="px-4 sm:px-5 py-2.5 bg-slate-100/80 dark:bg-slate-800/90 border-b border-slate-200/80 dark:border-slate-700/80 flex items-center gap-2 overflow-x-auto shrink-0 scrollbar-none">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap shrink-0">
+                Tierart wechseln:
+              </span>
+              {(['dog', 'cat', 'penguin', 'axolotl', 'unicorn'] as PetSpecies[]).map(sp => {
+                const info = PET_SPECIES[sp];
+                const isActive = tryOnSpecies === sp;
+                return (
+                  <button
+                    key={sp}
+                    onClick={() => setTryOnSpecies(sp)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+                      isActive
+                        ? 'bg-indigo-600 text-white shadow-xs ring-2 ring-indigo-400'
+                        : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                    }`}
+                  >
+                    <span>{PET_SPECIES_SOUNDS[sp].soundIcon}</span>
+                    <span>{info.defaultName}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-4 sm:p-6 overflow-y-auto flex flex-col md:grid md:grid-cols-2 gap-4 sm:gap-6">
+              {/* Left Column: Big Interactive Pet Avatar Stage */}
+              <div className={`p-4 sm:p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 flex flex-col items-center justify-center relative transition-all shrink-0 ${
+                tryOnItem.type === 'theme' 
+                  ? tryOnItem.item.previewClass
+                  : 'bg-gradient-to-b from-indigo-50 via-purple-50/70 to-slate-100 dark:from-slate-800 dark:via-indigo-950/50 dark:to-slate-900'
+              }`}>
+                {/* Species Sound Badge */}
+                <div className="absolute top-3 left-3 text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-white/95 dark:bg-slate-900/95 text-slate-800 dark:text-slate-200 shadow-2xs backdrop-blur-xs z-10">
+                  {PET_SPECIES[tryOnSpecies].title}
+                </div>
+
+                <div className="py-8 sm:py-10 flex items-center justify-center">
+                  <PetAvatar
+                    pet={{
+                      ...pet,
+                      species: tryOnSpecies,
+                      name: PET_SPECIES[tryOnSpecies].defaultName,
+                    }}
+                    size="lg"
+                    equippedCosmetics={{
+                      ...equippedCosmetics,
+                      ...(tryOnItem.type === 'frame' ? { frame: tryOnItem.item.id } : {}),
+                    }}
+                    previewOverride={{
+                      equipped: {
+                        ...(tryOnItem.type === 'accessory' ? { [tryOnItem.item.category]: tryOnItem.item.id } : {}),
+                        ...(tryOnItem.type === 'gadget' ? { gadget: tryOnItem.item.id } : {}),
+                        ...(tryOnItem.type === 'frame' ? { frame: tryOnItem.item.id } : {}),
+                      },
+                    }}
+                    onClick={() => {
+                      soundEffects.playClick();
+                      setTryOnItem(null);
+                      setActiveTab('pet');
+                    }}
+                  />
+                </div>
+
+                <div className="text-center mt-2 z-10">
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    "{PET_SPECIES_SOUNDS[tryOnSpecies].soundWord}" – Passt perfekt auf {PET_SPECIES[tryOnSpecies].defaultName}! ✨
+                  </p>
+                </div>
+              </div>
+
+              {/* Right Column: Item Information & Action Buttons */}
+              <div className="flex flex-col justify-between space-y-4 bg-slate-50/60 dark:bg-slate-800/40 p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-3xl sm:text-4xl">{tryOnItem.item.icon}</span>
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800">
+                      {tryOnItem.type === 'accessory' ? `Accessoire: ${tryOnItem.item.category}` : tryOnItem.type === 'gadget' ? 'Interaktives Gadget' : tryOnItem.type === 'frame' ? 'Aura-Rahmen' : 'Design-Theme'}
+                    </span>
+                  </div>
+
+                  <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-3">
+                    {tryOnItem.item.name}
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed font-medium">
+                    {tryOnItem.item.description}
+                  </p>
+
+                  {/* Pricing / Status summary */}
+                  <div className="mt-4 p-3.5 rounded-xl bg-white dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-700/80 space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500 dark:text-slate-400 font-semibold">Preis:</span>
+                      <span className="font-extrabold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                        <Star className="w-3.5 h-3.5 fill-amber-400" />
+                        {(tryOnItem.item.xpPrice ?? tryOnItem.item.priceXp ?? 0) === 0 ? 'Gratis' : `${tryOnItem.item.xpPrice ?? tryOnItem.item.priceXp} EXP`}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500 dark:text-slate-400 font-semibold">Dein EXP-Guthaben:</span>
+                      <span className="font-extrabold text-slate-900 dark:text-white">
+                        {xp} EXP
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Primary Actions inside Modal */}
+                <div className="pt-3 border-t border-slate-200/60 dark:border-slate-700/60 space-y-2">
+                  {(() => {
+                    if (tryOnItem.type === 'accessory') {
+                      const acc = tryOnItem.item as PetAccessory;
+                      const isOwned = pet.inventory.accessories.includes(acc.id);
+                      const isEquipped = pet.equipped[acc.category] === acc.id;
+                      const xpCost = acc.xpPrice || Math.round(acc.price * 0.8);
+                      const canAfford = xp >= xpCost;
+
+                      if (isOwned) {
+                        return (
+                          <button
+                            onClick={() => {
+                              handleToggleAccessory(acc);
+                              setFeedbackMsg(isEquipped ? `${acc.name} abgelegt.` : `${acc.name} angezogen! 🎉`);
+                              setTimeout(() => setFeedbackMsg(null), 3000);
+                            }}
+                            className={`w-full py-3 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs ${
+                              isEquipped
+                                ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                            }`}
+                          >
+                            <Check className="w-4 h-4" />
+                            <span>{isEquipped ? 'Gegenstand ablegen' : 'Gegenstand anziehen & tragen'}</span>
+                          </button>
+                        );
+                      } else {
+                        return (
+                          <button
+                            onClick={() => {
+                              handleBuyAccessory(acc);
+                              if (pet.equipped[acc.category] !== acc.id) {
+                                handleToggleAccessory(acc);
+                              }
+                              setFeedbackMsg(`🎉 ${acc.name} freigeschaltet und angezogen!`);
+                              setTimeout(() => setFeedbackMsg(null), 3000);
+                              setTryOnItem(null);
+                            }}
+                            disabled={!canAfford}
+                            className={`w-full py-3 px-4 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm ${
+                              canAfford
+                                ? 'bg-indigo-600 hover:bg-indigo-700 text-white active:scale-98'
+                                : 'opacity-40 bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed'
+                            }`}
+                          >
+                            <Star className="w-4 h-4 text-amber-300 fill-amber-300" />
+                            <span>{canAfford ? `Für ${xpCost} EXP freischalten & anziehen` : `Nicht genug EXP (${xpCost} benötigt)`}</span>
+                          </button>
+                        );
+                      }
+                    }
+
+                    if (tryOnItem.type === 'gadget') {
+                      const gadgetItem = tryOnItem.item as PetGadget;
+                      const ownedGadgets = pet.inventory.gadgets || ['bouncing_ball'];
+                      const isOwned = ownedGadgets.includes(gadgetItem.id);
+                      const isEquipped = pet.equipped.gadget === gadgetItem.id;
+                      const xpCost = gadgetItem.xpPrice;
+                      const canAfford = xp >= xpCost;
+
+                      if (isOwned) {
+                        return (
+                          <button
+                            onClick={() => {
+                              handleToggleGadget(gadgetItem);
+                              setFeedbackMsg(isEquipped ? `${gadgetItem.name} weggepackt.` : `${gadgetItem.name} neben Haustier platziert! 🎉`);
+                              setTimeout(() => setFeedbackMsg(null), 3000);
+                            }}
+                            className={`w-full py-3 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs ${
+                              isEquipped
+                                ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                            }`}
+                          >
+                            <Check className="w-4 h-4" />
+                            <span>{isEquipped ? 'Spielzeug wegpacken' : 'Neben Haustier platzieren'}</span>
+                          </button>
+                        );
+                      } else {
+                        return (
+                          <button
+                            onClick={() => {
+                              handleBuyGadget(gadgetItem);
+                              if (pet.equipped.gadget !== gadgetItem.id) {
+                                handleToggleGadget(gadgetItem);
+                              }
+                              setFeedbackMsg(`🎉 ${gadgetItem.name} freigeschaltet und platziert!`);
+                              setTimeout(() => setFeedbackMsg(null), 3000);
+                              setTryOnItem(null);
+                            }}
+                            disabled={!canAfford}
+                            className={`w-full py-3 px-4 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm ${
+                              canAfford
+                                ? 'bg-indigo-600 hover:bg-indigo-700 text-white active:scale-98'
+                                : 'opacity-40 bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed'
+                            }`}
+                          >
+                            <Star className="w-4 h-4 text-amber-300 fill-amber-300" />
+                            <span>{canAfford ? `Für ${xpCost} EXP freischalten & platzieren` : `Nicht genug EXP (${xpCost} benötigt)`}</span>
+                          </button>
+                        );
+                      }
+                    }
+
+                    if (tryOnItem.type === 'frame' || tryOnItem.type === 'theme') {
+                      const item = tryOnItem.item as CosmeticItem;
+                      const isOwned = unlockedCosmetics.includes(item.id);
+                      const isEquipped = item.category === 'frame' ? pet.equipped.frame === item.id : equippedCosmetics.theme === item.id;
+                      const xpCost = item.priceXp;
+                      const canAfford = xp >= xpCost;
+
+                      if (isOwned) {
+                        return (
+                          <button
+                            onClick={() => {
+                              handleEquipCosmetic(item);
+                              setFeedbackMsg(`${item.name} aktiviert! ✨`);
+                              setTimeout(() => setFeedbackMsg(null), 3000);
+                            }}
+                            className={`w-full py-3 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs ${
+                              isEquipped
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                            }`}
+                          >
+                            <Check className="w-4 h-4" />
+                            <span>{isEquipped ? 'Aktuell aktiviert' : 'Jetzt anwenden & aktivieren'}</span>
+                          </button>
+                        );
+                      } else {
+                        return (
+                          <button
+                            onClick={() => {
+                              handleBuyCosmetic(item);
+                              handleEquipCosmetic(item);
+                              setFeedbackMsg(`🎉 ${item.name} freigeschaltet und aktiviert!`);
+                              setTimeout(() => setFeedbackMsg(null), 3000);
+                              setTryOnItem(null);
+                            }}
+                            disabled={!canAfford}
+                            className={`w-full py-3 px-4 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm ${
+                              canAfford
+                                ? 'bg-indigo-600 hover:bg-indigo-700 text-white active:scale-98'
+                                : 'opacity-40 bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed'
+                            }`}
+                          >
+                            <Star className="w-4 h-4 text-amber-300 fill-amber-300" />
+                            <span>{canAfford ? `Für ${xpCost} EXP freischalten & anwenden` : `Nicht genug EXP (${xpCost} benötigt)`}</span>
+                          </button>
+                        );
+                      }
+                    }
+
+                    return null;
+                  })()}
+
+                  <button
+                    onClick={() => setTryOnItem(null)}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                  >
+                    Weiter im Shop stöbern
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

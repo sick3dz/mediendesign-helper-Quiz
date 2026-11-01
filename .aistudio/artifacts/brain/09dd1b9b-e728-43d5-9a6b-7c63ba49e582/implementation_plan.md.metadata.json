@@ -1,6 +1,6 @@
 {
-  "summary":  "Implementation plan to restructure the Gamification & Rewards section into a clean, intuitive Hub with distinct top-level tabs for Pet Companion (Gefährte), Rewards Shop (Shop), My Inventory (Inventar), and Achievements (Erfolge).",
-  "updatedAt":  "2026-11-01T13:58:36.637730258Z",
+  "summary":  "Erfolgreich umgesetzt: Der Anzeigefehler 0 / 0 bei Eingelöst wurde behoben, die Statuskarten zeigen nun saubere Gesamtzähler und Hinweistexte, und die Speicherung & Synchronisation zwischen EXP Shop und Aktuellem Rang wurde atomar abgesichert.",
+  "updatedAt":  "2026-11-01T18:47:32.156429674Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

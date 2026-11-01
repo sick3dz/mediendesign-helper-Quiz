@@ -31,6 +31,10 @@ export const PetAvatar: React.FC<Props> = ({
   onClick,
 }) => {
   const { species, happiness, hunger } = pet;
+  const neckYOffset = species === 'penguin' ? -12 : species === 'axolotl' ? 2 : 0;
+  const faceTransform = species === 'penguin' ? 'translate(0, -6)' : species === 'axolotl' ? 'translate(100, 84) scale(1.15, 1) translate(-100, -84)' : undefined;
+  const headYOffset = species === 'penguin' ? -8 : species === 'unicorn' ? -2 : 0;
+
   const equipped = {
     ...(equippedCosmetics?.frame ? { frame: equippedCosmetics.frame } : {}),
     ...pet.equipped,
@@ -66,23 +70,35 @@ export const PetAvatar: React.FC<Props> = ({
   const frameInsets = {
     sm: {
       bronze: '-inset-0.5 border',
+      emerald: '-inset-0.5 border ring-1',
       neon: '-inset-0.5 border ring-1',
+      cyber: '-inset-0.5 border ring-1',
       stardust: '-inset-0.5 border ring-1',
+      galaxy: '-inset-0.5 border-2 ring-1',
       rainbow: '-inset-0.5 border-2 ring-1 ring-offset-1',
+      phoenix: '-inset-1 border-2 ring-1.5',
       divine: '-inset-1 border-2 ring-1',
     },
     md: {
       bronze: '-inset-1 border-1.5',
+      emerald: '-inset-1.5 border-2 ring-1',
       neon: '-inset-1.5 border-2 ring-1',
+      cyber: '-inset-1.5 border-2 ring-1.5',
       stardust: '-inset-1.5 border-2 ring-1',
+      galaxy: '-inset-2 border-2.5 ring-1.5',
       rainbow: '-inset-1.5 border-[2.5px] ring-1.5 ring-offset-1.5',
+      phoenix: '-inset-2 border-3 ring-2',
       divine: '-inset-2 border-3 ring-2',
     },
     lg: {
       bronze: '-inset-2 border-2',
+      emerald: '-inset-2.5 border-2 ring-2',
       neon: '-inset-2.5 border-2 ring-2',
+      cyber: '-inset-2.5 border-2.5 ring-2',
       stardust: '-inset-2.5 border-2 ring-2',
+      galaxy: '-inset-3 border-3 ring-2',
       rainbow: '-inset-3 border-[3.5px] ring-2 ring-offset-2',
+      phoenix: '-inset-3.5 border-4 ring-3',
       divine: '-inset-3.5 border-4 ring-4',
     },
   }[size];
@@ -105,8 +121,28 @@ export const PetAvatar: React.FC<Props> = ({
       {equipped?.frame === 'frame-bronze' && (
         <div className={`absolute ${frameInsets.bronze} rounded-full border-amber-500/80 shadow-[0_0_12px_rgba(217,119,6,0.35)] pointer-events-none animate-pulse`} />
       )}
+      {equipped?.frame === 'frame-emerald-glow' && (
+        <div className={`absolute ${frameInsets.emerald} rounded-full border-emerald-400 ring-teal-500/80 shadow-[0_0_16px_rgba(16,185,129,0.7)] animate-pulse pointer-events-none`}>
+          {size !== 'sm' && (
+            <>
+              <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-xs">🌿</span>
+              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs">🌱</span>
+            </>
+          )}
+        </div>
+      )}
       {equipped?.frame === 'frame-neon' && (
         <div className={`absolute ${frameInsets.neon} rounded-full border-cyan-400 ring-fuchsia-500 shadow-[0_0_15px_rgba(6,182,212,0.8)] animate-pulse pointer-events-none`} />
+      )}
+      {equipped?.frame === 'frame-cyber-circuit' && (
+        <div className={`absolute ${frameInsets.cyber} rounded-full border-cyan-400 ring-blue-500/90 shadow-[0_0_18px_rgba(6,182,212,0.85)] animate-pulse pointer-events-none`}>
+          {size !== 'sm' && (
+            <>
+              <span className="absolute top-1/2 -left-2.5 -translate-y-1/2 text-[10px] text-cyan-300 font-mono font-bold animate-ping">⚡</span>
+              <span className="absolute top-1/2 -right-2.5 -translate-y-1/2 text-[10px] text-cyan-300 font-mono font-bold animate-ping">⚡</span>
+            </>
+          )}
+        </div>
       )}
       {equipped?.frame === 'frame-stardust' && (
         <div className={`absolute ${frameInsets.stardust} rounded-full border-purple-400 ring-indigo-400/80 shadow-[0_0_20px_rgba(168,85,247,0.6)] animate-pulse pointer-events-none`}>
@@ -120,8 +156,32 @@ export const PetAvatar: React.FC<Props> = ({
           )}
         </div>
       )}
+      {equipped?.frame === 'frame-galaxy' && (
+        <div className={`absolute ${frameInsets.galaxy} rounded-full border-indigo-400 ring-purple-600 shadow-[0_0_24px_rgba(99,102,241,0.85)] animate-pulse pointer-events-none`}>
+          {size !== 'sm' && (
+            <>
+              <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs animate-spin-slow">🪐</span>
+              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs">✨</span>
+              <span className="absolute top-1/2 -left-2 -translate-y-1/2 text-xs animate-pulse">🌌</span>
+              <span className="absolute top-1/2 -right-2 -translate-y-1/2 text-xs animate-pulse">✦</span>
+            </>
+          )}
+        </div>
+      )}
       {equipped?.frame === 'frame-rainbow' && (
         <div className={`absolute ${frameInsets.rainbow} rounded-full border-amber-400 ring-emerald-400 ring-offset-rose-500 shadow-[0_0_20px_rgba(236,72,153,0.7)] animate-spin-rainbow pointer-events-none`} />
+      )}
+      {equipped?.frame === 'frame-phoenix' && (
+        <div className={`absolute ${frameInsets.phoenix} rounded-full border-rose-500 ring-amber-400 shadow-[0_0_28px_rgba(244,63,94,0.95)] animate-pulse pointer-events-none`}>
+          <div className={`absolute ${size === 'sm' ? '-top-2 text-[10px]' : size === 'md' ? '-top-3 text-xs' : '-top-4 text-base'} left-1/2 -translate-x-1/2 select-none animate-bounce`}>🔥</div>
+          {size !== 'sm' && (
+            <>
+              <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-xs animate-pulse">🪶</span>
+              <span className="absolute top-1/2 -left-2 -translate-y-1/2 text-xs animate-bounce">✨</span>
+              <span className="absolute top-1/2 -right-2 -translate-y-1/2 text-xs animate-bounce">✨</span>
+            </>
+          )}
+        </div>
       )}
       {equipped?.frame === 'frame-divine' && (
         <div className={`absolute ${frameInsets.divine} rounded-full border-amber-300 ring-yellow-400 shadow-[0_0_25px_rgba(250,204,21,0.9)] animate-pulse pointer-events-none`}>
@@ -131,14 +191,14 @@ export const PetAvatar: React.FC<Props> = ({
 
       {/* Reactive heart animation when petted */}
       {isPetted && (
-        <div className="absolute -top-4 text-2xl animate-ping pointer-events-none z-20">
+        <div className="absolute top-1 -translate-y-full text-2xl animate-ping pointer-events-none z-20">
           💖
         </div>
       )}
 
       {/* Reactive gadget play reaction with celebratory mood badge */}
       {isGadgetActive && gadget && (
-        <div className="absolute -top-6 flex items-center gap-1.5 bg-white/95 dark:bg-slate-900/95 px-3 py-1 rounded-full shadow-lg border border-purple-300 dark:border-purple-700 animate-bounce pointer-events-none z-30">
+        <div className="absolute top-2 -translate-y-full flex items-center gap-1.5 bg-white/95 dark:bg-slate-900/95 px-3 py-1 rounded-full shadow-lg border border-purple-300 dark:border-purple-700 animate-bounce pointer-events-none z-30 whitespace-nowrap">
           <span className="text-sm">{gadget.icon}</span>
           <span className="text-xs font-black bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
             +{gadget.happinessBonus} Laune!
@@ -533,6 +593,7 @@ export const PetAvatar: React.FC<Props> = ({
         {/* ======================================================== */}
 
         {/* 1. NECK ACCESSORIES */}
+        <g transform={neckYOffset ? `translate(0, ${neckYOffset})` : undefined}>
         {equipped.neck === 'bowtie' && (
           <g transform="translate(100, 138)">
             <polygon points="-16,-8 0,0 -16,8" fill="#E11D48" />
@@ -650,7 +711,42 @@ export const PetAvatar: React.FC<Props> = ({
           </g>
         )}
 
+        {/* Retro-Bandana */}
+        {equipped.neck === 'bandana' && (
+          <g transform="translate(100, 138)">
+            <polygon points="-24,-2 0,16 24,-2" fill="#DC2626" />
+            <path d="M-26,-4 Q0,10 26,-4" stroke="#B91C1C" strokeWidth="2" fill="none" />
+            <circle cx="0" cy="6" r="1.5" fill="#FFFFFF" opacity="0.85" />
+            <circle cx="-10" cy="3" r="1.2" fill="#FFFFFF" opacity="0.85" />
+            <circle cx="10" cy="3" r="1.2" fill="#FFFFFF" opacity="0.85" />
+            <circle cx="-5" cy="10" r="1" fill="#FFFFFF" opacity="0.85" />
+            <circle cx="5" cy="10" r="1" fill="#FFFFFF" opacity="0.85" />
+          </g>
+        )}
+
+        {/* Goldenes Glücksglöckchen */}
+        {equipped.neck === 'lucky_bell' && (
+          <g transform="translate(100, 138)">
+            <path d="M-26,-4 Q0,14 26,-4" stroke="#EF4444" strokeWidth="3.5" fill="none" />
+            <circle cx="0" cy="11" r="6" fill="#FBBF24" stroke="#D97706" strokeWidth="1.2" />
+            <line x1="-3" y1="12" x2="3" y2="12" stroke="#78350F" strokeWidth="1.2" />
+            <circle cx="0" cy="14" r="1.2" fill="#78350F" />
+          </g>
+        )}
+
+        {/* Brillanter Vektor-Diamant */}
+        {equipped.neck === 'diamond_pendant' && (
+          <g transform="translate(100, 138)">
+            <path d="M-24,-4 Q0,14 24,-4" stroke="#94A3B8" strokeWidth="1.5" fill="none" />
+            <polygon points="-8,8 0,3 8,8 0,18" fill="#67E8F9" stroke="#0891B2" strokeWidth="1" />
+            <polygon points="-4,8 0,3 4,8 0,15" fill="#A5F3FC" opacity="0.8" />
+            <circle cx="0" cy="9" r="1" fill="#FFFFFF" />
+          </g>
+        )}
+        </g>
+
         {/* 2. FACE ACCESSORIES */}
+        <g transform={faceTransform}>
         {equipped.face === 'sunglasses' && (
           <g transform="translate(100, 84)">
             <rect x="-36" y="-8" width="30" height="18" rx="4" fill="#0F172A" />
@@ -680,7 +776,42 @@ export const PetAvatar: React.FC<Props> = ({
           </g>
         )}
 
+        {/* Gelehrten-Monokel */}
+        {equipped.face === 'monocle' && (
+          <g transform="translate(100, 84)">
+            <circle cx="20" cy="0" r="13" stroke="#F59E0B" strokeWidth="2.5" fill="rgba(254,243,199,0.25)" />
+            <path d="M33,0 Q40,15 36,35" stroke="#F59E0B" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+            <circle cx="36" cy="36" r="2" fill="#D97706" />
+            {/* Glass glint */}
+            <line x1="14" y1="-5" x2="24" y2="5" stroke="#FFFFFF" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+          </g>
+        )}
+
+        {/* Spatial-Computing-Visier VR */}
+        {equipped.face === 'vr_goggles' && (
+          <g transform="translate(100, 84)">
+            <rect x="-38" y="-12" width="76" height="24" rx="8" fill="#0F172A" stroke="#38BDF8" strokeWidth="2" />
+            <rect x="-34" y="-8" width="68" height="16" rx="5" fill="#0284C7" opacity="0.8" />
+            <line x1="-30" y1="0" x2="30" y2="0" stroke="#38BDF8" strokeWidth="1.5" opacity="0.5" strokeDasharray="3 2" />
+            <circle cx="28" cy="-5" r="2" fill="#4ADE80" className="animate-pulse" />
+          </g>
+        )}
+
+        {/* Bionisches Cyber-Okular */}
+        {equipped.face === 'cyber_eye_patch' && (
+          <g transform="translate(100, 84)">
+            <line x1="-40" y1="-12" x2="30" y2="10" stroke="#1E293B" strokeWidth="2" />
+            <circle cx="-20" cy="0" r="13" fill="#0F172A" stroke="#EF4444" strokeWidth="2" />
+            <circle cx="-20" cy="0" r="8" fill="#7F1D1D" />
+            <circle cx="-20" cy="0" r="4" fill="#EF4444" className="animate-pulse" />
+            <line x1="-27" y1="0" x2="-13" y2="0" stroke="#FCA5A5" strokeWidth="1" />
+            <line x1="-20" y1="-7" x2="-20" y2="7" stroke="#FCA5A5" strokeWidth="1" />
+          </g>
+        )}
+        </g>
+
         {/* 3. HEAD ACCESSORIES */}
+        <g transform={headYOffset ? `translate(0, ${headYOffset})` : undefined}>
         {/* Kapitel 1 Überraschung: Holo-Cyber-Headset */}
         {equipped.head === 'special_ixd_headset' && (
           <g transform="translate(100, 75)">
@@ -758,6 +889,58 @@ export const PetAvatar: React.FC<Props> = ({
           </g>
         )}
 
+        {/* RGB-Gaming-Headset */}
+        {equipped.head === 'gamer_headset' && (
+          <g transform="translate(100, 75)">
+            <path d="M-44,15 C-46,-32 46,-32 44,15" stroke="#A855F7" strokeWidth="5" fill="none" strokeLinecap="round" />
+            <path d="M-40,10 C-42,-26 42,-26 40,10" stroke="#06B6D4" strokeWidth="2" fill="none" strokeLinecap="round" />
+            <rect x="-52" y="4" width="13" height="25" rx="6" fill="#1E1B4B" stroke="#EC4899" strokeWidth="2" />
+            <rect x="39" y="4" width="13" height="25" rx="6" fill="#1E1B4B" stroke="#06B6D4" strokeWidth="2" />
+            <circle cx="-45.5" cy="16.5" r="3.5" fill="#F43F5E" className="animate-pulse" />
+            <circle cx="45.5" cy="16.5" r="3.5" fill="#38BDF8" className="animate-pulse" />
+            <path d="M-44,22 Q-40,40 -18,40" stroke="#1E1B4B" strokeWidth="3" fill="none" strokeLinecap="round" />
+            <circle cx="-16" cy="40" r="4" fill="#A855F7" />
+          </g>
+        )}
+
+        {/* Frühlings-Blütenkranz */}
+        {equipped.head === 'flower_crown' && (
+          <g transform="translate(100, 52)">
+            <path d="M-36,6 Q0,-8 36,6" stroke="#16A34A" strokeWidth="3" fill="none" />
+            {[-28, -14, 0, 14, 28].map((x, i) => (
+              <g key={i} transform={`translate(${x}, ${i === 2 ? -6 : Math.abs(x) > 20 ? 4 : -2})`}>
+                <circle cx="0" cy="0" r="6" fill={i % 2 === 0 ? '#FB7185' : '#F472B6'} />
+                <circle cx="0" cy="0" r="2.5" fill="#FEF08A" />
+              </g>
+            ))}
+          </g>
+        )}
+
+        {/* Nordischer Runenhelm */}
+        {equipped.head === 'viking_helmet' && (
+          <g transform="translate(100, 50)">
+            <ellipse cx="0" cy="4" rx="34" ry="14" fill="#64748B" stroke="#334155" strokeWidth="1.5" />
+            <rect x="-34" y="0" width="68" height="6" fill="#94A3B8" />
+            {/* Left Horn */}
+            <path d="M-28,4 C-38,-2 -46,-20 -38,-30 C-36,-20 -30,-10 -24,4 Z" fill="#FEF3C7" stroke="#D97706" strokeWidth="1.2" />
+            {/* Right Horn */}
+            <path d="M28,4 C38,-2 46,-20 38,-30 C36,-20 30,-10 24,4 Z" fill="#FEF3C7" stroke="#D97706" strokeWidth="1.2" />
+            {/* Golden front nose guard / brow */}
+            <polygon points="-4,-2 0,-8 4,-2" fill="#F59E0B" />
+          </g>
+        )}
+
+        {/* Holografischer Cyber-Halo */}
+        {equipped.head === 'cyber_halo' && (
+          <g transform="translate(100, 36)">
+            <ellipse cx="0" cy="0" rx="34" ry="10" fill="none" stroke="#22D3EE" strokeWidth="3" className="animate-pulse" />
+            <ellipse cx="0" cy="0" rx="36" ry="11" fill="none" stroke="#A855F7" strokeWidth="1.2" opacity="0.7" />
+            <circle cx="-32" cy="0" r="2" fill="#FFFFFF" />
+            <circle cx="32" cy="0" r="2" fill="#FFFFFF" />
+            <circle cx="0" cy="-9" r="2" fill="#67E8F9" />
+          </g>
+        )}
+        </g>
         {/* ======================================================== */}
         {/* UNICORN MAJESTIC HORN (Layered so it projects through     */}
         {/* hats, crowns, beanies and headsets majestically!)        */}
@@ -883,6 +1066,72 @@ export const PetAvatar: React.FC<Props> = ({
                 <circle cx="-1" cy="-6" r="2.5" fill="#22D3EE" />
                 <circle cx="-5" cy="3" r="1.5" fill="#F43F5E" />
                 <circle cx="5" cy="3" r="1.5" fill="#FBBF24" />
+              </g>
+            )}
+
+            {/* 5. RUBBER DUCK */}
+            {gadget.id === 'rubber_duck' && (
+              <g className={isGadgetActive ? 'animate-gadget-fidget-active' : 'animate-gadget-idle group-hover:scale-110 transition-transform'}>
+                {/* Body */}
+                <ellipse cx="0" cy="2" rx="14" ry="10" fill="#FACC15" stroke="#CA8A04" strokeWidth="1" />
+                {/* Head */}
+                <circle cx="-6" cy="-8" r="8" fill="#FACC15" stroke="#CA8A04" strokeWidth="1" />
+                {/* Eye */}
+                <circle cx="-8" cy="-9" r="1.5" fill="#1E293B" />
+                <circle cx="-8.5" cy="-9.5" r="0.6" fill="#FFFFFF" />
+                {/* Beak */}
+                <path d="M-14,-7 Q-20,-6 -14,-4 Z" fill="#EA580C" />
+                {/* Wing */}
+                <ellipse cx="4" cy="2" rx="6" ry="4" fill="#EAB308" />
+              </g>
+            )}
+
+            {/* 6. MINI DRONE */}
+            {gadget.id === 'mini_drone' && (
+              <g className={isGadgetActive ? 'animate-bounce' : 'animate-gadget-idle group-hover:scale-110 transition-transform'}>
+                {/* Center Body */}
+                <rect x="-8" y="-4" width="16" height="8" rx="3" fill="#0F172A" stroke="#06B6D4" strokeWidth="1" />
+                <circle cx="0" cy="0" r="3" fill="#38BDF8" className="animate-pulse" />
+                {/* Arms */}
+                <line x1="-14" y1="-8" x2="14" y2="8" stroke="#475569" strokeWidth="2" />
+                <line x1="-14" y1="8" x2="14" y2="-8" stroke="#475569" strokeWidth="2" />
+                {/* 4 Rotors */}
+                <ellipse cx="-14" cy="-8" rx="6" ry="2" fill="#94A3B8" opacity="0.75" />
+                <ellipse cx="14" cy="8" rx="6" ry="2" fill="#94A3B8" opacity="0.75" />
+                <ellipse cx="-14" cy="8" rx="6" ry="2" fill="#94A3B8" opacity="0.75" />
+                <ellipse cx="14" cy="-8" rx="6" ry="2" fill="#94A3B8" opacity="0.75" />
+                <circle cx="-14" cy="-8" r="1.5" fill="#EF4444" />
+                <circle cx="14" cy="-8" r="1.5" fill="#22C55E" />
+              </g>
+            )}
+
+            {/* 7. SYNTHESIZER PAD */}
+            {gadget.id === 'synthesizer_pad' && (
+              <g className={isGadgetActive ? 'animate-gadget-fidget-active' : 'animate-gadget-idle group-hover:scale-105 transition-transform'}>
+                {/* Console base */}
+                <rect x="-16" y="-10" width="32" height="20" rx="3" fill="#1E1B4B" stroke="#818CF8" strokeWidth="1" />
+                {/* 4x2 pads */}
+                {[-10, -3, 4, 11].map((px, col) => (
+                  <g key={col}>
+                    <rect x={px - 2} y="-6" width="5" height="4" rx="1" fill={col === 1 && isGadgetActive ? '#F43F5E' : '#38BDF8'} />
+                    <rect x={px - 2} y="1" width="5" height="4" rx="1" fill={col === 2 && isGadgetActive ? '#FBBF24' : '#A855F7'} />
+                  </g>
+                ))}
+                {/* Wave display bar */}
+                <line x1="-12" y1="-8" x2="12" y2="-8" stroke="#4ADE80" strokeWidth="1" className={isGadgetActive ? 'animate-pulse' : ''} />
+              </g>
+            )}
+
+            {/* 8. ANTI-GRAVITY ORB */}
+            {gadget.id === 'anti_gravity_orb' && (
+              <g className={isGadgetActive ? 'animate-pulse' : 'animate-gadget-idle group-hover:scale-110 transition-transform'}>
+                {/* Outer magnetic rings */}
+                <ellipse cx="0" cy="0" rx="16" ry="6" fill="none" stroke="#A855F7" strokeWidth="1.2" transform="rotate(-25)" />
+                <ellipse cx="0" cy="0" rx="16" ry="6" fill="none" stroke="#06B6D4" strokeWidth="1.2" transform="rotate(35)" />
+                {/* Core Crystal Sphere */}
+                <circle cx="0" cy="0" r="10" fill="url(#unicorn-horn-grad)" opacity="0.85" stroke="#E0E7FF" strokeWidth="1" />
+                <circle cx="-3" cy="-3" r="3" fill="#FFFFFF" opacity="0.7" />
+                <circle cx="0" cy="0" r="4" fill="#818CF8" className="animate-ping" opacity="0.4" />
               </g>
             )}
           </g>

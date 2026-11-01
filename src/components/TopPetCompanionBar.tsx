@@ -7,21 +7,16 @@ import { soundEffects } from '../services/audioService';
 import {
   Heart,
   Utensils,
-  ShoppingBag,
   Sparkles,
-  RefreshCw,
-  ExternalLink,
-  Gamepad2,
-  Star,
 } from 'lucide-react';
 
 interface Props {
   stats: UserStats;
   onUpdatePet: (updatedPet: PetState) => void;
-  onOpenShop: (initialTab?: 'food' | 'accessories') => void;
+  onOpenShop?: (initialTab?: 'food' | 'accessories') => void;
   onOpenFullPetRoom: () => void;
   onOpenGames?: () => void;
-  onChangePet: () => void;
+  onChangePet?: () => void;
   previewOverride?: {
     equipped?: Partial<PetState['equipped']>;
   };
@@ -147,11 +142,11 @@ export const TopPetCompanionBar: React.FC<Props> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           {/* Left: Pet Avatar + Name + Status */}
           <div className="flex items-center gap-3">
-            {/* Clickable mini avatar to interact */}
+            {/* Clickable mini avatar to open Haustier Lounge */}
             <button
-              onClick={handleQuickPet}
+              onClick={onOpenFullPetRoom}
               className="relative shrink-0 group cursor-pointer focus:outline-none"
-              title={pet.isSleeping ? 'Schläft friedlich – Klick zum Aufwecken!' : 'Klick zum Streicheln!'}
+              title="Zur Haustier Lounge"
             >
               <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center overflow-visible transition-transform group-hover:scale-105 active:scale-95 relative">
                 <PetAvatar
@@ -226,7 +221,7 @@ export const TopPetCompanionBar: React.FC<Props> = ({
             </div>
           )}
 
-          {/* Right: Quick Interactive Pet & Shop CTAs */}
+          {/* Right: Quick Interactive Pet Care CTAs */}
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 self-start sm:self-center shrink-0 max-w-full">
             {/* Quick High-Five Button */}
             <button
@@ -245,38 +240,7 @@ export const TopPetCompanionBar: React.FC<Props> = ({
               title="Snack füttern"
             >
               <Utensils className="w-3.5 h-3.5 text-amber-500" />
-              <span className="hidden md:inline">Füttern {availableFoodEntry ? `(${availableFoodEntry[1]})` : ''}</span>
-            </button>
-
-            {/* Dedicated EXP-Shop Button */}
-            <button
-              onClick={() => onOpenShop()}
-              className="h-8 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95 whitespace-nowrap shrink-0"
-              title="Gib deine verdienten EXP-Punkte im Shop aus"
-            >
-              <Star className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
-              <span>EXP-Shop</span>
-            </button>
-
-            {/* Quick Quiz Games Button */}
-            {onOpenGames && (
-              <button
-                onClick={onOpenGames}
-                className="h-8 px-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95 whitespace-nowrap shrink-0"
-                title="Spiele Speed-Quiz, Memory oder Boss-Raid"
-              >
-                <Gamepad2 className="w-3.5 h-3.5 text-slate-950" />
-                <span>Quiz-Spiele</span>
-              </button>
-            )}
-
-            {/* Change Pet / Switch species */}
-            <button
-              onClick={onChangePet}
-              className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-all cursor-pointer shrink-0"
-              title="Anderes Haustier auswählen"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Füttern {availableFoodEntry ? `(${availableFoodEntry[1]})` : ''}</span>
             </button>
           </div>
         </div>

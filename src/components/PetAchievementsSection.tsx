@@ -77,8 +77,8 @@ export const PetAchievementsSection: React.FC<Props> = ({
     };
 
     onUpdateStats(updatedStats);
-    if (onXpChange) onXpChange(newXp);
-    if (onCoinsChange) onCoinsChange(newCoins);
+    if (!onUpdateStats && onXpChange) onXpChange(newXp);
+    if (!onUpdateStats && onCoinsChange) onCoinsChange(newCoins);
 
     setTimeout(() => {
       setClaimingId(null);
@@ -96,7 +96,7 @@ export const PetAchievementsSection: React.FC<Props> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                Errungenschaften & MeiIensteine
+                Errungenschaften & Meilensteine
               </span>
             </div>
             <h3 className="text-xl font-black text-slate-900 dark:text-white leading-tight">

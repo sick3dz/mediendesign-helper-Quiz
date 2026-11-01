@@ -160,15 +160,20 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
 
       {/* Header Banner */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-7 shadow-xs transition-colors">
-        <div className="flex items-center gap-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-2 uppercase tracking-wider">
-          <Gamepad2 className="w-4 h-4" />
-          <span>StudyQuest Spiele & Challenges</span>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
+            Gamification & Belohnungen
+          </span>
+          <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300">
+            Spiele-Hub
+          </span>
         </div>
-        <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">
-          IHK-Wissen spielerisch festigen
+        <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+          <Gamepad2 className="w-6 h-6 text-rose-500" />
+          Quiz-Spiele Hub & Challenges
         </h2>
         <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
-          Aktives Handeln macht das Lernen effektiver und unterhaltsamer. Gewinne Spiele, sammle Highscores und verdiene wertvolle <strong>EXP-Punkte</strong> für dein Haustier!
+          Aktives Handeln macht das Lernen effektiver und unterhaltsamer. Gewinne Spiele, sammle Highscores und verdiene wertvolle <strong>EXP-Punkte & Coins</strong> für deinen Rang und dein Haustier!
         </p>
       </div>
 

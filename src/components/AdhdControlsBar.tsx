@@ -10,6 +10,7 @@ interface Props {
   studySeconds: number;
   onUpdateSettings: (settings: UserSettings) => void;
   onGoToPet: () => void;
+  onGoToRank?: () => void;
   onStartBreathing: () => void;
   onSnoozeBreak: () => void;
   onResetTimer?: () => void;
@@ -21,6 +22,7 @@ export const AdhdControlsBar: React.FC<Props> = ({
   studySeconds,
   onUpdateSettings,
   onGoToPet,
+  onGoToRank,
   onStartBreathing,
   onSnoozeBreak,
   onResetTimer,
@@ -77,10 +79,19 @@ export const AdhdControlsBar: React.FC<Props> = ({
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2 flex flex-col md:flex-row md:items-center justify-between gap-3">
         {/* Left: Gamification Level, XP & Coins */}
         <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-800 dark:text-slate-200">Lvl {levelInfo.level}</span>
-            <span className="text-slate-500 dark:text-slate-400 hidden sm:inline">{levelInfo.title}</span>
-          </div>
+          <button
+            type="button"
+            onClick={onGoToRank}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer group"
+            title="Aktueller Rang & Stufenleiter öffnen"
+          >
+            <span className="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+              Lvl {levelInfo.level}
+            </span>
+            <span className="text-slate-500 dark:text-slate-400 hidden sm:inline">
+              {levelInfo.title}
+            </span>
+          </button>
 
           <div className="w-16 sm:w-24 bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
             <div

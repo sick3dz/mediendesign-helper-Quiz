@@ -100,7 +100,7 @@ export interface PetFood {
   description: string;
 }
 
-export type GadgetInteractionType = 'bounce' | 'laser' | 'magic_wand' | 'fidget';
+export type GadgetInteractionType = 'bounce' | 'laser' | 'magic_wand' | 'fidget' | 'duck' | 'drone' | 'synth' | 'orb';
 
 export interface PetGadget {
   id: string;
@@ -112,7 +112,7 @@ export interface PetGadget {
   description: string;
   interactionType: GadgetInteractionType;
   happinessBonus: number;
-  soundName: 'bounce' | 'laser' | 'magic' | 'click';
+  soundName: 'bounce' | 'laser' | 'magic' | 'click' | 'quack';
   actionMessage: (petName: string) => string;
 }
 

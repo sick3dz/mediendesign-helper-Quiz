@@ -34,9 +34,11 @@ import { ChapterSurpriseModal } from './components/ChapterSurpriseModal';
 import { CHAPTER_SURPRISES, ChapterSurprise, calculatePetDecay } from './data/petData';
 import { ambientAudioService, AmbientSoundType } from './services/ambientAudioService';
 import confetti from 'canvas-confetti';
-import { Star, ArrowLeft, RotateCcw } from 'lucide-react';
+import { Star, ArrowLeft, RotateCcw, BookOpen, Sparkles } from 'lucide-react';
 
 import { VirtualPetView } from './components/VirtualPetView';
+import { RankProgressView } from './components/RankProgressView';
+import { AchievementsMilestonesView } from './components/AchievementsMilestonesView';
 import { LearningStatsView } from './components/LearningStatsView';
 import { getPrioritizedQuestions, getAllQuestions } from './utils/learningLogic';
 import { QuizCard } from './components/QuizCard';
@@ -119,6 +121,10 @@ export default function App() {
       'theme-cyberpunk',
       'theme-gold',
       'theme-monochrome',
+      'theme-sakura',
+      'theme-coffee',
+      'theme-deepspace',
+      'theme-synthwave',
     ];
     document.documentElement.classList.remove(...allThemes);
     if (theme !== 'theme-default') {
@@ -679,6 +685,18 @@ export default function App() {
     });
   };
 
+  const handleUpdateStats = (updatedStats: UserStats) => {
+    const currentLifetime = updatedStats.lifetimeXp ?? updatedStats.xp ?? 0;
+    const levelInfo = calculateLevel(currentLifetime);
+    const safeStats: UserStats = {
+      ...updatedStats,
+      level: Math.max(updatedStats.level || 1, levelInfo.level),
+      lifetimeXp: currentLifetime,
+    };
+    setStats(safeStats);
+    saveUserStats(safeStats);
+  };
+
   const handleUpdatePet = (updatedPet: typeof stats.pet) => {
     setStats(prev => {
       const nextStats: UserStats = {
@@ -865,16 +883,36 @@ export default function App() {
     }
   };
 
+  // Determine current view label and icon for TopBar dynamically
+  let currentViewTitle: string | undefined;
+  let currentViewIcon: React.ReactNode | undefined;
+
+  if (reviewQuestions) {
+    currentViewTitle = 'Wiederholungs-Session';
+    currentViewIcon = <RotateCcw className="w-4 h-4 text-rose-500 shrink-0" />;
+  } else if (activeMixUpItems) {
+    currentViewTitle = 'Themen-Mix Quiz';
+    currentViewIcon = <Sparkles className="w-4 h-4 text-purple-500 shrink-0" />;
+  } else if (selectedModuleMeta && currentModule) {
+    currentViewTitle = currentModule.title;
+    currentViewIcon = <BookOpen className="w-4 h-4 text-indigo-500 shrink-0" />;
+  }
+
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
       {/* Strict 3-zone Top Navigation */}
       <TopBar
         activeTab={activeTab}
+        currentViewTitle={currentViewTitle}
+        currentViewIcon={currentViewIcon}
         setActiveTab={tab => {
           setSelectedModuleMeta(null);
           setActiveMixUpItems(null);
+          setReviewQuestions(null);
           if (tab === 'pet') {
             setPetInitialTab('care');
+          } else if (tab === 'shop') {
+            setPetInitialTab('shop');
           }
           setActiveTab(tab);
         }}
@@ -895,8 +933,16 @@ export default function App() {
         onUpdateSettings={handleUpdateSettings}
         onGoToPet={() => {
           setSelectedModuleMeta(null);
+          setActiveMixUpItems(null);
+          setReviewQuestions(null);
           setPetInitialTab('shop');
-          setActiveTab('pet');
+          setActiveTab('shop');
+        }}
+        onGoToRank={() => {
+          setSelectedModuleMeta(null);
+          setActiveMixUpItems(null);
+          setReviewQuestions(null);
+          setActiveTab('rank');
         }}
         onStartBreathing={handleStartBreathing}
         onSnoozeBreak={handleSnoozeBreak}
@@ -907,21 +953,13 @@ export default function App() {
       <TopPetCompanionBar
         stats={stats}
         onUpdatePet={handleUpdatePet}
-        onOpenShop={() => {
-          setSelectedModuleMeta(null);
-          setPetInitialTab('shop');
-          setActiveTab('pet');
-        }}
         onOpenFullPetRoom={() => {
           setSelectedModuleMeta(null);
+          setActiveMixUpItems(null);
+          setReviewQuestions(null);
           setPetInitialTab('care');
           setActiveTab('pet');
         }}
-        onOpenGames={() => {
-          setSelectedModuleMeta(null);
-          setActiveTab('minigames');
-        }}
-        onChangePet={() => setIsAdoptionModalOpen(true)}
         previewOverride={petPreviewOverride}
       />
 
@@ -1007,10 +1045,49 @@ export default function App() {
               />
             )}
 
+            {activeTab === 'rank' && (
+              <RankProgressView
+                stats={stats}
+                onBack={() => setActiveTab('chapters')}
+                onGoToShop={() => setActiveTab('shop')}
+                onGoToPet={() => setActiveTab('pet')}
+                onGoToAchievements={() => setActiveTab('achievements')}
+                onGoToChapters={() => setActiveTab('chapters')}
+              />
+            )}
+
+            {activeTab === 'achievements' && (
+              <AchievementsMilestonesView
+                stats={stats}
+                onBack={() => setActiveTab('chapters')}
+                onGoToRank={() => setActiveTab('rank')}
+                onGoToPet={() => setActiveTab('pet')}
+                onGoToShop={() => setActiveTab('shop')}
+                onUpdateStats={handleUpdateStats}
+                onXpChange={handleXpChange}
+                onCoinsChange={handleCoinsChange}
+              />
+            )}
+
             {activeTab === 'pet' && (
               <VirtualPetView
                 stats={stats}
-                initialTab={petInitialTab}
+                initialTab="care"
+                onUpdatePet={handleUpdatePet}
+                onCoinsChange={handleCoinsChange}
+                onXpChange={handleXpChange}
+                onUpdateCosmetics={handleUpdateCosmetics}
+                onOpenAdoptionModal={() => setIsAdoptionModalOpen(true)}
+                onGoToGames={() => setActiveTab('minigames')}
+                onBack={() => setActiveTab('chapters')}
+                onPreviewOverrideChange={setPetPreviewOverride}
+              />
+            )}
+
+            {activeTab === 'shop' && (
+              <VirtualPetView
+                stats={stats}
+                initialTab="shop"
                 onUpdatePet={handleUpdatePet}
                 onCoinsChange={handleCoinsChange}
                 onXpChange={handleXpChange}
@@ -1053,6 +1130,10 @@ export default function App() {
                   setSelectedChapterId(cId);
                   setActiveTab('chapters');
                 }}
+                onGoToAchievements={() => setActiveTab('achievements')}
+                onUpdateStats={handleUpdateStats}
+                onXpChange={handleXpChange}
+                onCoinsChange={handleCoinsChange}
               />
             )}
 
