@@ -539,9 +539,20 @@ export function calculatePetDecay(pet: PetState): PetState {
   const elapsedMs = Math.max(0, now - lastTime);
   const elapsedHours = elapsedMs / (1000 * 60 * 60);
 
+  const currentHour = new Date().getHours();
+  // Diurnal rhythm: Night hours are strictly between 22:00 and 06:00
+  const isNightHours = currentHour >= 22 || currentHour < 6;
+
+  // MORNING AUTO-WAKEUP:
+  // Between 06:00 and 22:00 (morgens, tagsüber, abends), the pet ALWAYS wakes up automatically!
+  // Any overnight sleep ends automatically as soon as morning arrives.
+  // During night hours (22:00–06:00), it rests peacefully (unless recently woken manually by the user).
+  const isSleeping = isNightHours && (pet.isSleeping !== false || elapsedHours >= 1);
+
   if (elapsedHours < 0.005) {
     return {
       ...pet,
+      isSleeping,
       lastCareTimestamp: pet.lastCareTimestamp || now,
     };
   }
@@ -556,12 +567,6 @@ export function calculatePetDecay(pet: PetState): PetState {
   if (currentHunger < 40) {
     currentHappiness = Math.max(30, currentHappiness - elapsedHours * 1.5);
   }
-
-  const currentHour = new Date().getHours();
-  const isNightHours = currentHour >= 22 || currentHour < 6;
-
-  // If night hours (22:00 - 06:00), away for >= 5 hours, or tired, the pet peacefully sleeps
-  const isSleeping = isNightHours || elapsedHours >= 5 || Boolean(pet.isSleeping && currentHunger <= 40);
 
   return {
     ...pet,
@@ -578,12 +583,13 @@ export function getDynamicPetThought(pet: PetState, statsXp: number = 0, seedInd
   const hour = new Date().getHours();
   const isNightHours = hour >= 22 || hour < 6;
 
-  if (pet.isSleeping || isNightHours) {
+  // Peaceful nighttime rest
+  if (isNightHours && pet.isSleeping) {
     const sleepQuotes = [
       `💭 Zzz... ${pet.name} träumt friedlich von 100 % in der IHK-Abschlussprüfung! 🎓🏆`,
       `💭 Zzz... ${pet.name} träumt von einer goldenen Ehrenurkunde "IHK-Prüfling des Jahres"! ✨📜`,
       `💭 Zzz... ${pet.name} träumt von fehlerfreien Wireframes, glänzenden Medaillen & Leckerlis! 🍖🥇`,
-      `💭 Zzz... Sanfte Nachtruhe (22:00–06:00 Uhr)... Morgen knacken wir das nächste Kapitel! 🌙⭐`,
+      `💭 Zzz... Sanfte Nachtruhe (22:00–06:00 Uhr)... Morgens ab 06:00 Uhr wache ich von selbst auf! 🌙⭐`,
     ];
     return sleepQuotes[(seedIndex ?? Math.floor(Math.random() * sleepQuotes.length)) % sleepQuotes.length];
   }
@@ -598,41 +604,51 @@ export function getDynamicPetThought(pet: PetState, statsXp: number = 0, seedInd
 
   const timeContext = hour >= 5 && hour < 12 ? 'morning' : hour >= 12 && hour < 18 ? 'afternoon' : 'evening';
 
+  const morningGreeting = pet.species === 'cat'
+    ? `Miau... Guten Morgen! ${pet.name} ist munter aufgewacht und schnurrt bereit für deine IHK-Lerneinheit! ☀️🐾`
+    : pet.species === 'penguin'
+    ? `Frischer Morgenwind! Nöööt – ${pet.name} ist hellwach und bereit für neue Lernrekorde! ☀️🐧`
+    : pet.species === 'axolotl'
+    ? `Blubb! Guten Morgen – ${pet.name} taucht munter auf und freut sich auf dich! ☀️🫧`
+    : pet.species === 'unicorn'
+    ? `Magischer Sonnenaufgang! ${pet.name} ist voller Tatendrang aufgewacht! ☀️✨`
+    : `Guten Morgen! Wuff – ${pet.name} ist munter aufgewacht und springt vor Lernfreude! ☀️🐕`;
+
   const speciesQuotes: Record<PetSpecies, string[]> = {
     dog: [
-      `${pet.name} schnüffelt neugierig nach neuen Wireframes & Layout-Tipps! 🐾`,
+      timeContext === 'morning' ? morningGreeting : `${pet.name} schnüffelt neugierig nach neuen Wireframes & Layout-Tipps! 🐾`,
       `Wuff! Ich habe einen kleinen Fehler im Raster aufgespürt! 🐕`,
       `Design-Gründe sprechen klar für eine frische Lerneinheit! ⭐`,
       `Ich halte dir treu die Treue bei jeder kniffligen IHK-Frage! 🐾`,
-      timeContext === 'morning' ? `Guten Morgen! Wuff – lass uns mit vollem Schwung lernen! ☀️` : timeContext === 'afternoon' ? `Nachmittags-Power! Wuff – lass uns das nächste Kapitel knacken! ⭐` : `Nachtschicht? Ich wache treu an deiner Seite! 🌙`,
+      timeContext === 'afternoon' ? `Nachmittags-Power! Wuff – lass uns das nächste Kapitel knacken! ⭐` : `Design-Spürsinn aktiviert! 🐾`,
     ],
     cat: [
-      `${pet.name} prüft mit Schnurrhaaren, ob dein Kontrast WCAG-konform ist! 🐱`,
+      timeContext === 'morning' ? morningGreeting : `${pet.name} prüft mit Schnurrhaaren, ob dein Kontrast WCAG-konform ist! 🐱`,
       `Miau! Gutes UI-Design schmiegt sich an wie eine warme Decke. ✨`,
       `Sanfter Klick, geschmeidiges Micro-Feedback... So muss UX sein! 🐾`,
       `Erst eine Runde Streicheln, dann die IHK-Bestnote! Miau! ✨`,
-      timeContext === 'morning' ? `Miau... Guten Morgen! Erst gähnen, dann IHK-Formeln lernen! ☀️` : timeContext === 'afternoon' ? `Geschmeidige Nachmittags-Session! Miau! 🌸` : `Späte Stunde? Ich schnurre beruhigend zu deinen Lernkarten... 🌙`,
+      timeContext === 'afternoon' ? `Geschmeidige Nachmittags-Session! Miau! 🌸` : `Ich schnurre beruhigend zu deinen Lernkarten... ✨`,
     ],
     penguin: [
-      `${pet.name} bleibt cool wie Eis – Barrierefreiheit ist kein Hexenwerk! ❄️`,
+      timeContext === 'morning' ? morningGreeting : `${pet.name} bleibt cool wie Eis – Barrierefreiheit ist kein Hexenwerk! ❄️`,
       `Nöööt! Tastatursteuerung & WCAG meistere ich im Schlaf! 🐧`,
       `Ein Eis-Snack und eine Runde Spickzettel-Formeln, bitte! ❄️`,
       `Watscheln wir direkt zum nächsten spannenden IHK-Kapitel! 🐧`,
-      timeContext === 'morning' ? `Frischer Morgenwind! Nöööt – bereit für Wissen! ☀️` : timeContext === 'afternoon' ? `Eiskalt fokussiert! Lass uns Module abschließen! ❄️` : `Kühler Kopf am Abend – so gelingt jede Prüfung! 🌙`,
+      timeContext === 'afternoon' ? `Eiskalt fokussiert! Lass uns Module abschließen! ❄️` : `Kühler Kopf beim Lernen – so gelingt jede Prüfung! ❄️`,
     ],
     axolotl: [
-      `${pet.name} regeneriert frische Lernenergie im kühlen Wasser! 🫧`,
+      timeContext === 'morning' ? morningGreeting : `${pet.name} regeneriert frische Lernenergie im kühlen Wasser! 🫧`,
       `Blubb! Schwimme mit Leichtigkeit durch jede Designkonzeption! 🦎`,
       `Unterwasser-Fokus aktiviert... Lass uns wertvolles EXP sammeln! 🫧`,
       `Interaktionsdesign ist mein natürlicher Lebensraum! Blubb! 🌊`,
-      timeContext === 'morning' ? `Blubb! Guten Morgen – munter auftauchen zum Lernen! ☀️` : timeContext === 'afternoon' ? `Sanfte Wellen & frisches Wissen am Nachmittag! 🫧` : `Abendliches Blubbern... Zeit für eine ruhige Fokus-Einheit! 🌙`,
+      timeContext === 'afternoon' ? `Sanfte Wellen & frisches Wissen am Nachmittag! 🫧` : `Zeit für eine ruhige Fokus-Einheit! 🫧`,
     ],
     unicorn: [
-      `${pet.name}'s Horn funkelt voller kreativer Ideen für dein nächstes Design! 🦄✨`,
+      timeContext === 'morning' ? morningGreeting : `${pet.name}'s Horn funkelt voller kreativer Ideen für dein nächstes Design! 🦄✨`,
       `Wieher! Ein Hauch Sternenstaub verwandelt jedes Layout in pure Magie! 🌈`,
       `Farbharmonien und Kontraste strahlen heute besonders zauberhaft! ✨`,
       `Mit kreativem Gespür meistern wir jede knifflige IHK-Aufgabe! 🌟`,
-      timeContext === 'morning' ? `Magischer Sonnenaufgang! Wieher – lass uns kreativ durchstarten! ☀️✨` : timeContext === 'afternoon' ? `Bunte Nachmittags-Inspiration! Das Horn leuchtet vor Tatendrang! 🦄🌈` : `Ein funkelnder Sternenhimmel für deine abendliche Lern-Session! 🌙✨`,
+      timeContext === 'afternoon' ? `Bunte Nachmittags-Inspiration! Das Horn leuchtet vor Tatendrang! 🦄🌈` : `Ein funkelnder Sternenhimmel für deine Lern-Session! 🌙✨`,
     ],
   };
 

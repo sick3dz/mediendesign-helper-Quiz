@@ -163,7 +163,8 @@ export default function App() {
         const decayedPet = calculatePetDecay(prevStats.pet);
         if (
           decayedPet.hunger !== prevStats.pet.hunger ||
-          decayedPet.happiness !== prevStats.pet.happiness
+          decayedPet.happiness !== prevStats.pet.happiness ||
+          decayedPet.isSleeping !== prevStats.pet.isSleeping
         ) {
           const updatedStats = { ...prevStats, pet: decayedPet };
           saveUserStats(updatedStats);

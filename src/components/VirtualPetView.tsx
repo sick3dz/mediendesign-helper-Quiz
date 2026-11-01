@@ -845,9 +845,9 @@ export const VirtualPetView: React.FC<Props> = ({
                 <Moon className="w-4 h-4" />
               </div>
               <div>
-                <span className="font-extrabold text-white">Schläft friedlich 💤</span>
+                <span className="font-extrabold text-white">Nachtruhe 💤</span>
                 <p className="text-[11px] text-indigo-200/80 mt-0.5">
-                  Dein Haustier kann nicht sterben! Es ruht sich ohne jede Strafe aus.
+                  Schläft friedlich während der Nachtruhe (22:00–06:00 Uhr) – morgens ab 06:00 Uhr wacht dein Haustier automatisch von selbst auf! ☀️
                 </p>
               </div>
             </div>

@@ -55,14 +55,20 @@ export const TopPetCompanionBar: React.FC<Props> = ({
     setIsPetted(true);
     setTimeout(() => setIsPetted(false), 800);
 
+    const wasSleeping = Boolean(pet.isSleeping);
     const newHappiness = Math.min(100, pet.happiness + 10);
     const updated: PetState = {
       ...pet,
+      isSleeping: false,
       happiness: newHappiness,
       timesPetted: pet.timesPetted + 1,
     };
     onUpdatePet(updated);
-    showFeedback(`${soundConfig.soundIcon} "${soundConfig.soundWord}" – ${soundConfig.petActionMsg(pet.name)}`);
+    if (wasSleeping) {
+      showFeedback(soundConfig.wakeUpMsg(pet.name));
+    } else {
+      showFeedback(`${soundConfig.soundIcon} "${soundConfig.soundWord}" – ${soundConfig.petActionMsg(pet.name)}`);
+    }
   };
 
   const handleQuickHighFive = () => {
@@ -110,6 +116,7 @@ export const TopPetCompanionBar: React.FC<Props> = ({
 
     const updated: PetState = {
       ...pet,
+      isSleeping: false,
       hunger: newHunger,
       happiness: newHappiness,
       inventory: {
