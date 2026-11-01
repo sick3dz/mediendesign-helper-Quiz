@@ -3,7 +3,8 @@ import { QuizQuestion, QuizOption } from '../types/quiz';
 import { BionicText } from '../utils/bionicReading';
 import { soundEffects } from '../services/audioService';
 import confetti from 'canvas-confetti';
-import { Check, X, ArrowRight, RotateCcw, Award, Lightbulb, Star, Sparkles, AlertTriangle } from 'lucide-react';
+import { Check, X, ArrowRight, RotateCcw, Award, Lightbulb, Star, Sparkles, AlertTriangle, BookOpen } from 'lucide-react';
+import { QuestionDetailModal } from './QuestionDetailModal';
 
 interface Props {
   questions: QuizQuestion[];
@@ -11,6 +12,7 @@ interface Props {
   isLevel2?: boolean;
   onFinished: (score: number) => void;
   onCorrectAnswer?: () => void;
+  onAnswer?: (questionId: string, isCorrect: boolean) => void;
   onBackToOverview?: () => void;
   onNextModule?: () => void;
   hasNextModule?: boolean;
@@ -22,6 +24,7 @@ export const QuizCard: React.FC<Props> = ({
   isLevel2 = false,
   onFinished,
   onCorrectAnswer,
+  onAnswer,
   onBackToOverview,
   onNextModule,
   hasNextModule = false,
@@ -34,6 +37,7 @@ export const QuizCard: React.FC<Props> = ({
   const [isCompleted, setIsCompleted] = useState(false);
   const [answers, setAnswers] = useState<Record<number, boolean>>({});
   const [comboToast, setComboToast] = useState<string | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const currentQuestion = questions[currentIndex] || questions[0];
 
@@ -92,11 +96,16 @@ export const QuizCard: React.FC<Props> = ({
       soundEffects.playWrong();
       setCombo(0);
     }
+
+    if (onAnswer) {
+      onAnswer(currentQuestion.id, isCorrect);
+    }
   };
 
   const handleNext = () => {
     soundEffects.playClick();
     setSelectedOptionId(null);
+    setShowDetailModal(false);
 
     if (currentIndex + 1 < questions.length) {
       setCurrentIndex(i => i + 1);
@@ -115,6 +124,7 @@ export const QuizCard: React.FC<Props> = ({
   const restart = () => {
     setCurrentIndex(0);
     setSelectedOptionId(null);
+    setShowDetailModal(false);
     setCombo(0);
     setScore(0);
     setCorrectCount(0);
@@ -396,6 +406,25 @@ export const QuizCard: React.FC<Props> = ({
               <span>IHK-Prüfer-Tipp: {currentQuestion.examTip}</span>
             </div>
           )}
+
+          {/* Action Button: Ausführliche IHK-Infos & Praxisfall öffnen */}
+          <div className="pt-2.5 border-t border-slate-200/60 dark:border-slate-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+              Ausführliche Definition · Praxisbeispiel · Prüfer-Warnung
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                soundEffects.playClick();
+                setShowDetailModal(true);
+              }}
+              className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95 shrink-0"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Ausführliche IHK-Infos öffnen</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       )}
 
@@ -414,6 +443,20 @@ export const QuizCard: React.FC<Props> = ({
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
+      )}
+
+      {/* Detailed Question Dossier Modal */}
+      {showDetailModal && (
+        <QuestionDetailModal
+          question={currentQuestion}
+          selectedOption={selectedOption || null}
+          bionic={bionic}
+          onClose={() => setShowDetailModal(false)}
+          onNext={() => {
+            setShowDetailModal(false);
+            handleNext();
+          }}
+        />
       )}
     </div>
   );

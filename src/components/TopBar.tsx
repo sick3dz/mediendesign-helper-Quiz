@@ -8,9 +8,10 @@ import {
   Award,
   Gamepad2,
   Code,
+  BarChart3,
 } from 'lucide-react';
 
-export type ActiveTab = 'chapters' | 'pet' | 'exam' | 'spickzettel' | 'minigames' | 'sandbox';
+export type ActiveTab = 'chapters' | 'spickzettel' | 'stats' | 'exam' | 'sandbox' | 'minigames' | 'pet';
 
 interface Props {
   activeTab: ActiveTab;
@@ -132,25 +133,25 @@ export const TopBar: React.FC<Props> = ({
                 </div>
               </button>
 
-              {/* Option 3: EXP-Shop & Haustier */}
+              {/* Option 3: Lern-Statistiken */}
               <button
-                onClick={() => handleMenuSelect('pet')}
+                onClick={() => handleMenuSelect('stats')}
                 className={`w-full p-2.5 rounded-xl text-left transition-all flex items-start gap-3 cursor-pointer ${
-                  activeTab === 'pet'
+                  activeTab === 'stats'
                     ? 'bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/80 text-indigo-900 dark:text-indigo-200'
                     : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-800 dark:text-slate-200'
                 }`}
               >
-                <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5">
-                  <Sparkles className="w-4 h-4" />
+                <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5">
+                  <BarChart3 className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="text-xs font-bold flex items-center gap-1.5">
-                    <span>{petSpeciesEmoji} Haustier-Lounge & EXP-Shop</span>
-                    {activeTab === 'pet' && <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />}
+                    <span>📊 Lern-Statistiken & Mastery</span>
+                    {activeTab === 'stats' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
-                    Snacks, Accessoires & Haustierpflege mit Lern-EXP
+                    Themen-Fortschritt, Trefferquote & Spaced Repetition
                   </p>
                 </div>
               </button>
@@ -164,13 +165,13 @@ export const TopBar: React.FC<Props> = ({
                     : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-800 dark:text-slate-200'
                 }`}
               >
-                <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5">
+                <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 shrink-0 mt-0.5">
                   <Award className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="text-xs font-bold flex items-center gap-1.5">
                     <span>🏆 IHK-Abschlussprüfung</span>
-                    {activeTab === 'exam' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
+                    {activeTab === 'exam' && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />}
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
                     Realistischer Prüfungssimulator mit Noten-Auswertung
@@ -178,7 +179,30 @@ export const TopBar: React.FC<Props> = ({
                 </div>
               </button>
 
-              {/* Option 5: Quiz-Spiele */}
+              {/* Option 5: Daten-Sandbox */}
+              <button
+                onClick={() => handleMenuSelect('sandbox')}
+                className={`w-full p-2.5 rounded-xl text-left transition-all flex items-start gap-3 cursor-pointer ${
+                  activeTab === 'sandbox'
+                    ? 'bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/80 text-indigo-900 dark:text-indigo-200'
+                    : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-800 dark:text-slate-200'
+                }`}
+              >
+                <div className="p-2 rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5">
+                  <Code className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold flex items-center gap-1.5">
+                    <span>💻 Daten-Struktur Sandbox</span>
+                    {activeTab === 'sandbox' && <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />}
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
+                    JSON, XML & Markdown interaktiv verstehen
+                  </p>
+                </div>
+              </button>
+
+              {/* Option 6: Quiz-Spiele (Vorletzte) */}
               <button
                 onClick={() => handleMenuSelect('minigames')}
                 className={`w-full p-2.5 rounded-xl text-left transition-all flex items-start gap-3 cursor-pointer ${
@@ -201,25 +225,25 @@ export const TopBar: React.FC<Props> = ({
                 </div>
               </button>
 
-              {/* Option 6: Daten-Sandbox */}
+              {/* Option 7: Haustier-Lounge & EXP-Shop (Unten / Letzte) */}
               <button
-                onClick={() => handleMenuSelect('sandbox')}
+                onClick={() => handleMenuSelect('pet')}
                 className={`w-full p-2.5 rounded-xl text-left transition-all flex items-start gap-3 cursor-pointer ${
-                  activeTab === 'sandbox'
+                  activeTab === 'pet'
                     ? 'bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800/80 text-indigo-900 dark:text-indigo-200'
                     : 'hover:bg-slate-50 dark:hover:bg-slate-800/60 text-slate-800 dark:text-slate-200'
                 }`}
               >
-                <div className="p-2 rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5">
-                  <Code className="w-4 h-4" />
+                <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5">
+                  <Sparkles className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="text-xs font-bold flex items-center gap-1.5">
-                    <span>💻 Daten-Struktur Sandbox</span>
-                    {activeTab === 'sandbox' && <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />}
+                    <span>{petSpeciesEmoji} Haustier-Lounge & EXP-Shop</span>
+                    {activeTab === 'pet' && <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />}
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">
-                    JSON, XML & Markdown interaktiv verstehen
+                    Snacks, Accessoires & Haustierpflege mit Lern-EXP
                   </p>
                 </div>
               </button>

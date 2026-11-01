@@ -31,6 +31,8 @@ import {
 } from '../data/cosmeticsData';
 import { calculateLevel, LEVEL_LADDER, LevelTier } from '../services/storageService';
 import { PetAvatar } from './PetAvatar';
+import { LearningStatsView } from './LearningStatsView';
+import { CHAPTERS } from '../data/chaptersData';
 import { soundEffects } from '../services/audioService';
 import confetti from 'canvas-confetti';
 import {
@@ -901,36 +903,18 @@ export const VirtualPetView: React.FC<Props> = ({
             }}
             onInteractGadget={handlePlayGadget}
             isGadgetInteracting={isGadgetInteracting}
+            onClick={handlePet}
           />
 
-          {/* Interactive Care & Gadget Action Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-2.5 mt-6">
+          {/* Interactive Trick Button (Petting and Gadget are triggered directly on the avatar) */}
+          <div className="flex items-center justify-center mt-5">
             <button
               onClick={handleHighFive}
-              className="px-4 py-2 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60 rounded-xl text-xs font-bold flex items-center gap-2 transition-transform active:scale-95 cursor-pointer shadow-xs"
+              className="px-5 py-2.5 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900/60 rounded-xl text-xs font-bold flex items-center gap-2 transition-transform active:scale-95 cursor-pointer shadow-xs"
             >
               <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" />
               <span>{soundConfig.highFiveLabel}</span>
             </button>
-
-            <button
-              onClick={handlePet}
-              className="px-4 py-2 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/60 rounded-xl text-xs font-bold flex items-center gap-2 transition-transform active:scale-95 cursor-pointer shadow-xs"
-            >
-              <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
-              <span>{pet.isSleeping ? 'Wecken & Streicheln' : 'Streicheln (+15 Laune)'}</span>
-            </button>
-
-            {pet.equipped.gadget && findGadgetById(pet.equipped.gadget) && (
-              <button
-                onClick={() => handlePlayGadget(findGadgetById(pet.equipped.gadget!))}
-                className="px-4 py-2 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900/60 rounded-xl text-xs font-bold flex items-center gap-2 transition-transform active:scale-95 cursor-pointer shadow-xs"
-                title={`${findGadgetById(pet.equipped.gadget!)?.name} anstupsen`}
-              >
-                <span className="text-sm">{findGadgetById(pet.equipped.gadget!)?.icon}</span>
-                <span>{findGadgetById(pet.equipped.gadget!)?.name} anstupsen</span>
-              </button>
-            )}
           </div>
         </div>
 

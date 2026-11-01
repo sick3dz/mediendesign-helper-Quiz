@@ -15,6 +15,7 @@ interface Props {
   onInteractGadget?: (gadget: PetGadget) => void;
   isGadgetInteracting?: boolean;
   isGadgetActive?: boolean;
+  onClick?: () => void;
 }
 
 export const PetAvatar: React.FC<Props> = ({
@@ -27,6 +28,7 @@ export const PetAvatar: React.FC<Props> = ({
   onInteractGadget,
   isGadgetInteracting,
   isGadgetActive: externalGadgetActive,
+  onClick,
 }) => {
   const { species, happiness, hunger } = pet;
   const equipped = {
@@ -88,9 +90,17 @@ export const PetAvatar: React.FC<Props> = ({
   const isSleeping = Boolean(pet.isSleeping);
 
   return (
-    <div className={`relative ${sizeClasses} mx-auto flex items-center justify-center select-none transition-transform duration-300 ${
-      isEating ? 'animate-bounce scale-105' : isPetted ? 'scale-110' : isGadgetActive ? 'scale-105 animate-pet-gadget-shake' : isSleeping ? 'scale-95 opacity-90' : 'animate-pet-breathe hover:scale-105'
-    }`}>
+    <div 
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      title={onClick ? (isSleeping ? 'Sanft wecken & streicheln' : 'Klick auf mich zum Streicheln! ❤️') : undefined}
+      className={`relative ${sizeClasses} mx-auto flex items-center justify-center select-none transition-transform duration-300 ${
+        onClick ? 'cursor-pointer hover:scale-105 active:scale-95' : ''
+      } ${
+        isEating ? 'animate-bounce scale-105' : isPetted ? 'scale-110' : isGadgetActive ? 'scale-105 animate-pet-gadget-shake' : isSleeping ? 'scale-95 opacity-90' : 'animate-pet-breathe'
+      }`}
+    >
       {/* Equipped Animated Pet Frame */}
       {equipped?.frame === 'frame-bronze' && (
         <div className={`absolute ${frameInsets.bronze} rounded-full border-amber-500/80 shadow-[0_0_12px_rgba(217,119,6,0.35)] pointer-events-none animate-pulse`} />

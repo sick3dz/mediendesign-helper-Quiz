@@ -84,6 +84,8 @@ const DEFAULT_STATS: UserStats = {
   },
   dailyMissions: generateDailyMissions(),
   dailyMissionsDate: getTodayDateString(),
+  questionPerformance: {},
+  topicMastery: {},
   examScores: [],
 };
 
@@ -350,6 +352,8 @@ export function loadUserStats(): UserStats {
       completedModulesLevel2: Array.isArray(parsed.completedModulesLevel2) ? parsed.completedModulesLevel2 : [],
       dailyMissions,
       dailyMissionsDate,
+      questionPerformance: parsed.questionPerformance || {},
+      topicMastery: parsed.topicMastery || {},
       unlockedCosmetics: Array.isArray(parsed.unlockedCosmetics) && parsed.unlockedCosmetics.length > 0
         ? parsed.unlockedCosmetics
         : DEFAULT_STATS.unlockedCosmetics,

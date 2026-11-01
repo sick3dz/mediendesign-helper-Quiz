@@ -24,6 +24,7 @@ interface Props {
   onBack: () => void;
   onModuleCompleted: (moduleId: string, gainedXp: number, level: 1 | 2) => void;
   onCorrectAnswer?: () => void;
+  onAnswer?: (questionId: string, isCorrect: boolean) => void;
   onNextModule?: () => void;
   hasNextModule?: boolean;
 }
@@ -38,6 +39,7 @@ export const ModuleLearningView: React.FC<Props> = ({
   onBack,
   onModuleCompleted,
   onCorrectAnswer,
+  onAnswer,
   onNextModule,
   hasNextModule = false,
 }) => {
@@ -453,6 +455,7 @@ export const ModuleLearningView: React.FC<Props> = ({
             onModuleCompleted(module.id, finalXp, currentLevel);
           }}
           onCorrectAnswer={onCorrectAnswer}
+          onAnswer={onAnswer}
           onBackToOverview={onBack}
           onNextModule={onNextModule}
           hasNextModule={hasNextModule}

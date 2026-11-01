@@ -4,16 +4,19 @@ import { QuizOption } from '../types/quiz';
 import { BionicText } from '../utils/bionicReading';
 import { soundEffects } from '../services/audioService';
 import confetti from 'canvas-confetti';
-import { Award, Check, X, ArrowLeft, ArrowRight, RotateCcw, Clock, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Award, Check, X, ArrowLeft, ArrowRight, RotateCcw, Clock, AlertTriangle, ShieldCheck, BookOpen } from 'lucide-react';
+import { QuestionDetailModal } from './QuestionDetailModal';
+import { QuizQuestion } from '../types/quiz';
 
 interface Props {
   bionic: boolean;
   onExamCompleted: (result: { score: number; total: number; percentage: number; grade: string }) => void;
+  onAnswer?: (questionId: string, isCorrect: boolean) => void;
   onGoToChapter: (chapterId: string) => void;
   onBack: () => void;
 }
 
-export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, onGoToChapter, onBack }) => {
+export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, onAnswer, onGoToChapter, onBack }) => {
   const [hasStarted, setHasStarted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<{ [qId: string]: string }>({});
@@ -21,6 +24,7 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
   const [isFinished, setIsFinished] = useState(false);
   const [secondsElapsed, setSecondsElapsed] = useState(0);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [detailModalQuestion, setDetailModalQuestion] = useState<{ question: QuizQuestion; selectedOption: QuizOption | null } | null>(null);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -44,6 +48,10 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
       soundEffects.playCorrect();
     } else {
       soundEffects.playWrong();
+    }
+
+    if (onAnswer) {
+      onAnswer(currentQ.id, opt.isCorrect);
     }
   };
 
@@ -297,17 +305,29 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
                     </p>
                   </div>
 
-                  <div className="mt-3 pt-2 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between">
+                  <div className="mt-3 pt-2 border-t border-slate-200/60 dark:border-slate-800/60 flex flex-wrap items-center justify-between gap-2">
                     <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-semibold">
                       Thema: {q.chapterId}
                     </span>
-                    <button
-                      onClick={() => onGoToChapter(q.chapterId)}
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors cursor-pointer"
-                    >
-                      <span>Kapitel aufrufen</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          soundEffects.playClick();
+                          setDetailModalQuestion({ question: q, selectedOption: chosenOpt || null });
+                        }}
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                      >
+                        <BookOpen className="w-3 h-3" />
+                        <span>Ausführliche IHK-Infos</span>
+                      </button>
+                      <button
+                        onClick={() => onGoToChapter(q.chapterId)}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 transition-colors cursor-pointer"
+                      >
+                        <span>Kapitel</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -455,6 +475,24 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
                 "{currentQ.merksatz}"
               </p>
             )}
+
+            <div className="pt-2.5 mt-2.5 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between">
+              <span className="text-[11px] text-slate-500">IHK-Prüfungsdossier & Praxisfall</span>
+              <button
+                type="button"
+                onClick={() => {
+                  soundEffects.playClick();
+                  setDetailModalQuestion({
+                    question: currentQ,
+                    selectedOption: currentQ.options.find(o => o.id === selectedInCurrent) || null,
+                  });
+                }}
+                className="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>Ausführliche IHK-Infos öffnen</span>
+              </button>
+            </div>
           </div>
         )}
 
@@ -479,6 +517,16 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
           )}
         </div>
       </div>
+
+      {/* Detailed Question Dossier Modal */}
+      {detailModalQuestion && (
+        <QuestionDetailModal
+          question={detailModalQuestion.question}
+          selectedOption={detailModalQuestion.selectedOption}
+          bionic={bionic}
+          onClose={() => setDetailModalQuestion(null)}
+        />
+      )}
     </div>
   );
 };

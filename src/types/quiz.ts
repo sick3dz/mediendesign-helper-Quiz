@@ -194,6 +194,8 @@ export interface UserStats {
   equippedCosmetics?: EquippedCosmetics;
   dailyMissions?: DailyMission[];
   dailyMissionsDate?: string;
+  questionPerformance: { [questionId: string]: { correctCount: number; wrongCount: number; lastAnswered?: string } };
+  topicMastery: { [topicId: string]: number }; // 0 to 100 percentage
   examScores: {
     date: string;
     score: number;
