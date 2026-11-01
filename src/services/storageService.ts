@@ -9,6 +9,7 @@ export interface UserSettings {
   soundEnabled: boolean;
   zenMode: boolean;
   darkMode: boolean;
+  breakReminderMinutes: number | null;
 }
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -16,6 +17,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   soundEnabled: true,
   zenMode: false,
   darkMode: false,
+  breakReminderMinutes: null,
 };
 
 export function getTodayDateString(): string {

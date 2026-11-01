@@ -1,6 +1,6 @@
 {
-  "summary":  "Detaillierter Implementierungsplan für interaktive Haustier-Gadgets:\n- Neues Spielzeug-System mit Platzierung direkt neben dem Haustier im SVG-Avatar\n- Physik-Hüpfen und Interaktions-Animationen mit Laune-Bonus (+Soundeffekte)\n- Starter- und EXP-Shop-Sortiment: Bunter Hüpfball (Gratis), Neon-Laserpointer (EXP) und Magischer Zauberstab (EXP)\n- Integration in Datenmodelle, PetAvatar, VirtualPetView (Shop & Garderobe) und TopPetCompanionBar",
-  "updatedAt":  "2026-10-31T17:25:23.006115102Z",
+  "summary":  "Überarbeiteter Implementierungsplan: Das extra Fenster konzentriert sich voll auf die thematische Modul- und Kapitel-Auswahl (ohne Fragenanzahl-Wähler). Der Mix-Up generiert die didaktischen Einheiten (Wissen + bis zu 2 Fragen) direkt für alle gewählten Themen.",
+  "updatedAt":  "2026-11-01T11:46:25.570876968Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

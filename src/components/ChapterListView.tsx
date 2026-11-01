@@ -17,6 +17,7 @@ import {
   Grid,
   Star,
   RotateCcw,
+  Shuffle,
 } from 'lucide-react';
 import { soundEffects } from '../services/audioService';
 import { ChecklistDetailModal } from './ChecklistDetailModal';
@@ -31,6 +32,7 @@ interface Props {
   onSelectModule: (chapterId: string, moduleId: string, level?: 1 | 2) => void;
   onStartExam: () => void;
   onStartReview: () => void;
+  onOpenMixUpModal?: () => void;
   onOpenGames?: () => void;
   onGoToSpickzettel?: () => void;
 }
@@ -44,6 +46,7 @@ export const ChapterListView: React.FC<Props> = ({
   onSelectModule,
   onStartExam,
   onStartReview,
+  onOpenMixUpModal,
   onOpenGames,
   onGoToSpickzettel,
 }) => {
@@ -118,7 +121,7 @@ export const ChapterListView: React.FC<Props> = ({
   return (
     <div className="space-y-4 sm:space-y-5">
       {/* Learning Efficiency Tools Bar */}
-      <div className="flex flex-col sm:flex-row items-center gap-3">
+      <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3">
         <button
           onClick={onStartReview}
           className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer"
@@ -126,9 +129,20 @@ export const ChapterListView: React.FC<Props> = ({
           <RotateCcw className="w-4 h-4" />
           <span>Wiederholungs-Quiz (Fokus auf Fehler)</span>
         </button>
+
+        {onOpenMixUpModal && (
+          <button
+            onClick={onOpenMixUpModal}
+            className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer"
+          >
+            <Shuffle className="w-4 h-4" />
+            <span>Mix-Up Mix (Themen wählen)</span>
+          </button>
+        )}
+
         <div className="hidden sm:block h-6 w-px bg-slate-200 dark:bg-slate-800" />
         <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-          Dein intelligentes System schlägt dir Fragen vor, die du zuletzt falsch beantwortet hast.
+          Wiederhole gezielt Fehlfragen oder stelle dir im Mix-Up deine individuelle Fragenserie zusammen.
         </p>
       </div>
 

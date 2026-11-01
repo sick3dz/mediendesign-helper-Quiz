@@ -70,56 +70,168 @@ export function createRecallQuestionFromKnowledge(knowledge: {
 }
 
 export function buildBlitzPool(): BlitzItem[] {
-  const items: BlitzItem[] = [];
+  interface Cluster {
+    knowledge: BlitzItem;
+    questions: BlitzItem[];
+  }
 
-  // 1. Add Design-Relevant Exam Questions
-  EXAM_QUESTIONS.forEach(q => {
-    if (isDesignRelevant(q.question)) {
-      items.push({
-        type: 'quiz',
-        id: q.id,
-        category: 'Design & Medien IHK-Prüfung',
-        question: q.question,
-        options: q.options,
-        merksatz: q.merksatz,
-      });
-    }
-  });
+  const clusters: Cluster[] = [];
 
-  // 2. Extract Questions and Knowledge Nuggets from Chapters
+  // Group into didactic units: 1 Knowledge Nugget -> up to 2 related Quiz Questions
   CHAPTERS.forEach(chap => {
     chap.modules.forEach(mod => {
-      // Add Module Quiz Questions
-      mod.quizQuestions.forEach(q => {
-        if (isDesignRelevant(q.question)) {
-          items.push({
-            type: 'quiz',
-            id: q.id,
-            category: `${chap.title}`,
-            question: q.question,
-            options: q.options,
-            merksatz: q.merksatz,
-          });
-        }
-      });
+      // Each module has nuggets and quizQuestions
+      const primaryNugget = mod.nuggets[0];
+      if (!primaryNugget) return;
 
-      // Add Module Knowledge Nuggets as Flashcards
-      mod.nuggets.forEach(nugget => {
-        items.push({
-          type: 'knowledge',
-          id: nugget.id,
-          category: `${chap.title}`,
-          title: nugget.title,
-          coreConcept: nugget.coreConcept,
-          bulletPoints: nugget.bulletPoints,
-          merksatz: nugget.merksatz,
-          example: nugget.example,
-          examFavorite: nugget.examFavorite,
+      const knowledgeItem: BlitzItem = {
+        type: 'knowledge',
+        id: primaryNugget.id,
+        category: `Wissensvermittlung • Kapitel ${chap.number}: ${chap.title}`,
+        title: primaryNugget.title,
+        coreConcept: primaryNugget.coreConcept,
+        bulletPoints: primaryNugget.bulletPoints,
+        merksatz: primaryNugget.merksatz,
+        example: primaryNugget.example,
+        examFavorite: primaryNugget.examFavorite,
+      };
+
+      // Filter and pick up to 2 questions from this module
+      const moduleQuestions: BlitzItem[] = (mod.quizQuestions || [])
+        .filter(q => isDesignRelevant(q.question))
+        .slice(0, 2)
+        .map((q, idx, arr) => ({
+          type: 'quiz' as const,
+          id: q.id,
+          category: arr.length > 1 
+            ? `Prüfungsfrage (${idx + 1}/2) • ${chap.title}` 
+            : `Prüfungsfrage • ${chap.title}`,
+          question: q.question,
+          options: q.options,
+          merksatz: q.merksatz || primaryNugget.merksatz,
+          linkedFromNuggetTitle: primaryNugget.title,
+        }));
+
+      // Fallback to exam questions from the same chapter if module has fewer questions
+      if (moduleQuestions.length === 0) {
+        const chapterExamQuestions = EXAM_QUESTIONS
+          .filter(eq => eq.chapterId === chap.id && isDesignRelevant(eq.question))
+          .slice(0, 2);
+
+        chapterExamQuestions.forEach((eq, idx, arr) => {
+          moduleQuestions.push({
+            type: 'quiz',
+            id: eq.id,
+            category: arr.length > 1
+              ? `Prüfungsfrage (${idx + 1}/2) • ${chap.title}`
+              : `Prüfungsfrage • ${chap.title}`,
+            question: eq.question,
+            options: eq.options,
+            merksatz: eq.merksatz || primaryNugget.merksatz,
+            linkedFromNuggetTitle: primaryNugget.title,
+          });
         });
+      }
+
+      clusters.push({
+        knowledge: knowledgeItem,
+        questions: moduleQuestions,
       });
     });
   });
 
-  // Shuffle the combined pool for interleaved learning
-  return items.sort(() => Math.random() - 0.5);
+  // Shuffle the order of clusters for variety across sprint runs
+  const shuffledClusters = [...clusters].sort(() => Math.random() - 0.5);
+
+  // Flatten into didactic sequence: [Knowledge] -> [Question 1] -> [Question 2]
+  const sequentialItems: BlitzItem[] = [];
+  for (const cluster of shuffledClusters) {
+    sequentialItems.push(cluster.knowledge);
+    sequentialItems.push(...cluster.questions);
+    if (sequentialItems.length >= 24) break;
+  }
+
+  // Return the first 22 items (covering the 20-unit sprint with buffer)
+  return sequentialItems.slice(0, 22);
+}
+
+export function buildCustomMixPool(selectedModuleIds: string[]): BlitzItem[] {
+  const selectedSet = new Set(selectedModuleIds);
+  interface Cluster {
+    knowledge: BlitzItem;
+    questions: BlitzItem[];
+  }
+  const clusters: Cluster[] = [];
+
+  CHAPTERS.forEach(chap => {
+    chap.modules.forEach(mod => {
+      if (!selectedSet.has(mod.id)) return;
+
+      const primaryNugget = mod.nuggets[0];
+      if (!primaryNugget) return;
+
+      const knowledgeItem: BlitzItem = {
+        type: 'knowledge',
+        id: primaryNugget.id,
+        category: `Wissensvermittlung • Kapitel ${chap.number}: ${chap.title}`,
+        title: primaryNugget.title,
+        coreConcept: primaryNugget.coreConcept,
+        bulletPoints: primaryNugget.bulletPoints,
+        merksatz: primaryNugget.merksatz,
+        example: primaryNugget.example,
+        examFavorite: primaryNugget.examFavorite,
+      };
+
+      const moduleQuestions: BlitzItem[] = (mod.quizQuestions || [])
+        .filter(q => isDesignRelevant(q.question))
+        .slice(0, 2)
+        .map((q, idx, arr) => ({
+          type: 'quiz' as const,
+          id: q.id,
+          category: arr.length > 1
+            ? `Prüfungsfrage (${idx + 1}/2) • ${mod.title}`
+            : `Prüfungsfrage • ${mod.title}`,
+          question: q.question,
+          options: q.options,
+          merksatz: q.merksatz || primaryNugget.merksatz,
+          linkedFromNuggetTitle: primaryNugget.title,
+        }));
+
+      if (moduleQuestions.length === 0) {
+        const chapterExamQuestions = EXAM_QUESTIONS
+          .filter(eq => eq.chapterId === chap.id && isDesignRelevant(eq.question))
+          .slice(0, 2);
+
+        chapterExamQuestions.forEach((eq, idx, arr) => {
+          moduleQuestions.push({
+            type: 'quiz',
+            id: eq.id,
+            category: arr.length > 1
+              ? `Prüfungsfrage (${idx + 1}/2) • ${mod.title}`
+              : `Prüfungsfrage • ${mod.title}`,
+            question: eq.question,
+            options: eq.options,
+            merksatz: eq.merksatz || primaryNugget.merksatz,
+            linkedFromNuggetTitle: primaryNugget.title,
+          });
+        });
+      }
+
+      clusters.push({
+        knowledge: knowledgeItem,
+        questions: moduleQuestions,
+      });
+    });
+  });
+
+  // Shuffle clusters for a dynamic mix-up learning experience across chosen topics
+  const shuffledClusters = [...clusters].sort(() => Math.random() - 0.5);
+
+  const sequentialItems: BlitzItem[] = [];
+  for (const cluster of shuffledClusters) {
+    sequentialItems.push(cluster.knowledge);
+    sequentialItems.push(...cluster.questions);
+  }
+
+  return sequentialItems;
 }

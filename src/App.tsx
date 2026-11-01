@@ -40,6 +40,10 @@ import { VirtualPetView } from './components/VirtualPetView';
 import { LearningStatsView } from './components/LearningStatsView';
 import { getPrioritizedQuestions, getAllQuestions } from './utils/learningLogic';
 import { QuizCard } from './components/QuizCard';
+import { MindfulBreathingModal } from './components/MindfulBreathingModal';
+import { MixUpConfigModal } from './components/MixUpConfigModal';
+import { DidacticMixUpView } from './components/DidacticMixUpView';
+import { buildCustomMixPool, BlitzItem } from './utils/blitzContent';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('chapters');
@@ -50,9 +54,19 @@ export default function App() {
     level?: 1 | 2;
   } | null>(null);
   const [reviewQuestions, setReviewQuestions] = useState<any[] | null>(null);
+  const [isMixUpModalOpen, setIsMixUpModalOpen] = useState<boolean>(false);
+  const [activeMixUpItems, setActiveMixUpItems] = useState<BlitzItem[] | null>(null);
 
   const [stats, setStats] = useState<UserStats>(() => loadUserStats());
-  const [settings, setSettings] = useState<UserSettings>(() => loadUserSettings());
+  const [settings, setSettings] = useState<UserSettings>(() => {
+    const s = loadUserSettings();
+    if (s.breakReminderMinutes === 25) {
+      const updated = { ...s, breakReminderMinutes: null };
+      saveUserSettings(updated);
+      return updated;
+    }
+    return s;
+  });
   const [isFocusSprintOpen, setIsFocusSprintOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [isAdoptionModalOpen, setIsAdoptionModalOpen] = useState<boolean>(
@@ -70,6 +84,18 @@ export default function App() {
   const [sprintSoundType, setSprintSoundType] = useState<AmbientSoundType>('lofi');
   const [sprintVolume, setSprintVolume] = useState<number>(0.35);
   const [sprintIsMuted, setSprintIsMuted] = useState<boolean>(false);
+
+  // Break Reminder & Mindful Study Session State
+  const [studySeconds, setStudySeconds] = useState<number>(0);
+  const [isBreathingModalOpen, setIsBreathingModalOpen] = useState<boolean>(false);
+
+  // Active study timer for break reminder
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setStudySeconds(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Sync dark mode class on <html> & <body>
   useEffect(() => {
@@ -790,6 +816,54 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Break Reminder & Mindful Breathing Handlers
+  const handleSnoozeBreak = () => {
+    const targetSeconds = (settings.breakReminderMinutes ?? 25) * 60;
+    setStudySeconds(Math.max(0, targetSeconds - 300));
+  };
+
+  const handleResetStudyTimer = () => {
+    setStudySeconds(0);
+  };
+
+  const handleStartBreathing = () => {
+    setIsBreathingModalOpen(true);
+  };
+
+  const handleCompleteBreathing = () => {
+    setIsBreathingModalOpen(false);
+    setStudySeconds(0);
+
+    const bonusXp = 25;
+    const newXp = stats.xp + bonusXp;
+    const newLifetimeXp = (stats.lifetimeXp ?? stats.xp) + bonusXp;
+    const newHappiness = Math.min(100, stats.pet.happiness + 15);
+    const updatedPet: PetState = {
+      ...stats.pet,
+      isSleeping: false,
+      happiness: newHappiness,
+      timesPlayed: (stats.pet.timesPlayed || 0) + 1,
+    };
+
+    const updatedStats: UserStats = {
+      ...stats,
+      xp: newXp,
+      lifetimeXp: newLifetimeXp,
+      pet: updatedPet,
+    };
+
+    setStats(updatedStats);
+    saveUserStats(updatedStats);
+  };
+
+  const handleStartMixUp = (selectedModuleIds: string[]) => {
+    const items = buildCustomMixPool(selectedModuleIds);
+    if (items.length > 0) {
+      setActiveMixUpItems(items);
+      setIsMixUpModalOpen(false);
+    }
+  };
+
   return (
     <div className="min-h-screen w-full max-w-full overflow-x-hidden flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
       {/* Strict 3-zone Top Navigation */}
@@ -797,6 +871,7 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={tab => {
           setSelectedModuleMeta(null);
+          setActiveMixUpItems(null);
           if (tab === 'pet') {
             setPetInitialTab('care');
           }
@@ -815,12 +890,16 @@ export default function App() {
       <AdhdControlsBar
         stats={stats}
         settings={settings}
+        studySeconds={studySeconds}
         onUpdateSettings={handleUpdateSettings}
         onGoToPet={() => {
           setSelectedModuleMeta(null);
           setPetInitialTab('shop');
           setActiveTab('pet');
         }}
+        onStartBreathing={handleStartBreathing}
+        onSnoozeBreak={handleSnoozeBreak}
+        onResetTimer={handleResetStudyTimer}
       />
 
       {/* Top Interactive Pet Companion Bar */}
@@ -882,6 +961,18 @@ export default function App() {
               onBackToOverview={() => setReviewQuestions(null)}
             />
           </div>
+        ) : activeMixUpItems ? (
+          <DidacticMixUpView
+            items={activeMixUpItems}
+            bionic={settings.bionicReading}
+            onFinished={(score) => {
+              handleScoreEarned(score);
+              setActiveMixUpItems(null);
+            }}
+            onCorrectAnswer={handleCorrectAnswer}
+            onAnswer={handleAnswer}
+            onBack={() => setActiveMixUpItems(null)}
+          />
         ) : selectedModuleMeta && currentChapter && currentModule ? (
           <ModuleLearningView
             chapter={currentChapter}
@@ -909,6 +1000,7 @@ export default function App() {
                 onSelectModule={(cId, mId, lvl) => setSelectedModuleMeta({ chapterId: cId, moduleId: mId, level: lvl || 1 })}
                 onStartExam={() => setActiveTab('exam')}
                 onStartReview={handleStartReview}
+                onOpenMixUpModal={() => setIsMixUpModalOpen(true)}
                 onOpenGames={() => setActiveTab('minigames')}
                 onGoToSpickzettel={() => setActiveTab('spickzettel')}
               />
@@ -1039,6 +1131,24 @@ export default function App() {
           onClose={() => setActiveSurprise(null)}
         />
       )}
+
+      {/* Mindful Breathing Break Modal */}
+      {isBreathingModalOpen && (
+        <MindfulBreathingModal
+          pet={stats.pet}
+          equippedCosmetics={stats.equippedCosmetics}
+          onClose={() => setIsBreathingModalOpen(false)}
+          onComplete={handleCompleteBreathing}
+        />
+      )}
+
+      {/* Mix-Up Topic & Module Selection Modal */}
+      <MixUpConfigModal
+        isOpen={isMixUpModalOpen}
+        chapters={CHAPTERS}
+        onClose={() => setIsMixUpModalOpen(false)}
+        onStart={handleStartMixUp}
+      />
 
       {/* Quiet Footer */}
       <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 mt-12 text-xs text-slate-500 dark:text-slate-400 transition-colors">

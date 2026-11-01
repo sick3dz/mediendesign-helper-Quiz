@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { soundEffects } from '../services/audioService';
 import { AmbientSoundType } from '../services/ambientAudioService';
-import { buildBlitzPool, createRecallQuestionFromKnowledge, BlitzItem } from '../utils/blitzContent';
+import { buildBlitzPool, BlitzItem } from '../utils/blitzContent';
 import confetti from 'canvas-confetti';
 import {
   Play,
@@ -319,7 +319,6 @@ export const FocusSprintModal: React.FC<Props> = ({
   const handleAcknowledgeKnowledge = () => {
     if (isSessionFinished) return;
 
-    const currentKnowledgeItem = blitzPool[currentPoolIndex];
     soundEffects.playSuccess();
     setBlitzScore(prev => prev + 1);
     const newAttempted = totalAttempted + 1;
@@ -333,22 +332,6 @@ export const FocusSprintModal: React.FC<Props> = ({
       soundEffects.playLevelUp();
       confetti({ particleCount: 40, spread: 40, origin: { y: 0.7 } });
       setTimeout(() => setShowComboToast(false), 2000);
-    }
-
-    if (currentKnowledgeItem && currentKnowledgeItem.type === 'knowledge') {
-      const recallQuestion = createRecallQuestionFromKnowledge({
-        title: currentKnowledgeItem.title,
-        coreConcept: currentKnowledgeItem.coreConcept,
-        category: currentKnowledgeItem.category,
-        merksatz: currentKnowledgeItem.merksatz,
-      });
-
-      setBlitzPool(prevPool => {
-        const targetIndex = Math.min(currentPoolIndex + 3, prevPool.length);
-        const updated = [...prevPool];
-        updated.splice(targetIndex, 0, recallQuestion);
-        return updated;
-      });
     }
 
     checkMaxUnitsAndAdvance(newAttempted);
@@ -552,7 +535,7 @@ export const FocusSprintModal: React.FC<Props> = ({
                   <>
                     <div className="flex items-center gap-2 font-bold">
                       <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                      <span>Maximal 20 Lerneinheiten (Spaced Flashcards & Quiz)</span>
+                      <span>Didaktischer 20-Einheiten Mix (Wissen vermitteln & bis zu 2 Fragen)</span>
                     </div>
                     <div className="flex items-center gap-2 font-bold">
                       <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -836,8 +819,8 @@ export const FocusSprintModal: React.FC<Props> = ({
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-500/10 text-amber-700 dark:text-amber-300 font-bold text-[11px] rounded-md border border-amber-300/50 dark:border-amber-700/50">
-                        <Star className="w-3 h-3 fill-amber-400 text-amber-500" />
-                        <span>Quick-Wissen Flashcard</span>
+                        <BookOpen className="w-3 h-3 text-amber-500" />
+                        <span>Didaktischer Wissensbaustein</span>
                       </span>
                       {currentItem.examFavorite && (
                         <span className="px-2 py-0.5 bg-purple-500/10 text-purple-700 dark:text-purple-300 font-bold text-[10px] rounded-md border border-purple-300/50">
@@ -876,7 +859,7 @@ export const FocusSprintModal: React.FC<Props> = ({
                       className="w-full mt-2 py-2.5 px-4 bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-700 hover:to-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all active:scale-98 cursor-pointer flex items-center justify-center gap-2"
                     >
                       <Check className="w-4 h-4 stroke-[3]" />
-                      <span>Gelesen & Gemerkt! (+10 ⭐ EXP)</span>
+                      <span>Wissen verstanden – Zu den Fragen → (+10 ⭐ EXP)</span>
                     </button>
                   </div>
                 )}
