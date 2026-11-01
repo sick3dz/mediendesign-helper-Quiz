@@ -1,6 +1,6 @@
 {
-  "summary":  "Überarbeiteter Implementierungsplan: Das extra Fenster konzentriert sich voll auf die thematische Modul- und Kapitel-Auswahl (ohne Fragenanzahl-Wähler). Der Mix-Up generiert die didaktischen Einheiten (Wissen + bis zu 2 Fragen) direkt für alle gewählten Themen.",
-  "updatedAt":  "2026-11-01T11:46:25.570876968Z",
+  "summary":  "Implementation plan to restructure the Gamification & Rewards section into a clean, intuitive Hub with distinct top-level tabs for Pet Companion (Gefährte), Rewards Shop (Shop), My Inventory (Inventar), and Achievements (Erfolge).",
+  "updatedAt":  "2026-11-01T13:58:36.637730258Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

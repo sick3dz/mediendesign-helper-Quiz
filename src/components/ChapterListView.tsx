@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { Chapter, UserStats, ChecklistItem } from '../types/quiz';
-import { ALL_BADGES } from '../services/storageService';
 import { BionicText } from '../utils/bionicReading';
 import {
   ArrowRight,
@@ -621,38 +620,7 @@ export const ChapterListView: React.FC<Props> = ({
         </div>
       </section>
 
-      {/* Compact Badges / Errungenschaften Bar */}
-      <section className="bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 p-3.5 sm:p-4 transition-colors">
-        <div className="flex items-center justify-between mb-2.5">
-          <div>
-            <h3 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5 uppercase tracking-wider">
-              <Award className="w-3.5 h-3.5 text-amber-500" />
-              <span>Errungenschaften ({stats.earnedBadges.length}/{ALL_BADGES.length})</span>
-            </h3>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-          {ALL_BADGES.map(badge => {
-            const isUnlocked = stats.earnedBadges.includes(badge.id);
-            return (
-              <div
-                key={badge.id}
-                className={`p-2 rounded-lg border text-center transition-all ${
-                  isUnlocked
-                    ? 'bg-amber-50/50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/60'
-                    : 'bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-slate-800 opacity-40'
-                }`}
-              >
-                <div className="text-lg mb-0.5">{badge.icon}</div>
-                <div className="text-[10px] font-bold text-slate-900 dark:text-slate-100 truncate">
-                  {badge.title}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
 
       {/* Detailed IHK Checklist Modal */}
       {selectedChecklistModal && (

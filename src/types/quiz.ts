@@ -189,6 +189,7 @@ export interface UserStats {
   currentCombo: number;
   maxCombo: number;
   earnedBadges: string[];
+  claimedAchievements?: string[];
   pet: PetState;
   unlockedCosmetics?: string[]; // IDs of purchased cosmetics
   equippedCosmetics?: EquippedCosmetics;

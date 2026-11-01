@@ -1,92 +1,104 @@
-# Flexibler 'Mix-Up Mix' (Fokus auf thematische Modul-Auswahl)
+# Restructuring Gamification, Shop & Achievements Navigation
 
-Ein neuer Button und ein dediziertes Auswahlfenster neben dem Wiederholungs-Quiz in `ChapterListView`. Das Fenster konzentriert sich voll auf die thematische Auswahl von Modulen und Kapiteln (ohne Fragenanzahl-Regler). Für alle gewählten Themen wird der bewährte didaktische Mix aus Wissensvermittlung und bis zu 2 passenden Fragen durchlaufen.
+Reorganize the entire gamification ecosystem by creating a clean, dedicated **"Gamification & Belohnungen"** Hub. Instead of crowding pet care, shop items, wardrobe, and achievements into a single nested menu, the new design introduces four distinct, logical top-level tabs with clear domain separation.
+
+---
 
 ## User Review & Critical Decisions
 
 > [!IMPORTANT]
-> Folgende Anpassungen wurden basierend auf deinem Feedback eingearbeitet:
-> - **Kein Fragenanzahl-Wähler**: Die künstliche Begrenzung (10/15/20 Fragen) entfällt. Das Fenster konzentriert sich rein auf die inhaltliche Themen-Auswahl.
-> - **Themen-Fokus im extra Fenster**: Übersichtliche Modul- und Kapitel-Auswahl mit Checkboxen, Schnellauswahl ganzer Kapitel und "Alle auswählen / Auswahl aufheben".
-> - **Didaktischer Ablauf pro Thema**: Jedes ausgewählte Modulthema wird mit seiner Wissenskarte (Kernkonzept, Stichpunkte & Merksatz) eingeleitet, gefolgt von bis zu 2 passenden IHK-Fragen, bevor das nächste gewählte Thema folgt.
+> Key architectural decisions aligned with user input:
+
+- **Confirmed Decision 1 (Gamification Hub Structure)**: A dedicated, clean Gamification Hub with intuitive main tabs rather than mixing everything inside the Pet Care card.
+- **Confirmed Decision 2 (Strict Domain Separation)**:
+  1. 🐾 **Gefährte**: Virtual pet stage, thought bubble, vitals (hunger & happiness), feeding from quick inventory, and level roadmap.
+  2. 🛍️ **Shop**: Clean catalog for purchasing snacks, pet accessories, gadgets, app themes, soundpacks, titles, and frames.
+  3. 🎒 **Inventar**: Dedicated inventory overview showing all owned items, food stocks, acquired accessories, and unlocked cosmetics with one-click equip actions.
+  4. 🏆 **Erfolge**: Dedicated achievements dashboard featuring progress bars, numeric ratios (e.g. `3 / 5`), actionable directives, and instant reward claiming.
+- **Confirmed Decision 3 (Top Navigation Clarity)**: In the main TopBar navigation, the tab is named **"Belohnungen & Haustier"** or **"Gamification"**, leading directly into this newly structured hub.
 
 ---
 
 ## 1. Overview & Core Concept
 
-- **Platzierung**: Direkt in der oberen Aktionsleiste von `ChapterListView` neben dem *„Wiederholungs-Quiz (Fokus auf Fehler)“*.
-- **Themen-Auswahlfenster (`MixUpConfigModal`)**:
-  - Zeigt alle 8 IHK-Kapitel übersichtlich strukturiert an.
-  - Ermöglicht das An- und Abwählen ganzer Kapitel mit einem Klick.
-  - Ermöglicht das Aufklappen jedes Kapitels zur gezielten Auswahl spezifischer Modulthemen (z. B. nur *Affordance & Signifier* und *Gestaltgesetze*).
-  - Schnellauswahl-Buttons: *„Alle Themen auswählen“* und *„Auswahl leeren“*.
-  - Statusanzeige: Zeigt z. B. *„6 Themen ausgewählt“*.
-  - Primärer Start-Button: `🔀 Mix-Up starten (6 Themen)`.
-- **Lern-Erlebnis**: 
-  - Die ausgewählten Modulthemen werden in abwechslungsreicher Reihenfolge durchlaufen.
-  - Für jedes gewählte Thema: Zuerst der didaktische Wissensbaustein (*„Wissen verstanden – Zu den Fragen →“*), danach 1 bis 2 zugehörige Fragen.
-  - Am Ende: Zusammenfassung, Erfolgsquote und EXP-Gutschrift.
+- **Problem Addressed**: Previously, the virtual pet view contained a crowded grid of 6 different sub-tabs (care, shop, wardrobe, achievements, minigames, adoption), making it cluttered and hard to navigate.
+- **New Solution**:
+  - A clean 4-tab top navigation bar inside the Gamification Hub:
+    - **Tab 1: 🐾 Gefährte** (Pet Care, Vitals, Feeding, Level Ladder)
+    - **Tab 2: 🛍️ Shop** (Storefront with clear category pills)
+    - **Tab 3: 🎒 Inventar** (My Items, Wardrobe, Style Studio & Equipped Gear)
+    - **Tab 4: 🏆 Erfolge** (Achievements Dashboard, Progress Bars & Claimable Rewards)
+  - Dedicated full-width layouts for each tab so that Shop items, Inventory gear, and Achievement cards have space to breathe without UI overcrowding.
 
 ---
 
 ## 2. User Experience & Visual Design
 
-### Key User Flows
-1. **Einstieg**: Klick auf `🔀 Mix-Up Mix (Themen wählen)` in der Kapitelansicht.
-2. **Themen im Fenster auswählen**:
-   - Nutzer wählt z. B. ganzes *Kapitel 1: Interaktionsdesign* und aus *Kapitel 4* gezielt *Phishing-Erkennung*.
-   - Die Box zeigt sofort die Anzahl der gewählten Themen.
-   - Klick auf `Mix-Up starten`.
-3. **Didaktischer Ablauf**:
-   - Für jedes gewählte Modulthema:
-     1. Wissenskarte mit Bionic Reading, Kernbegriffen & Prüfer-Merksatz.
-     2. Per Klick weiter zu den 1 bis 2 Prüfungsfragen dieses Themas.
-4. **Abschluss**:
-   - Detaillierte Auswertung (Richtig/Falsch-Quote aller gewählten Themen, verdiente EXP).
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│  🌟 GAMIFICATION & BELOHUNGS-ZENTRUM                                   │
+│  ────────────────────────────────────────────────────────────────────  │
+│  [ 🐾 Gefährte ]   [ 🛍️ Shop ]   [ 🎒 Inventar ]   [ 🏆 Erfolge ]     │
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│  ┌──────────────────────────────────────────────────────────────────┐  │
+│  │ Active Tab View Content                                          │  │
+│  │ (e.g. Shop catalog OR Inventory gear OR Achievements dashboard)  │  │
+│  └──────────────────────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────────────────────┘
+```
 
-### Visuelle Leitlinien (Zero-Pill & Anti-Slop)
-- Klare, aufgeräumte Checkbox-Listen mit Kapitel-Icons und Modul-Titeln.
-- Kein visueller Ballast oder überflüssige Schieberegler.
-- Primärer Button hebt sich in edlem Indigo/Violett hervor.
+### Tab Breakdown & Features
+1. **🐾 Gefährte (Pet Companion)**:
+   - Pet avatar showcase, dynamic thought bubble, vitals gauges, level & XP progression roadmap.
+   - Quick-feed food drawer for fast snack distribution.
+2. **🛍️ Shop (Rewards Shop)**:
+   - Categorized catalog: Snacks & Food, Pet Accessories, Gadgets, App Themes, Soundpacks, Titles, Animated Frames.
+   - Dual-currency price tags (EXP and Coins) with live preview buttons.
+3. **🎒 Inventar (My Inventory & Wardrobe)**:
+   - Overview of all acquired items and stock quantities.
+   - One-click equip/unequip for accessories, gadgets, themes, titles, and frames.
+4. **🏆 Erfolge (Achievements Dashboard)**:
+   - Summary status bar showing unlocked vs total achievements, total claimed XP/Coins.
+   - Category filters (All, Learning, Quiz, Care, Streak).
+   - Numerical ratio progress bars, actionable lightbulb hints (`💡 Nächster Schritt...`), and pulsing reward claiming buttons.
 
 ---
 
-## 3. Key Product Decisions & Trade-Offs
+## 3. Technical Architecture & Data Strategy
 
-- **Entscheidung 1: Reiner Fokus auf Themenauswahl im Fenster**:
-  - *Gewählter Ansatz*: Statt Zeitlimits oder Fragenanzahl zu konfigurieren, entscheidet der Lernende rein inhaltlich: *„Welche Themen möchte ich heute trainieren?“*
-  - *Warum*: Entspricht exakt deinem Wunsch („statt Fragenanzahl Modul Themen auswahl im extra fenster“) und reduziert kognitiven Ballast bei ADHS.
-- **Entscheidung 2: 1:1 Kopplung von Wissen & Fragen**:
-  - *Gewählter Ansatz*: Alle ausgewählten Module werden als didaktische Paare (Wissen + bis zu 2 Fragen) durchlaufen.
-  - *Warum*: Garantiert tiefes Verständnis und direkten Praxistest.
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                              App.tsx                                   │
+│              activeTab: 'chapters' | 'pet' | 'exam' | ...             │
+└──────────────────────────────────┬─────────────────────────────────────┘
+                                   │
+                                   ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                          VirtualPetView.tsx                            │
+│     activeGamificationTab: 'pet' | 'shop' | 'inventory' | 'achievements'│
+└────────┬───────────────────┬───────────────────┬───────────────────────┘
+         │                   │                   │                       │
+         ▼                   ▼                   ▼                       ▼
+┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────────────┐
+│ PetCompanion    │ │ Gamification    │ │ PlayerInventory │ │ PetAchievementsSection  │
+│ Section         │ │ ShopSection     │ │ Section         │ │ (Dashboard)             │
+└─────────────────┘ └─────────────────┘ └─────────────────┘ └─────────────────────────┘
+```
 
 ---
 
-## 4. Technical Architecture & Data Strategy
+## Implementation Steps
 
-```
-┌────────────────────────────────────────────────────────┐
-│                   ChapterListView.tsx                  │
-│  - Button: [Wiederholungs-Quiz] [🔀 Mix-Up Mix]        │
-│  - State: isMixUpModalOpen (boolean)                   │
-└───────────────────────────┬────────────────────────────┘
-                            │
-┌───────────────────────────▼────────────────────────────┐
-│                  MixUpConfigModal.tsx                  │
-│  - Kapitel- & Modul-Themen-Auswahl (Checkboxen)        │
-│  - "Alle auswählen" / "Leeren"                         │
-│  - Start-Button: onStartMixUp(selectedModuleIds)       │
-└───────────────────────────┬────────────────────────────┘
-                            │
-┌───────────────────────────▼────────────────────────────┐
-│                        App.tsx                         │
-│  - Generiert Sequenz für ausgewählte Modulthemen       │
-│  - [Wissen Modul 1] -> [Q1] -> [Q2] -> [Wissen Modul 2]│
-│  - Auswertung & EXP-Gutschrift nach Abschluss          │
-└────────────────────────────────────────────────────────┘
-```
-
-### Komponenten & Schnittstellen
-1. **`src/components/MixUpConfigModal.tsx`**: Neues Modal mit intuitiver Themen- und Modulauswahl.
-2. **`src/components/ChapterListView.tsx`**: Neuer Button zum Öffnen des Themen-Fensters.
-3. **`src/App.tsx`**: Verwaltung der Mix-Up Session mit den gewählten Modulthemen.
+1. **Refactor `VirtualPetView.tsx` Navigation**:
+   - Establish top-level tabs: `'pet' | 'shop' | 'inventory' | 'achievements'`.
+   - Create clean, single-line segment navigation buttons.
+2. **Extract & Modularize Sub-Views**:
+   - `PetCompanionSection`: Pet stage, thought bubble, vitals, quick-feed snacks, level ladder.
+   - `GamificationShopSection`: Organized storefront with categories.
+   - `PlayerInventorySection`: Clean inventory studio showing owned items and equip toggles.
+   - `PetAchievementsSection`: Achievements dashboard with progress bars, numerical counters, and claim handlers.
+3. **Update TopBar & Navigation Labeling**:
+   - Update main app header link label to "Haustier & Belohnungen" or "Gamification".
+4. **Verification & Build Check**:
+   - Run `lint_applet` and `compile_applet` to ensure zero compilation or build errors.
