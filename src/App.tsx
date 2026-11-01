@@ -953,6 +953,7 @@ export default function App() {
       <TopPetCompanionBar
         stats={stats}
         onUpdatePet={handleUpdatePet}
+        onUpdateStats={handleUpdateStats}
         onOpenFullPetRoom={() => {
           setSelectedModuleMeta(null);
           setActiveMixUpItems(null);
@@ -1074,6 +1075,7 @@ export default function App() {
                 stats={stats}
                 initialTab="care"
                 onUpdatePet={handleUpdatePet}
+                onUpdateStats={handleUpdateStats}
                 onCoinsChange={handleCoinsChange}
                 onXpChange={handleXpChange}
                 onUpdateCosmetics={handleUpdateCosmetics}
@@ -1089,6 +1091,7 @@ export default function App() {
                 stats={stats}
                 initialTab="shop"
                 onUpdatePet={handleUpdatePet}
+                onUpdateStats={handleUpdateStats}
                 onCoinsChange={handleCoinsChange}
                 onXpChange={handleXpChange}
                 onUpdateCosmetics={handleUpdateCosmetics}

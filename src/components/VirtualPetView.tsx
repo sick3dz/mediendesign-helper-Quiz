@@ -29,7 +29,7 @@ import {
   ALL_COSMETICS,
   findCosmeticById,
 } from '../data/cosmeticsData';
-import { calculateLevel, LEVEL_LADDER, LevelTier } from '../services/storageService';
+import { calculateLevel, LEVEL_LADDER, LevelTier, getFreeCookieStatus, getTodayDateString } from '../services/storageService';
 import { PetAvatar } from './PetAvatar';
 import { soundEffects } from '../services/audioService';
 import confetti from 'canvas-confetti';
@@ -66,6 +66,7 @@ interface Props {
   stats: UserStats;
   initialTab?: 'pet' | 'shop' | 'inventory' | 'care' | 'wardrobe' | 'adopt';
   onUpdatePet: (updatedPet: PetState) => void;
+  onUpdateStats?: (updatedStats: UserStats) => void;
   onCoinsChange?: (newCoins: number) => void;
   onXpChange?: (newXp: number) => void;
   onUpdateCosmetics?: (unlocked: string[], equipped: EquippedCosmetics) => void;
@@ -82,6 +83,7 @@ export const VirtualPetView: React.FC<Props> = ({
   stats,
   initialTab = 'care',
   onUpdatePet,
+  onUpdateStats,
   onCoinsChange,
   onXpChange,
   onUpdateCosmetics,
@@ -344,39 +346,82 @@ export const VirtualPetView: React.FC<Props> = ({
   const handleBuyFood = (food: PetFood) => {
     const cost = food.xpPrice !== undefined ? food.xpPrice : Math.round(food.price * 0.8);
 
+    if (food.id === 'cookie' || cost === 0) {
+      const cookieStatus = getFreeCookieStatus(stats);
+      if (cookieStatus.isLocked) {
+        soundEffects.playWrong();
+        if (cookieStatus.lockReason === 'daily_limit') {
+          showTemporaryFeedback(`🔒 Tageslimit von 5 Gratis-Keksen erreicht! Bis morgen gesperrt.`);
+        } else {
+          showTemporaryFeedback(`🔒 Gratis-Keks gesperrt! Noch ${cookieStatus.formattedRemainingTime} Pause.`);
+        }
+        return;
+      }
+
+      soundEffects.playClick();
+      const currentQty = pet.inventory.food['cookie'] || 0;
+      const newCount = cookieStatus.countToday + 1;
+      const today = getTodayDateString();
+      // Always set 2 hours cooldown upon claiming a free cookie
+      const newLockedUntil = Date.now() + 2 * 3600 * 1000;
+
+      const updatedPet: PetState = {
+        ...pet,
+        inventory: {
+          ...pet.inventory,
+          food: {
+            ...pet.inventory.food,
+            cookie: currentQty + 1,
+          },
+        },
+      };
+
+      const updatedStats: UserStats = {
+        ...stats,
+        freeCookieClaimDate: today,
+        freeCookieClaimCount: newCount,
+        freeCookieLockedUntil: newLockedUntil,
+        pet: updatedPet,
+      };
+
+      if (onUpdateStats) {
+        onUpdateStats(updatedStats);
+      } else {
+        onUpdatePet(updatedPet);
+      }
+
+      if (newCount >= 5) {
+        showTemporaryFeedback(`🍪 Gratis Glücks-Keks erhalten! (5/5 heute erreicht – Limit für heute voll 🔒)`);
+      } else {
+        showTemporaryFeedback(`🍪 Gratis Glücks-Keks erhalten! (${newCount}/5 heute – jetzt 2 Std. Pause 🔒)`);
+      }
+      return;
+    }
+
     if (cost > 0 && xp < cost) {
       soundEffects.playWrong();
       showTemporaryFeedback(`Nicht genug EXP! Du benötigst ${cost} EXP.`);
       return;
     }
 
-    if (cost > 0) {
-      soundEffects.playCoin();
-      if (onXpChange) {
-        onXpChange(xp - cost);
-      }
-    } else {
-      soundEffects.playClick();
+    soundEffects.playCoin();
+    if (onXpChange) {
+      onXpChange(xp - cost);
     }
 
     const currentQty = pet.inventory.food[food.id] || 0;
-    const addQty = cost === 0 ? 5 : 1;
     const updated: PetState = {
       ...pet,
       inventory: {
         ...pet.inventory,
         food: {
           ...pet.inventory.food,
-          [food.id]: currentQty + addQty,
+          [food.id]: currentQty + 1,
         },
       },
     };
     onUpdatePet(updated);
-    if (cost === 0) {
-      showTemporaryFeedback(`🎉 +5x Gratis ${food.name} zum Vorrat hinzugefügt! (0 EXP)`);
-    } else {
-      showTemporaryFeedback(`1x ${food.name} gekauft! (-${cost} EXP)`);
-    }
+    showTemporaryFeedback(`1x ${food.name} gekauft! (-${cost} EXP)`);
   };
 
   // 5. Buying Pet Accessory (Hüte, Brillen, etc. - strictly using EXP points)
@@ -955,20 +1000,42 @@ export const VirtualPetView: React.FC<Props> = ({
                   <span className="text-3xl shrink-0">🥪</span>
                   <div>
                     <div className="text-xs font-bold text-slate-800 dark:text-slate-200">Dein Futtervorrat ist leer</div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">Hol dir leckere Snacks im Belohnungs-Shop mit deinen EXP!</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">Hol dir leckere Snacks im Belohnungs-Shop oder deinen täglichen Gratis-Keks!</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => {
-                    soundEffects.playClick();
-                    setActiveTab('shop');
-                    setShopCategory('food');
-                  }}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 cursor-pointer shadow-xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Zum Shop für Snacks</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  {(() => {
+                    const cookieStatus = getFreeCookieStatus(stats);
+                    return (
+                      <button
+                        onClick={() => handleBuyFood(PET_FOODS[0])}
+                        disabled={cookieStatus.isLocked}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+                          cookieStatus.isLocked
+                            ? 'opacity-60 bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-300 dark:border-slate-700'
+                            : 'bg-emerald-600 text-white hover:bg-emerald-700 active:scale-98 font-black'
+                        }`}
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                        <span>
+                          {cookieStatus.isLocked
+                            ? `🔒 Gesperrt (${cookieStatus.formattedRemainingTime})`
+                            : `Gratis Keks holen (${cookieStatus.remainingToday}/5 frei)`}
+                        </span>
+                      </button>
+                    );
+                  })()}
+                  <button
+                    onClick={() => {
+                      soundEffects.playClick();
+                      setActiveTab('shop');
+                      setShopCategory('food');
+                    }}
+                    className="px-3.5 py-2 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-bold hover:bg-slate-300 cursor-pointer shadow-xs inline-flex items-center gap-1.5 whitespace-nowrap shrink-0"
+                  >
+                    <span>Zum Shop</span>
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -1123,7 +1190,9 @@ export const VirtualPetView: React.FC<Props> = ({
               {PET_FOODS.map(food => {
                 const qty = pet.inventory.food[food.id] || 0;
                 const xpCost = food.xpPrice !== undefined ? food.xpPrice : Math.round(food.price * 0.8);
-                const canAffordXp = xpCost === 0 || xp >= xpCost;
+                const isFreeCookie = food.id === 'cookie' || xpCost === 0;
+                const cookieStatus = isFreeCookie ? getFreeCookieStatus(stats) : null;
+                const canAffordXp = isFreeCookie ? !cookieStatus?.isLocked : (xpCost === 0 || xp >= xpCost);
 
                 return (
                   <div
@@ -1133,11 +1202,19 @@ export const VirtualPetView: React.FC<Props> = ({
                     <div>
                       <div className="flex items-center justify-between">
                         <span className="text-3xl">{food.icon}</span>
-                        {qty > 0 && (
+                        {isFreeCookie && cookieStatus?.isLocked ? (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">
+                            🔒 2h Gesperrt
+                          </span>
+                        ) : isFreeCookie ? (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
+                            {cookieStatus?.countToday}/5 heute verwendet
+                          </span>
+                        ) : qty > 0 ? (
                           <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
                             {qty} im Vorrat
                           </span>
-                        )}
+                        ) : null}
                       </div>
                       <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-2">
                         {food.name}
@@ -1155,7 +1232,9 @@ export const VirtualPetView: React.FC<Props> = ({
                         onClick={() => handleBuyFood(food)}
                         disabled={!canAffordXp}
                         className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs ${
-                          xpCost === 0
+                          isFreeCookie && cookieStatus?.isLocked
+                            ? 'opacity-60 bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-300 dark:border-slate-700'
+                            : isFreeCookie
                             ? 'bg-emerald-600 text-white hover:bg-emerald-700 active:scale-98 font-black'
                             : canAffordXp
                             ? 'bg-indigo-600 text-white hover:bg-indigo-700 active:scale-98'
@@ -1163,7 +1242,13 @@ export const VirtualPetView: React.FC<Props> = ({
                         }`}
                       >
                         <Star className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
-                        <span>{xpCost === 0 ? 'Gratis holen (+5 Kekse)' : `${xpCost} EXP kaufen`}</span>
+                        <span>
+                          {isFreeCookie
+                            ? cookieStatus?.isLocked
+                              ? `🔒 Gesperrt (${cookieStatus.formattedRemainingTime})`
+                              : `Gratis Keks holen (${cookieStatus?.remainingToday}/5 frei)`
+                            : `${xpCost} EXP kaufen`}
+                        </span>
                       </button>
                     </div>
                   </div>

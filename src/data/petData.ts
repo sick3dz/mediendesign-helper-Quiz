@@ -107,7 +107,7 @@ export const PET_FOODS: PetFood[] = [
     icon: '🍪',
     nutrition: 25,
     happiness: 20,
-    description: 'Gratis-Snack! Unbegrenzt und kostenlos für dein Haustier.',
+    description: 'Gratis-Snack! Max. 5 am Tag (nach jedem Keks 2 Std. Pause).',
   },
   {
     id: 'snack_meal',

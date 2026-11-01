@@ -4,6 +4,7 @@ import { PET_SPECIES, PET_FOODS, PET_SPECIES_SOUNDS } from '../data/petData';
 import { findCosmeticById } from '../data/cosmeticsData';
 import { PetAvatar } from './PetAvatar';
 import { soundEffects } from '../services/audioService';
+import { getFreeCookieStatus, getTodayDateString } from '../services/storageService';
 import {
   Heart,
   Utensils,
@@ -13,6 +14,7 @@ import {
 interface Props {
   stats: UserStats;
   onUpdatePet: (updatedPet: PetState) => void;
+  onUpdateStats?: (updatedStats: UserStats) => void;
   onOpenShop?: (initialTab?: 'food' | 'accessories') => void;
   onOpenFullPetRoom: () => void;
   onOpenGames?: () => void;
@@ -25,6 +27,7 @@ interface Props {
 export const TopPetCompanionBar: React.FC<Props> = ({
   stats,
   onUpdatePet,
+  onUpdateStats,
   onOpenShop,
   onOpenFullPetRoom,
   onOpenGames,
@@ -87,40 +90,87 @@ export const TopPetCompanionBar: React.FC<Props> = ({
   );
 
   const handleQuickFeed = () => {
-    const [foodId, qty] = availableFoodEntry || ['cookie', 1];
-    const foodItem = PET_FOODS.find(f => f.id === foodId) || PET_FOODS[0];
-    if (!foodItem) return;
+    if (availableFoodEntry) {
+      const [foodId, qty] = availableFoodEntry;
+      const foodItem = PET_FOODS.find(f => f.id === foodId) || PET_FOODS[0];
+      if (!foodItem) return;
 
-    soundEffects.playEat();
-    setIsEating(true);
-    setTimeout(() => setIsEating(false), 800);
+      soundEffects.playEat();
+      setIsEating(true);
+      setTimeout(() => setIsEating(false), 800);
 
-    const currentQty = pet.inventory?.food?.[foodId] || 0;
-    const newFoodInventory = {
-      ...pet.inventory?.food,
-      [foodId]: Math.max(0, currentQty - 1),
-    };
+      const currentQty = pet.inventory?.food?.[foodId] || 0;
+      const newFoodInventory = {
+        ...pet.inventory?.food,
+        [foodId]: Math.max(0, currentQty - 1),
+      };
 
-    const newHunger = Math.min(100, pet.hunger + foodItem.nutrition);
-    const newHappiness = Math.min(100, pet.happiness + foodItem.happiness);
+      const newHunger = Math.min(100, pet.hunger + foodItem.nutrition);
+      const newHappiness = Math.min(100, pet.happiness + foodItem.happiness);
 
-    const updated: PetState = {
-      ...pet,
-      isSleeping: false,
-      hunger: newHunger,
-      happiness: newHappiness,
-      inventory: {
-        ...pet.inventory,
-        food: newFoodInventory,
-      },
-      timesFed: pet.timesFed + 1,
-    };
+      const updated: PetState = {
+        ...pet,
+        isSleeping: false,
+        hunger: newHunger,
+        happiness: newHappiness,
+        inventory: {
+          ...pet.inventory,
+          food: newFoodInventory,
+        },
+        timesFed: pet.timesFed + 1,
+      };
 
-    onUpdatePet(updated);
-    if (!availableFoodEntry) {
-      showFeedback(`Gratis Glücks-Keks verfüttert! 🍪 (+${foodItem.nutrition} Sättigung)`);
-    } else {
+      onUpdatePet(updated);
       showFeedback(`${foodItem.name} verfüttert! (+${foodItem.nutrition} Sättigung)`);
+    } else {
+      // Fallback: Gratis Glücks-Keks check limit (max 5 per day & 2h lock)
+      const cookieStatus = getFreeCookieStatus(stats);
+      if (cookieStatus.isLocked) {
+        soundEffects.playWrong();
+        showFeedback(`🔒 Vorrat leer! Gratis-Kekse gesperrt (${cookieStatus.formattedRemainingTime}).`);
+        return;
+      }
+
+      const foodItem = PET_FOODS[0]; // Glücks-Keks
+      soundEffects.playEat();
+      setIsEating(true);
+      setTimeout(() => setIsEating(false), 800);
+
+      const newHunger = Math.min(100, pet.hunger + foodItem.nutrition);
+      const newHappiness = Math.min(100, pet.happiness + foodItem.happiness);
+
+      const newClaimCount = cookieStatus.countToday + 1;
+      const todayStr = getTodayDateString();
+      // Always set 2 hours cooldown upon claiming/feeding a free cookie
+      const lockUntil = Date.now() + 2 * 3600 * 1000;
+
+      const updatedPet: PetState = {
+        ...pet,
+        isSleeping: false,
+        hunger: newHunger,
+        happiness: newHappiness,
+        timesFed: pet.timesFed + 1,
+      };
+
+      const updatedStats: UserStats = {
+        ...stats,
+        freeCookieClaimDate: todayStr,
+        freeCookieClaimCount: newClaimCount,
+        freeCookieLockedUntil: lockUntil,
+        pet: updatedPet,
+      };
+
+      if (onUpdateStats) {
+        onUpdateStats(updatedStats);
+      } else {
+        onUpdatePet(updatedPet);
+      }
+
+      if (newClaimCount >= 5) {
+        showFeedback(`Gratis-Keks verfüttert! 🍪 (5/5 heute – Limit für heute voll 🔒)`);
+      } else {
+        showFeedback(`Gratis-Keks verfüttert! 🍪 (${newClaimCount}/5 heute – jetzt 2 Std. Pause 🔒)`);
+      }
     }
   };
 

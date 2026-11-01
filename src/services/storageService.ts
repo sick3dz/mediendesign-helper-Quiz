@@ -89,7 +89,70 @@ const DEFAULT_STATS: UserStats = {
   questionPerformance: {},
   topicMastery: {},
   examScores: [],
+  freeCookieClaimDate: getTodayDateString(),
+  freeCookieClaimCount: 0,
+  freeCookieLockedUntil: 0,
 };
+
+export interface FreeCookieStatus {
+  isLocked: boolean;
+  lockReason: 'daily_limit' | 'cooldown' | null;
+  remainingLockTimeMs: number;
+  formattedRemainingTime: string;
+  countToday: number;
+  maxDaily: number;
+  remainingToday: number;
+}
+
+export function getFreeCookieStatus(stats: UserStats): FreeCookieStatus {
+  const today = getTodayDateString();
+  const now = Date.now();
+
+  const claimDate = stats.freeCookieClaimDate || '';
+  const rawCount = typeof stats.freeCookieClaimCount === 'number' ? stats.freeCookieClaimCount : 0;
+  const lockedUntil = typeof stats.freeCookieLockedUntil === 'number' ? stats.freeCookieLockedUntil : 0;
+
+  // The daily claim count strictly resets ONLY when a new calendar day arrives
+  const countToday = claimDate === today ? rawCount : 0;
+
+  const remainingLockTimeMs = Math.max(0, lockedUntil - now);
+  const isCooldownLocked = remainingLockTimeMs > 0;
+  const isDailyLimitReached = countToday >= 5;
+  const isLocked = isCooldownLocked || isDailyLimitReached;
+
+  let lockReason: 'daily_limit' | 'cooldown' | null = null;
+  if (isDailyLimitReached) {
+    lockReason = 'daily_limit';
+  } else if (isCooldownLocked) {
+    lockReason = 'cooldown';
+  }
+
+  let formattedRemainingTime = '';
+  if (remainingLockTimeMs > 0) {
+    const totalMins = Math.ceil(remainingLockTimeMs / 60000);
+    const hours = Math.floor(totalMins / 60);
+    const mins = totalMins % 60;
+    if (hours > 0 && mins > 0) {
+      formattedRemainingTime = `${hours} Std. ${mins} Min.`;
+    } else if (hours > 0) {
+      formattedRemainingTime = `${hours} Std.`;
+    } else {
+      formattedRemainingTime = `${mins} Min.`;
+    }
+  } else if (isDailyLimitReached) {
+    formattedRemainingTime = 'Bis morgen';
+  }
+
+  return {
+    isLocked,
+    lockReason,
+    remainingLockTimeMs,
+    formattedRemainingTime,
+    countToday,
+    maxDaily: 5,
+    remainingToday: Math.max(0, 5 - countToday),
+  };
+}
 
 export const ALL_BADGES: Badge[] = [
   {
@@ -363,6 +426,9 @@ export function loadUserStats(): UserStats {
         ...DEFAULT_STATS.equippedCosmetics,
         ...(parsed.equippedCosmetics || {}),
       },
+      freeCookieClaimDate: parsed.freeCookieClaimDate || getTodayDateString(),
+      freeCookieClaimCount: typeof parsed.freeCookieClaimCount === 'number' ? parsed.freeCookieClaimCount : 0,
+      freeCookieLockedUntil: typeof parsed.freeCookieLockedUntil === 'number' ? parsed.freeCookieLockedUntil : 0,
     };
   } catch {
     return DEFAULT_STATS;

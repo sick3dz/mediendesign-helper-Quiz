@@ -204,6 +204,9 @@ export interface UserStats {
     percentage: number;
     grade: string;
   }[];
+  freeCookieClaimDate?: string;
+  freeCookieClaimCount?: number;
+  freeCookieLockedUntil?: number;
 }
 
 export interface Badge {
