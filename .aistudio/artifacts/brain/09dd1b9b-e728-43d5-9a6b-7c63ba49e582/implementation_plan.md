@@ -1,32 +1,41 @@
-# Implementierungsplan: Gamification & Belohnungen – Zähler, EXP-Sync & Logik-Bereinigung (Abgeschlossen)
+# Implementierungsplan: Unterbrechungsfreier Spielfluss & IHK-Fehlerdossier + UI-Inspector (Abgeschlossen)
 
-Umfassende Prüfung und Bereinigung der vier Unterbereiche unter **„GAMIFICATION & BELOHNUNGEN“** (*Aktueller Rang*, *Errungenschaften & Meilensteine*, *Haustier Lounge*, *EXP Shop*), insbesondere der Anzeige **„Eingelöst 0 / 0“**, der Datenpersistenz und der EXP-Guthaben-Logik.
+Erfolgreich umgesetzt nach Nutzerwunsch: Der **Spielfluss während des Spielens bleibt vollständig ungestört** (keine Zwangspausen bei Fehlern, Zeitdruck und Combo-Ketten laufen sauber durch). Am Ende jeder Runde liefert ein interaktives **IHK-Lern-Dossier** die detaillierten Begründungen zu allen Fehlern. Zudem wurde das brandneue Spiel **„UI-Inspector“** integriert.
 
 ---
 
-## 1. Durchgeführte Korrekturen
+## 1. Durchgeführte Implementierungen
 
-1. **Behebung des Anzeigefehlers „Eingelöst 0 / 0“ (`AchievementsMilestonesView.tsx`)**:
-   - Karte 2 berechnet nun `{totalClaimed} / {totalCount}` (z. B. `0 / 12` aller Erfolge eingelöst) anstelle der fehlerhaften Division durch `{totalUnlocked}`.
-   - Kontextuelle Statuszeilen hinzugefügt:
-     - **Freigeschaltet**: Zeigt `{totalUnlocked} / {totalCount}` sowie die prozentuale Quote aller Erfolge.
-     - **Eingelöst**: Zeigt `{totalClaimed} / {totalCount}` sowie den Status `{claimableCount > 0 ? "... noch abholbereit" : "Alles abgeholt"}`.
-     - **Bereit zum Abholen**: Zeigt die abholbaren Belohnungen (mit animiertem Geschenk-Icon).
-     - **Lern-Streak**: Zeigt den aktuellen Streak mit Hinweistext zur täglichen Kontinuität.
+1. **Spielfluss & Runden-Dossier in `SpeedQuizGame.tsx`**:
+   - Das Spiel läuft während der Fragen ohne Zwangspause durch.
+   - Am Spielende wird eine strukturierte **„📘 IHK-Fehleranalyse & Lern-Dossier“** angezeigt:
+     - Fragetext & Zeitablauf-Status.
+     - ❌ Deine gewählte Antwort + IHK-Fallen-Erklärung (`trapExplanation`).
+     - ✅ Korrekte IHK-Lösung + ausführliche IHK-Begründung (`correctOpt.explanation`).
+     - 📌 Offizieller IHK-Prüfer-Tipp (`examTip`).
+     - Bei fehlerfreiem Durchgang: Goldenes Siegel *„100% Perfekt ⭐“*.
 
-2. **Atomare Datenspeicherung & Persistenz (`App.tsx` & `PetAchievementsSection.tsx`)**:
-   - `handleUpdateStats(updatedStats)` implementiert: Speichert Änderungen sofort in `localStorage` (`saveUserStats`) und synchronisiert den State in einer einzigen Transaktion.
-   - Beseitigung paralleler Race Conditions zwischen `onUpdateStats`, `onXpChange` und `onCoinsChange`.
-   - Eingelöste Errungenschaften, Bonus-XP und Coins bleiben nun auch nach einem Reload oder Navigation dauerhaft erhalten.
+2. **Boss-Schadensbericht in `BossRaidGame.tsx`**:
+   - Schnelle rundenbasierte Kampf-Dynamik ohne Unterbrechung.
+   - Nach Sieg oder Niederlage: Ausführliche **IHK-Fehleranalyse** aller erlittenen Konter-Angriffe mit genauer Begründung der richtigen IHK-Normen.
 
-3. **EXP-Synchronisation: Rang-EXP vs. Shop-Guthaben**:
-   - `lifetimeXp` (Gesamt-EXP) bestimmt unveränderlich die Stufenleiter 1–7 und sinkt bei Einkäufen niemals ab.
-   - `xp` dient als ausgabefähiges Guthaben im *EXP Shop*.
+3. **Neues Spiel `UiInspectorGame.tsx`**:
+   - Interaktives UX- & Barrierefreiheits-Audit eines echten Interface-Screens (*IxD-Shop Express*).
+   - 5 interaktiv auffindbare IHK-Mängel:
+     1. **Kontrast**: Text 2.1:1 statt mindestens 4.5:1 (WCAG 1.4.3).
+     2. **Touch-Target**: Zu kleine 20px Klickfläche statt $\ge 44\text{px}$ (WCAG 2.5.5).
+     3. **Gestaltgesetz der Nähe**: Rabatt-Hinweis klebt am falschen Formularfeld.
+     4. **Formular-Labels**: Fehlendes `<label>` und reiner Platzhalter (WCAG 3.3.2).
+     5. **Affordance & Signifier**: Destruktiver Lösch-Button irreführend in Frühlingsgrün gestaltet.
+   - Feedback bei Treffern (IHK-Norm, Begründung, Lösungsansatz) und bei Klick auf normgerechte Elemente.
+   - Belohnung von bis zu +200 EXP & Coins für den Rang und das Haustier.
+
+4. **Integration in `MiniGamesHubView.tsx`**:
+   - Spielkarte für **UI-Inspector** unter `studyQuestGames` mit Badge `🔍 UI- & A11y-Audit` hinzugefügt und spielbar geschaltet.
 
 ---
 
 ## 2. Verifikation
 
 - **Build-Check**: `compile_applet` erfolgreich abgeschlossen.
-- **Linting**: `tsc --noEmit` ohne Fehler durchgelaufen.
-- **Zähler-Validierung**: Bei Initialzustand mit 0 freigeschalteten Erfolgen wird sauber `0 / 12` statt `0 / 0` angezeigt.
+- **Lint-Check**: `tsc --noEmit` ohne Fehler durchgelaufen.

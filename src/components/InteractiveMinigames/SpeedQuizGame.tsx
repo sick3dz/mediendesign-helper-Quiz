@@ -8,6 +8,12 @@ interface Props {
   onComplete: (score: number) => void;
 }
 
+interface MissedQuestion {
+  question: QuizQuestion;
+  selectedOptionId: string | null;
+  isTimeout?: boolean;
+}
+
 export const SpeedQuizGame: React.FC<Props> = ({ onComplete }) => {
   const QUESTION_TIME = 12; // 12 seconds per question
   const TOTAL_QUESTIONS = 8;
@@ -22,6 +28,7 @@ export const SpeedQuizGame: React.FC<Props> = ({ onComplete }) => {
   const [correctCount, setCorrectCount] = useState(0);
   const [totalXpEarned, setTotalXpEarned] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [missedQuestions, setMissedQuestions] = useState<MissedQuestion[]>([]);
 
   // Initialize random questions
   useEffect(() => {
@@ -40,6 +47,7 @@ export const SpeedQuizGame: React.FC<Props> = ({ onComplete }) => {
     setCorrectCount(0);
     setTotalXpEarned(0);
     setIsGameOver(false);
+    setMissedQuestions([]);
   };
 
   // Timer Countdown
@@ -64,6 +72,8 @@ export const SpeedQuizGame: React.FC<Props> = ({ onComplete }) => {
     soundEffects.playWrong();
     setIsAnswered(true);
     setStreak(0);
+    const currentQ = questions[currentIndex];
+    setMissedQuestions(prev => [...prev, { question: currentQ, selectedOptionId: null, isTimeout: true }]);
 
     setTimeout(() => {
       nextQuestion();
@@ -96,6 +106,7 @@ export const SpeedQuizGame: React.FC<Props> = ({ onComplete }) => {
     } else {
       soundEffects.playWrong();
       setStreak(0);
+      setMissedQuestions(prev => [...prev, { question: currentQ, selectedOptionId: optionId, isTimeout: false }]);
     }
 
     setTimeout(() => {
@@ -128,21 +139,21 @@ export const SpeedQuizGame: React.FC<Props> = ({ onComplete }) => {
 
   if (isGameOver) {
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-md text-center space-y-6 animate-fade-in">
-        <div className="w-16 h-16 mx-auto rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 flex items-center justify-center text-amber-500">
-          <Trophy className="w-8 h-8" />
-        </div>
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-md space-y-6 animate-fade-in max-w-2xl mx-auto text-left">
+        <div className="text-center space-y-2">
+          <div className="w-16 h-16 mx-auto rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 flex items-center justify-center text-amber-500">
+            <Trophy className="w-8 h-8" />
+          </div>
 
-        <div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">
             Speed-Quest Abgeschlossen!
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Du hast deinen Speed-Run erfolgreich gemeistert!
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Du hast deinen Speed-Run gemeistert. Hier ist deine Runden-Auswertung:
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
+        <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-md mx-auto text-center">
           <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
             <div className="text-xs text-slate-500">Richtig</div>
             <div className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
@@ -167,10 +178,95 @@ export const SpeedQuizGame: React.FC<Props> = ({ onComplete }) => {
           </div>
         </div>
 
+        {/* IHK-Fehleranalyse & Lern-Dossier */}
+        <div className="border-t border-slate-200 dark:border-slate-800 pt-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <span>📘 IHK-Fehleranalyse & Lern-Dossier</span>
+              </h3>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                {missedQuestions.length === 0
+                  ? 'Perfekter Lauf! Keine Fehler gemacht – 100% IHK-Präzision.'
+                  : `${missedQuestions.length} verfehlte ${missedQuestions.length === 1 ? 'Frage' : 'Fragen'} im Detail aufbereitet:`}
+              </p>
+            </div>
+            {missedQuestions.length === 0 && (
+              <span className="text-xs font-bold font-mono px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                100% Perfekt ⭐
+              </span>
+            )}
+          </div>
+
+          {missedQuestions.length > 0 && (
+            <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+              {missedQuestions.map(({ question: q, selectedOptionId: selId, isTimeout }, idx) => {
+                const chosenOpt = q.options.find(o => o.id === selId);
+                const correctOpt = q.options.find(o => o.isCorrect);
+
+                return (
+                  <div
+                    key={q.id || idx}
+                    className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2.5 text-xs"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="font-bold text-slate-900 dark:text-white leading-snug">
+                        #{idx + 1}: {q.question}
+                      </span>
+                      {isTimeout && (
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 shrink-0">
+                          ⏱️ Zeit abgelaufen
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                      {chosenOpt && !isTimeout && (
+                        <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-800 dark:text-rose-300">
+                          <span className="text-[10px] font-bold block uppercase tracking-wider mb-0.5">
+                            ❌ Deine gewählte Antwort:
+                          </span>
+                          <span className="font-medium">{chosenOpt.text}</span>
+                        </div>
+                      )}
+                      {correctOpt && (
+                        <div className={`p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 text-emerald-800 dark:text-emerald-300 ${!chosenOpt ? 'sm:col-span-2' : ''}`}>
+                          <span className="text-[10px] font-bold block uppercase tracking-wider mb-0.5">
+                            ✅ Richtige IHK-Lösung:
+                          </span>
+                          <span className="font-medium">{correctOpt.text}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {chosenOpt?.trapExplanation && (
+                      <div className="p-2 rounded-lg bg-rose-50/60 dark:bg-rose-950/30 text-rose-800 dark:text-rose-300 text-[11px] leading-relaxed">
+                        <span className="font-bold">⚠️ IHK-Falle:</span> {chosenOpt.trapExplanation}
+                      </div>
+                    )}
+
+                    {correctOpt?.explanation && (
+                      <div className="p-2.5 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-900/60 text-indigo-900 dark:text-indigo-200 text-[11px] leading-relaxed">
+                        <span className="font-bold block mb-0.5">💡 IHK-Begründung:</span>
+                        <span>{correctOpt.explanation}</span>
+                        {q.examTip && (
+                          <div className="mt-1 pt-1 border-t border-indigo-200/60 dark:border-indigo-800/60 font-semibold text-indigo-800 dark:text-indigo-300">
+                            📌 Prüfer-Tipp: {q.examTip}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         <div className="flex justify-center gap-3 pt-2">
           <button
             onClick={restartGame}
-            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs"
           >
             <RotateCcw className="w-4 h-4" />
             <span>Erneut spielen</span>

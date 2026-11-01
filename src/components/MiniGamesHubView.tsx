@@ -6,6 +6,7 @@ import { WcagMatchGame } from './InteractiveMinigames/WcagMatchGame';
 import { SpeedQuizGame } from './InteractiveMinigames/SpeedQuizGame';
 import { MemoryMatchGame } from './InteractiveMinigames/MemoryMatchGame';
 import { BossRaidGame } from './InteractiveMinigames/BossRaidGame';
+import { UiInspectorGame } from './InteractiveMinigames/UiInspectorGame';
 import {
   Gamepad2,
   ArrowLeft,
@@ -17,6 +18,7 @@ import {
   Swords,
   Brain,
   Trophy,
+  Search,
 } from 'lucide-react';
 import { soundEffects } from '../services/audioService';
 
@@ -29,6 +31,7 @@ type GameId =
   | 'speed-quiz'
   | 'memory'
   | 'boss-raid'
+  | 'ui-inspector'
   | 'affordance'
   | 'phishing'
   | 'process'
@@ -47,20 +50,28 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
       xpBonus: 'Bis zu +200 EXP',
     },
     {
-      id: 'memory' as const,
-      title: 'IHK-Begriffe Memory-Match',
-      desc: 'Finde zusammengehörige Paare aus Fachbegriffen und IHK-Definitionen so schnell wie möglich.',
-      badge: '🧠 Begriffspaar-Matching',
-      icon: Brain,
-      xpBonus: 'Bis zu +150 EXP',
-    },
-    {
       id: 'boss-raid' as const,
       title: 'Boss-Raid: Prüfungsgigant Duell',
       desc: 'Rundenbasierter Kampf gegen den Prüfungsboss! Jede richtige Antwort zieht dem Boss Lebenspunkte ab.',
       badge: '⚔️ Boss-Fight',
       icon: Swords,
       xpBonus: '+250 EXP bei Sieg',
+    },
+    {
+      id: 'ui-inspector' as const,
+      title: 'UI-Inspector (Usability- & Kontrast-Audit)',
+      desc: 'Enttarne 5 versteckte Gestaltungs- und A11y-Mängel im Interface-Mockup nach WCAG 2.1 & ISO 9241.',
+      badge: '🔍 UI- & A11y-Audit',
+      icon: Search,
+      xpBonus: 'Bis zu +200 EXP',
+    },
+    {
+      id: 'memory' as const,
+      title: 'IHK-Begriffe Memory-Match',
+      desc: 'Finde zusammengehörige Paare aus Fachbegriffen und IHK-Definitionen so schnell wie möglich.',
+      badge: '🧠 Begriffspaar-Matching',
+      icon: Brain,
+      xpBonus: 'Bis zu +150 EXP',
     },
   ];
 
@@ -123,6 +134,10 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
 
         {activeGame === 'boss-raid' && (
           <BossRaidGame onComplete={score => onScoreEarned(score)} />
+        )}
+
+        {activeGame === 'ui-inspector' && (
+          <UiInspectorGame onComplete={score => onScoreEarned(score)} />
         )}
 
         {activeGame === 'affordance' && (

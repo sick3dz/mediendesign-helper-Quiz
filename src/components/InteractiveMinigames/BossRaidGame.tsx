@@ -8,6 +8,11 @@ interface Props {
   onComplete: (score: number) => void;
 }
 
+interface MissedCombatQuestion {
+  question: QuizQuestion;
+  selectedOptionId: string;
+}
+
 export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -18,6 +23,7 @@ export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
   const [lastActionText, setLastActionText] = useState<string | null>(null);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isWon, setIsWon] = useState(false);
+  const [missedQuestions, setMissedQuestions] = useState<MissedCombatQuestion[]>([]);
 
   useEffect(() => {
     restartGame();
@@ -34,6 +40,7 @@ export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
     setLastActionText('Der IHK-Prüfungsboss fordert dich heraus!');
     setIsGameOver(false);
     setIsWon(false);
+    setMissedQuestions([]);
   };
 
   const handleSelectOption = (optionId: string) => {
@@ -50,7 +57,7 @@ export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
       const damage = Math.floor(Math.random() * 10) + 25; // 25 to 35 damage
       const newBossHp = Math.max(0, bossHp - damage);
       setBossHp(newBossHp);
-      setLastActionText(` Volltreffer! Du fügst dem Boss ${damage} Schaden zu!`);
+      setLastActionText(`🎯 Volltreffer! Du fügst dem Boss ${damage} Schaden zu!`);
 
       if (newBossHp === 0) {
         setTimeout(() => {
@@ -63,10 +70,11 @@ export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
       }
     } else {
       soundEffects.playWrong();
+      setMissedQuestions(prev => [...prev, { question: currentQ, selectedOptionId: optionId }]);
       const playerDamage = 20;
       const newPlayerHp = Math.max(0, playerHp - playerDamage);
       setPlayerHp(newPlayerHp);
-      setLastActionText(` Konter-Angriff! Der Boss fügt dir ${playerDamage} Schaden zu.`);
+      setLastActionText(`💥 Konter-Angriff! Der Boss fügt dir ${playerDamage} Schaden zu.`);
 
       if (newPlayerHp === 0) {
         setTimeout(() => {
@@ -97,29 +105,29 @@ export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
 
   if (isGameOver) {
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-md text-center space-y-6 animate-fade-in">
-        <div
-          className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center border ${
-            isWon
-              ? 'bg-amber-100 dark:bg-amber-950/60 border-amber-300 dark:border-amber-700 text-amber-500'
-              : 'bg-rose-100 dark:bg-rose-950/60 border-rose-300 dark:border-rose-700 text-rose-500'
-          }`}
-        >
-          {isWon ? <Trophy className="w-8 h-8" /> : <Swords className="w-8 h-8" />}
-        </div>
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-md space-y-6 animate-fade-in max-w-2xl mx-auto text-left">
+        <div className="text-center space-y-2">
+          <div
+            className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center border ${
+              isWon
+                ? 'bg-amber-100 dark:bg-amber-950/60 border-amber-300 dark:border-amber-700 text-amber-500'
+                : 'bg-rose-100 dark:bg-rose-950/60 border-rose-300 dark:border-rose-700 text-rose-500'
+            }`}
+          >
+            {isWon ? <Trophy className="w-8 h-8" /> : <Swords className="w-8 h-8" />}
+          </div>
 
-        <div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">
             {isWon ? 'Boss Besiegt! 🎉' : 'Kampf Verloren! ⚔️'}
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             {isWon
               ? 'Du hast den IHK-Prüfungsboss durch exzellentes Fachwissen bezwungen!'
-              : 'Deine Lebenspunkte sind auf 0 gefallen. Versuche es gleich noch einmal!'}
+              : 'Deine Lebenspunkte sind auf 0 gefallen. Analysiere deine Fehler und starte die Revanche!'}
           </p>
         </div>
 
-        <div className="p-4 bg-indigo-50 dark:bg-indigo-950/60 rounded-xl border border-indigo-200 dark:border-indigo-800 max-w-xs mx-auto">
+        <div className="p-4 bg-indigo-50 dark:bg-indigo-950/60 rounded-xl border border-indigo-200 dark:border-indigo-800 max-w-xs mx-auto text-center">
           <div className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">EXP Belohnung</div>
           <div className="text-xl font-extrabold text-indigo-700 dark:text-indigo-300 flex items-center justify-center gap-1.5 mt-0.5">
             <Sparkles className="w-5 h-5 text-amber-400" />
@@ -127,10 +135,88 @@ export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
           </div>
         </div>
 
+        {/* IHK-Fehleranalyse & Lern-Dossier */}
+        <div className="border-t border-slate-200 dark:border-slate-800 pt-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <span>📘 IHK-Fehleranalyse ({missedQuestions.length} Fehler)</span>
+              </h3>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                {missedQuestions.length === 0
+                  ? 'Makelloser Sieg! Alle Fragen wurden fehlerfrei beantwortet.'
+                  : 'Ausführliche didaktische Erklärungen zu den verfehlten Fragen:'}
+              </p>
+            </div>
+            {missedQuestions.length === 0 && (
+              <span className="text-xs font-bold font-mono px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                Makelloser Sieg ⭐
+              </span>
+            )}
+          </div>
+
+          {missedQuestions.length > 0 && (
+            <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+              {missedQuestions.map(({ question: q, selectedOptionId: selId }, idx) => {
+                const chosenOpt = q.options.find(o => o.id === selId);
+                const correctOpt = q.options.find(o => o.isCorrect);
+
+                return (
+                  <div
+                    key={q.id || idx}
+                    className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2.5 text-xs"
+                  >
+                    <div className="font-bold text-slate-900 dark:text-white leading-snug">
+                      #{idx + 1}: {q.question}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                      {chosenOpt && (
+                        <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-800 dark:text-rose-300">
+                          <span className="text-[10px] font-bold block uppercase tracking-wider mb-0.5">
+                            ❌ Deine Antwort (Konter erlitten):
+                          </span>
+                          <span className="font-medium">{chosenOpt.text}</span>
+                        </div>
+                      )}
+                      {correctOpt && (
+                        <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 text-emerald-800 dark:text-emerald-300">
+                          <span className="text-[10px] font-bold block uppercase tracking-wider mb-0.5">
+                            ✅ Richtige IHK-Lösung:
+                          </span>
+                          <span className="font-medium">{correctOpt.text}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {chosenOpt?.trapExplanation && (
+                      <div className="p-2 rounded-lg bg-rose-50/60 dark:bg-rose-950/30 text-rose-800 dark:text-rose-300 text-[11px] leading-relaxed">
+                        <span className="font-bold">⚠️ IHK-Falle:</span> {chosenOpt.trapExplanation}
+                      </div>
+                    )}
+
+                    {correctOpt?.explanation && (
+                      <div className="p-2.5 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-900/60 text-indigo-900 dark:text-indigo-200 text-[11px] leading-relaxed">
+                        <span className="font-bold block mb-0.5">💡 IHK-Begründung & Prüfungsregel:</span>
+                        <span>{correctOpt.explanation}</span>
+                        {q.examTip && (
+                          <div className="mt-1 pt-1 border-t border-indigo-200/60 dark:border-indigo-800/60 font-semibold text-indigo-800 dark:text-indigo-300">
+                            📌 Prüfer-Tipp: {q.examTip}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         <div className="flex justify-center pt-2">
           <button
             onClick={restartGame}
-            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs"
+            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs"
           >
             <RotateCcw className="w-4 h-4" />
             <span>Revanche / Erneut kämpfen</span>
