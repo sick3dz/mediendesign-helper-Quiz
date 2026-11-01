@@ -323,32 +323,41 @@ export const VirtualPetView: React.FC<Props> = ({
 
   // 4. Buying Food (strictly using EXP points)
   const handleBuyFood = (food: PetFood) => {
-    const cost = food.xpPrice || Math.round(food.price * 0.8);
+    const cost = food.xpPrice !== undefined ? food.xpPrice : Math.round(food.price * 0.8);
 
-    if (xp < cost) {
+    if (cost > 0 && xp < cost) {
       soundEffects.playWrong();
       showTemporaryFeedback(`Nicht genug EXP! Du benötigst ${cost} EXP.`);
       return;
     }
 
-    soundEffects.playCoin();
-    if (onXpChange) {
-      onXpChange(xp - cost);
+    if (cost > 0) {
+      soundEffects.playCoin();
+      if (onXpChange) {
+        onXpChange(xp - cost);
+      }
+    } else {
+      soundEffects.playClick();
     }
 
     const currentQty = pet.inventory.food[food.id] || 0;
+    const addQty = cost === 0 ? 5 : 1;
     const updated: PetState = {
       ...pet,
       inventory: {
         ...pet.inventory,
         food: {
           ...pet.inventory.food,
-          [food.id]: currentQty + 1,
+          [food.id]: currentQty + addQty,
         },
       },
     };
     onUpdatePet(updated);
-    showTemporaryFeedback(`1x ${food.name} gekauft! (-${cost} EXP)`);
+    if (cost === 0) {
+      showTemporaryFeedback(`🎉 +5x Gratis ${food.name} zum Vorrat hinzugefügt! (0 EXP)`);
+    } else {
+      showTemporaryFeedback(`1x ${food.name} gekauft! (-${cost} EXP)`);
+    }
   };
 
   // 5. Buying Pet Accessory (Hüte, Brillen, etc. - strictly using EXP points)
@@ -1216,8 +1225,8 @@ export const VirtualPetView: React.FC<Props> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {PET_FOODS.map(food => {
                 const qty = pet.inventory.food[food.id] || 0;
-                const xpCost = food.xpPrice || Math.round(food.price * 0.8);
-                const canAffordXp = xp >= xpCost;
+                const xpCost = food.xpPrice !== undefined ? food.xpPrice : Math.round(food.price * 0.8);
+                const canAffordXp = xpCost === 0 || xp >= xpCost;
 
                 return (
                   <div
@@ -1249,13 +1258,15 @@ export const VirtualPetView: React.FC<Props> = ({
                         onClick={() => handleBuyFood(food)}
                         disabled={!canAffordXp}
                         className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs ${
-                          canAffordXp
+                          xpCost === 0
+                            ? 'bg-emerald-600 text-white hover:bg-emerald-700 active:scale-98 font-black'
+                            : canAffordXp
                             ? 'bg-indigo-600 text-white hover:bg-indigo-700 active:scale-98'
                             : 'opacity-40 bg-slate-200 dark:bg-slate-800 text-slate-500 cursor-not-allowed'
                         }`}
                       >
                         <Star className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
-                        <span>{xpCost} EXP kaufen</span>
+                        <span>{xpCost === 0 ? 'Gratis holen (+5 Kekse)' : `${xpCost} EXP kaufen`}</span>
                       </button>
                     </div>
                   </div>

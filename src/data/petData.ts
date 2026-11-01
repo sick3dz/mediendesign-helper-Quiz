@@ -102,12 +102,12 @@ export const PET_FOODS: PetFood[] = [
   {
     id: 'cookie',
     name: 'Glücks-Keks',
-    price: 30,
-    xpPrice: 25,
+    price: 0,
+    xpPrice: 0,
     icon: '🍪',
-    nutrition: 20,
-    happiness: 15,
-    description: 'Ein kleiner süßer Snack für zwischendurch.',
+    nutrition: 25,
+    happiness: 20,
+    description: 'Gratis-Snack! Unbegrenzt und kostenlos für dein Haustier.',
   },
   {
     id: 'snack_meal',
@@ -519,7 +519,7 @@ export const DEFAULT_PET_STATE: PetState = {
   },
   inventory: {
     food: {
-      cookie: 3, // starts with 3 free welcome treats
+      cookie: 10, // starts with 10 free cookies
       snack_meal: 1,
     },
     accessories: [],
@@ -560,13 +560,10 @@ export function calculatePetDecay(pet: PetState): PetState {
   let currentHunger = pet.hunger ?? 85;
   let currentHappiness = pet.happiness ?? 85;
 
-  // Immortal Pet Design: Gentle decay with strict safe floors (minimum 30%).
-  // The pet NEVER starves, NEVER dies, and NEVER loses items or leaves the user.
-  currentHunger = Math.max(30, currentHunger - elapsedHours * 2.5);
-
-  if (currentHunger < 40) {
-    currentHappiness = Math.max(30, currentHappiness - elapsedHours * 1.5);
-  }
+  // Immortal Pet Design: Extremely gentle decay with strict safe floors (minimum 60% saturation).
+  // The pet NEVER starves, NEVER dies, and decay is slowed down 5x.
+  currentHunger = Math.max(60, currentHunger - elapsedHours * 0.5);
+  currentHappiness = Math.max(60, currentHappiness - elapsedHours * 0.3);
 
   return {
     ...pet,

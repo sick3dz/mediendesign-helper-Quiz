@@ -92,23 +92,18 @@ export const TopPetCompanionBar: React.FC<Props> = ({
   );
 
   const handleQuickFeed = () => {
-    if (!availableFoodEntry) {
-      showFeedback('Keine Snacks mehr! Öffne den EXP-Shop.');
-      onOpenShop('food');
-      return;
-    }
-
-    const [foodId, qty] = availableFoodEntry;
-    const foodItem = PET_FOODS.find(f => f.id === foodId);
+    const [foodId, qty] = availableFoodEntry || ['cookie', 1];
+    const foodItem = PET_FOODS.find(f => f.id === foodId) || PET_FOODS[0];
     if (!foodItem) return;
 
     soundEffects.playEat();
     setIsEating(true);
     setTimeout(() => setIsEating(false), 800);
 
+    const currentQty = pet.inventory?.food?.[foodId] || 0;
     const newFoodInventory = {
-      ...pet.inventory.food,
-      [foodId]: qty - 1,
+      ...pet.inventory?.food,
+      [foodId]: Math.max(0, currentQty - 1),
     };
 
     const newHunger = Math.min(100, pet.hunger + foodItem.nutrition);
@@ -127,7 +122,11 @@ export const TopPetCompanionBar: React.FC<Props> = ({
     };
 
     onUpdatePet(updated);
-    showFeedback(`${foodItem.name} verfüttert! (+${foodItem.nutrition} Sättigung)`);
+    if (!availableFoodEntry) {
+      showFeedback(`Gratis Glücks-Keks verfüttert! 🍪 (+${foodItem.nutrition} Sättigung)`);
+    } else {
+      showFeedback(`${foodItem.name} verfüttert! (+${foodItem.nutrition} Sättigung)`);
+    }
   };
 
   const moodLabel = pet.isSleeping
