@@ -345,7 +345,6 @@ export default function App() {
         dailyMissions: updatedMissions,
         completedModules: updatedCompleted,
         completedModulesLevel2: updatedLvl2,
-        answeredQuestionsCount: prev.answeredQuestionsCount + 1,
         earnedBadges: checkBadgeUnlocks({
           ...prev,
           pet: updatedPet,
@@ -354,7 +353,6 @@ export default function App() {
           coins: newCoins,
           completedModules: updatedCompleted,
           completedModulesLevel2: updatedLvl2,
-          answeredQuestionsCount: prev.answeredQuestionsCount + 1,
         }),
       };
 
@@ -374,7 +372,6 @@ export default function App() {
       });
       const nextStats: UserStats = {
         ...prev,
-        correctAnswersCount: prev.correctAnswersCount + 1,
         dailyMissions: updatedMissions,
       };
       saveUserStats(nextStats);

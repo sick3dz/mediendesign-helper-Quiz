@@ -407,12 +407,30 @@ export function loadUserStats(): UserStats {
       ? Math.max(parsed.lifetimeXp, parsedXp)
       : Math.max(parsedXp, levelLadderFloor);
 
+    // Calculate question stats sanity check from questionPerformance
+    const rawAnswered = typeof parsed.answeredQuestionsCount === 'number' ? parsed.answeredQuestionsCount : 0;
+    const rawCorrect = typeof parsed.correctAnswersCount === 'number' ? parsed.correctAnswersCount : 0;
+    const perfEntries = Object.values(parsed.questionPerformance || {});
+    let perfCorrect = 0;
+    let perfAnswered = 0;
+    perfEntries.forEach((p: any) => {
+      const c = typeof p.correctCount === 'number' ? p.correctCount : 0;
+      const w = typeof p.wrongCount === 'number' ? p.wrongCount : 0;
+      perfCorrect += c;
+      perfAnswered += (c + w);
+    });
+
+    const sanitizedCorrect = Math.max(rawCorrect, perfCorrect);
+    const sanitizedAnswered = Math.max(rawAnswered, perfAnswered, sanitizedCorrect);
+
     return {
       ...DEFAULT_STATS,
       ...parsed,
       xp: parsedXp,
       lifetimeXp,
       pet: decayedPet,
+      answeredQuestionsCount: sanitizedAnswered,
+      correctAnswersCount: sanitizedCorrect,
       completedModules: Array.isArray(parsed.completedModules) ? parsed.completedModules : [],
       completedModulesLevel2: Array.isArray(parsed.completedModulesLevel2) ? parsed.completedModulesLevel2 : [],
       dailyMissions,

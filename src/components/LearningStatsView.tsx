@@ -49,9 +49,26 @@ export const LearningStatsView: React.FC<Props> = ({
   const [expandedQuestionId, setExpandedQuestionId] = useState<string | null>(null);
   const [dossierQuestion, setDossierQuestion] = useState<QuizQuestion | null>(null);
 
-  const totalAnswered = stats.answeredQuestionsCount || 0;
-  const totalCorrect = stats.correctAnswersCount || 0;
-  const accuracy = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
+  // Compute sanitized question performance metrics
+  const { totalAnswered, totalCorrect, accuracy } = useMemo(() => {
+    let perfCorrect = 0;
+    let perfAnswered = 0;
+    Object.values(stats.questionPerformance || {}).forEach(p => {
+      const c = p.correctCount || 0;
+      const w = p.wrongCount || 0;
+      perfCorrect += c;
+      perfAnswered += (c + w);
+    });
+
+    const rawAnswered = stats.answeredQuestionsCount || 0;
+    const rawCorrect = stats.correctAnswersCount || 0;
+
+    const correct = Math.max(rawCorrect, perfCorrect);
+    const answered = Math.max(rawAnswered, perfAnswered, correct);
+    const acc = answered > 0 ? Math.round((correct / answered) * 100) : 0;
+
+    return { totalAnswered: answered, totalCorrect: correct, accuracy: acc };
+  }, [stats]);
 
   // Build index of all available questions across chapters, modules, and exams
   const questionsMap = useMemo(() => {
