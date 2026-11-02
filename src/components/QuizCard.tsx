@@ -3,7 +3,7 @@ import { QuizQuestion, QuizOption } from '../types/quiz';
 import { BionicText } from '../utils/bionicReading';
 import { soundEffects } from '../services/audioService';
 import confetti from 'canvas-confetti';
-import { Check, X, ArrowRight, RotateCcw, Award, Lightbulb, Star, Sparkles, AlertTriangle, BookOpen } from 'lucide-react';
+import { Check, X, ArrowRight, RotateCcw, Award, Lightbulb, Star, Sparkles, AlertTriangle, BookOpen, HelpCircle } from 'lucide-react';
 import { QuestionDetailModal } from './QuestionDetailModal';
 
 interface Props {
@@ -292,9 +292,13 @@ export const QuizCard: React.FC<Props> = ({
 
           if (isRevealed) {
             if (opt.isCorrect) {
-              btnClass = 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-950 dark:text-emerald-200 font-semibold';
+              btnClass = isLevel2
+                ? 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-400 text-indigo-950 dark:text-indigo-200 font-semibold'
+                : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-950 dark:text-emerald-200 font-semibold';
             } else if (isSelected && !opt.isCorrect) {
-              btnClass = 'bg-rose-50 dark:bg-rose-950/40 border-rose-400 text-rose-950 dark:text-rose-200';
+              btnClass = isLevel2
+                ? 'bg-slate-100 dark:bg-slate-800/90 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200'
+                : 'bg-rose-50 dark:bg-rose-950/40 border-rose-400 text-rose-950 dark:text-rose-200';
             } else {
               btnClass = 'bg-slate-50/60 dark:bg-slate-800/20 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 opacity-60';
             }
@@ -310,9 +314,9 @@ export const QuizCard: React.FC<Props> = ({
               <div className="flex items-center gap-3 pr-2">
                 <span className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-mono font-bold shrink-0 transition-colors ${
                   isRevealed && opt.isCorrect
-                    ? 'bg-emerald-600 text-white'
+                    ? (isLevel2 ? 'bg-indigo-600 text-white' : 'bg-emerald-600 text-white')
                     : isRevealed && isSelected && !opt.isCorrect
-                    ? 'bg-rose-600 text-white'
+                    ? (isLevel2 ? 'bg-slate-600 text-white' : 'bg-rose-600 text-white')
                     : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
                 }`}>
                   {idx + 1}
@@ -326,9 +330,13 @@ export const QuizCard: React.FC<Props> = ({
               {isRevealed && (
                 <div className="shrink-0">
                   {opt.isCorrect ? (
-                    <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    <Check className={`w-5 h-5 ${isLevel2 ? 'text-indigo-600 dark:text-indigo-400' : 'text-emerald-600 dark:text-emerald-400'}`} />
                   ) : isSelected ? (
-                    <X className="w-5 h-5 text-rose-500" />
+                    isLevel2 ? (
+                      <HelpCircle className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+                    ) : (
+                      <X className="w-5 h-5 text-rose-500" />
+                    )
                   ) : null}
                 </div>
               )}
@@ -342,6 +350,8 @@ export const QuizCard: React.FC<Props> = ({
         <div className={`p-4 rounded-xl border text-xs leading-relaxed space-y-2.5 animate-fade-in ${
           selectedOption.isCorrect
             ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/60 text-emerald-900 dark:text-emerald-200'
+            : isLevel2
+            ? 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200'
             : 'bg-rose-50/70 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800/60 text-rose-900 dark:text-rose-200'
         }`}>
           <div className="font-bold flex items-center gap-2 text-sm">
@@ -352,10 +362,10 @@ export const QuizCard: React.FC<Props> = ({
               </>
             ) : (
               <>
-                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                <span className="text-amber-900 dark:text-amber-200">
+                <AlertTriangle className={`w-4 h-4 shrink-0 ${isLevel2 ? 'text-slate-500 dark:text-slate-400' : 'text-amber-600 dark:text-amber-400'}`} />
+                <span className={isLevel2 ? 'text-slate-800 dark:text-slate-200' : 'text-amber-900 dark:text-amber-200'}>
                   {selectedOption.trapExplanation || isLevel2
-                    ? '⚠️ IHK-Prüfungsfalle entlarvt!'
+                    ? 'IHK-Analyse & Lösungsvergleich:'
                     : '✗ Leider nicht ganz richtig'}
                 </span>
               </>
@@ -365,8 +375,14 @@ export const QuizCard: React.FC<Props> = ({
           {!selectedOption.isCorrect ? (
             <div className="space-y-2 pt-1">
               {/* Trap explanation */}
-              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/25 text-amber-950 dark:text-amber-200 text-xs">
-                <div className="font-bold text-[11px] text-amber-800 dark:text-amber-300 uppercase tracking-wide mb-1 flex items-center gap-1.5">
+              <div className={`p-3 rounded-lg border text-xs ${
+                isLevel2
+                  ? 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200'
+                  : 'bg-amber-500/10 border-amber-500/25 text-amber-950 dark:text-amber-200'
+              }`}>
+                <div className={`font-bold text-[11px] uppercase tracking-wide mb-1 flex items-center gap-1.5 ${
+                  isLevel2 ? 'text-slate-600 dark:text-slate-400' : 'text-amber-800 dark:text-amber-300'
+                }`}>
                   <span>Warum diese Antwortoption verlockend war:</span>
                 </div>
                 <p className="leading-relaxed">

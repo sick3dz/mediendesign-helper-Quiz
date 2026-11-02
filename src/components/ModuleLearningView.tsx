@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LearningModule, Chapter } from '../types/quiz';
 import { getModuleLevel2Questions } from '../data/chaptersData';
 import { BionicText } from '../utils/bionicReading';
@@ -46,9 +46,21 @@ export const ModuleLearningView: React.FC<Props> = ({
   const [currentLevel, setCurrentLevel] = useState<1 | 2>(initialLevel);
   const [currentNuggetIndex, setCurrentNuggetIndex] = useState(0);
   const [stepIndex, setStepIndex] = useState(0); // Tracks how many parts of the nugget are revealed
-  const [viewState, setViewState] = useState<'learn' | 'minigame' | 'quiz'>(
-    initialLevel === 2 ? 'quiz' : 'learn'
-  );
+  const [viewState, setViewState] = useState<'learn' | 'minigame' | 'quiz'>(() => {
+    if (initialLevel === 2) {
+      return module.miniGameType ? 'minigame' : 'quiz';
+    }
+    return 'learn';
+  });
+
+  useEffect(() => {
+    setCurrentLevel(initialLevel);
+    if (initialLevel === 2) {
+      setViewState(module.miniGameType ? 'minigame' : 'quiz');
+    } else {
+      setViewState('learn');
+    }
+  }, [initialLevel, module.id, module.miniGameType]);
 
   const nuggetViewRef = useRef<HTMLDivElement>(null);
 
@@ -150,7 +162,11 @@ export const ModuleLearningView: React.FC<Props> = ({
               if (!isLevel1Completed) return;
               soundEffects.playClick();
               setCurrentLevel(2);
-              setViewState('quiz');
+              if (module.miniGameType) {
+                setViewState('minigame');
+              } else {
+                setViewState('quiz');
+              }
             }}
             disabled={!isLevel1Completed}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
@@ -399,36 +415,56 @@ export const ModuleLearningView: React.FC<Props> = ({
         <div>
           {module.miniGameType === 'affordance' && (
             <AffordanceSignifierGame
+              isLevel2={currentLevel === 2}
               onComplete={score => {
                 const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
-                onModuleCompleted(module.id, finalXp, currentLevel);
+                if (currentLevel === 2) {
+                  setViewState('quiz');
+                } else {
+                  onModuleCompleted(module.id, finalXp, 1);
+                }
               }}
             />
           )}
 
           {module.miniGameType === 'phishing' && (
             <PhishingDetectorGame
+              isLevel2={currentLevel === 2}
               onComplete={score => {
                 const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
-                onModuleCompleted(module.id, finalXp, currentLevel);
+                if (currentLevel === 2) {
+                  setViewState('quiz');
+                } else {
+                  onModuleCompleted(module.id, finalXp, 1);
+                }
               }}
             />
           )}
 
           {module.miniGameType === 'process_order' && (
             <ProcessSorterGame
+              isLevel2={currentLevel === 2}
               onComplete={score => {
                 const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
-                onModuleCompleted(module.id, finalXp, currentLevel);
+                if (currentLevel === 2) {
+                  setViewState('quiz');
+                } else {
+                  onModuleCompleted(module.id, finalXp, 1);
+                }
               }}
             />
           )}
 
           {module.miniGameType === 'wcag_match' && (
             <WcagMatchGame
+              isLevel2={currentLevel === 2}
               onComplete={score => {
                 const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
-                onModuleCompleted(module.id, finalXp, currentLevel);
+                if (currentLevel === 2) {
+                  setViewState('quiz');
+                } else {
+                  onModuleCompleted(module.id, finalXp, 1);
+                }
               }}
             />
           )}

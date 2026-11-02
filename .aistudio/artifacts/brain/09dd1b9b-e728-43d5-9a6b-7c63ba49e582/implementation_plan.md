@@ -1,41 +1,33 @@
-# Implementierungsplan: Unterbrechungsfreier Spielfluss & IHK-Fehlerdossier + UI-Inspector (Abgeschlossen)
+# Implementation Plan: Realistic Natural Email Layout for Level 2 Phishing Challenge
 
-Erfolgreich umgesetzt nach Nutzerwunsch: Der **Spielfluss während des Spielens bleibt vollständig ungestört** (keine Zwangspausen bei Fehlern, Zeitdruck und Combo-Ketten laufen sauber durch). Am Ende jeder Runde liefert ein interaktives **IHK-Lern-Dossier** die detaillierten Begründungen zu allen Fehlern. Zudem wurde das brandneue Spiel **„UI-Inspector“** integriert.
-
----
-
-## 1. Durchgeführte Implementierungen
-
-1. **Spielfluss & Runden-Dossier in `SpeedQuizGame.tsx`**:
-   - Das Spiel läuft während der Fragen ohne Zwangspause durch.
-   - Am Spielende wird eine strukturierte **„📘 IHK-Fehleranalyse & Lern-Dossier“** angezeigt:
-     - Fragetext & Zeitablauf-Status.
-     - ❌ Deine gewählte Antwort + IHK-Fallen-Erklärung (`trapExplanation`).
-     - ✅ Korrekte IHK-Lösung + ausführliche IHK-Begründung (`correctOpt.explanation`).
-     - 📌 Offizieller IHK-Prüfer-Tipp (`examTip`).
-     - Bei fehlerfreiem Durchgang: Goldenes Siegel *„100% Perfekt ⭐“*.
-
-2. **Boss-Schadensbericht in `BossRaidGame.tsx`**:
-   - Schnelle rundenbasierte Kampf-Dynamik ohne Unterbrechung.
-   - Nach Sieg oder Niederlage: Ausführliche **IHK-Fehleranalyse** aller erlittenen Konter-Angriffe mit genauer Begründung der richtigen IHK-Normen.
-
-3. **Neues Spiel `UiInspectorGame.tsx`**:
-   - Interaktives UX- & Barrierefreiheits-Audit eines echten Interface-Screens (*IxD-Shop Express*).
-   - 5 interaktiv auffindbare IHK-Mängel:
-     1. **Kontrast**: Text 2.1:1 statt mindestens 4.5:1 (WCAG 1.4.3).
-     2. **Touch-Target**: Zu kleine 20px Klickfläche statt $\ge 44\text{px}$ (WCAG 2.5.5).
-     3. **Gestaltgesetz der Nähe**: Rabatt-Hinweis klebt am falschen Formularfeld.
-     4. **Formular-Labels**: Fehlendes `<label>` und reiner Platzhalter (WCAG 3.3.2).
-     5. **Affordance & Signifier**: Destruktiver Lösch-Button irreführend in Frühlingsgrün gestaltet.
-   - Feedback bei Treffern (IHK-Norm, Begründung, Lösungsansatz) und bei Klick auf normgerechte Elemente.
-   - Belohnung von bis zu +200 EXP & Coins für den Rang und das Haustier.
-
-4. **Integration in `MiniGamesHubView.tsx`**:
-   - Spielkarte für **UI-Inspector** unter `studyQuestGames` mit Badge `🔍 UI- & A11y-Audit` hinzugefügt und spielbar geschaltet.
+## Goal
+Transform the Level 2 Phishing & Fraud simulation (`PhishingDetectorGame.tsx`) into a completely natural, realistic HTML email & website preview. Remove artificial button outlines, dashed boxes, and highlighted background pills so the learner evaluates an authentic-looking email and inspects suspicious text naturally.
 
 ---
 
-## 2. Verifikation
+## User Requirements Summary
+- **Natural Email Layout**: In Level 2 (Experten-Modus), render the simulation as a realistic, seamless HTML email.
+- **No Visible Frames or Outlines**: Eliminate dashed borders (`border-dashed`), artificial button boxes, and pre-highlighted background containers around clues before discovery.
+- **Natural Inspection**: Text elements (sender address, urgency banner, discount claims, payment terms) render as authentic email content and only highlight in emerald upon being discovered.
 
-- **Build-Check**: `compile_applet` erfolgreich abgeschlossen.
-- **Lint-Check**: `tsc --noEmit` ohne Fehler durchgelaufen.
+---
+
+## Proposed Changes
+
+### `src/components/InteractiveMinigames/PhishingDetectorGame.tsx`
+- **Email Body Restructuring in Level 2**:
+  - **Email Header**: Render `Von: Kundenservice <kundenservice@amaz0n-konto-verify.xyz>` as plain, realistic email header text without dashed border boxes or pill frames.
+  - **Urgency Warning**: Render `DRINGEND: Ihr Konto wird in 24 Stunden unwiderruflich gesperrt!` as natural email body paragraph text rather than a framed button box.
+  - **Promotional Offer**: Render the VIP deal headline (`90% Rabatt auf alle Marken-Kameras und Apple MacBooks!`) seamlessly inline within the promotional body copy.
+  - **Payment Terms**: Render `Zahlungsart: Nur direkte Banküberweisung (Vorkasse)` as standard text inside the offer footer/details block without separate button borders.
+- **Post-Discovery Highlight**:
+  - Elements only receive a subtle green background and checkmark (`✓`) *after* being successfully clicked and identified by the user.
+
+---
+
+## Verification Plan
+
+1. **Compilation Check**:
+   - Run `compile_applet` to verify React/Vite build.
+2. **TypeScript Validation**:
+   - Run `lint_applet` (`tsc --noEmit`) to verify zero type or lint errors.

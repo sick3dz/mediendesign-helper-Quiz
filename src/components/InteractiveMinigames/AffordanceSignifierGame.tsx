@@ -58,9 +58,10 @@ const ITEMS: Item[] = [
 
 interface Props {
   onComplete: (score: number) => void;
+  isLevel2?: boolean;
 }
 
-export const AffordanceSignifierGame: React.FC<Props> = ({ onComplete }) => {
+export const AffordanceSignifierGame: React.FC<Props> = ({ onComplete, isLevel2 = false }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -152,10 +153,22 @@ export const AffordanceSignifierGame: React.FC<Props> = ({ onComplete }) => {
         <p className="text-sm text-slate-600 dark:text-slate-300">Was liegt hier vor?</p>
 
         {lastResult && (
-          <div className={`absolute inset-0 flex flex-col items-center justify-center p-4 transition-all ${lastResult.isCorrect ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`}>
-            <div className="flex items-center gap-2 text-lg font-bold mb-1">
-              {lastResult.isCorrect ? <Check className="w-6 h-6" /> : <X className="w-6 h-6" />}
-              {lastResult.isCorrect ? 'Exakt richtig!' : 'Leider daneben!'}
+          <div className={`absolute inset-0 flex flex-col items-center justify-center p-4 transition-all ${
+            lastResult.isCorrect
+              ? 'bg-emerald-600 text-white'
+              : isLevel2
+              ? 'bg-slate-800 text-slate-100 border border-slate-700'
+              : 'bg-rose-600 text-white'
+          }`}>
+            <div className="flex items-center gap-2 text-base font-bold mb-1">
+              {lastResult.isCorrect ? (
+                <Check className="w-5 h-5 text-emerald-400" />
+              ) : isLevel2 ? (
+                <Sparkles className="w-5 h-5 text-indigo-400" />
+              ) : (
+                <X className="w-5 h-5" />
+              )}
+              <span>{lastResult.isCorrect ? 'Exakt richtig!' : isLevel2 ? 'IHK-Analyse & Lösungsvergleich:' : 'Leider daneben!'}</span>
             </div>
             <p className="text-xs text-white/90 text-center max-w-md">{lastResult.explanation}</p>
           </div>

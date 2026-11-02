@@ -11,7 +11,7 @@ interface Clue {
   found: boolean;
 }
 
-export const PhishingDetectorGame: React.FC<{ onComplete: (score: number) => void }> = ({ onComplete }) => {
+export const PhishingDetectorGame: React.FC<{ onComplete: (score: number) => void; isLevel2?: boolean }> = ({ onComplete, isLevel2 = false }) => {
   const [clues, setClues] = useState<Clue[]>([
     {
       id: 'sender',
@@ -102,69 +102,83 @@ export const PhishingDetectorGame: React.FC<{ onComplete: (score: number) => voi
 
         <div className="p-5 space-y-4 bg-white dark:bg-slate-900">
           {/* Header Info */}
-          <div className="pb-3 border-b border-slate-100 dark:border-slate-800 flex flex-col gap-1">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-400 dark:text-slate-500">Von:</span>
+          <div className="pb-3 border-b border-slate-100 dark:border-slate-800 flex flex-col gap-1.5 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 dark:text-slate-500 font-medium">Von:</span>
               <button
+                type="button"
                 onClick={() => handleClueClick('sender')}
-                className={`px-2 py-1 rounded text-left transition-all ${
+                className={`text-left transition-all ${
                   clues[0].found
-                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-mono font-semibold'
-                    : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 cursor-pointer border border-dashed border-rose-300 dark:border-rose-800'
+                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-mono font-bold px-2 py-0.5 rounded'
+                    : isLevel2
+                    ? 'text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer font-mono font-medium'
+                    : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 cursor-pointer border border-dashed border-rose-300 dark:border-rose-800 px-2 py-0.5 rounded font-mono'
                 }`}
               >
                 {clues[0].text} {clues[0].found && '✓'}
               </button>
             </div>
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-400 dark:text-slate-500">Betreff:</span>
-              <span className="font-semibold text-slate-800 dark:text-slate-200">Dringende Handlung erforderlich</span>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 dark:text-slate-500 font-medium">Betreff:</span>
+              <span className="font-bold text-slate-800 dark:text-slate-200">Dringende Handlung erforderlich</span>
             </div>
           </div>
 
-          {/* Warning Banner */}
-          <button
-            onClick={() => handleClueClick('urgency')}
-            className={`w-full p-3 rounded-lg text-left transition-all ${
-              clues[1].found
-                ? 'bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
-                : 'bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/60 cursor-pointer'
-            }`}
-          >
-            <div className="flex items-center gap-2 text-xs font-bold">
-              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-500" />
-              <span>{clues[1].text}</span>
-              {clues[1].found && <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 ml-auto" />}
-            </div>
-          </button>
+          {/* Warning Message / Urgency Text */}
+          <div className="py-1">
+            <button
+              type="button"
+              onClick={() => handleClueClick('urgency')}
+              className={`w-full text-left transition-all ${
+                clues[1].found
+                  ? 'bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 p-3 rounded-lg font-bold flex items-center justify-between'
+                  : isLevel2
+                  ? 'text-slate-900 dark:text-slate-100 font-bold hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer py-1'
+                  : 'bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-900/60 cursor-pointer p-3 rounded-lg font-bold flex items-center justify-between'
+              }`}
+            >
+              <div className="flex items-center gap-2 text-xs sm:text-sm font-extrabold leading-snug">
+                {!isLevel2 && !clues[1].found && <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0" />}
+                <span>{clues[1].text}</span>
+                {clues[1].found && <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 ml-auto" />}
+              </div>
+            </button>
+          </div>
 
-          {/* Fake Store Deal */}
-          <div className="p-4 border border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50/50 dark:bg-slate-800/40">
-            <div className="flex items-center justify-between mb-2">
+          {/* Fake Store Deal Content */}
+          <div className="p-4 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-800/40 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Exklusiver VIP-Restposten Shop</span>
               <button
+                type="button"
                 onClick={() => handleClueClick('discount')}
-                className={`px-2 py-1 text-xs font-bold rounded transition-all ${
+                className={`text-xs text-left transition-all ${
                   clues[3].found
-                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
-                    : 'bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 hover:bg-rose-200 dark:hover:bg-rose-900/60 border border-rose-300 dark:border-rose-800 cursor-pointer'
+                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold px-2 py-0.5 rounded'
+                    : isLevel2
+                    ? 'text-slate-900 dark:text-slate-100 font-extrabold hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer'
+                    : 'bg-rose-100 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 hover:bg-rose-200 dark:hover:bg-rose-900/60 border border-rose-300 dark:border-rose-800 cursor-pointer font-bold px-2 py-1 rounded'
                 }`}
               >
                 {clues[3].text} {clues[3].found && '✓'}
               </button>
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400 mb-3">
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
               Klicken Sie hier, um Ihre Bestellung sofort zu sichern und Ihr Konto freizuschalten.
             </p>
 
-            <div className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded text-xs flex items-center justify-between">
+            <div className="pt-2 border-t border-slate-200/80 dark:border-slate-700/80 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <span className="text-slate-500 dark:text-slate-400">Zahlungsabwicklung:</span>
               <button
+                type="button"
                 onClick={() => handleClueClick('payment')}
-                className={`px-2 py-1 rounded transition-all ${
+                className={`text-left transition-all ${
                   clues[2].found
-                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-semibold'
-                    : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-300 dark:border-rose-800 cursor-pointer'
+                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold px-2 py-0.5 rounded'
+                    : isLevel2
+                    ? 'text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer font-medium'
+                    : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-300 dark:border-rose-800 cursor-pointer px-2 py-1 rounded'
                 }`}
               >
                 {clues[2].text} {clues[2].found && '✓'}
@@ -176,7 +190,7 @@ export const PhishingDetectorGame: React.FC<{ onComplete: (score: number) => voi
 
       {/* Checklist of clues */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-        {clues.map(c => (
+        {clues.map((c, idx) => (
           <div
             key={c.id}
             className={`p-3 rounded-lg border text-xs transition-colors ${
@@ -186,10 +200,16 @@ export const PhishingDetectorGame: React.FC<{ onComplete: (score: number) => voi
             }`}
           >
             <div className="flex items-center gap-2 font-semibold mb-1">
-              {c.found ? <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> : <ShieldAlert className="w-4 h-4 text-slate-400 dark:text-slate-500" />}
-              <span>{c.label}</span>
+              {c.found ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              ) : (
+                <ShieldAlert className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+              )}
+              <span>{c.found ? c.label : isLevel2 ? `🔎 Verdächtiges Merkmal #${idx + 1}` : c.label}</span>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-500">{c.hint}</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              {c.found ? c.hint : isLevel2 ? '🔒 In Level 2 erst nach Enttarnung sichtbar' : c.hint}
+            </p>
           </div>
         ))}
       </div>

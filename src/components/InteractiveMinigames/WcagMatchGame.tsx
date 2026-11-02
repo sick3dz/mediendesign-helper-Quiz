@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { soundEffects } from '../../services/audioService';
 import confetti from 'canvas-confetti';
-import { Check, X, RotateCcw, Award } from 'lucide-react';
+import { Check, X, RotateCcw, Award, Sparkles } from 'lucide-react';
 
 interface WcagTask {
   id: string;
@@ -56,7 +56,7 @@ const TASKS: WcagTask[] = [
   }
 ];
 
-export const WcagMatchGame: React.FC<{ onComplete: (score: number) => void }> = ({ onComplete }) => {
+export const WcagMatchGame: React.FC<{ onComplete: (score: number) => void; isLevel2?: boolean }> = ({ onComplete, isLevel2 = false }) => {
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [lastFeedback, setLastFeedback] = useState<{ isCorrect: boolean; text: string } | null>(null);
@@ -139,10 +139,22 @@ export const WcagMatchGame: React.FC<{ onComplete: (score: number) => void }> = 
         <h4 className="text-base font-bold text-slate-900 dark:text-white mb-2">{current.action}</h4>
 
         {lastFeedback && (
-          <div className={`absolute inset-0 flex flex-col items-center justify-center p-4 transition-all ${lastFeedback.isCorrect ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`}>
+          <div className={`absolute inset-0 flex flex-col items-center justify-center p-4 transition-all ${
+            lastFeedback.isCorrect
+              ? 'bg-emerald-600 text-white'
+              : isLevel2
+              ? 'bg-slate-800 text-slate-100 border border-slate-700'
+              : 'bg-rose-600 text-white'
+          }`}>
             <div className="flex items-center gap-2 text-base font-bold mb-1">
-              {lastFeedback.isCorrect ? <Check className="w-5 h-5" /> : <X className="w-5 h-5" />}
-              {lastFeedback.isCorrect ? 'Volltreffer!' : 'Daneben!'}
+              {lastFeedback.isCorrect ? (
+                <Check className="w-5 h-5 text-emerald-400" />
+              ) : isLevel2 ? (
+                <Sparkles className="w-5 h-5 text-indigo-400" />
+              ) : (
+                <X className="w-5 h-5" />
+              )}
+              <span>{lastFeedback.isCorrect ? 'Volltreffer!' : isLevel2 ? 'IHK-Analyse & Zuordnung:' : 'Daneben!'}</span>
             </div>
             <p className="text-xs text-white/95 text-center max-w-md">{lastFeedback.text}</p>
           </div>

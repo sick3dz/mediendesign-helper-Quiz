@@ -27,7 +27,7 @@ function shuffle<T>(array: T[]): T[] {
   return arr;
 }
 
-export const ProcessSorterGame: React.FC<{ onComplete: (score: number) => void }> = ({ onComplete }) => {
+export const ProcessSorterGame: React.FC<{ onComplete: (score: number) => void; isLevel2?: boolean }> = ({ onComplete, isLevel2 = false }) => {
   const [items, setItems] = useState<Step[]>(() => {
     let s = shuffle(CORRECT_ORDER);
     // ensure it's not solved initially
@@ -94,14 +94,14 @@ export const ProcessSorterGame: React.FC<{ onComplete: (score: number) => void }
               className={`p-3 rounded-lg border flex items-center justify-between transition-colors ${
                 isSuccess
                   ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800'
-                  : isAtCorrectPos
+                  : isAtCorrectPos && !isLevel2
                   ? 'bg-indigo-50/50 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800'
                   : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800'
               }`}
             >
               <div className="flex items-center gap-3">
                 <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono font-bold ${
-                  isAtCorrectPos ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                  isAtCorrectPos && !isLevel2 ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
                 }`}>
                   {idx + 1}
                 </span>
