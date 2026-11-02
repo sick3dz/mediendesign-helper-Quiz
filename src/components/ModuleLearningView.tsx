@@ -12,7 +12,8 @@ import { SqlBuilderWidget } from './SqlBuilderWidget';
 import { JsonInspectorWidget } from './JsonInspectorWidget';
 import { CrossmediaPublishingWidget } from './CrossmediaPublishingWidget';
 import { XmlInspectorWidget } from './XmlInspectorWidget';
-import { ArrowLeft, ArrowRight, CheckCircle2, Star, Sparkles, HelpCircle, Gamepad2, Lightbulb, Zap } from 'lucide-react';
+import { ModuleSummaryModal } from './ModuleSummaryModal';
+import { ArrowLeft, ArrowRight, CheckCircle2, Star, Sparkles, HelpCircle, Gamepad2, Lightbulb, Zap, BookOpen } from 'lucide-react';
 
 interface Props {
   chapter: Chapter;
@@ -46,6 +47,7 @@ export const ModuleLearningView: React.FC<Props> = ({
   const [currentLevel, setCurrentLevel] = useState<1 | 2>(initialLevel);
   const [currentNuggetIndex, setCurrentNuggetIndex] = useState(0);
   const [stepIndex, setStepIndex] = useState(0); // Tracks how many parts of the nugget are revealed
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [viewState, setViewState] = useState<'learn' | 'minigame' | 'quiz'>(() => {
     if (initialLevel === 2) {
       return module.miniGameType ? 'minigame' : 'quiz';
@@ -131,9 +133,21 @@ export const ModuleLearningView: React.FC<Props> = ({
         </button>
 
         <div className="flex items-center gap-2 text-xs text-slate-500">
-          <span>Kapitel {chapter.number}</span>
-          <span aria-hidden="true">·</span>
-          <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[150px] sm:max-w-md">{module.title}</span>
+          <button
+            type="button"
+            onClick={() => {
+              soundEffects.playClick();
+              setShowSummaryModal(true);
+            }}
+            className="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-bold text-[11px] hover:bg-indigo-100 transition-colors flex items-center gap-1 cursor-pointer"
+            title="Wissens-Zusammenfassung des Moduls öffnen"
+          >
+            <BookOpen className="w-3 h-3" />
+            <span>Zusammenfassung lesen</span>
+          </button>
+          <span className="hidden sm:inline">Kapitel {chapter.number}</span>
+          <span aria-hidden="true" className="hidden sm:inline">·</span>
+          <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[120px] sm:max-w-md">{module.title}</span>
         </div>
       </div>
 
@@ -489,12 +503,42 @@ export const ModuleLearningView: React.FC<Props> = ({
           onFinished={score => {
             const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
             onModuleCompleted(module.id, finalXp, currentLevel);
+            if (currentLevel === 1) {
+              setShowSummaryModal(true);
+            }
           }}
           onCorrectAnswer={onCorrectAnswer}
           onAnswer={onAnswer}
           onBackToOverview={onBack}
           onNextModule={onNextModule}
           hasNextModule={hasNextModule}
+        />
+      )}
+
+      {/* Module Summary Modal */}
+      {showSummaryModal && (
+        <ModuleSummaryModal
+          module={module}
+          chapterTitle={chapter.title}
+          chapterNumber={chapter.number}
+          bionic={bionic}
+          isLevel1Completed={isLevel1Completed}
+          isLevel2Completed={isLevel2Completed}
+          onClose={() => setShowSummaryModal(false)}
+          onStartLevel2={() => {
+            setShowSummaryModal(false);
+            setCurrentLevel(2);
+            if (module.miniGameType) {
+              setViewState('minigame');
+            } else {
+              setViewState('quiz');
+            }
+          }}
+          onRepeatLevel1={() => {
+            setShowSummaryModal(false);
+            setCurrentLevel(1);
+            setViewState('learn');
+          }}
         />
       )}
     </div>

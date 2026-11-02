@@ -21,6 +21,8 @@ import {
 import { soundEffects } from '../services/audioService';
 import { ChecklistDetailModal } from './ChecklistDetailModal';
 import { getChecklistDossier } from '../data/checklistDetailsData';
+import { ModuleSummaryModal } from './ModuleSummaryModal';
+import { LearningModule } from '../types/quiz';
 
 interface Props {
   chapters: Chapter[];
@@ -111,6 +113,7 @@ export const ChapterListView: React.FC<Props> = ({
 
   const [expandedChecklistIdx, setExpandedChecklistIdx] = useState<number | null>(null);
   const [selectedChecklistModal, setSelectedChecklistModal] = useState<{ chapter: Chapter; item: ChecklistItem } | null>(null);
+  const [summaryModuleMeta, setSummaryModuleMeta] = useState<{ module: LearningModule; chapter: Chapter } | null>(null);
 
   const toggleChecklistItem = (idx: number) => {
     soundEffects.playClick();
@@ -440,13 +443,17 @@ export const ChapterListView: React.FC<Props> = ({
                             <span>{isLevel2Completed ? 'Lvl 2 wiederholen' : 'Lvl 2 Meister (+50% EXP)'}</span>
                           </button>
 
-                          {/* Secondary Level 1 Review Button */}
+                          {/* Secondary Summary Button */}
                           <button
-                            onClick={() => onSelectModule(currentChapter.id, module.id, 1)}
-                            className="h-8 px-2.5 rounded-lg text-[11px] font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                            title="Level 1 Grundlagen wiederholen"
+                            onClick={() => {
+                              soundEffects.playClick();
+                              setSummaryModuleMeta({ module, chapter: currentChapter });
+                            }}
+                            className="h-8 px-2.5 rounded-lg text-[11px] font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer flex items-center gap-1 shrink-0"
+                            title="Modul-Zusammenfassung & IHK-Spickzettel lesen"
                           >
-                            Lvl 1
+                            <BookOpen className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                            <span>Zusammenfassung</span>
                           </button>
                         </>
                       )}
@@ -630,6 +637,31 @@ export const ChapterListView: React.FC<Props> = ({
           bionic={bionic}
           onClose={() => setSelectedChecklistModal(null)}
           onSelectModule={onSelectModule}
+        />
+      )}
+
+      {/* Module Summary & Key Takeaways Modal */}
+      {summaryModuleMeta && (
+        <ModuleSummaryModal
+          module={summaryModuleMeta.module}
+          chapterTitle={summaryModuleMeta.chapter.title}
+          chapterNumber={summaryModuleMeta.chapter.number}
+          bionic={bionic}
+          isLevel1Completed={stats.completedModules.includes(summaryModuleMeta.module.id)}
+          isLevel2Completed={Boolean(stats.completedModulesLevel2?.includes(summaryModuleMeta.module.id))}
+          onClose={() => setSummaryModuleMeta(null)}
+          onStartLevel2={() => {
+            const cId = summaryModuleMeta.chapter.id;
+            const mId = summaryModuleMeta.module.id;
+            setSummaryModuleMeta(null);
+            onSelectModule(cId, mId, 2);
+          }}
+          onRepeatLevel1={() => {
+            const cId = summaryModuleMeta.chapter.id;
+            const mId = summaryModuleMeta.module.id;
+            setSummaryModuleMeta(null);
+            onSelectModule(cId, mId, 1);
+          }}
         />
       )}
     </div>

@@ -1488,6 +1488,17 @@ export const VirtualPetView: React.FC<Props> = ({
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
                         {item.description}
                       </p>
+
+                      {/* Mini App UI Mockup Badge */}
+                      <div className={`mt-2.5 p-2 rounded-xl bg-gradient-to-r ${item.previewClass} text-white text-[10px] space-y-1 shadow-2xs`}>
+                        <div className="flex items-center justify-between font-bold opacity-90">
+                          <span>App-Design Vorschau</span>
+                          <span className="font-mono text-[9px]">UI Mockup</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-white/30 rounded-full overflow-hidden">
+                          <div className="h-full w-2/3 bg-white rounded-full" />
+                        </div>
+                      </div>
                     </div>
 
                     <div className="pt-2 border-t border-slate-200 dark:border-slate-700/60">
@@ -2297,77 +2308,148 @@ export const VirtualPetView: React.FC<Props> = ({
               </button>
             </div>
 
-            {/* Species Selector Bar */}
-            <div className="px-4 sm:px-5 py-2.5 bg-slate-100/80 dark:bg-slate-800/90 border-b border-slate-200/80 dark:border-slate-700/80 flex items-center gap-2 overflow-x-auto shrink-0 scrollbar-none">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap shrink-0">
-                Tierart wechseln:
-              </span>
-              {(['dog', 'cat', 'penguin', 'axolotl', 'unicorn'] as PetSpecies[]).map(sp => {
-                const info = PET_SPECIES[sp];
-                const isActive = tryOnSpecies === sp;
-                return (
-                  <button
-                    key={sp}
-                    onClick={() => setTryOnSpecies(sp)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
-                      isActive
-                        ? 'bg-indigo-600 text-white shadow-xs ring-2 ring-indigo-400'
-                        : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-                    }`}
-                  >
-                    <span>{PET_SPECIES_SOUNDS[sp].soundIcon}</span>
-                    <span>{info.defaultName}</span>
-                  </button>
-                );
-              })}
-            </div>
+            {/* Species Selector Bar (Hidden for Theme previews) */}
+            {tryOnItem.type !== 'theme' && (
+              <div className="px-4 sm:px-5 py-2.5 bg-slate-100/80 dark:bg-slate-800/90 border-b border-slate-200/80 dark:border-slate-700/80 flex items-center gap-2 overflow-x-auto shrink-0 scrollbar-none">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap shrink-0">
+                  Tierart wechseln:
+                </span>
+                {(['dog', 'cat', 'penguin', 'axolotl', 'unicorn'] as PetSpecies[]).map(sp => {
+                  const info = PET_SPECIES[sp];
+                  const isActive = tryOnSpecies === sp;
+                  return (
+                    <button
+                      key={sp}
+                      onClick={() => setTryOnSpecies(sp)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+                        isActive
+                          ? 'bg-indigo-600 text-white shadow-xs ring-2 ring-indigo-400'
+                          : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                      }`}
+                    >
+                      <span>{PET_SPECIES_SOUNDS[sp].soundIcon}</span>
+                      <span>{info.defaultName}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Modal Body */}
             <div className="p-4 sm:p-6 overflow-y-auto flex flex-col md:grid md:grid-cols-2 gap-4 sm:gap-6">
-              {/* Left Column: Big Interactive Pet Avatar Stage */}
-              <div className={`p-4 sm:p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 flex flex-col items-center justify-center relative transition-all shrink-0 ${
-                tryOnItem.type === 'theme' 
-                  ? tryOnItem.item.previewClass
-                  : 'bg-gradient-to-b from-indigo-50 via-purple-50/70 to-slate-100 dark:from-slate-800 dark:via-indigo-950/50 dark:to-slate-900'
-              }`}>
-                {/* Species Sound Badge */}
-                <div className="absolute top-3 left-3 text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-white/95 dark:bg-slate-900/95 text-slate-800 dark:text-slate-200 shadow-2xs backdrop-blur-xs z-10">
-                  {PET_SPECIES[tryOnSpecies].title}
-                </div>
+              {/* Left Column: Stage (App UI Mockup for Themes, Pet Avatar for Accessories/Gadgets/Frames) */}
+              {tryOnItem.type === 'theme' ? (
+                <div className={`p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 flex flex-col items-center justify-between relative transition-all bg-gradient-to-b ${tryOnItem.item.previewClass} min-h-[340px] text-slate-900 dark:text-white`}>
+                  {/* Stage Header Badge */}
+                  <div className="w-full flex items-center justify-between text-[11px] font-extrabold px-3 py-1.5 rounded-xl bg-white/95 dark:bg-slate-900/95 text-slate-800 dark:text-slate-200 shadow-md backdrop-blur-xs mb-3 z-10">
+                    <div className="flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Echte App UI Vorschau</span>
+                    </div>
+                    <span className="font-mono text-indigo-600 dark:text-indigo-400 font-bold">{tryOnItem.item.name}</span>
+                  </div>
 
-                <div className="py-8 sm:py-10 flex items-center justify-center">
-                  <PetAvatar
-                    pet={{
-                      ...pet,
-                      species: tryOnSpecies,
-                      name: PET_SPECIES[tryOnSpecies].defaultName,
-                    }}
-                    size="lg"
-                    equippedCosmetics={{
-                      ...equippedCosmetics,
-                      ...(tryOnItem.type === 'frame' ? { frame: tryOnItem.item.id } : {}),
-                    }}
-                    previewOverride={{
-                      equipped: {
-                        ...(tryOnItem.type === 'accessory' ? { [tryOnItem.item.category]: tryOnItem.item.id } : {}),
-                        ...(tryOnItem.type === 'gadget' ? { gadget: tryOnItem.item.id } : {}),
-                        ...(tryOnItem.type === 'frame' ? { frame: tryOnItem.item.id } : {}),
-                      },
-                    }}
-                    onClick={() => {
-                      soundEffects.playClick();
-                      setTryOnItem(null);
-                      setActiveTab('pet');
-                    }}
-                  />
-                </div>
+                  {/* App UI Sample Mockup Container */}
+                  <div className="w-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xl space-y-3 text-left my-auto">
+                    {/* Sample Header Bar */}
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800 text-xs">
+                      <div className="flex items-center gap-2 font-black text-slate-800 dark:text-slate-100">
+                        <span className="text-base">{tryOnItem.item.icon}</span>
+                        <span className="text-xs">DesignKonzept.prep</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-[10px]">
+                          1.250 EXP
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 font-mono font-bold text-[10px]">
+                          🪙 45
+                        </span>
+                      </div>
+                    </div>
 
-                <div className="text-center mt-2 z-10">
-                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                    "{PET_SPECIES_SOUNDS[tryOnSpecies].soundWord}" – Passt perfekt auf {PET_SPECIES[tryOnSpecies].defaultName}! ✨
+                    {/* Navigation Tabs */}
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold">
+                      <span className="px-2.5 py-1 rounded-lg bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-2xs">
+                        Lernmodule
+                      </span>
+                      <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500">
+                        Prüfungs-Quiz
+                      </span>
+                      <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500">
+                        Statistik
+                      </span>
+                    </div>
+
+                    {/* Quiz / Learning Card */}
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700/80 space-y-2">
+                      <div className="flex items-center justify-between text-[10px] font-semibold text-slate-400">
+                        <span>IHK KAPITEL 1 • INTERAKTIONSDESIGN</span>
+                        <span className="font-mono font-bold text-slate-600 dark:text-slate-300">Frage 3 / 5</span>
+                      </div>
+                      <h5 className="text-xs font-bold text-slate-900 dark:text-white leading-snug">
+                        Welches Merkmal zeichnet eine gute Affordance aus?
+                      </h5>
+                      {/* Progress Bar */}
+                      <div className="h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div className={`h-full w-3/5 bg-gradient-to-r ${tryOnItem.item.previewClass} rounded-full`} />
+                      </div>
+                    </div>
+
+                    {/* Answer / Primary Action Button */}
+                    <button
+                      type="button"
+                      className={`w-full py-2.5 px-3 rounded-xl text-xs font-extrabold text-white bg-gradient-to-r ${tryOnItem.item.previewClass} shadow-md flex items-center justify-between cursor-default`}
+                    >
+                      <span>✓ Visuelle Klickbarkeit signalisieren</span>
+                      <span className="font-mono text-[11px]">+100 EXP</span>
+                    </button>
+                  </div>
+
+                  <p className="text-[11px] text-white/90 font-semibold text-center mt-3 drop-shadow-xs">
+                    So werden Farben, Buttons & Fortschritte im gesamten Tool dargestellt!
                   </p>
                 </div>
-              </div>
+              ) : (
+                <div className="p-4 sm:p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 flex flex-col items-center justify-center relative transition-all shrink-0 bg-gradient-to-b from-indigo-50 via-purple-50/70 to-slate-100 dark:from-slate-800 dark:via-indigo-950/50 dark:to-slate-900">
+                  {/* Species Sound Badge */}
+                  <div className="absolute top-3 left-3 text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-white/95 dark:bg-slate-900/95 text-slate-800 dark:text-slate-200 shadow-2xs backdrop-blur-xs z-10">
+                    {PET_SPECIES[tryOnSpecies].title}
+                  </div>
+
+                  <div className="py-8 sm:py-10 flex items-center justify-center">
+                    <PetAvatar
+                      pet={{
+                        ...pet,
+                        species: tryOnSpecies,
+                        name: PET_SPECIES[tryOnSpecies].defaultName,
+                      }}
+                      size="lg"
+                      equippedCosmetics={{
+                        ...equippedCosmetics,
+                        ...(tryOnItem.type === 'frame' ? { frame: tryOnItem.item.id } : {}),
+                      }}
+                      previewOverride={{
+                        equipped: {
+                          ...(tryOnItem.type === 'accessory' ? { [tryOnItem.item.category]: tryOnItem.item.id } : {}),
+                          ...(tryOnItem.type === 'gadget' ? { gadget: tryOnItem.item.id } : {}),
+                          ...(tryOnItem.type === 'frame' ? { frame: tryOnItem.item.id } : {}),
+                        },
+                      }}
+                      onClick={() => {
+                        soundEffects.playClick();
+                        setTryOnItem(null);
+                        setActiveTab('pet');
+                      }}
+                    />
+                  </div>
+
+                  <div className="text-center mt-2 z-10">
+                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                      "{PET_SPECIES_SOUNDS[tryOnSpecies].soundWord}" – Passt perfekt auf {PET_SPECIES[tryOnSpecies].defaultName}! ✨
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Right Column: Item Information & Action Buttons */}
               <div className="flex flex-col justify-between space-y-4 bg-slate-50/60 dark:bg-slate-800/40 p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
