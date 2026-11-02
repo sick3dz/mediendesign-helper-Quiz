@@ -187,7 +187,7 @@ export const TopPetCompanionBar: React.FC<Props> = ({
   const equippedTitle = stats.equippedCosmetics?.title;
 
   return (
-    <div className="bg-white/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 transition-colors shadow-2xs">
+    <div className="relative z-30 bg-white/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 transition-colors shadow-2xs">
       <div className="max-w-6xl mx-auto px-3 sm:px-6 py-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           {/* Left: Pet Avatar + Name + Status */}

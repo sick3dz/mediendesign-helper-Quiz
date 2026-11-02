@@ -484,7 +484,7 @@ export const ModuleLearningView: React.FC<Props> = ({
           isLevel2={currentLevel === 2}
           onFinished={score => {
             const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
-            const completionBonus = currentLevel === 2 ? 38 : 25; // 25 base + 50% for Lvl 2
+            const completionBonus = currentLevel === 2 ? 22 : 15; // 15 base + 50% for Lvl 2
             onModuleCompleted(module.id, finalXp + accumulatedXp + completionBonus, currentLevel);
             if (currentLevel === 1) {
               setShowSummaryModal(true);
@@ -508,6 +508,8 @@ export const ModuleLearningView: React.FC<Props> = ({
           isLevel1Completed={isLevel1Completed}
           isLevel2Completed={isLevel2Completed}
           onClose={() => setShowSummaryModal(false)}
+          onNextModule={onNextModule}
+          hasNextModule={hasNextModule}
           onStartLevel2={() => {
             setShowSummaryModal(false);
             setCurrentLevel(2);

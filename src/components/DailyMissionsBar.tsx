@@ -62,7 +62,7 @@ export const DailyMissionsBar: React.FC<Props> = ({
   };
 
   return (
-    <div className="bg-slate-50/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 transition-colors">
+    <div className="relative z-20 bg-slate-50/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 transition-colors">
       <div className="max-w-6xl mx-auto px-3 sm:px-6 py-2">
         {/* Header Ribbon of the Bar */}
         <div

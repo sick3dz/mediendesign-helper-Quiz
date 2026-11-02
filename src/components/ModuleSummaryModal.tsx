@@ -24,6 +24,8 @@ interface Props {
   onClose: () => void;
   onStartLevel2?: () => void;
   onRepeatLevel1?: () => void;
+  onNextModule?: () => void;
+  hasNextModule?: boolean;
 }
 
 export const ModuleSummaryModal: React.FC<Props> = ({
@@ -36,6 +38,8 @@ export const ModuleSummaryModal: React.FC<Props> = ({
   onClose,
   onStartLevel2,
   onRepeatLevel1,
+  onNextModule,
+  hasNextModule = false,
 }) => {
   // Collect all exam tips and merksätze across nuggets & questions
   const allMerksaetze: string[] = [];
@@ -203,7 +207,21 @@ export const ModuleSummaryModal: React.FC<Props> = ({
                 className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
               >
                 <Star className="w-4 h-4 fill-slate-950 text-slate-950" />
-                <span>⭐ Level 2 Meister starten</span>
+                <span>Level 2</span>
+              </button>
+            )}
+
+            {hasNextModule && onNextModule && (
+              <button
+                type="button"
+                onClick={() => {
+                  soundEffects.playClick();
+                  onNextModule();
+                }}
+                className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
+              >
+                <span>Nächstes Modul</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             )}
           </div>

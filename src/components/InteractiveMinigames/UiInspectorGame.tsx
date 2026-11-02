@@ -90,7 +90,7 @@ export const UiInspectorGame: React.FC<{ onComplete: (score: number) => void }> 
 
     if (!target.found) {
       soundEffects.playCorrect(foundCount + 1);
-      const newScore = score + 10;
+      const newScore = score + 5;
       setScore(newScore);
 
       const updated = flaws.map((f) => (f.id === flawId ? { ...f, found: true } : f));
@@ -101,7 +101,7 @@ export const UiInspectorGame: React.FC<{ onComplete: (score: number) => void }> 
         setTimeout(() => {
           confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
           soundEffects.playLevelUp();
-          onComplete(newScore + 10); // bonus completion
+          onComplete(newScore + 5); // bonus completion
         }, 500);
       }
     } else {

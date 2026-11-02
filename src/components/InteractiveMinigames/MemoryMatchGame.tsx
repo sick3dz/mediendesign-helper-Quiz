@@ -137,7 +137,7 @@ export const MemoryMatchGame: React.FC<Props> = ({ onComplete }) => {
     soundEffects.playLevelUp();
 
     // Calculate EXP reward: 40 EXP base - moves penalty
-    const xp = Math.max(15, 40 - finalMoves * 1.5);
+    const xp = Math.max(5, 15 - finalMoves * 0.5);
     setEarnedXp(xp);
     onComplete(xp);
   };

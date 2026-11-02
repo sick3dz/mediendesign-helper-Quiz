@@ -55,7 +55,7 @@ export const PhishingDetectorGame: React.FC<{ onComplete: (score: number) => voi
     if (!clue || clue.found) return;
 
     soundEffects.playCorrect(foundCount + 1);
-    setScore(s => s + 25);
+    setScore(s => s + 5);
 
     const updated = clues.map(c => (c.id === id ? { ...c, found: true } : c));
     setClues(updated);
@@ -142,7 +142,7 @@ export const PhishingDetectorGame: React.FC<{ onComplete: (score: number) => voi
             </div>
             <button
               type="button"
-              onClick={() => handleSafeElementClick('Der Betreff ist zwar alarmierend, aber an sich kein technisches Betrugsmerkmal, sondern Teil der Social Engineering Taktik.')}
+              onClick={() => handleSafeElementClick('Das Betreff-Feld ist eine Standard-Anzeige eines E-Mail-Programms. Der Text selbst ist Teil der psychologischen Taktik, aber kein technisches Merkmal wie die Domain.')}
               className="flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 p-1 rounded transition-colors text-left"
             >
               <span className="text-slate-400 dark:text-slate-500 font-medium">Betreff:</span>

@@ -78,7 +78,7 @@ export const QuizCard: React.FC<Props> = ({
       const nextCombo = combo + 1;
       setCombo(nextCombo);
       soundEffects.playCorrect(nextCombo);
-      setScore(s => s + 20 * nextCombo);
+      setScore(s => s + 10 * nextCombo);
       setCorrectCount(c => c + 1);
       if (onCorrectAnswer) {
         onCorrectAnswer();

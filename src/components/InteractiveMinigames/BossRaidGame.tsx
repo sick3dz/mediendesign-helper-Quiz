@@ -64,7 +64,7 @@ export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
           setIsWon(true);
           setIsGameOver(true);
           soundEffects.playLevelUp();
-          onComplete(60); // High XP reward for boss defeat
+          onComplete(20); // Balanced XP reward for boss defeat
         }, 1200);
         return;
       }
@@ -80,7 +80,7 @@ export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
         setTimeout(() => {
           setIsWon(false);
           setIsGameOver(true);
-          onComplete(10); // Consolation XP
+          onComplete(5); // Consolation XP
         }, 1200);
         return;
       }
@@ -131,7 +131,7 @@ export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
           <div className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">EXP Belohnung</div>
           <div className="text-xl font-extrabold text-indigo-700 dark:text-indigo-300 flex items-center justify-center gap-1.5 mt-0.5">
             <Sparkles className="w-5 h-5 text-amber-400" />
-            <span>+{isWon ? 60 : 10} EXP</span>
+            <span>+{isWon ? 20 : 5} EXP</span>
           </div>
         </div>
 

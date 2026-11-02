@@ -222,7 +222,7 @@ export const TopBar: React.FC<Props> = ({
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
+    <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
       <div className="max-w-6xl mx-auto flex items-center justify-between gap-2 sm:gap-4 px-3 sm:px-6 py-2 overflow-visible">
         {/* Zone 1: Central Lernen & Navigation Menu with current view title */}
         <div className="relative" ref={dropdownRef}>

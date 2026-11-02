@@ -70,7 +70,7 @@ export const WcagMatchGame: React.FC<{ onComplete: (score: number) => void; isLe
     const isCorrect = chosen === current.correctPour;
     if (isCorrect) {
       soundEffects.playCorrect();
-      setScore(s => s + 20);
+      setScore(s => s + 5);
       setLastFeedback({ isCorrect: true, text: `Richtig! ${current.pourName}. ${current.explanation}` });
     } else {
       soundEffects.playWrong();

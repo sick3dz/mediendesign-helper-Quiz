@@ -98,13 +98,13 @@ export const ChapterListView: React.FC<Props> = ({
   };
 
   const calculateChapterTotalXp = (chapter: Chapter) => {
-    const moduleExp = chapter.modules.length * 25;
-    const questionsExp = chapter.modules.reduce((acc, m) => acc + (m.quizQuestions?.length || 0) * 20, 0);
+    const moduleExp = chapter.modules.length * 15;
+    const questionsExp = chapter.modules.reduce((acc, m) => acc + (m.quizQuestions?.length || 0) * 10, 0);
     return moduleExp + questionsExp;
   };
 
   const calculateModuleXp = (module: Chapter['modules'][0]) => {
-    return 25 + (module.quizQuestions?.length || 0) * 20;
+    return 15 + (module.quizQuestions?.length || 0) * 10;
   };
 
   const activeChapterStats = getChapterCompletion(currentChapter);

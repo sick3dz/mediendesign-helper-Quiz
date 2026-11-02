@@ -76,7 +76,7 @@ export const AffordanceSignifierGame: React.FC<Props> = ({ onComplete, isLevel2 
     const isCorrect = chosen === currentItem.type;
     if (isCorrect) {
       soundEffects.playCorrect(streak + 1);
-      setScore(s => s + 20 * (streak + 1));
+      setScore(s => s + 5);
       setStreak(s => s + 1);
       setLastResult({ isCorrect: true, explanation: currentItem.explanation });
     } else {

@@ -98,9 +98,9 @@ export const SpeedQuizGame: React.FC<Props> = ({ onComplete }) => {
       setCorrectCount(prev => prev + 1);
 
       // Calculate XP bonus: base 5 + time bonus + streak multiplier
-      const speedBonus = Math.round(timeLeft * 0.5);
+      const speedBonus = Math.round(timeLeft * 0.2);
       const multiplier = newStreak >= 3 ? 1.5 : 1;
-      const earned = Math.round((5 + speedBonus) * multiplier);
+      const earned = Math.round((2 + speedBonus) * multiplier);
 
       setTotalXpEarned(prev => prev + earned);
     } else {

@@ -501,7 +501,7 @@ export default function App() {
       } catch {
         // ignore
       }
-      handleFocusSprintCompleted(40);
+      handleFocusSprintCompleted(15);
     }
     return () => {
       if (interval) clearInterval(interval);
@@ -531,8 +531,8 @@ export default function App() {
           ...updatedPet.inventory,
           food: { ...updatedPet.inventory.food, golden_apple: cur + 1 },
         };
-      } else if (rewardText.includes('100 Bonus EXP')) {
-        newXp += 100;
+      } else if (rewardText.includes('30 Bonus EXP')) {
+        newXp += 30;
       }
 
       const updatedStats = {
@@ -645,7 +645,7 @@ export default function App() {
     percentage: number;
     grade: string;
   }) => {
-    const gainedXp = result.score * 40;
+    const gainedXp = result.score * 15;
     const gainedCoins = result.score * 30 + 100;
 
     setStats(prev => {
@@ -850,7 +850,7 @@ export default function App() {
     setIsBreathingModalOpen(false);
     setStudySeconds(0);
 
-    const bonusXp = 25;
+    const bonusXp = 5;
     const newXp = stats.xp + bonusXp;
     const newLifetimeXp = (stats.lifetimeXp ?? stats.xp) + bonusXp;
     const newHappiness = Math.min(100, stats.pet.happiness + 15);
