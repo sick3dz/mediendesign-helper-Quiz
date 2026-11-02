@@ -645,7 +645,7 @@ export default function App() {
     percentage: number;
     grade: string;
   }) => {
-    const gainedXp = result.score * 80;
+    const gainedXp = result.score * 40;
     const gainedCoins = result.score * 30 + 100;
 
     setStats(prev => {

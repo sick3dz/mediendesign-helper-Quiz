@@ -47,7 +47,7 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
       desc: 'Beantworte IHK-Fragen gegen die tickende Uhr! Sammle Serien-Combos für maximale Bonuspunkte.',
       badge: '⚡ Speed-Run',
       icon: Star,
-      xpBonus: 'Bis zu +200 EXP',
+      xpBonus: 'Bis zu +50 EXP',
     },
     {
       id: 'boss-raid' as const,
@@ -55,7 +55,7 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
       desc: 'Rundenbasierter Kampf gegen den Prüfungsboss! Jede richtige Antwort zieht dem Boss Lebenspunkte ab.',
       badge: '⚔️ Boss-Fight',
       icon: Swords,
-      xpBonus: '+250 EXP bei Sieg',
+      xpBonus: '+60 EXP bei Sieg',
     },
     {
       id: 'ui-inspector' as const,
@@ -63,7 +63,7 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
       desc: 'Enttarne 5 versteckte Gestaltungs- und A11y-Mängel im Interface-Mockup nach WCAG 2.1 & ISO 9241.',
       badge: '🔍 UI- & A11y-Audit',
       icon: Search,
-      xpBonus: 'Bis zu +200 EXP',
+      xpBonus: 'Bis zu +50 EXP',
     },
     {
       id: 'memory' as const,
@@ -71,7 +71,7 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
       desc: 'Finde zusammengehörige Paare aus Fachbegriffen und IHK-Definitionen so schnell wie möglich.',
       badge: '🧠 Begriffspaar-Matching',
       icon: Brain,
-      xpBonus: 'Bis zu +150 EXP',
+      xpBonus: 'Bis zu +40 EXP',
     },
   ];
 
@@ -82,7 +82,7 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
       desc: 'Kann ich es anfassen/bedienen (Affordance) oder zeigt ein Signal die Richtung (Signifier)? Das #1 IHK-Prüfungsduell!',
       badge: 'Kapitel 1: IxD',
       icon: Sparkles,
-      xpBonus: '+50 EXP',
+      xpBonus: '+20 EXP',
     },
     {
       id: 'phishing' as const,
@@ -90,7 +90,7 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
       desc: 'Finde die verdächtigen roten Flaggen im gefälschten E-Mail- & Webshop-Szenario.',
       badge: 'Kapitel 4: Sicherheit',
       icon: ShieldAlert,
-      xpBonus: '+60 EXP',
+      xpBonus: '+25 EXP',
     },
     {
       id: 'process' as const,
@@ -98,7 +98,7 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
       desc: 'Bringe die 6 Phasen von der Anforderungsanalyse bis zum produktiven Code in die exakte Reihenfolge.',
       badge: 'Kapitel 2 & 6: Workflow',
       icon: Layers,
-      xpBonus: '+50 EXP',
+      xpBonus: '+20 EXP',
     },
     {
       id: 'wcag' as const,
@@ -106,7 +106,7 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
       desc: 'Ordne Barrierefreiheits-Maßnahmen den 4 WCAG-Säulen Perceivable, Operable, Understandable und Robust zu.',
       badge: 'Kapitel 5: A11y',
       icon: CheckCircle2,
-      xpBonus: '+50 EXP',
+      xpBonus: '+20 EXP',
     },
   ];
 

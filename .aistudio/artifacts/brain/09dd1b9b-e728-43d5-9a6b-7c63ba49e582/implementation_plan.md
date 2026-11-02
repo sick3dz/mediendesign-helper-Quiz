@@ -1,32 +1,31 @@
-# Implementierungsplan: Modul-Zusammenfassung & Level 2 Schnellstart
+# Implementation Plan - XP Rebalancing
 
-Einführung einer kompakten Wissens-Zusammenfassung nach Abschluss von Level 1 eines Moduls sowie Anzeige des Buttons **"📋 Zusammenfassung lesen"** bei allen absolvierten Modulen in der Kapitelliste.
+The user has requested to reduce XP gain because progress is currently too fast, allowing items to be purchased too easily. The goal is to reduce the base XP per correct answer from 100 to 20 and scale down other rewards while keeping the "Combo" feeling.
+
+## User Requirements
+- Reduce XP per correct answer from 100 to 20.
+- Keep Combo bonuses but with smaller numbers.
+- Ensure all mini-games are adjusted to this new economy.
 
 ## Proposed Changes
 
-### 1. `ModuleLearningView.tsx` - Abschluss-Screen mit Zusammenfassung
-- Nach erfolgreichem Abschluss von Level 1 eines Moduls wird ein **Modul-Abschluss- & Zusammenfassungs-Bildschirm** angezeigt.
-- **Inhalte des Abschluss-Bildschirms**:
-  - Belohnung & EXP-Gutschrift.
-  - **IHK-Kompakt-Wissen / Spickzettel-Zusammenfassung**: Kern-Merksätze und wichtigste IHK-Prüfungsfakten des Moduls auf einen Blick.
-  - Buttons: **"Schließen / Zurück zur Übersicht"** und **"⚡ Level 2 Experten-Runde starten"**.
+### 1. Components - Quiz & Learning
+- **QuizCard.tsx**: 
+    - Change base reward from `100 * nextCombo` to `20 * nextCombo`.
+    - Update combo toast text for the 3-streak bonus.
+- **ModuleLearningView.tsx**:
+    - Verify that Level 2 multiplier (1.5x) still feels correct with smaller base numbers (it should).
 
-### 2. `ChapterListView.tsx` - Modul-Aktionen in der Kapitelliste
-- Wenn ein Modul Level 1 bereits abgeschlossen hat (`completedModules.includes(mod.id)`):
-  - Statt des einfachen "Level 1 wiederholen"-Buttons werden zwei klare Option-Buttons angezeigt:
-    - **"📋 Zusammenfassung"**: Öffnet direkt die Kompakt-Zusammenfassung des Moduls.
-    - **"⭐ Level 2 starten"**: Startet direkt den Experten-Modus (Level 2).
+### 2. Mini-Games XP Rebalancing
+- **AffordanceSignifierGame.tsx**:
+    - Change score calculation from `100 * (streak + 1)` to `20 * (streak + 1)`.
+- **PhishingDetectorGame.tsx**:
+    - Change XP per clue from `150` to `25`.
+- **ProcessSorterGame.tsx**:
+    - Change completion XP from `200` to `50`.
+- **WcagMatchGame.tsx**:
+    - Change XP per match from `100` to `20`.
 
-### 3. Modul-Zusammenfassungs-Modal (`ModuleSummaryModal.tsx`)
-- Erstellung einer wiederverwendbaren Ansicht (`ModuleSummaryModal`), die sowohl direkt nach Modulabschluss als auch per Klick aus der Kapitelliste geöffnet werden kann.
-
-## Verification Plan
-
-### Automated Tests & Linting
-- `lint_applet` (`tsc --noEmit`) ausführen, um Typen und Syntax zu validieren.
-- `compile_applet` ausführen, um den Vite-Build sicherzustellen.
-
-### Manual Verification
-- Ein Modul auf Level 1 abschließen und prüfen, dass die Wissens-Zusammenfassung mit Schließen-Button und Level 2 Start-Button erscheint.
-- Zur Kapitelliste navigieren: Bei absolvierten Modulen den Button **"📋 Zusammenfassung"** anklicken und prüfen, dass die Zusammenfassung sofort öffnet.
-- Button **"⭐ Level 2"** anklicken und prüfen, dass direkt Level 2 (Mini-Challenge / Quiz) startet.
+### 3. Verification
+- Run `lint` to ensure no typos in calculations.
+- Run `build` to verify integrity.

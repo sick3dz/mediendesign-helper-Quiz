@@ -78,14 +78,14 @@ export const QuizCard: React.FC<Props> = ({
       const nextCombo = combo + 1;
       setCombo(nextCombo);
       soundEffects.playCorrect(nextCombo);
-      setScore(s => s + 100 * nextCombo);
+      setScore(s => s + 20 * nextCombo);
       setCorrectCount(c => c + 1);
       if (onCorrectAnswer) {
         onCorrectAnswer();
       }
 
       if (nextCombo > 0 && nextCombo % 3 === 0) {
-        showComboFeedback(`🔥 ${nextCombo}ER-COMBO! +25 EXTRA EXP BONUS! 🎉`);
+        showComboFeedback(`🔥 ${nextCombo}ER-COMBO! +10 EXTRA EXP BONUS! 🎉`);
         try {
           confetti({ particleCount: 55, spread: 75, origin: { y: 0.6 } });
         } catch {

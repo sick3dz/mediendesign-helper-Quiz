@@ -55,7 +55,7 @@ export const PhishingDetectorGame: React.FC<{ onComplete: (score: number) => voi
     if (!clue || clue.found) return;
 
     soundEffects.playCorrect(foundCount + 1);
-    setScore(s => s + 150);
+    setScore(s => s + 25);
 
     const updated = clues.map(c => (c.id === id ? { ...c, found: true } : c));
     setClues(updated);

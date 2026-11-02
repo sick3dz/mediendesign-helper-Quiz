@@ -157,14 +157,14 @@ export const ProcessSorterGame: React.FC<{ onComplete: (score: number) => void; 
           <div className="text-left">
             <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-sm mb-1">
               <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-              Perfekt geordnet! 200 XP erhalten
+              Perfekt geordnet! 50 XP erhalten
             </div>
             <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-mono italic leading-tight">
               Merksatz: Wireframe = Aufbau | Mockup = Aussehen | Prototyp = Bedienung | Entwicklung = Funktion
             </p>
           </div>
           <button
-            onClick={() => onComplete(200)}
+            onClick={() => onComplete(50)}
             className="flex items-center gap-1.5 px-5 py-2 bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
           >
             <span>Weiter zum Quiz</span>
