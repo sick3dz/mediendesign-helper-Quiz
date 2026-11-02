@@ -85,46 +85,63 @@ export const ProcessSorterGame: React.FC<{ onComplete: (score: number) => void; 
         Ordne die 6 Phasen von der ersten Idee bis zum fertigen Code. Nutze die Pfeile zum Verschieben.
       </p>
 
-      <div className="space-y-2 mb-4">
+      <div className="space-y-2.5 mb-4">
         {items.map((item, idx) => {
           const isAtCorrectPos = item.id === CORRECT_ORDER[idx].id;
           return (
             <div
               key={item.id}
-              className={`p-3 rounded-lg border flex items-center justify-between transition-colors ${
+              className={`p-3.5 rounded-xl border flex items-center justify-between transition-all ${
                 isSuccess
-                  ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 shadow-2xs'
                   : isAtCorrectPos && !isLevel2
                   ? 'bg-indigo-50/50 dark:bg-indigo-950/30 border-indigo-200 dark:border-indigo-800'
-                  : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800'
+                  : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700/80'
               }`}
             >
-              <div className="flex items-center gap-3">
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono font-bold ${
-                  isAtCorrectPos && !isLevel2 ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+              <div className="flex items-center gap-3.5 min-w-0 pr-2">
+                <span className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-mono font-bold shrink-0 transition-colors ${
+                  isAtCorrectPos && !isLevel2 ? 'bg-indigo-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600'
                 }`}>
                   {idx + 1}
                 </span>
-                <div>
-                  <div className="text-xs font-bold text-slate-900 dark:text-white">{item.name}</div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">{item.desc}</div>
+
+                {/* Visual Artifact Mockup Badge */}
+                <div className="hidden sm:flex shrink-0 w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex-col items-center justify-center text-base select-none">
+                  {item.id === '1' && '📋'}
+                  {item.id === '2' && '🌿'}
+                  {item.id === '3' && '📐'}
+                  {item.id === '4' && '🎨'}
+                  {item.id === '5' && '⚡'}
+                  {item.id === '6' && '💻'}
+                </div>
+
+                <div className="min-w-0">
+                  <div className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white truncate">
+                    {item.name}
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                    {item.desc}
+                  </div>
                 </div>
               </div>
 
               {!isSuccess && (
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 shrink-0">
                   <button
+                    type="button"
                     onClick={() => move(idx, 'up')}
                     disabled={idx === 0}
-                    className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-200 dark:hover:text-white dark:hover:bg-slate-700 disabled:opacity-20 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-700 disabled:opacity-20 transition-colors cursor-pointer"
                     title="Nach oben"
                   >
                     <ArrowUp className="w-4 h-4" />
                   </button>
                   <button
+                    type="button"
                     onClick={() => move(idx, 'down')}
                     disabled={idx === items.length - 1}
-                    className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-200 dark:hover:text-white dark:hover:bg-slate-700 disabled:opacity-20 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 dark:hover:text-white dark:hover:bg-slate-700 disabled:opacity-20 transition-colors cursor-pointer"
                     title="Nach unten"
                   >
                     <ArrowDown className="w-4 h-4" />

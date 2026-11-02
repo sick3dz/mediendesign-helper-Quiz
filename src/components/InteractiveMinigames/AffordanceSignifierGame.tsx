@@ -147,10 +147,76 @@ export const AffordanceSignifierGame: React.FC<Props> = ({ onComplete, isLevel2 
         </div>
       </div>
 
-      <div className="my-6 p-6 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 text-center relative overflow-hidden">
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wide">{currentItem.context}</p>
-        <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{currentItem.element}</h4>
-        <p className="text-sm text-slate-600 dark:text-slate-300">Was liegt hier vor?</p>
+      <div className="my-6 p-6 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800 text-center relative overflow-hidden flex flex-col items-center">
+        <p className="text-xs font-mono font-bold text-slate-400 dark:text-slate-500 mb-3 uppercase tracking-wider">{currentItem.context}</p>
+
+        {/* Live Visual UI Mockup Box */}
+        <div className="w-full max-w-sm my-2 p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col items-center justify-center min-h-[120px]">
+          {currentItem.id === '1' && (
+            <div className="flex items-center gap-4 bg-slate-100 dark:bg-slate-800 p-4 rounded-xl border border-slate-300 dark:border-slate-700 w-full justify-center">
+              <div className="w-4 h-24 bg-gradient-to-r from-slate-300 via-slate-100 to-slate-400 dark:from-slate-600 dark:via-slate-400 dark:to-slate-700 rounded-full shadow-md border border-slate-400/50 flex items-center justify-center">
+                <div className="w-1 h-16 bg-slate-400/50 rounded-full" />
+              </div>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Physischer Glas-Türeinlass</span>
+            </div>
+          )}
+
+          {currentItem.id === '2' && (
+            <div className="px-6 py-3 bg-gradient-to-b from-amber-200 via-amber-300 to-amber-400 text-amber-950 font-serif font-black text-sm tracking-widest uppercase rounded-md shadow-md border-2 border-amber-500 flex items-center gap-2">
+              <span className="text-amber-800">★</span>
+              <span>ZIEHEN</span>
+              <span className="text-amber-800">★</span>
+            </div>
+          )}
+
+          {currentItem.id === '3' && (
+            <div className="w-full space-y-2 text-left">
+              <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded w-3/4" />
+              <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded w-1/2" />
+              <div className="pt-3 flex justify-center">
+                <div className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-full text-xs font-bold flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800 animate-bounce">
+                  <span>Scrollen für mehr</span>
+                  <span>↓</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentItem.id === '4' && (
+            <button
+              type="button"
+              className="px-6 py-3 bg-gradient-to-b from-indigo-500 to-indigo-700 text-white font-black text-xs rounded-xl shadow-lg border-b-4 border-indigo-900 active:translate-y-1 transition-all cursor-pointer"
+            >
+              Jetzt Kostenlos Registrieren
+            </button>
+          )}
+
+          {currentItem.id === '5' && (
+            <div className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed text-left">
+              Weitere Details zur IHK-Prüfungsvorbereitung findest du direkt in unserem{' '}
+              <span className="text-blue-600 dark:text-blue-400 font-bold underline underline-offset-2 hover:text-blue-800 cursor-pointer">
+                Prüfungskatalog 2026
+              </span>{' '}
+              für Mediengestaltung Digital & Print.
+            </div>
+          )}
+
+          {currentItem.id === '6' && (
+            <div className="flex items-center gap-3">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-b from-slate-200 to-slate-400 dark:from-slate-700 dark:to-slate-900 border-2 border-slate-400 dark:border-slate-600 shadow-md relative flex items-center justify-center">
+                <div className="w-1.5 h-6 bg-indigo-600 rounded-full absolute top-1" />
+                <div className="w-8 h-8 rounded-full bg-slate-300 dark:bg-slate-800 border border-slate-400/50" />
+              </div>
+              <div className="text-left text-[11px] font-mono text-slate-500">
+                <div className="font-bold text-slate-900 dark:text-slate-200">Audio Gain</div>
+                <div>+12 dB Rotary Knob</div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <h4 className="text-base font-bold text-slate-900 dark:text-white mt-1 mb-1">{currentItem.element}</h4>
+        <p className="text-xs text-slate-600 dark:text-slate-300">Was liegt hier vor?</p>
 
         {lastResult && (
           <div className={`absolute inset-0 flex flex-col items-center justify-center p-4 transition-all ${

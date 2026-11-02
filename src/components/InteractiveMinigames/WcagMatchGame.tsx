@@ -134,8 +134,81 @@ export const WcagMatchGame: React.FC<{ onComplete: (score: number) => void; isLe
         </div>
       </div>
 
-      <div className="my-5 p-6 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 text-center relative overflow-hidden">
+      <div className="my-5 p-6 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 text-center relative overflow-hidden flex flex-col items-center">
         <p className="text-xs text-slate-400 dark:text-slate-500 mb-1 uppercase tracking-wide">Welchem WCAG-Prinzip gehört diese Maßnahme an?</p>
+        
+        {/* Practice Visual UI Mockup Card */}
+        <div className="w-full max-w-md my-3 p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col items-center justify-center min-h-[90px]">
+          {current.id === '1' && (
+            <div className="flex items-center gap-4 bg-slate-900 text-white p-3 rounded-lg w-full justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl font-black text-amber-400">Aa</span>
+                <div className="text-left">
+                  <div className="text-xs font-bold text-slate-200">Kontrast-Verhältnis</div>
+                  <div className="text-[11px] font-mono text-slate-400">Vordergrund #FBBF24 auf #0F172A</div>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 bg-emerald-900/80 text-emerald-300 border border-emerald-700 text-xs font-mono font-bold rounded-md">
+                4.8:1 (PASS)
+              </span>
+            </div>
+          )}
+
+          {current.id === '2' && (
+            <div className="flex items-center gap-3 bg-slate-100 dark:bg-slate-800 p-3 rounded-lg w-full justify-between">
+              <div className="flex items-center gap-2">
+                <kbd className="px-2 py-1 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded text-xs font-mono font-bold shadow-2xs text-slate-800 dark:text-slate-200">
+                  Tab
+                </kbd>
+                <span className="text-xs text-slate-600 dark:text-slate-300">Focus Indicator Ring</span>
+              </div>
+              <button type="button" className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-bold rounded-md ring-4 ring-indigo-300 dark:ring-indigo-800">
+                Aktions-Button
+              </button>
+            </div>
+          )}
+
+          {current.id === '3' && (
+            <div className="w-full text-left space-y-1">
+              <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">E-Mail-Adresse *</label>
+              <input type="text" readOnly value="max@mustermann" className="w-full px-2.5 py-1 text-xs border border-amber-500 rounded bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200 font-mono" />
+              <p className="text-[11px] text-amber-700 dark:text-amber-400 font-medium">⚠️ Bitte geben Sie eine gültige E-Mail-Adresse ein</p>
+            </div>
+          )}
+
+          {current.id === '4' && (
+            <div className="w-full bg-slate-900 text-slate-200 p-2.5 rounded-lg text-[11px] font-mono text-left space-y-0.5">
+              <div className="text-purple-400">&lt;header class=&quot;site-header&quot;&gt;</div>
+              <div className="text-blue-400 pl-3">&lt;nav aria-label=&quot;Hauptnavigation&quot;&gt;...&lt;/nav&gt;</div>
+              <div className="text-purple-400">&lt;/header&gt;</div>
+              <div className="text-emerald-400">&lt;main id=&quot;content&quot;&gt;...&lt;/main&gt;</div>
+            </div>
+          )}
+
+          {current.id === '5' && (
+            <div className="w-full bg-slate-100 dark:bg-slate-800 p-2.5 rounded-lg text-left flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs">▶</span>
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Video-Lektion.mp4</span>
+              </div>
+              <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-800 text-[10px] font-bold rounded">
+                [CC] Untertitel aktiv
+              </span>
+            </div>
+          )}
+
+          {current.id === '6' && (
+            <div className="w-full bg-slate-100 dark:bg-slate-800 p-2.5 rounded-lg text-left flex items-center justify-between">
+              <div className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+                Sitzungs-Timer: Noch 05:00 Min.
+              </div>
+              <button type="button" className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold rounded">
+                +30 Min. verlängern
+              </button>
+            </div>
+          )}
+        </div>
+
         <h4 className="text-base font-bold text-slate-900 dark:text-white mb-2">{current.action}</h4>
 
         {lastFeedback && (
