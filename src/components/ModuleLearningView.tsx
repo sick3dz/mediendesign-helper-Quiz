@@ -54,9 +54,11 @@ export const ModuleLearningView: React.FC<Props> = ({
     }
     return 'learn';
   });
+  const [accumulatedXp, setAccumulatedXp] = useState(0);
 
   useEffect(() => {
     setCurrentLevel(initialLevel);
+    setAccumulatedXp(0);
     if (initialLevel === 2) {
       setViewState(module.miniGameType ? 'minigame' : 'quiz');
     } else {
@@ -432,11 +434,8 @@ export const ModuleLearningView: React.FC<Props> = ({
               isLevel2={currentLevel === 2}
               onComplete={score => {
                 const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
-                if (currentLevel === 2) {
-                  setViewState('quiz');
-                } else {
-                  onModuleCompleted(module.id, finalXp, 1);
-                }
+                setAccumulatedXp(prev => prev + finalXp);
+                setViewState('quiz');
               }}
             />
           )}
@@ -446,11 +445,8 @@ export const ModuleLearningView: React.FC<Props> = ({
               isLevel2={currentLevel === 2}
               onComplete={score => {
                 const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
-                if (currentLevel === 2) {
-                  setViewState('quiz');
-                } else {
-                  onModuleCompleted(module.id, finalXp, 1);
-                }
+                setAccumulatedXp(prev => prev + finalXp);
+                setViewState('quiz');
               }}
             />
           )}
@@ -460,11 +456,8 @@ export const ModuleLearningView: React.FC<Props> = ({
               isLevel2={currentLevel === 2}
               onComplete={score => {
                 const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
-                if (currentLevel === 2) {
-                  setViewState('quiz');
-                } else {
-                  onModuleCompleted(module.id, finalXp, 1);
-                }
+                setAccumulatedXp(prev => prev + finalXp);
+                setViewState('quiz');
               }}
             />
           )}
@@ -474,23 +467,12 @@ export const ModuleLearningView: React.FC<Props> = ({
               isLevel2={currentLevel === 2}
               onComplete={score => {
                 const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
-                if (currentLevel === 2) {
-                  setViewState('quiz');
-                } else {
-                  onModuleCompleted(module.id, finalXp, 1);
-                }
+                setAccumulatedXp(prev => prev + finalXp);
+                setViewState('quiz');
               }}
             />
           )}
 
-          <div className="mt-4 text-center">
-            <button
-              onClick={() => setViewState('quiz')}
-              className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors inline-flex items-center gap-1 cursor-pointer"
-            >
-              Weiter zum Wissens-Check <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
         </div>
       )}
 
@@ -502,7 +484,7 @@ export const ModuleLearningView: React.FC<Props> = ({
           isLevel2={currentLevel === 2}
           onFinished={score => {
             const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
-            onModuleCompleted(module.id, finalXp, currentLevel);
+            onModuleCompleted(module.id, finalXp + accumulatedXp, currentLevel);
             if (currentLevel === 1) {
               setShowSummaryModal(true);
             }

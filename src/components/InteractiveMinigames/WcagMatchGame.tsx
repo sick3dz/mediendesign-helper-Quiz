@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { soundEffects } from '../../services/audioService';
 import confetti from 'canvas-confetti';
-import { Check, X, RotateCcw, Award, Sparkles } from 'lucide-react';
+import { Check, X, RotateCcw, Award, Sparkles, ArrowRight } from 'lucide-react';
 
 interface WcagTask {
   id: string;
@@ -85,9 +85,8 @@ export const WcagMatchGame: React.FC<{ onComplete: (score: number) => void; isLe
         setDone(true);
         soundEffects.playLevelUp();
         confetti({ particleCount: 70, spread: 60 });
-        onComplete(score + (isCorrect ? 100 : 0));
       }
-    }, 1300);
+    }, isCorrect ? 1300 : 2800);
   };
 
   const restart = () => {
@@ -110,13 +109,22 @@ export const WcagMatchGame: React.FC<{ onComplete: (score: number) => void; isLe
         <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 max-w-md mx-auto">
           Merke dir POUR für die Prüfung: Perceivable (Wahrnehmbar), Operable (Bedienbar), Understandable (Verständlich), Robust (Robust).
         </p>
-        <button
-          onClick={restart}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
-        >
-          <RotateCcw className="w-4 h-4" />
-          Nochmal trainieren
-        </button>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            onClick={restart}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium transition-colors cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Nochmal trainieren
+          </button>
+          <button
+            onClick={() => onComplete(score)}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+          >
+            <span>Weiter zum Quiz</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     );
   }
@@ -215,8 +223,6 @@ export const WcagMatchGame: React.FC<{ onComplete: (score: number) => void; isLe
           <div className={`absolute inset-0 flex flex-col items-center justify-center p-4 transition-all ${
             lastFeedback.isCorrect
               ? 'bg-emerald-600 text-white'
-              : isLevel2
-              ? 'bg-slate-800 text-slate-100 border border-slate-700'
               : 'bg-rose-600 text-white'
           }`}>
             <div className="flex items-center gap-2 text-base font-bold mb-1">
@@ -229,7 +235,10 @@ export const WcagMatchGame: React.FC<{ onComplete: (score: number) => void; isLe
               )}
               <span>{lastFeedback.isCorrect ? 'Volltreffer!' : isLevel2 ? 'IHK-Analyse & Zuordnung:' : 'Daneben!'}</span>
             </div>
-            <p className="text-xs text-white/95 text-center max-w-md">{lastFeedback.text}</p>
+            <p className="text-xs text-white/95 text-center max-w-md">
+              {!lastFeedback.isCorrect && <span className="font-bold block mb-1 underline">💡 Analyse:</span>}
+              {lastFeedback.text}
+            </p>
           </div>
         )}
       </div>

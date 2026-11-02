@@ -53,18 +53,24 @@ export const LearningStatsView: React.FC<Props> = ({
   const { totalAnswered, totalCorrect, accuracy } = useMemo(() => {
     let perfCorrect = 0;
     let perfAnswered = 0;
+    
+    // Aggregate from question performance records
     Object.values(stats.questionPerformance || {}).forEach(p => {
-      const c = p.correctCount || 0;
-      const w = p.wrongCount || 0;
+      const c = Number(p.correctCount) || 0;
+      const w = Number(p.wrongCount) || 0;
       perfCorrect += c;
       perfAnswered += (c + w);
     });
 
-    const rawAnswered = stats.answeredQuestionsCount || 0;
-    const rawCorrect = stats.correctAnswersCount || 0;
+    // Use raw stats as baseline (for legacy or mixed data)
+    const rawAnswered = Number(stats.answeredQuestionsCount) || 0;
+    const rawCorrect = Number(stats.correctAnswersCount) || 0;
 
+    // The final numbers should be the maximum of both sources to be most accurate
     const correct = Math.max(rawCorrect, perfCorrect);
+    // Crucially: Answered must always be at least as many as correct answers
     const answered = Math.max(rawAnswered, perfAnswered, correct);
+    
     const acc = answered > 0 ? Math.round((correct / answered) * 100) : 0;
 
     return { totalAnswered: answered, totalCorrect: correct, accuracy: acc };

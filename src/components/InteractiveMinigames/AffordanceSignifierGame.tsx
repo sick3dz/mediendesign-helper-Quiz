@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { soundEffects } from '../../services/audioService';
 import confetti from 'canvas-confetti';
-import { Sparkles, Check, X, RotateCcw, Award } from 'lucide-react';
+import { Sparkles, Check, X, RotateCcw, Award, ArrowRight } from 'lucide-react';
 
 interface Item {
   id: string;
@@ -96,9 +96,8 @@ export const AffordanceSignifierGame: React.FC<Props> = ({ onComplete, isLevel2 
         setFinished(true);
         confetti({ particleCount: 70, spread: 60 });
         soundEffects.playLevelUp();
-        onComplete(score + (isCorrect ? 100 : 0));
       }
-    }, 1200);
+    }, isCorrect ? 1200 : 2500);
   };
 
   const restart = () => {
@@ -122,13 +121,22 @@ export const AffordanceSignifierGame: React.FC<Props> = ({ onComplete, isLevel2 
         <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 max-w-md mx-auto">
           Prüfungs-Merksatz: Affordance beschreibt die mögliche Handlung. Signifier signalisiert die Handlung (Hinweis/Beschriftung).
         </p>
-        <button
-          onClick={restart}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
-        >
-          <RotateCcw className="w-4 h-4" />
-          Nochmal spielen
-        </button>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            onClick={restart}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium transition-colors cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Nochmal spielen
+          </button>
+          <button
+            onClick={() => onComplete(score)}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+          >
+            <span>Weiter zum Quiz</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     );
   }
@@ -222,8 +230,6 @@ export const AffordanceSignifierGame: React.FC<Props> = ({ onComplete, isLevel2 
           <div className={`absolute inset-0 flex flex-col items-center justify-center p-4 transition-all ${
             lastResult.isCorrect
               ? 'bg-emerald-600 text-white'
-              : isLevel2
-              ? 'bg-slate-800 text-slate-100 border border-slate-700'
               : 'bg-rose-600 text-white'
           }`}>
             <div className="flex items-center gap-2 text-base font-bold mb-1">
@@ -236,7 +242,10 @@ export const AffordanceSignifierGame: React.FC<Props> = ({ onComplete, isLevel2 
               )}
               <span>{lastResult.isCorrect ? 'Exakt richtig!' : isLevel2 ? 'IHK-Analyse & Lösungsvergleich:' : 'Leider daneben!'}</span>
             </div>
-            <p className="text-xs text-white/90 text-center max-w-md">{lastResult.explanation}</p>
+            <p className="text-xs text-white/90 text-center max-w-md">
+              {!lastResult.isCorrect && <span className="font-bold block mb-1 underline">💡 Analyse:</span>}
+              {lastResult.explanation}
+            </p>
           </div>
         )}
       </div>

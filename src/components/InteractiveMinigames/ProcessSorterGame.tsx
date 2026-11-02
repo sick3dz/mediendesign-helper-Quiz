@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { soundEffects } from '../../services/audioService';
 import confetti from 'canvas-confetti';
-import { ArrowUp, ArrowDown, CheckCircle2, RotateCcw } from 'lucide-react';
+import { ArrowUp, ArrowDown, CheckCircle2, RotateCcw, ArrowRight } from 'lucide-react';
 
 interface Step {
   id: string;
@@ -57,7 +57,6 @@ export const ProcessSorterGame: React.FC<{ onComplete: (score: number) => void; 
       setIsSuccess(true);
       soundEffects.playLevelUp();
       confetti({ particleCount: 75, spread: 60 });
-      onComplete(200);
     }
   };
 
@@ -154,14 +153,23 @@ export const ProcessSorterGame: React.FC<{ onComplete: (score: number) => void; 
       </div>
 
       {isSuccess && (
-        <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800 text-center">
-          <div className="flex items-center justify-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-sm mb-1">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            Perfekt geordnet! 200 XP erhalten
+        <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="text-left">
+            <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-sm mb-1">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              Perfekt geordnet! 200 XP erhalten
+            </div>
+            <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-mono italic leading-tight">
+              Merksatz: Wireframe = Aufbau | Mockup = Aussehen | Prototyp = Bedienung | Entwicklung = Funktion
+            </p>
           </div>
-          <p className="text-xs text-emerald-700 dark:text-emerald-400 font-mono">
-            Merksatz: Wireframe = Aufbau | Mockup = Aussehen | Prototyp = Bedienung | Entwicklung = Funktion
-          </p>
+          <button
+            onClick={() => onComplete(200)}
+            className="flex items-center gap-1.5 px-5 py-2 bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
+          >
+            <span>Weiter zum Quiz</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
     </div>
