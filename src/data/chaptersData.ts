@@ -735,6 +735,19 @@ export const CHAPTERS: Chapter[] = [
               { id: 'c', text: 'Flexibilität für Profis', isCorrect: false, explanation: 'Ladebalken betrifft alle Nutzer.' },
               { id: 'd', text: 'Wiedererkennen statt Erinnern', isCorrect: false, explanation: 'Hier geht es um den Echtzeit-Zustand des Systems.' }
             ]
+          },
+          {
+            id: 'q-ixd-6-3',
+            chapterId: 'ixd',
+            moduleId: 'ixd-6',
+            question: 'Ein Webformular zeigt Vorschläge für Suchbegriffe direkt bei der Texteingabe (Auto-Suggest). Welche Nielsen-Heuristik wird hier angewendet?',
+            options: [
+              { id: 'a', text: 'Wiedererkennen statt Erinnern (Recognition rather than recall)', isCorrect: true, explanation: 'Richtig! Der Nutzer muss sich Begriffe nicht aus dem Gedächtnis rufen, sondern wählt aus sichtbaren Vorschlägen.' },
+              { id: 'b', text: 'Minimalistisches Design', isCorrect: false, explanation: 'Minimalistisches Design verzichtet auf unnötige Zierelemente.' },
+              { id: 'c', text: 'Systemstatus-Sichtbarkeit', isCorrect: false, explanation: 'Sichtbarkeit des Systemstatus zeigt z.B. Fortschrittsbalken.' },
+              { id: 'd', text: 'Single Source Publishing', isCorrect: false, explanation: 'Das ist ein medienneutrales Veröffentlichungskonzept.' }
+            ],
+            examTip: 'IHK-Tipp: "Wiedererkennen statt Erinnern" entlastet das Arbeitsgedächtnis durch visuelle Vorschläge und Menüauswahlen.'
           }
         ]
       },
@@ -771,6 +784,31 @@ export const CHAPTERS: Chapter[] = [
               { id: 'c', text: 'Gesetz der Geschlossenheit', isCorrect: false, explanation: 'Geschlossenheit ergänzt fehlende Konturen.' },
               { id: 'd', text: 'Gesetz der Prägnanz', isCorrect: false, explanation: 'Prägnanz bevorzugt einfache Formen.' }
             ]
+          },
+          {
+            id: 'q-ixd-7-2',
+            chapterId: 'ixd',
+            moduleId: 'ixd-7',
+            question: 'Welches Gestaltgesetz erklärt, warum Buttons mit derselben Hintergrundfarbe und Form von Nutzern als gleichartige Funktionsteile wahrgenommen werden?',
+            options: [
+              { id: 'a', text: 'Gesetz der Ähnlichkeit (Similarity)', isCorrect: true, explanation: 'Richtig! Ähnlich gestaltete Objekte (Farbe, Form, Größe) werden gedanklich zu einer Gruppe verknüpft.' },
+              { id: 'b', text: 'Gesetz der Nähe', isCorrect: false, explanation: 'Gesetz der Nähe bezieht sich auf den räumlichen Abstand.' },
+              { id: 'c', text: 'Gesetz der Geschlossenheit', isCorrect: false, explanation: 'Gesetz der Geschlossenheit vervollständigt unvollständige Konturen.' },
+              { id: 'd', text: 'Gesetz der Kontinuität', isCorrect: false, explanation: 'Kontinuität folgt durchgehenden Linienverläufen.' }
+            ]
+          },
+          {
+            id: 'q-ixd-7-3',
+            chapterId: 'ixd',
+            moduleId: 'ixd-7',
+            question: 'Ein Logo besteht aus unterbrochenen Kreislinien, die unser Gehirn automatisch zu einem vollen Kreis vervollständigt. Welches Gestaltgesetz wirkt hier?',
+            options: [
+              { id: 'a', text: 'Gesetz der Geschlossenheit (Closure)', isCorrect: true, explanation: 'Perfekt! Das menschliche Gehirn schließt unvollständige Konturen zu einer bekannten Gesamtform.' },
+              { id: 'b', text: 'Gesetz des gemeinsamen Schicksals', isCorrect: false, explanation: 'Betrifft sich gemeinsam bewegende Elemente.' },
+              { id: 'c', text: 'Gesetz der Gleichartigkeit', isCorrect: false, explanation: 'Bezieht sich auf ähnliche Form-/Farbmerkmale.' },
+              { id: 'd', text: 'Gesetz des optischen Lärms', isCorrect: false, explanation: 'Kein Gestaltgesetz.' }
+            ],
+            merksatz: 'Gesetz der Geschlossenheit lässt das Gehirn Lücken in Konturen selbstständig auffüllen.'
           }
         ]
       }
@@ -1152,6 +1190,31 @@ export const CHAPTERS: Chapter[] = [
               { id: 'c', text: 'Weil sie nur für den Online-Handel gelten', isCorrect: false, explanation: 'Sinus-Milieus gelten für alle Lebensbereiche.' },
               { id: 'd', text: 'Weil sie Pixel in Vektoren umwandeln', isCorrect: false, explanation: 'Falsch.' }
             ]
+          },
+          {
+            id: 'q-wf-5-2',
+            chapterId: 'wireframe',
+            moduleId: 'wf-5',
+            question: 'Welches Sinus-Milieu wird als ehrgeizige, leistungsorientierte Effizienz-Elite mit hoher Technik-Affinität beschrieben?',
+            options: [
+              { id: 'a', text: 'Performer', isCorrect: true, explanation: 'Richtig! Performer zeichnen sich durch Erfolgsstreben, digitale Dynamik und Effizienz aus.' },
+              { id: 'b', text: 'Traditionelle', isCorrect: false, explanation: 'Traditionelle legen Fokus auf Sicherheit und Ordnung.' },
+              { id: 'c', text: 'Prekäre', isCorrect: false, explanation: 'Prekäre sind um Teilhabe bemühte Milieus mit Orientierungsdruck.' },
+              { id: 'd', text: 'Bürgerliche Mitte', isCorrect: false, explanation: 'Die Bürgerliche Mitte ist der gesicherte Mainstream.' }
+            ]
+          },
+          {
+            id: 'q-wf-5-3',
+            chapterId: 'wireframe',
+            moduleId: 'wf-5',
+            question: 'Was versteht man im Design-Kontext unter einer "Persona"?',
+            options: [
+              { id: 'a', text: 'Eine fiktive, aber datenbasierte Repräsentantin einer Zielgruppe zur Konkretisierung von Nutzerbedürfnissen', isCorrect: true, explanation: 'Exakt! Personas verleihen anonymen Zielgruppendaten ein konkretes Gesicht mit Zielen und Schmerzpunkten.' },
+              { id: 'b', text: 'Einen echten Kunden mit unterschriebenem Vertrag', isCorrect: false, explanation: 'Personas sind fiktive Modellnutzer.' },
+              { id: 'c', text: 'Das Passwort des System-Administrators', isCorrect: false, explanation: 'Kein IT-Zugangsdaten-Begriff.' },
+              { id: 'd', text: 'Ein Programm zur Bildbearbeitung', isCorrect: false, explanation: 'Nein.' }
+            ],
+            merksatz: 'Personas übersetzen Zielgruppenstatistiken in anschauliche Nutzerprofile mit konkreten Bedürfnissen.'
           }
         ]
       },
@@ -1188,6 +1251,31 @@ export const CHAPTERS: Chapter[] = [
               { id: 'c', text: 'Das Festlegen der Server-Preise', isCorrect: false, explanation: 'Falsch.' },
               { id: 'd', text: 'Die Auswahl der Büroausstattung', isCorrect: false, explanation: 'Das gehört nicht zum digitalen Styleguide.' }
             ]
+          },
+          {
+            id: 'q-wf-6-2',
+            chapterId: 'wireframe',
+            moduleId: 'wf-6',
+            question: 'Welches Element ist ein zentraler Bestandteil des Corporate Designs (CD) eines Unternehmens?',
+            options: [
+              { id: 'a', text: 'Hausschrift, Farbpalette, Firmenlogo und Bildsprache', isCorrect: true, explanation: 'Richtig! Das CD umfasst das gesamte visuelle Erscheinungsbild eines Unternehmens.' },
+              { id: 'b', text: 'Die Gehaltsstruktur der Angestellten', isCorrect: false, explanation: 'Das gehört zum Personalwesen.' },
+              { id: 'c', text: 'Die Netzspannung in den Büroräumen', isCorrect: false, explanation: 'Das gehört zur Elektrotechnik.' },
+              { id: 'd', text: 'Der Mietvertrag der Firmenzentrale', isCorrect: false, explanation: 'Das gehört zur Gebäudeverwaltung.' }
+            ]
+          },
+          {
+            id: 'q-wf-6-3',
+            chapterId: 'wireframe',
+            moduleId: 'wf-6',
+            question: 'Was unterscheidet eine "Component Library" in UI-Design-Tools (wie Figma) von einem reinen PDF-Styleguide?',
+            options: [
+              { id: 'a', text: 'Sie enthält wiederverwendbare, interaktive UI-Bausteine (Buttons, Formularfelder), die zentral geändert werden können', isCorrect: true, explanation: 'Exakt! Änderungen an Komponenten in der Library aktualisieren automatisch alle verknüpften Instanzen im Projekt.' },
+              { id: 'b', text: 'Ein PDF-Styleguide kann gedruckt werden, eine Component Library löscht automatisch den Quellcode', isCorrect: false, explanation: 'Unsinn.' },
+              { id: 'c', text: 'Component Libraries sind gesetzlich verboten', isCorrect: false, explanation: 'Falsch.' },
+              { id: 'd', text: 'Sie beinhaltet ausschließlich Audio-Dateien', isCorrect: false, explanation: 'UI Component Libraries beinhalten Interface-Elemente.' }
+            ],
+            merksatz: 'Component Libraries bündeln wiederverwendbare UI-Elemente für maximale Effizienz und Konsistenz.'
           }
         ]
       }
@@ -1812,6 +1900,31 @@ export const CHAPTERS: Chapter[] = [
               { id: 'c', text: 'Erst nach der Anmeldung beim Patentamt', isCorrect: false, explanation: 'Patente schützen technische Erfindungen, nicht das Urheberrecht.' },
               { id: 'd', text: 'Nach 10 Jahren Veröffentlichung', isCorrect: false, explanation: 'Der Schutz beginnt sofort.' }
             ]
+          },
+          {
+            id: 'q-sec-4-2',
+            chapterId: 'security',
+            moduleId: 'sec-4',
+            question: 'Welche Angaben müssen nach deutschem Telemediengesetz (TDDDG/DDG) zwingend im Impressum einer geschäftsmäßigen Website stehen?',
+            options: [
+              { id: 'a', text: 'Name, ladungsfähige Anschrift, schnelle Kontaktdaten (E-Mail/Telefon) und Vertretungsberechtigte', isCorrect: true, explanation: 'Richtig! Das Impressum dient der rechtlichen Transparenz und Anbieterkennzeichnung.' },
+              { id: 'b', text: 'Geburtsdatum und Lieblingsfarben des Webdesigners', isCorrect: false, explanation: 'Rechtlich vollkommen irrelevant.' },
+              { id: 'c', text: 'Das vollständige Quellcode-Repository', isCorrect: false, explanation: 'Quellcode gehört nicht ins Impressum.' },
+              { id: 'd', text: 'Die Passwörter der Kundenkonten', isCorrect: false, explanation: 'Verletzt gravierend den Datenschutz.' }
+            ]
+          },
+          {
+            id: 'q-sec-4-3',
+            chapterId: 'security',
+            moduleId: 'sec-4',
+            question: 'Was bedeutet die Creative-Commons-Lizenzangabe "CC BY-NC"?',
+            options: [
+              { id: 'a', text: 'Das Werk darf unter Namensnennung (BY) genutzt werden, jedoch NICHT für kommerzielle Zwecke (NC)', isCorrect: true, explanation: 'Exakt! BY = Attribution (Namensnennung), NC = Non-Commercial (nicht kommerziell).' },
+              { id: 'b', text: 'Das Werk darf beliebig verkauft werden, ohne den Autor zu nennen', isCorrect: false, explanation: 'Das widerspricht sowohl BY als auch NC.' },
+              { id: 'c', text: 'Das Werk ist vollkommen lizenzfrei im Public Domain', isCorrect: false, explanation: 'Public Domain entspricht CC0.' },
+              { id: 'd', text: 'Das Werk darf nur auf Papier ausgedruckt werden', isCorrect: false, explanation: 'Falsch.' }
+            ],
+            merksatz: 'Creative Commons: BY = Namensnennung, NC = Nicht Kommerziell, ND = Keine Bearbeitung, SA = Weitergabe unter gleichen Bedingungen.'
           }
         ]
       }
@@ -2400,6 +2513,31 @@ export const CHAPTERS: Chapter[] = [
               { id: 'c', text: 'Das Gespräch wortlos verlassen', isCorrect: false, explanation: 'Unprofessionell.' },
               { id: 'd', text: 'Die Schuld auf die Praktikanten schieben', isCorrect: false, explanation: 'Absolut unprofessionell.' }
             ]
+          },
+          {
+            id: 'q-proj-4-2',
+            chapterId: 'project',
+            moduleId: 'proj-4',
+            question: 'Was versteht man unter einer "Ich-Botschaft" in der professionellen Projektkommunikation?',
+            options: [
+              { id: 'a', text: 'Das Äußern der eigenen Wahrnehmung und Wirkung ("Ich stelle fest..."), ohne den Gesprächspartner direkt anzugreifen', isCorrect: true, explanation: 'Exakt! Ich-Botschaften reduzieren Abwehrhaltungen und fördern ein sachliches Gespräch.' },
+              { id: 'b', text: 'Eine egoistische Forderung nach Gehaltserhöhung', isCorrect: false, explanation: 'Falsch.' },
+              { id: 'c', text: 'Das Versenden von E-Mails im Nur-Lese-Modus', isCorrect: false, explanation: 'Hat nichts mit Kommunikationstechnik zu tun.' },
+              { id: 'd', text: 'Eine automatische Abwesenheitsnotiz', isCorrect: false, explanation: 'Falsch.' }
+            ]
+          },
+          {
+            id: 'q-proj-4-3',
+            chapterId: 'project',
+            moduleId: 'proj-4',
+            question: 'Was ist das Ziel des "Harvard-Konzepts" im Verhandlungs- und Konfliktmanagement?',
+            options: [
+              { id: 'a', text: 'Eine sachbezogene Verhandlung zur Erzielung von Win-Win-Lösungen auf Basis gegenseitiger Interessen statt starrer Positionen', isCorrect: true, explanation: 'Richtig! Trennung von Mensch und Problem sowie Fokus auf gemeinsame Interessen stehen im Mittelpunkt.' },
+              { id: 'b', text: 'Den Verhandlungspartner durch Lautstärke zum Schweigen zu bringen', isCorrect: false, explanation: 'Unprofessionell und destruktiv.' },
+              { id: 'c', text: 'Möglichst hohe Vertragsstrafen durchzusetzen', isCorrect: false, explanation: 'Nicht Ziel des Harvard-Prinzips.' },
+              { id: 'd', text: 'Das Abbrechen aller Kundenprojekte', isCorrect: false, explanation: 'Falsch.' }
+            ],
+            examTip: 'Harvard-Konzept: Trenne Personen von Problemen, fokussiere auf Interessen statt starrer Positionen für echte Win-Win-Ergebnisse.'
           }
         ]
       }
@@ -3519,6 +3657,31 @@ export const CHAPTERS: Chapter[] = [
               { id: 'c', text: 'BMP', isCorrect: false, explanation: 'Veraltet und ungeeignet.' },
               { id: 'd', text: 'TIFF', isCorrect: false, explanation: 'Kein Web-Format.' }
             ]
+          },
+          {
+            id: 'q-gfx-1-2',
+            chapterId: 'graphics',
+            moduleId: 'gfx-1',
+            question: 'Was passiert mit einer Pixelgrafik (Rastergrafik), wenn sie extrem stark vergrößert wird?',
+            options: [
+              { id: 'a', text: 'Es kommt zur Treppchenbildung (Verpixelung), da die einzelnen Farbpunkte sichtbar werden', isCorrect: true, explanation: 'Richtig! Da Pixel ein meilenweit definiertes Raster sind, führt Vergrößerung zu Unschärfe und Treppchenbildung.' },
+              { id: 'b', text: 'Sie wandelt sich automatisch in eine mathematische Vektordatei um', isCorrect: false, explanation: 'Konvertierung erfordert Vektorisierungstools, passiert nicht automatisch.' },
+              { id: 'c', text: 'Die Dateigröße schrumpft auf 0 Byte', isCorrect: false, explanation: 'Physikalisch unmöglich.' },
+              { id: 'd', text: 'Sie wird automatisch in CMYK konvertiert', isCorrect: false, explanation: 'Farbraum ändert sich nicht beim Skalieren.' }
+            ]
+          },
+          {
+            id: 'q-gfx-1-3',
+            chapterId: 'graphics',
+            moduleId: 'gfx-1',
+            question: 'Auf welcher Auszeichnungssprache basiert das Vektorgrafik-Format SVG (Scalable Vector Graphics)?',
+            options: [
+              { id: 'a', text: 'XML (Extensible Markup Language)', isCorrect: true, explanation: 'Exakt! SVG-Dateien sind XML-Dokumente, deren Pfade und Formen in Text-Code beschrieben werden.' },
+              { id: 'b', text: 'C++', isCorrect: false, explanation: 'C++ ist eine kompilierte Programmiersprache.' },
+              { id: 'c', text: 'MP3', isCorrect: false, explanation: 'MP3 ist ein Audioformat.' },
+              { id: 'd', text: 'SQL', isCorrect: false, explanation: 'SQL ist eine Datenbankabfragesprache.' }
+            ],
+            merksatz: 'SVG ist ein XML-basiertes Vektorformat – unendlich skalierbar und per Code/CSS manipulierbar!'
           }
         ]
       },
@@ -3563,6 +3726,31 @@ export const CHAPTERS: Chapter[] = [
               { id: 'c', text: 'Es benötigt keine Internetverbindung', isCorrect: false, explanation: 'Unsinning.' },
               { id: 'd', text: 'Es ist ein reines Audio-Format', isCorrect: false, explanation: 'Nein.' }
             ]
+          },
+          {
+            id: 'q-gfx-2-2',
+            chapterId: 'graphics',
+            moduleId: 'gfx-2',
+            question: 'Welches Kompressionsverfahren eignet sich am besten für Screenshots mit feinem Text und transparentem Hintergrund?',
+            options: [
+              { id: 'a', text: 'Verlustfreie Kompression (Lossless, z. B. PNG oder WebP-Lossless)', isCorrect: true, explanation: 'Richtig! Verlustfreie Kompression verhindert störende Artefakte an Textkanten und unterstützt Alphakanäle.' },
+              { id: 'b', text: 'Starke verblassende JPG-Kompression auf Qualitätsstufe 10%', isCorrect: false, explanation: 'Führt zu unleserlichen Textartefakten und unterstützt keine Transparenz.' },
+              { id: 'c', text: 'Druck-CMYK-Farbauszug ohne Kompression', isCorrect: false, explanation: 'Für Web-Screenshots ungeeignet.' },
+              { id: 'd', text: 'MP4-Videokompression', isCorrect: false, explanation: 'MP4 ist ein Videoformat.' }
+            ]
+          },
+          {
+            id: 'q-gfx-2-3',
+            chapterId: 'graphics',
+            moduleId: 'gfx-2',
+            question: 'Was versteht man unter "Kompression-Artefakten" bei einer JPG-Datei?',
+            options: [
+              { id: 'a', text: 'Sichtbare Störungen, Blockbildungen oder Fransen an Kontrastkanten durch verlustbehaftetes Datenlöschen', isCorrect: true, explanation: 'Exakt! JPG fasst ähnliche 8x8-Pixelblöcke zusammen, was bei hoher Kompression sichtbare Störungen erzeugt.' },
+              { id: 'b', text: 'Historische Kunstwerke in Digitalmuseen', isCorrect: false, explanation: 'Sprachverwechslung.' },
+              { id: 'c', text: 'Die Schärfung von Vektorpfaden', isCorrect: false, explanation: 'Artefakte verschlechtern das Bild.' },
+              { id: 'd', text: 'Das automatische Einfügen von Wasserzeichen', isCorrect: false, explanation: 'Falsch.' }
+            ],
+            examTip: 'IHK-Merksatz: Verlustbehaftete Kompression (JPG) spart Speicher, erzeugt aber irreversible Kompressionsartefakte.'
           }
         ]
       },
@@ -3607,6 +3795,31 @@ export const CHAPTERS: Chapter[] = [
               { id: 'c', text: 'Alle Bilder müssen zwingend schwarz-weiß sein', isCorrect: false, explanation: 'Falsch.' },
               { id: 'd', text: 'Das Löschen aller Meta-Daten', isCorrect: false, explanation: 'Gegenteil ist der Fall.' }
             ]
+          },
+          {
+            id: 'q-gfx-3-2',
+            chapterId: 'graphics',
+            moduleId: 'gfx-3',
+            question: 'Was versteht man unter dem Prinzip des "Late Binding" bei der Farbraumkonvertierung in der Medienproduktion?',
+            options: [
+              { id: 'a', text: 'Bilddaten werden möglichst lange im neutralen RGB-Farbraum belassen und erst bei der konkreten Medienausgabe in CMYK umgewandelt', isCorrect: true, explanation: 'Richtig! Late Binding bewahrt das volle Farbspektrum für alle Kanäle bis zur finalen Druckausgabe.' },
+              { id: 'b', text: 'Das Binden von Büchern am späten Abend', isCorrect: false, explanation: 'Falsche Wortbedeutung.' },
+              { id: 'c', text: 'Das sofortige Umwandeln aller Fotos in CMYK beim Fotografieren', isCorrect: false, explanation: 'Das wäre "Early Binding" und zerstört RGB-Farbinformationen für Web.' },
+              { id: 'd', text: 'Das automatische Löschen von Schriftarten aus InDesign', isCorrect: false, explanation: 'Falsch.' }
+            ]
+          },
+          {
+            id: 'q-gfx-3-3',
+            chapterId: 'graphics',
+            moduleId: 'gfx-3',
+            question: 'Warum gilt der eciRGB-v2-Farbraum als besonders geeignet für die medienneutrale Bilddatenhaltung?',
+            options: [
+              { id: 'a', text: 'Weil er einen sehr großen Farbumfang besitzt, der sowohl sRGB (Web) als auch gängige Offsetdruck-Farbräume (CMYK) vollständig abdeckt', isCorrect: true, explanation: 'Exakt! Großer RGB-Farbraum verhindert Farbverluste bei späteren Umwandlungen.' },
+              { id: 'b', text: 'Weil er nur 4 Farben darstellen kann', isCorrect: false, explanation: 'Falsch.' },
+              { id: 'c', text: 'Weil eciRGB nur auf Linux-Servern existiert', isCorrect: false, explanation: 'eciRGB ist ein plattformunabhängiger ICC-Standard.' },
+              { id: 'd', text: 'Weil er Bilder automatisch um 50% komprimiert', isCorrect: false, explanation: 'Ein Farbraum komprimiert keine Dateigrößen.' }
+            ],
+            merksatz: 'Late Binding & eciRGB-v2 sichern maximale Farbqualität für die spätere Transformation in Web (sRGB) oder Print (CMYK).'
           }
         ]
       }
@@ -3620,15 +3833,29 @@ export const CHAPTERS: Chapter[] = [
  * otherwise transforms base questions into scenario-rich IHK transfer questions
  * with balanced option lengths and detailed trap explanations.
  */
+/**
+ * Returns Level 2 (Mastery / IHK-Transfer) questions for a module.
+ * If explicitly defined in level2QuizQuestions, returns those;
+ * otherwise transforms base questions into scenario-rich IHK transfer questions
+ * with balanced option lengths, shuffled order, and detailed trap explanations.
+ */
 export function getModuleLevel2Questions(module: LearningModule): QuizQuestion[] {
-  if (module.level2QuizQuestions && module.level2QuizQuestions.length > 0) {
-    return module.level2QuizQuestions;
-  }
+  const scenarioPrefixes = [
+    `IHK-Abschlussprüfung (Digital): In einem komplexen Kundenprojekt zur "${module.title}" stehst du vor folgender Herausforderung:`,
+    `Transfer-Szenario: Als Mediengestalter im 3. Lehrjahr sollst du für eine Fachabteilung folgende Entscheidung fachlich begründen:`,
+    `IHK-Meisterfall: Ein Kunde bemängelt die Umsetzung im Modul "${module.title}". Analysiere die Situation nach geltenden Qualitätsstandards:`,
+    `Prüfungsrelevante Fallstudie: In der mündlichen IHK-Prüfung wirst du mit folgendem Szenario konfrontiert:`,
+    `Situationsaufgabe (Gesellenstück-Niveau): Für ein Portfolio-Projekt im Bereich "${module.title}" musst du folgende Fachfrage präzise beantworten:`
+  ];
 
-  return module.quizQuestions.map(q => {
+  const sourceQuestions = module.level2QuizQuestions && module.level2QuizQuestions.length > 0
+    ? module.level2QuizQuestions
+    : module.quizQuestions;
+
+  return sourceQuestions.map((q, index) => {
     // Find target length from correct option so distractors are balanced
     const correctOpt = q.options.find(o => o.isCorrect);
-    const targetWords = correctOpt ? correctOpt.text.split(/\s+/).length : 15;
+    const targetWords = correctOpt ? correctOpt.text.split(/\s+/).length : 18;
 
     const balancedOptions = q.options.map(opt => {
       if (opt.isCorrect) {
@@ -3638,14 +3865,16 @@ export function getModuleLevel2Questions(module: LearningModule): QuizQuestion[]
       const words = opt.text.trim().split(/\s+/);
       let enhancedText = opt.text.trim();
 
-      // If distractor is visibly shorter than the target length, expand with plausible professional context
-      if (words.length < Math.max(12, Math.round(targetWords * 0.75))) {
+      // Even more sophisticated expansion for Level 2 difficulty
+      if (words.length < Math.max(14, Math.round(targetWords * 0.85))) {
         if (enhancedText.toLowerCase().startsWith('ausschließlich') || enhancedText.toLowerCase().startsWith('nur')) {
-          enhancedText = `${enhancedText}, da dies nach oberflächlicher Betrachtung den geringsten initialen Gestaltungsaufwand erfordert.`;
+          enhancedText = `${enhancedText}, da dies nach oberflächlicher Betrachtung den geringsten initialen Gestaltungsaufwand erfordert und oft als pragmatische Abkürzung missverstanden wird.`;
+        } else if (enhancedText.toLowerCase().includes('zufall') || enhancedText.toLowerCase().includes('irrelevant')) {
+          enhancedText = `${enhancedText}, da in der Praxis oft auf empirische Belege verzichtet wird und man sich auf das rein subjektive ästhetische Empfinden verlässt.`;
         } else if (enhancedText.endsWith('.')) {
-          enhancedText = `${enhancedText.slice(0, -1)}, was in manchen Praxis-Teams zwar vermutet wird, den IHK-Standards jedoch widerspricht.`;
+          enhancedText = `${enhancedText.slice(0, -1)}, was zwar eine gängige (aber fachlich falsche) Annahme in vielen Junior-Teams darstellt und gegen IHK-Kernkompetenzen verstößt.`;
         } else {
-          enhancedText = `${enhancedText} – eine in der Praxis häufig gewählte Fehleinschätzung, die fachliche Qualitätskriterien missachtet.`;
+          enhancedText = `${enhancedText} – eine verlockende Fehleinschätzung, die zwar plausibel klingt, jedoch die tiefergehenden fachlichen Anforderungen der Prüfungsordnung ignoriert.`;
         }
       }
 
@@ -3654,21 +3883,28 @@ export function getModuleLevel2Questions(module: LearningModule): QuizQuestion[]
         text: enhancedText,
         trapExplanation:
           opt.trapExplanation ||
-          `Glaubwürdiger Praxis-Irrtum: ${opt.explanation} In IHK-Prüfungen wird diese Option oft gewählt, da sie oberflächlich wie eine pragmatische Abkürzung wirkt, aber fundamentale Fachstandards außer Acht lässt.`
+          `Klassische Prüfungsfalle: ${opt.explanation} In IHK-Prüfungen wird diese Option oft gewählt, da sie wie eine effiziente Lösung wirkt, aber die notwendige fachliche Tiefe oder rechtliche Rahmenbedingungen vernachlässigt.`
       };
+    });
+
+    // Shuffle options for Level 2 difficulty (but keep it deterministic per session if possible)
+    // Here we use a simple pseudo-shuffle that is consistent for the current question
+    const shuffledOptions = [...balancedOptions].sort((a, b) => {
+      // Use the first character of the ID and text to create a stable but shuffled-looking order
+      const seed = (a.id.charCodeAt(0) + a.text.charCodeAt(0)) - (b.id.charCodeAt(0) + b.text.charCodeAt(0));
+      return seed;
     });
 
     return {
       ...q,
       id: `l2-${q.id}`,
-      question: `[IHK-Meisterfall] ${q.question}`,
+      question: q.question.startsWith('[IHK-') ? q.question : `[Meister-Niveau] ${q.question}`,
       scenario:
-        q.scenario ||
-        'Praxis-Szenario: In einem anspruchsvollen Kundenprojekt soll eine IHK-konforme und transferorientierte Entscheidung getroffen werden:',
-      options: balancedOptions,
+        q.scenario || scenarioPrefixes[index % scenarioPrefixes.length],
+      options: shuffledOptions,
       examTip:
         q.examTip ||
-        'IHK-Prüfer-Tipp: Achte bei dieser Transferfrage besonders auf die exakte Begriffstrennung, da alle 4 Optionen plausibel klingen!',
+        'IHK-Experten-Rat: Bei dieser Transferleistung ist absolute Präzision gefragt. Achte auf Nuancen in der Formulierung, die den Unterschied zwischen "fast richtig" und "fachlich perfekt" ausmachen.',
     };
   });
 }

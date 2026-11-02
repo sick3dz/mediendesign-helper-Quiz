@@ -419,13 +419,16 @@ export const FocusSprintModal: React.FC<Props> = ({
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4"
     >
       <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 relative transition-colors max-h-[92vh] overflow-y-auto">
-        <button
-          onClick={handleAttemptClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-xl transition-colors cursor-pointer bg-slate-100 dark:bg-slate-800 z-10"
-          aria-label="Schließen"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        {/* Small Close Button - Only show when NOT in an active session to prevent accidental closing */}
+        {(!hasStarted || isSessionFinished) && (
+          <button
+            onClick={handleAttemptClose}
+            className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1.5 rounded-xl transition-colors cursor-pointer bg-slate-100 dark:bg-slate-800 z-10"
+            aria-label="Schließen"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
 
         {/* Modal Header */}
         <div className="text-center mb-4">
@@ -664,10 +667,11 @@ export const FocusSprintModal: React.FC<Props> = ({
         ) : (
           /* ACTIVE SPRINT SESSION CONTROLS & CONTENT */
           <>
-            {/* Mode Selector Tabs */}
-            <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl mb-3">
+            {/* Mode Selector Tabs - Disabled while timer is RUNNING to prevent accidental mode switches */}
+            <div className={`grid grid-cols-2 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl mb-3 ${isActive ? 'opacity-50 pointer-events-none' : ''}`}>
               <button
                 onClick={() => handleRequestModeSwitch('active_quiz')}
+                disabled={isActive}
                 className={`py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-300 ease-out cursor-pointer active:scale-95 ${
                   sprintMode === 'active_quiz'
                     ? 'bg-gradient-to-r from-amber-500 to-indigo-600 text-white shadow-md scale-[1.02] ring-2 ring-amber-400/40'
@@ -680,6 +684,7 @@ export const FocusSprintModal: React.FC<Props> = ({
 
               <button
                 onClick={() => handleRequestModeSwitch('passive')}
+                disabled={isActive}
                 className={`py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all duration-300 ease-out cursor-pointer active:scale-95 ${
                   sprintMode === 'passive'
                     ? 'bg-indigo-600 text-white shadow-md scale-[1.02] ring-2 ring-indigo-400/40'
@@ -820,32 +825,16 @@ export const FocusSprintModal: React.FC<Props> = ({
                         Inhalt ist während der Pause verdeckt. Klicke auf Weiterlernen, um fortzufahren!
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-center">
                       <button
                         onClick={() => {
                           soundEffects.playClick();
                           onToggleActive();
                         }}
-                        className="px-4 py-2 bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+                        className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
                       >
                         <Play className="w-4 h-4 fill-current" />
                         <span>Weiterlernen</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          soundEffects.playClick();
-                          if (isActive) onToggleActive();
-                          onReset(300);
-                          setHasStarted(false);
-                          setBlitzScore(0);
-                          setTotalAttempted(0);
-                          setBlitzCombo(0);
-                          setUnitsCompleted(false);
-                        }}
-                        className="px-3.5 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-rose-500 hover:text-white text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
-                      >
-                        <RefreshCw className="w-3.5 h-3.5" />
-                        <span>Abbrechen</span>
                       </button>
                     </div>
                   </div>

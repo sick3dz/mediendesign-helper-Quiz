@@ -1,117 +1,98 @@
-# Passiver Fokus-Timer: Nahtlose Modul-Navigation & Hintergrund-Lernen
+# Implementation Plan - Quizfragen auf mindestens 3 pro Modul erweitern
 
-Der passive Fokus-Timer wird so überarbeitet, dass Lernende direkt nach dem Starten oder Schließen des Timer-Fensters ohne störende Rückfrage-Dialoge in allen Lernmodulen und Kapiteln weiterlernen können, während der Timer präzise im Hintergrund weiterläuft.
+Erweiterung aller Lernmodule im Mediendesign IHK Trainer, so dass jedes Modul über mindestens 3 fundierte, prüfungsrelevante Quizfragen verfügt. Das schließt Wissensfragen zur Theorie und anwendungsbezogene IHK-Praxisfälle ein.
 
 ## User Review & Critical Decisions
 
 > [!IMPORTANT]
-> Basierend auf deinen Antworten in Phase 1 wurden folgende Kernentscheidungen für den Ablauf festgelegt:
+> Basierend auf der Befragung wurden folgende Entscheidungen getroffen:
 
-- **Confirmed Decision 1 (Timer-Start)**: Beim Klick auf „Fokus-Timer Starten“ schließt sich das große Modal sofort automatisch (Auto-Minimierung), sodass der Lernbereich mit Modulen, Quizzen und Flashcards sofort bedienbar ist.
-- **Confirmed Decision 2 (Schließen ohne Rückfrage)**: Der Schließen-Button (X) sowie die Tastatur-/Klick-Ereignisse schließen das Fenster im passiven Modus augenblicklich ohne Rückfrage („Sprint wirklich beenden?“). Der Timer läuft ununterbrochen weiter.
-- **Confirmed Decision 3 (Direkt-Navigation)**: Im Timer-Fenster wird ein prominenter Button „Zurück zur Lernübersicht“ integriert, der das Modal schließt und den Nutzer direkt zur Kapitel- und Modul-Lernübersicht bringt.
-- **Confirmed Decision 4 (Sicherheit beim Abbrechen)**: Die Rückfrage zur Beendigung wird ausschließlich dann angezeigt, wenn der Nutzer ganz gezielt auf das rote Reset-/Abbrechen-Symbol klickt, niemals beim normalen Schließen oder Navigieren.
+- **Bisheriger Ist-Zustand**: 8 Module besaßen bisher nur 1 Frage und 1 Modul besaß 2 Fragen. Die übrigen Module verfügen über 3 bis 5 Fragen.
+- **Ziel-Erweiterung**: Alle Module mit unter 3 Fragen werden gezielt um 2 bis 3 neue Fragen auf mindestens 3 Fragen aufgestockt.
+- **Didaktische Ausrichtung**: Ausgewogene Kombination aus Kernkonzept-Definitionen (z. B. Gestaltgesetze, Urheberrecht, Formate) und situativen IHK-Prüfungsszenarien.
 
 ---
 
 ## 1. Overview & Core Concept
 
-- **What It Does**: Ermöglicht eine ungestörte Lernsession nach dem Pomodoro-/Fokus-Prinzip. Nutzer starten den passiven Timer (3, 5, 10, 15 oder 25 Minuten) und können sich frei durch alle 8 IHK-Kapitel, Fachmodule, Prüfungsfragen und Spickzettel bewegen.
-- **Target Audience / Persona**: IHK-Prüflinge (Mediengestaltung / Digital & Print / Konzeption & Visualisierung) und Lernende mit ADHS, die feste Zeitfenster zum konzentrierten Lernen benötigen, ohne durch blockierende Popups oder versehentliches Abbrechen frustriert zu werden.
-- **Key Value**: Reibungsloser Flow zwischen Zeitüberwachung und aktivem Lernen. Die verbleibende Zeit ist stets im TopBar-Header, als dezentes Schwebefeld und im Browser-Tab (`⏱️ MM:SS`) sichtbar.
+### Ziel & Nutzen
+Einige Themengebiete (z. B. Gestaltgesetze, Sinus-Milieus, Styleguides, Urheberrecht, Kommunikation/Konfliktmanagement sowie Pixel- vs. Vektorgrafiken) wiesen bislang nur 1 Einzelfrage auf. Durch die Aufstockung auf mindestens 3 Fragen pro Modul wird die Lernkontrolle vertieft, der Fragenpool für die Level-1- und Level-2-Sprint-Sessions abwechslungsreicher und der Vorbereitungswert für die IHK-Abschlussprüfung signifikant gesteigert.
 
 ---
 
-## 2. User Experience & Visual Design
+## 2. Betroffene Lernmodule & Ergänzungs-Fokus
 
-### Key User Flows
+Folgende 9 Module werden in `src/data/chaptersData.ts` mit neuen Fragen ergänzt:
+
+1. **`ixd-7` Gestaltgesetze: Visuelle Wahrnehmung** (von 1 auf 3 Fragen)
+   - *Neu*: Gesetz der Ähnlichkeit & Prägnanz in Web-Interfaces.
+   - *Neu*: Praxisfall zu unvollständigen Icons (Gesetz der Geschlossenheit).
+
+2. **`wf-5` Zielgruppen & Sinus-Milieus** (von 1 auf 3 Fragen)
+   - *Neu*: Zuordnung der Milieus (Performer vs. Bürgerliche Mitte vs. Expeditive) zu Designansprüchen.
+   - *Neu*: Praxisfall zur UI-Gestaltung für unterschiedliche Lebenswelten.
+
+3. **`wf-6` Styleguide & Corporate Design** (von 1 auf 3 Fragen)
+   - *Neu*: Unterscheidung Corporate Identity (CI) vs. Corporate Design (CD) vs. Component Library.
+   - *Neu*: Praxisfall zur Aufrechterhaltung der Konsistenz in verteilt arbeitenden Design-Teams.
+
+4. **`sec-4` Rechtliche Grundlagen: Urheberrecht & Impressum** (von 1 auf 3 Fragen)
+   - *Neu*: Nutzungsrechte & Creative-Commons-Lizenzen (CC-BY, CC-ND, CC-NC) im Berufsalltag.
+   - *Neu*: Pflichtangaben im Impressum & Datenschutzerklärung bei Geschäftsmäßigkeit.
+
+5. **`proj-4` Kommunikation & Konfliktmanagement** (von 1 auf 3 Fragen)
+   - *Neu*: Professionelles Korrekturmanagement (Meilensteine, Change Requests & Abnahme).
+   - *Neu*: Deeskalationstechniken (Ich-Botschaften, Aktives Zuhören & Harvard-Konzept).
+
+6. **`gfx-1` Pixel vs. Vektor (SVG & WebP)** (von 1 auf 3 Fragen)
+   - *Neu*: Technische Eigenschaften von Vektorgrafiken (DOM-Editierbarkeit, Skalierbarkeit, mathematische Pfade).
+   - *Neu*: Praxisfall zur Auswahl des optimalen Grafikformats für ein komplexes Web-Layout.
+
+7. **`gfx-2` Kompression & Bildbewertung** (von 1 auf 3 Fragen)
+   - *Neu*: Vor- und Nachteile von lossy vs. lossless Kompression.
+   - *Neu*: Praxisfall zu WebP-Features (Alphakanal, Animation & Dateigrößenvorteile).
+
+8. **`gfx-3` Crossmedia & Medienneutrale Daten** (von 1 auf 3 Fragen)
+   - *Neu*: Medienneutrale Datenhaltung (eciRGB vs. sRGB vs. CMYK Late Binding).
+   - *Neu*: Praxisfall zur Druck- und Web-Ausgabe aus einem medienneutralen Archiv.
+
+9. **`ixd-6` Die 10 Nielsen-Heuristiken** (von 2 auf 3 Fragen)
+   - *Neu*: Praxisfall zur Anwendung der Heuristik "Fehlervermeidung & Wiedererkennen statt Erinnern".
+
+---
+
+## 3. Technical Architecture & Data Strategy
 
 ```
-[ TopBar: "Fokus" ] 
-       │
-       ▼
-┌──────────────────────────────────────────────┐
-│  Fokus-Sprint Modal (Passiv-Modus gewählt)   │
-│  - Dauer wählen (z.B. 10m / 25m)             │
-│  - Klick auf: "⏱️ Fokus-Timer JETZT STARTEN"  │
-└──────────────────────┬───────────────────────┘
-                       │
-       ┌───────────────┴───────────────┐
-       ▼                               ▼
-[ Auto-Minimieren ]        [ Modal manuell geöffnet ]
-       │                               │
-       │                   Klick auf: "Zurück zur Lernübersicht"
-       │                               │
-       ▼                               ▼
 ┌──────────────────────────────────────────────────────────┐
-│  Lernansicht (Kapitel, Module, Didaktik, Prüfungen)      │
-│  • TopBar zeigt Live-Zeit: [ ⏱️ 09:42 ]                   │
-│  • Floating Mini-Badge unten rechts mit Puls-Indikator   │
-│  • Tab-Titel aktualisiert: "⏱️ 09:42 • Fokus-Session"    │
-│  • Keine blockierenden Fenster                           │
+│                   src/data/chaptersData.ts               │
+│                                                          │
+│  Lernmodule (CHAPTERS Array)                            │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │ Module-Objekt (z.B. ixd-7, wf-5, sec-4, gfx-1...)  │  │
+│  │ ├─ nuggets: [...]                                  │  │
+│  │ └─ quizQuestions: [ Q1 (Bestehend), Q2, Q3 ]       │  │
+│  └────────────────────────────────────────────────────┘  │
+└────────────────────────────┬─────────────────────────────┘
+                             │
+                             ▼
+┌──────────────────────────────────────────────────────────┐
+│               Dynamische Level-2 Generierung             │
+│            getModuleLevel2Questions(module)              │
+│                                                          │
+│  Generiert automatisch IHK-Meisterfall-Szenarien,        │
+│  Glaubwürdigkeits-Fallen & Prüfer-Tipps für alle Quiz    │
+│  Fragen in Level 2!                                      │
 └──────────────────────────────────────────────────────────┘
 ```
 
-1. **Starten & Weiterlernen**: Klickt der Nutzer im passiven Modus auf Start, wird der Timer aktiviert und das Modal schließt sich sofort sanft. Der Nutzer befindet sich direkt in der Modul-Übersicht und kann mit dem Lernen beginnen.
-2. **Zwischendurch Öffnen**: Klickt der Nutzer in der TopBar auf den Timer-Button `⏱️ 09:42` oder auf das Schwebefeld unten rechts, öffnet sich das Fokus-Studio (z.B. um Hintergrundmusik zu wechseln oder die Zeit zu prüfen).
-3. **Zurückkehren**: Ein Klick auf das X oder auf den Button „Zurück zur Lernübersicht“ schließt das Modal ohne Dialog. Der Timer läuft ohne Unterbrechung weiter.
-4. **Session-Ende**: Bei Ablauf der Zeit ertönt der dezente Erfolgs-Jingle, Konfetti wird ausgelöst, EXP werden gutgeschrieben und eine Web-Notification informiert den Nutzer, falls er sich in einem anderen Tab befindet.
-
-### Visual Identity & Theme
-
-- **Farbpalette**:
-  - Dominanter Canvas: `bg-slate-50 dark:bg-slate-950`
-  - Timer-Fokus-Akzent: Warmes Indigo (`bg-indigo-600 text-white`) kombiniert mit subtilem Bernstein (`text-amber-500`) für Motivation.
-  - Laufender Status: Dezent pulsierendes Smaragdgrün (`text-emerald-500`, `bg-emerald-500/10`) für „Fokus aktiv“.
-- **Typografie & Zahlen**: Tabellarische Ziffern (`font-mono tabular-nums font-black`) für den Countdown, um nervöses Layout-Wackeln zu verhindern.
-- **Barrierefreiheit & Dark Mode**: Vollständige Unterstützung von `@custom-variant dark`, mit hohem Kontrast (WCAG AA konform) auf allen Buttons und Cards.
+- **Integrierte Antwortoptionen & Erklärungen**: Jede neue Quizfrage erhält 4 plausible Antwortmöglichkeiten, eine explizite `isCorrect`-Zuordnung, detaillierte Erklärungen bei Falschantworten sowie Merksätze.
+- **Automatische Level-2 Meisterstufe**: Da `getModuleLevel2Questions()` die Fragen eines Moduls dynamisch in Meisterfälle transformiert, profitieren sowohl Level 1 als auch Level 2 sofort von den neu hinzugefügten Fragen.
 
 ---
 
-## 3. Key Product Decisions & Trade-Offs
+## 4. Execution Steps
 
-- **Trennung von Passiv-Timer und Aktivem Quiz-Sprint**:
-  - *Chosen Approach*: Der passive Timer ist als reiner Begleiter zum freien Lernen gedacht. Deshalb darf das Schließen des Modals im Passiv-Modus niemals ein Bestätigungs-Popup auslösen. Im aktiven Quiz-Sprint (wo Fragen direkt im Modal beantwortet werden) warnt die App nur dann, wenn ein angefangenes 20-Einheiten-Quiz abgebrochen werden soll.
-  - *Why*: Nutzer lernen in den eigentlichen App-Modulen (Kapitel 1–8), nicht im Modal. Ein blockierendes Modal widerspricht dem Konzept des passiven Lern-Begleiters.
-- **Auto-Close beim Start im Passiv-Modus**:
-  - *Chosen Approach*: `handleStartSprintNow` schließt das Modal automatisch, wenn `sprintMode === 'passive'`, sodass der Nutzer keinen separaten Klick machen muss, um mit dem Lernen loszulegen.
-  - *Why*: Reduziert Reibung und Klicks um 50% und leitet den Lern-Flow sofort ein.
-- **Explizite Abbruch-Schaltfläche**:
-  - *Chosen Approach*: Ein Abbruch-Dialog erscheint nur noch bei gezielter Auswahl des Abbruch-Buttons (`Sprint beenden / zurücksetzen`), nicht beim bloßen Schließen des Fensters.
-
----
-
-## 4. Technical Architecture & Component Structure
-
-### Component Flow
-
-```
-┌────────────────────────────────────────────────────────┐
-│                        App.tsx                         │
-│  - State: isSprintActive, sprintSecondsLeft, isDone    │
-│  - Ref: sprintEndTimeRef (Echtzeituhr-Synchronisation) │
-│  - LocalStorage: focus_sprint_target_end               │
-└───────────────┬────────────────────────┬───────────────┘
-                │                        │
-       Props & Handlers         Props & Handlers
-                │                        │
-                ▼                        ▼
-┌──────────────────────────────┐  ┌───────────────────────┐
-│          TopBar.tsx          │  │ FocusSprintModal.tsx  │
-│  - Live-Badge [⏱️ MM:SS]     │  │  - sprintMode         │
-│  - Click -> Open Focus Modal │  │  - handleAttemptClose │
-└──────────────────────────────┘  │  - onGoToOverview     │
-                                  └───────────────────────┘
-```
-
-### State & Handler Modifications
-
-1. **`src/components/FocusSprintModal.tsx`**:
-   - `handleAttemptClose`: Sicherstellen, dass im passiven Modus immer sofort `onClose()` aufgerufen wird, ohne `showExitConfirmModal`.
-   - `handleStartSprintNow`: Wenn `sprintMode === 'passive'`, nach Aktivierung des Timers (`onToggleActive`) direkt `onClose()` ausführen, sodass das Fenster minimiert wird.
-   - `Lernübersicht-Button`: Hinzufügen eines gut sichtbaren Buttons `Zurück zur Lernübersicht` im passiven Screen, der `onClose()` ausführt.
-   - Initialer Modus: Sicherstellen, dass der gespeicherte Modus verlässlich erkannt wird und standardmäßig auf `passive` steht, wenn der Nutzer die Zeitbegleitung wünscht.
-
-2. **`src/App.tsx`**:
-   - Sicherstellen, dass `isFocusSprintOpen` jederzeit über die TopBar oder das Floating Badge geöffnet und geschlossen werden kann, ohne dass der laufende Sprint pausiert oder zurückgesetzt wird.
-   - Verfeinerung des Schwebefeldes unten rechts: Bessere Klickfläche und klarer Text ("⏱️ MM:SS • Fokus läuft • Zurück zum Timer").
+1. **Update `chaptersData.ts`**: Formuliere und füge die neu ausgearbeiteten 17 Quizfragen in den entsprechenden Module-Objekten ein.
+2. **Prüfung der Fragenanzahl**: Überprüfe per TypeScript-Script, dass jedes der 38 Module nun über mindestens 3 Fragen verfügt.
+3. **Build & Lint Verification**: Ausführen von `compile_applet` und `lint_applet` zur Bestätigung der Fehlerfreiheit.

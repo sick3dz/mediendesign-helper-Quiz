@@ -3,7 +3,7 @@ import { QuizQuestion, QuizOption } from '../types/quiz';
 import { BionicText } from '../utils/bionicReading';
 import { soundEffects } from '../services/audioService';
 import confetti from 'canvas-confetti';
-import { Check, X, ArrowRight, RotateCcw, Award, Lightbulb, Star, Sparkles, AlertTriangle, BookOpen, HelpCircle } from 'lucide-react';
+import { Check, X, ArrowRight, RotateCcw, Award, Lightbulb, Star, Sparkles, AlertTriangle, BookOpen, HelpCircle, Zap } from 'lucide-react';
 import { QuestionDetailModal } from './QuestionDetailModal';
 
 interface Props {
@@ -31,6 +31,8 @@ export const QuizCard: React.FC<Props> = ({
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number>(45); // 45 seconds per Meister-question
+  const [timerActive, setTimerActive] = useState(false);
   const [combo, setCombo] = useState(0);
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -40,6 +42,31 @@ export const QuizCard: React.FC<Props> = ({
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   const currentQuestion = questions[currentIndex] || questions[0];
+
+  // Timer logic for Level 2
+  useEffect(() => {
+    if (!isLevel2 || isCompleted || selectedOptionId !== null) {
+      setTimerActive(false);
+      return;
+    }
+
+    setTimeLeft(45); // Reset timer for new question
+    setTimerActive(true);
+  }, [currentIndex, isLevel2, isCompleted, selectedOptionId]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (timerActive && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft(prev => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0 && timerActive) {
+      // Time's up! Auto-select nothing (wrong)
+      handleSelectOption({ id: 'TIMEOUT', text: '', isCorrect: false, explanation: 'Die Zeit ist abgelaufen! In der IHK-Prüfung zählt jede Sekunde.' });
+      setTimerActive(false);
+    }
+    return () => clearInterval(interval);
+  }, [timerActive, timeLeft]);
 
   const showComboFeedback = (msg: string) => {
     setComboToast(msg);
@@ -66,10 +93,11 @@ export const QuizCard: React.FC<Props> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentIndex, selectedOptionId, isCompleted, currentQuestion]);
 
-  const handleSelectOption = (opt: QuizOption) => {
+  const handleSelectOption = (opt: QuizOption | { id: string, text: string, isCorrect: boolean, explanation: string }) => {
     if (selectedOptionId !== null) return; // Already selected
 
     setSelectedOptionId(opt.id);
+    setTimerActive(false);
     const isCorrect = opt.isCorrect;
 
     setAnswers(prev => ({ ...prev, [currentIndex]: isCorrect }));
@@ -256,8 +284,18 @@ export const QuizCard: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Combo & XP Indicator */}
+        {/* Combo, Timer & XP Indicator */}
         <div className="flex items-center gap-3">
+          {isLevel2 && !selectedOptionId && !isCompleted && (
+            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono font-bold text-[11px] transition-all ${
+              timeLeft <= 10 
+                ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 animate-pulse ring-2 ring-rose-500/20' 
+                : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400'
+            }`}>
+              <Zap className={`w-3.5 h-3.5 ${timeLeft <= 10 ? 'fill-rose-500' : 'fill-amber-500'}`} />
+              <span>{timeLeft}s</span>
+            </div>
+          )}
           {combo > 1 && (
             <span className="font-bold text-amber-600 dark:text-amber-400 font-mono flex items-center gap-1 animate-pulse">
               <Star className="w-3.5 h-3.5 fill-amber-500" />
@@ -269,6 +307,18 @@ export const QuizCard: React.FC<Props> = ({
           </span>
         </div>
       </div>
+
+      {/* Level 2 Timer Progress Bar */}
+      {isLevel2 && !selectedOptionId && !isCompleted && (
+        <div className="w-full bg-slate-100 dark:bg-slate-800 h-1 rounded-full overflow-hidden -mt-2">
+          <div 
+            className={`h-full transition-all duration-1000 linear ${
+              timeLeft <= 10 ? 'bg-rose-500' : 'bg-amber-500'
+            }`}
+            style={{ width: `${(timeLeft / 45) * 100}%` }}
+          />
+        </div>
+      )}
 
       {/* Question */}
       <div>

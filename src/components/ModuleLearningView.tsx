@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { LearningModule, Chapter } from '../types/quiz';
 import { getModuleLevel2Questions } from '../data/chaptersData';
 import { BionicText } from '../utils/bionicReading';
@@ -120,7 +120,9 @@ export const ModuleLearningView: React.FC<Props> = ({
     }
   };
 
-  const activeQuestions = currentLevel === 2 ? getModuleLevel2Questions(module) : module.quizQuestions;
+  const activeQuestions = useMemo(() => {
+    return currentLevel === 2 ? getModuleLevel2Questions(module) : module.quizQuestions;
+  }, [currentLevel, module]);
 
   return (
     <div className="max-w-3xl mx-auto space-y-4 sm:space-y-5">
