@@ -170,47 +170,53 @@ export const ModuleSummaryModal: React.FC<Props> = ({
         </div>
 
         {/* Modal Footer Actions */}
-        <div className="p-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+        <div className="p-3 sm:p-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 shrink-0">
           <button
             type="button"
             onClick={() => {
               soundEffects.playClick();
               onClose();
             }}
-            className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all cursor-pointer text-center"
+            className="order-3 sm:order-1 w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all cursor-pointer text-center"
           >
             Schließen / Übersicht
           </button>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            {onRepeatLevel1 && (
-              <button
-                type="button"
-                onClick={() => {
-                  soundEffects.playClick();
-                  onRepeatLevel1();
-                }}
-                className="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Level 1</span>
-              </button>
+          <div className="order-1 sm:order-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            {/* Level repeat and level 2 buttons */}
+            {(onRepeatLevel1 || onStartLevel2) && (
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                {onRepeatLevel1 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEffects.playClick();
+                      onRepeatLevel1();
+                    }}
+                    className="flex-1 sm:flex-initial px-3 py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Level 1</span>
+                  </button>
+                )}
+
+                {onStartLevel2 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEffects.playClick();
+                      onStartLevel2();
+                    }}
+                    className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
+                  >
+                    <Star className="w-3.5 h-3.5 fill-slate-950 text-slate-950" />
+                    <span>Level 2</span>
+                  </button>
+                )}
+              </div>
             )}
 
-            {onStartLevel2 && (
-              <button
-                type="button"
-                onClick={() => {
-                  soundEffects.playClick();
-                  onStartLevel2();
-                }}
-                className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
-              >
-                <Star className="w-4 h-4 fill-slate-950 text-slate-950" />
-                <span>Level 2</span>
-              </button>
-            )}
-
+            {/* Primary Next Module Button */}
             {hasNextModule && onNextModule && (
               <button
                 type="button"
@@ -218,7 +224,7 @@ export const ModuleSummaryModal: React.FC<Props> = ({
                   soundEffects.playClick();
                   onNextModule();
                 }}
-                className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
               >
                 <span>Nächstes Modul</span>
                 <ArrowRight className="w-4 h-4" />

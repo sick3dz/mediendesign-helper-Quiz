@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CHAPTERS } from './data/chaptersData';
 import { UserStats, Badge, PetSpecies, PetState, EquippedCosmetics } from './types/quiz';
 import {
@@ -87,16 +87,73 @@ export default function App() {
   const [sprintVolume, setSprintVolume] = useState<number>(0.35);
   const [sprintIsMuted, setSprintIsMuted] = useState<boolean>(false);
 
+  // Exact wall-clock timestamp tracking for running in background tabs & locked screens
+  const sprintEndTimeRef = useRef<number | null>(null);
+  const lastStudyTickRef = useRef<number>(Date.now());
+
   // Break Reminder & Mindful Study Session State
   const [studySeconds, setStudySeconds] = useState<number>(0);
   const [isBreathingModalOpen, setIsBreathingModalOpen] = useState<boolean>(false);
 
-  // Active study timer for break reminder
+  // Restore any ongoing background Focus Sprint on page mount
   useEffect(() => {
+    try {
+      const savedEnd = localStorage.getItem('focus_sprint_target_end');
+      const savedTotal = localStorage.getItem('focus_sprint_total_seconds');
+      if (savedEnd) {
+        const targetEnd = parseInt(savedEnd, 10);
+        if (targetEnd && !isNaN(targetEnd)) {
+          const now = Date.now();
+          if (targetEnd > now) {
+            const remaining = Math.max(1, Math.ceil((targetEnd - now) / 1000));
+            sprintEndTimeRef.current = targetEnd;
+            if (savedTotal) {
+              setSprintTotalSeconds(parseInt(savedTotal, 10) || 300);
+            }
+            setSprintSecondsLeft(remaining);
+            setIsSprintActive(true);
+          } else {
+            // Timer expired while page was away
+            localStorage.removeItem('focus_sprint_target_end');
+            setSprintSecondsLeft(0);
+            setSprintIsDone(true);
+          }
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Active study timer for break reminder - accurately tracks real elapsed wall-clock seconds
+  useEffect(() => {
+    lastStudyTickRef.current = Date.now();
     const timer = setInterval(() => {
-      setStudySeconds(prev => prev + 1);
+      const now = Date.now();
+      const deltaSec = Math.round((now - lastStudyTickRef.current) / 1000);
+      if (deltaSec > 0) {
+        setStudySeconds(prev => prev + deltaSec);
+        lastStudyTickRef.current = now;
+      }
     }, 1000);
-    return () => clearInterval(timer);
+
+    const handleCatchUp = () => {
+      const now = Date.now();
+      const deltaSec = Math.round((now - lastStudyTickRef.current) / 1000);
+      if (deltaSec > 0) {
+        setStudySeconds(prev => prev + deltaSec);
+        lastStudyTickRef.current = now;
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleCatchUp);
+    window.addEventListener('focus', handleCatchUp);
+
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', handleCatchUp);
+      window.removeEventListener('focus', handleCatchUp);
+    };
   }, []);
 
   // Sync dark mode class on <html> & <body>
@@ -484,29 +541,95 @@ export default function App() {
     }
   }, [isSprintActive, sprintSoundType]);
 
-  // Global Focus Sprint countdown interval
+  // Global Focus Sprint countdown synchronized with real wall-clock time & background events
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (isSprintActive && sprintSecondsLeft > 0) {
-      interval = setInterval(() => {
-        setSprintSecondsLeft(sec => sec - 1);
-      }, 1000);
-    } else if (sprintSecondsLeft === 0 && isSprintActive) {
-      setIsSprintActive(false);
-      setSprintIsDone(true);
-      ambientAudioService.stop();
-      soundEffects.playLevelUp();
+    if (!isSprintActive) return;
+
+    if (!sprintEndTimeRef.current) {
+      sprintEndTimeRef.current = Date.now() + sprintSecondsLeft * 1000;
       try {
-        confetti({ particleCount: 85, spread: 80, origin: { y: 0.3 } });
+        localStorage.setItem('focus_sprint_target_end', String(sprintEndTimeRef.current));
+        localStorage.setItem('focus_sprint_total_seconds', String(sprintTotalSeconds));
       } catch {
         // ignore
       }
-      handleFocusSprintCompleted(15);
     }
-    return () => {
-      if (interval) clearInterval(interval);
+
+    const syncSprintTime = () => {
+      const targetEnd = sprintEndTimeRef.current;
+      if (!targetEnd) return;
+
+      const now = Date.now();
+      const remainingMs = targetEnd - now;
+      const remainingSecs = Math.max(0, Math.ceil(remainingMs / 1000));
+
+      setSprintSecondsLeft(remainingSecs);
+
+      if (remainingMs <= 0) {
+        setIsSprintActive(false);
+        setSprintIsDone(true);
+        sprintEndTimeRef.current = null;
+        try {
+          localStorage.removeItem('focus_sprint_target_end');
+        } catch {
+          // ignore
+        }
+        ambientAudioService.stop();
+        soundEffects.playLevelUp();
+        try {
+          confetti({ particleCount: 85, spread: 80, origin: { y: 0.3 } });
+        } catch {
+          // ignore
+        }
+        handleFocusSprintCompleted(15);
+
+        // Native Web Notification when session finishes outside the window/tab
+        if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+          try {
+            new Notification('⏱️ Fokus-Session abgeschlossen!', {
+              body: 'Klasse Leistung! Deine Fokus-Session ist beendet. Gönn dir eine Pause! (+15 EXP)',
+              icon: '/favicon.ico',
+            });
+          } catch {
+            // ignore
+          }
+        }
+      }
     };
-  }, [isSprintActive, sprintSecondsLeft]);
+
+    // Fast check to ensure smooth second updates
+    const interval = setInterval(syncSprintTime, 500);
+
+    // Immediate sync when returning to tab, focusing window, or waking device
+    const handleVisibilityOrFocus = () => {
+      syncSprintTime();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    window.addEventListener('pageshow', handleVisibilityOrFocus);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      window.removeEventListener('pageshow', handleVisibilityOrFocus);
+    };
+  }, [isSprintActive]);
+
+  // Dynamic Browser Tab Title with Live Countdown
+  useEffect(() => {
+    if (isSprintActive && sprintSecondsLeft > 0) {
+      const mins = Math.floor(sprintSecondsLeft / 60);
+      const secs = sprintSecondsLeft % 60;
+      const timeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      document.title = `⏱️ ${timeStr} • Fokus-Session | DesignKonzept.prep`;
+    } else if (sprintIsDone) {
+      document.title = `🎉 Belohnung! • Fokus-Session | DesignKonzept.prep`;
+    } else {
+      document.title = 'DesignKonzept.prep - IHK Prüfungsvorbereitung';
+    }
+  }, [isSprintActive, sprintSecondsLeft, sprintIsDone]);
 
   const handleClaimSprintLoot = (rewardText: string) => {
     setStats(prev => {
@@ -547,12 +670,40 @@ export default function App() {
 
   const handleToggleSprintActive = () => {
     soundEffects.playClick();
-    setIsSprintActive(prev => !prev);
+    setIsSprintActive(prev => {
+      const nextActive = !prev;
+      if (nextActive) {
+        // Resume or start: set target wall clock timestamp
+        const targetEnd = Date.now() + sprintSecondsLeft * 1000;
+        sprintEndTimeRef.current = targetEnd;
+        try {
+          localStorage.setItem('focus_sprint_target_end', String(targetEnd));
+          localStorage.setItem('focus_sprint_total_seconds', String(sprintTotalSeconds));
+        } catch {
+          // ignore
+        }
+      } else {
+        // Paused: clear target end time
+        sprintEndTimeRef.current = null;
+        try {
+          localStorage.removeItem('focus_sprint_target_end');
+        } catch {
+          // ignore
+        }
+      }
+      return nextActive;
+    });
   };
 
   const handleResetSprint = (secs: number = sprintTotalSeconds) => {
     soundEffects.playClick();
     setIsSprintActive(false);
+    sprintEndTimeRef.current = null;
+    try {
+      localStorage.removeItem('focus_sprint_target_end');
+    } catch {
+      // ignore
+    }
     setSprintTotalSeconds(secs);
     setSprintSecondsLeft(secs);
     setSprintIsDone(false);
@@ -919,6 +1070,7 @@ export default function App() {
         onOpenBackupModal={() => setIsBackupModalOpen(true)}
         petSpeciesEmoji={speciesEmojiMap[stats.pet.species] || '🐾'}
         isSprintActive={isSprintActive}
+        isSprintDone={sprintIsDone}
         sprintTimeFormatted={sprintTimeFormatted}
       />
 
@@ -1231,6 +1383,29 @@ export default function App() {
         onClose={() => setIsMixUpModalOpen(false)}
         onStart={handleStartMixUp}
       />
+
+      {/* Floating Passive Focus Sprint Badge when sprint is active and modal is minimized */}
+      {isSprintActive && !isFocusSprintOpen && (
+        <button
+          onClick={() => setIsFocusSprintOpen(true)}
+          className="fixed bottom-5 right-5 z-40 bg-slate-900/90 hover:bg-slate-950 text-white dark:bg-indigo-950/90 dark:hover:bg-indigo-900 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-2xl border border-indigo-500/40 flex items-center gap-3 cursor-pointer transition-all hover:scale-105 active:scale-95 group font-mono text-xs"
+          title="Fokus-Session öffnen"
+        >
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+          </span>
+          <span className="font-extrabold text-white text-sm tabular-nums">
+            ⏱️ {sprintTimeFormatted}
+          </span>
+          <span className="text-[11px] text-indigo-200 font-sans font-medium hidden sm:inline">
+            Fokus läuft im Hintergrund
+          </span>
+          <span className="text-[10px] px-1.5 py-0.5 bg-indigo-500/20 text-indigo-300 rounded font-sans font-semibold">
+            Öffnen
+          </span>
+        </button>
+      )}
 
       {/* Quiet Footer */}
       <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 mt-12 text-xs text-slate-500 dark:text-slate-400 transition-colors">

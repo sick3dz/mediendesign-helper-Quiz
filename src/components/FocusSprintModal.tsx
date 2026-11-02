@@ -27,6 +27,10 @@ import {
   ArrowRight,
   ShieldAlert,
   Clock,
+  ExternalLink,
+  Bell,
+  BellRing,
+  Monitor,
 } from 'lucide-react';
 
 const MAX_UNITS = 20;
@@ -138,12 +142,40 @@ export const FocusSprintModal: React.FC<Props> = ({
   onToggleMute,
   onClaimLoot,
 }) => {
-  const [sprintMode, setSprintMode] = useState<'passive' | 'active_quiz'>('active_quiz');
+  const [sprintMode, setSprintMode] = useState<'passive' | 'active_quiz'>(() => {
+    try {
+      return (localStorage.getItem('focus_sprint_mode') as 'passive' | 'active_quiz') || 'passive';
+    } catch {
+      return 'passive';
+    }
+  });
   const [hasStarted, setHasStarted] = useState(false);
   const [showExitConfirmModal, setShowExitConfirmModal] = useState(false);
   const [pendingModeSwitch, setPendingModeSwitch] = useState<'passive' | 'active_quiz' | null>(null);
   const [pendingTimeReset, setPendingTimeReset] = useState<number | null>(null);
   const [lootClaimed, setLootClaimed] = useState<string | null>(null);
+
+  // Desktop / Mobile Web Notification state
+  const [notifPermission, setNotifPermission] = useState<string>(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      return Notification.permission;
+    }
+    return 'unsupported';
+  });
+
+  const handleRequestNotification = async () => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      try {
+        const perm = await Notification.requestPermission();
+        setNotifPermission(perm);
+        if (perm === 'granted') {
+          soundEffects.playSuccess();
+        }
+      } catch {
+        // ignore
+      }
+    }
+  };
 
   // Blitz-Quiz State
   const [blitzPool, setBlitzPool] = useState<BlitzItem[]>([]);
@@ -156,26 +188,31 @@ export const FocusSprintModal: React.FC<Props> = ({
   const [showComboToast, setShowComboToast] = useState(false);
   const [unitsCompleted, setUnitsCompleted] = useState(false);
 
-  // Reset state when modal opens
+  // Sync state when modal opens or sprint state changes
   useEffect(() => {
     if (isOpen) {
-      setBlitzPool(buildBlitzPool());
-      setCurrentPoolIndex(0);
-      setBlitzScore(0);
-      setTotalAttempted(0);
-      setBlitzCombo(0);
-      setIsAnswered(false);
-      setSelectedOptionId(null);
-      setUnitsCompleted(false);
-      setLootClaimed(null);
-      setHasStarted(false);
+      const isSessionInProgress = isActive || secondsLeft < totalSeconds;
+      if (!isSessionInProgress && !hasStarted && !isDone) {
+        // Fresh start before session is launched
+        setBlitzPool(buildBlitzPool());
+        setCurrentPoolIndex(0);
+        setBlitzScore(0);
+        setTotalAttempted(0);
+        setBlitzCombo(0);
+        setIsAnswered(false);
+        setSelectedOptionId(null);
+        setUnitsCompleted(false);
+        setLootClaimed(null);
+        setHasStarted(false);
+      } else if (isSessionInProgress || isActive) {
+        // Preserve active or paused session when re-opening modal
+        setHasStarted(true);
+      }
       setShowExitConfirmModal(false);
       setPendingModeSwitch(null);
       setPendingTimeReset(null);
     }
-  }, [isOpen]);
-
-  if (!isOpen) return null;
+  }, [isOpen, isActive, isDone, secondsLeft, totalSeconds]);
 
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
@@ -183,12 +220,30 @@ export const FocusSprintModal: React.FC<Props> = ({
   const isSessionFinished = isDone || unitsCompleted || totalAttempted >= MAX_UNITS;
 
   const handleAttemptClose = () => {
-    if ((isActive || hasStarted) && !isSessionFinished) {
+    if (sprintMode === 'passive') {
+      // In passive mode, closing the modal always lets the timer continue smoothly in the background!
+      onClose();
+    } else if (totalAttempted > 0 && !isSessionFinished) {
+      // Only warn if in the middle of active quiz units
       setShowExitConfirmModal(true);
     } else {
       onClose();
     }
   };
+
+  // Keyboard shortcut: Escape closes/minimizes safely according to handleAttemptClose
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleAttemptClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, sprintMode, totalAttempted, isSessionFinished]);
+
+  if (!isOpen) return null;
 
   const handleConfirmExit = () => {
     setShowExitConfirmModal(false);
@@ -207,9 +262,14 @@ export const FocusSprintModal: React.FC<Props> = ({
   const handleRequestModeSwitch = (targetMode: 'passive' | 'active_quiz') => {
     if (targetMode === sprintMode) return;
     soundEffects.playClick();
+    try {
+      localStorage.setItem('focus_sprint_mode', targetMode);
+    } catch {
+      // ignore
+    }
 
-    // If an active session is in progress, ask for confirmation!
-    if ((isActive || hasStarted) && !isSessionFinished) {
+    // Only ask for confirmation if an active quiz round with answered questions is in progress!
+    if (sprintMode === 'active_quiz' && totalAttempted > 0 && !isSessionFinished) {
       setPendingModeSwitch(targetMode);
     } else {
       setSprintMode(targetMode);
@@ -220,6 +280,11 @@ export const FocusSprintModal: React.FC<Props> = ({
     if (pendingModeSwitch) {
       if (isActive) {
         onToggleActive();
+      }
+      try {
+        localStorage.setItem('focus_sprint_mode', pendingModeSwitch);
+      } catch {
+        // ignore
       }
       setSprintMode(pendingModeSwitch);
       setPendingModeSwitch(null);
@@ -232,8 +297,8 @@ export const FocusSprintModal: React.FC<Props> = ({
     if (secs === totalSeconds) return;
     soundEffects.playClick();
 
-    // If an active session is in progress, ask for confirmation!
-    if ((isActive || hasStarted) && !isSessionFinished) {
+    // If an active quiz session with answered questions is in progress, ask for confirmation!
+    if (sprintMode === 'active_quiz' && totalAttempted > 0 && !isSessionFinished) {
       setPendingTimeReset(secs);
     } else {
       onReset(secs);
@@ -255,6 +320,10 @@ export const FocusSprintModal: React.FC<Props> = ({
     setHasStarted(true);
     if (!isActive) {
       onToggleActive();
+    }
+    if (sprintMode === 'passive') {
+      // In passive mode, immediately minimize so user can start learning in modules
+      onClose();
     }
   };
 
@@ -341,7 +410,14 @@ export const FocusSprintModal: React.FC<Props> = ({
   const durationPresets = [180, 300, 600, 900, 1500]; // 3, 5, 10, 15, 25 Min
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          handleAttemptClose();
+        }
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4"
+    >
       <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 relative transition-colors max-h-[92vh] overflow-y-auto">
         <button
           onClick={handleAttemptClose}
@@ -380,21 +456,20 @@ export const FocusSprintModal: React.FC<Props> = ({
                 Nein, weiterlernen! 🔥
               </button>
               <button
-                onClick={handleConfirmExit}
-                className="w-full sm:w-auto px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
-              >
-                Zurück zur Start-Lobby 🏠
-              </button>
-              <button
                 onClick={() => {
                   setShowExitConfirmModal(false);
-                  if (isActive) onToggleActive();
-                  onReset(300);
                   onClose();
                 }}
+                className="w-full sm:w-auto px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <Clock className="w-3.5 h-3.5" />
+                <span>Im Hintergrund weiterlaufen lassen</span>
+              </button>
+              <button
+                onClick={handleConfirmExit}
                 className="w-full sm:w-auto px-3 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-rose-500 hover:text-white text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
               >
-                Fenster schließen ✖
+                Sprint abbrechen ✖
               </button>
             </div>
           </div>
@@ -552,6 +627,10 @@ export const FocusSprintModal: React.FC<Props> = ({
                       <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                       <span>Reizreduzierte Arbeitsumgebung ohne Quiz-Fragen</span>
                     </div>
+                    <div className="flex items-center gap-2 font-bold text-indigo-600 dark:text-indigo-400">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <span>Läuft außerhalb des Fensters weiter (inkl. Tab-Anzeige)</span>
+                    </div>
                   </>
                 )}
               </div>
@@ -565,10 +644,21 @@ export const FocusSprintModal: React.FC<Props> = ({
                 <span>
                   {sprintMode === 'active_quiz'
                     ? `⭐ Fokus-Sprint JETZT STARTEN (${Math.round(totalSeconds / 60)} Min)`
-                    : `⏱️ Fokus-Timer JETZT STARTEN (${Math.round(totalSeconds / 60)} Min)`}
+                    : `⏱️ Fokus-Timer STARTEN & LERNEN (${Math.round(totalSeconds / 60)} Min)`}
                 </span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
+
+              {sprintMode === 'passive' && (
+                <button
+                  type="button"
+                  onClick={handleStartSprintNow}
+                  className="w-full py-2 px-3 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span>Starten & direkt zu den Lernmodulen</span>
+                </button>
+              )}
             </div>
           </div>
         ) : (
@@ -610,7 +700,7 @@ export const FocusSprintModal: React.FC<Props> = ({
                   </div>
                   <div className="flex flex-col text-[11px] font-bold">
                     <span className="text-indigo-600 dark:text-indigo-400">
-                      {isSessionFinished ? '✓ Beendet' : isActive ? '● Sprint läuft' : 'Bereit'}
+                      {isSessionFinished ? '✓ Beendet' : isActive ? '● Sprint läuft' : hasStarted ? '⏸ Pausiert' : 'Bereit'}
                     </span>
                     {sprintMode === 'active_quiz' && (
                       <span className="text-amber-600 dark:text-amber-400 font-mono text-[10px]">
@@ -634,41 +724,9 @@ export const FocusSprintModal: React.FC<Props> = ({
                       }`}
                     >
                       {isActive ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                      <span>{isActive ? 'Pause' : 'Start'}</span>
+                      <span>{isActive ? 'Pause' : hasStarted ? 'Weiterlernen' : 'Start'}</span>
                     </button>
                   )}
-
-                  <button
-                    onClick={handleAttemptClose}
-                    className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
-                    title="Abbrechen / Beenden"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Quick Time Selector Bar */}
-              <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 dark:border-slate-700/60 text-[11px]">
-                <span className="text-slate-500 font-bold">Dauer:</span>
-                <div className="flex items-center gap-1">
-                  {durationPresets.map(secs => {
-                    const minLabel = secs / 60;
-                    const isSelected = totalSeconds === secs;
-                    return (
-                      <button
-                        key={secs}
-                        onClick={() => handleRequestDurationChange(secs)}
-                        className={`px-2 py-0.5 rounded-md font-mono text-[11px] font-bold cursor-pointer transition-all ${
-                          isSelected
-                            ? 'bg-indigo-600 text-white shadow-2xs'
-                            : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-100'
-                        }`}
-                      >
-                        {minLabel}m
-                      </button>
-                    );
-                  })}
                 </div>
               </div>
             </div>
@@ -687,10 +745,14 @@ export const FocusSprintModal: React.FC<Props> = ({
                 <div className="text-center p-4 bg-emerald-50 dark:bg-emerald-950/50 rounded-2xl border border-emerald-200 dark:border-emerald-800 space-y-1">
                   <div className="flex items-center justify-center gap-1.5 text-emerald-800 dark:text-emerald-300 font-extrabold text-sm">
                     <Trophy className="w-5 h-5 text-amber-500 fill-amber-500" />
-                    <span>20 Einheiten geschafft! 🎉</span>
+                    <span>
+                      {sprintMode === 'active_quiz' ? '20 Einheiten geschafft! 🎉' : 'Fokus-Lerneinheit geschafft! 🎉'}
+                    </span>
                   </div>
                   <p className="text-xs text-emerald-700 dark:text-emerald-300">
-                    Ausgezeichnete Leistung! Du hast {blitzScore} Punkte gesammelt. Jetzt Zeit zum Durchatmen!
+                    {sprintMode === 'active_quiz'
+                      ? `Ausgezeichnete Leistung! Du hast ${blitzScore} Punkte gesammelt. Jetzt Zeit zum Durchatmen!`
+                      : `Ausgezeichnete Leistung! Du hast ${Math.round(totalSeconds / 60)} Minuten fokussiert gelernt. Jetzt Zeit zum Durchatmen!`}
                   </p>
                 </div>
 
@@ -717,6 +779,29 @@ export const FocusSprintModal: React.FC<Props> = ({
 
                 {/* Interactive 4-4-4 Box Breathing Visualizer */}
                 <BoxBreathingVisualizer />
+
+                {/* Session Actions */}
+                <div className="flex items-center justify-center gap-2 pt-2">
+                  <button
+                    onClick={() => {
+                      soundEffects.playClick();
+                      onReset(totalSeconds);
+                      setHasStarted(false);
+                      setUnitsCompleted(false);
+                      setLootClaimed(null);
+                    }}
+                    className="py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Neue Session starten</span>
+                  </button>
+                  <button
+                    onClick={onClose}
+                    className="py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition-all cursor-pointer"
+                  >
+                    Übersicht schließen
+                  </button>
+                </div>
               </div>
             ) : sprintMode === 'active_quiz' && currentItem ? (
               /* ACTIVE SPRINT: INTERLEAVED KNOWLEDGE & QUIZ ITEM */
@@ -735,16 +820,34 @@ export const FocusSprintModal: React.FC<Props> = ({
                         Inhalt ist während der Pause verdeckt. Klicke auf Weiterlernen, um fortzufahren!
                       </p>
                     </div>
-                    <button
-                      onClick={() => {
-                        soundEffects.playClick();
-                        onToggleActive();
-                      }}
-                      className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
-                    >
-                      <Play className="w-4 h-4 fill-current" />
-                      <span>Weiterlernen</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          soundEffects.playClick();
+                          onToggleActive();
+                        }}
+                        className="px-4 py-2 bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-600 hover:to-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Play className="w-4 h-4 fill-current" />
+                        <span>Weiterlernen</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          soundEffects.playClick();
+                          if (isActive) onToggleActive();
+                          onReset(300);
+                          setHasStarted(false);
+                          setBlitzScore(0);
+                          setTotalAttempted(0);
+                          setBlitzCombo(0);
+                          setUnitsCompleted(false);
+                        }}
+                        className="px-3.5 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-rose-500 hover:text-white text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        <span>Abbrechen</span>
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -866,7 +969,7 @@ export const FocusSprintModal: React.FC<Props> = ({
               </div>
             ) : (
               /* PASSIVE FOKUS TIMER CARD */
-              <div className="mb-4 text-center py-4 px-2 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+              <div className="mb-4 text-center py-4 px-3 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3.5">
                 <div className="relative w-36 h-36 mx-auto flex items-center justify-center">
                   <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 100 100">
                     <circle
@@ -894,36 +997,122 @@ export const FocusSprintModal: React.FC<Props> = ({
                       {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
                     </span>
                     <span className="text-[10px] font-bold text-slate-400 mt-0.5">
-                      {isActive ? 'Fokus aktiv' : 'Passiv Mode'}
+                      {isActive ? '● Fokus aktiv' : hasStarted ? '⏸ Pausiert' : 'Passiv Mode'}
                     </span>
                   </div>
                 </div>
 
+                {/* Direct Pause/Play Control in Passive View */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEffects.playClick();
+                    onToggleActive();
+                  }}
+                  className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 mx-auto ${
+                    isActive
+                      ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-xs'
+                      : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs'
+                  }`}
+                >
+                  {isActive ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+                  <span>{isActive ? 'Timer pausieren' : hasStarted ? 'Timer fortsetzen' : 'Timer starten'}</span>
+                </button>
+
+                {hasStarted && !isActive && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEffects.playClick();
+                      if (isActive) onToggleActive();
+                      onReset(300);
+                      setHasStarted(false);
+                      setBlitzScore(0);
+                      setTotalAttempted(0);
+                      setBlitzCombo(0);
+                      setUnitsCompleted(false);
+                    }}
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-200 dark:bg-slate-700 hover:bg-rose-500 hover:text-white text-slate-700 dark:text-slate-300 transition-all cursor-pointer flex items-center justify-center gap-1.5 mx-auto mt-2"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Timer abbrechen & zurücksetzen</span>
+                  </button>
+                )}
+
                 {/* Duration Presets */}
-                <div className="bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1.5">
-                  <span className="text-slate-500 font-bold text-xs flex items-center justify-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-indigo-500" />
-                    <span>Dauer der Lerneinheit wählen:</span>
-                  </span>
-                  <div className="flex items-center justify-center gap-1.5">
-                    {durationPresets.map(secs => {
-                      const minLabel = secs / 60;
-                      const isSelected = totalSeconds === secs;
-                      return (
-                        <button
-                          key={secs}
-                          onClick={() => handleRequestDurationChange(secs)}
-                          className={`px-3 py-1.5 rounded-lg font-mono font-bold text-xs cursor-pointer transition-all ${
-                            isSelected
-                              ? 'bg-indigo-600 text-white shadow-xs'
-                              : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-200'
-                          }`}
-                        >
-                          {minLabel} Min
-                        </button>
-                      );
-                    })}
+                {!hasStarted && (
+                  <div className="bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1.5">
+                    <span className="text-slate-500 font-bold text-xs flex items-center justify-center gap-1">
+                      <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                      <span>Dauer der Lerneinheit wählen:</span>
+                    </span>
+                    <div className="flex items-center justify-center gap-1.5">
+                      {durationPresets.map(secs => {
+                        const minLabel = secs / 60;
+                        const isSelected = totalSeconds === secs;
+                        return (
+                          <button
+                            key={secs}
+                            onClick={() => handleRequestDurationChange(secs)}
+                            className={`px-3 py-1.5 rounded-lg font-mono font-bold text-xs cursor-pointer transition-all ${
+                              isSelected
+                                ? 'bg-indigo-600 text-white shadow-xs'
+                                : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-200'
+                            }`}
+                          >
+                            {minLabel} Min
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
+                )}
+
+                {/* Passive Mode Controls & Background Running Action */}
+                <div className="space-y-2.5 pt-1 text-left">
+                  {/* Action: Direct Return to Learning Modules */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEffects.playClick();
+                      onClose();
+                    }}
+                    className="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 hover:from-indigo-700 hover:to-purple-800 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md transition-all active:scale-98 cursor-pointer flex items-center justify-center gap-2 group"
+                  >
+                    <BookOpen className="w-4 h-4 shrink-0 group-hover:scale-110 transition-transform" />
+                    <span>Zurück zur Lernübersicht (Timer läuft weiter)</span>
+                  </button>
+
+                  {/* Wall-Clock Background Synchronization Note */}
+                  <div className="p-3 bg-indigo-50/80 dark:bg-indigo-950/40 rounded-xl border border-indigo-200 dark:border-indigo-800/80 space-y-1">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-900 dark:text-indigo-200">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <span>Hintergrund-Synchronisation aktiv</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                      Dieser Timer synchronisiert mit der Echtzeituhr und läuft auch bei minimiertem Browser, anderem Tab oder Gerätesperre 100% präzise weiter. Die Restzeit siehst du oben im Tab-Titel.
+                    </p>
+                  </div>
+
+                  {/* Browser Notification Opt-in */}
+                  {typeof window !== 'undefined' && 'Notification' in window && (
+                    <button
+                      type="button"
+                      onClick={handleRequestNotification}
+                      className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-2 cursor-pointer ${
+                        notifPermission === 'granted'
+                          ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300'
+                          : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      <Bell className={`w-3.5 h-3.5 ${notifPermission === 'granted' ? 'text-emerald-500 fill-emerald-500' : 'text-slate-500'}`} />
+                      <span>
+                        {notifPermission === 'granted'
+                          ? '✓ Benachrichtigung bei Ablauf aktiv'
+                          : '🔔 Bei Timer-Ende im Hintergrund benachrichtigen'}
+                      </span>
+                    </button>
+                  )}
                 </div>
               </div>
             )}

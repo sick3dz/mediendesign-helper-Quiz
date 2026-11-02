@@ -26,6 +26,7 @@ interface Props {
   onOpenBackupModal: () => void;
   petSpeciesEmoji: string;
   isSprintActive?: boolean;
+  isSprintDone?: boolean;
   sprintTimeFormatted?: string;
 }
 
@@ -40,6 +41,7 @@ export const TopBar: React.FC<Props> = ({
   onOpenBackupModal,
   petSpeciesEmoji,
   isSprintActive,
+  isSprintDone,
   sprintTimeFormatted,
 }) => {
   const [isLernenMenuOpen, setIsLernenMenuOpen] = useState(false);
@@ -331,14 +333,16 @@ export const TopBar: React.FC<Props> = ({
           <button
             onClick={onOpenFocusSprint}
             className={`px-2.5 sm:px-3 py-1.5 text-xs font-bold rounded-xl transition-colors whitespace-nowrap shrink-0 shadow-2xs flex items-center gap-1.5 cursor-pointer font-mono ${
-              isSprintActive
+              isSprintDone
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white ring-2 ring-emerald-400/60 animate-bounce'
+                : isSprintActive
                 ? 'bg-amber-600 hover:bg-amber-700 text-white ring-2 ring-amber-400/50'
                 : 'bg-indigo-600 hover:bg-indigo-700 text-white'
             }`}
             title="Fokus-Sprint Timer & Lofi Studio"
           >
-            <span className={`w-2 h-2 rounded-full ${isSprintActive ? 'bg-emerald-400 animate-pulse' : 'bg-emerald-400'}`}></span>
-            <span>{isSprintActive && sprintTimeFormatted ? `⏱️ ${sprintTimeFormatted}` : 'Fokus'}</span>
+            <span className={`w-2 h-2 rounded-full ${isSprintDone ? 'bg-amber-300' : isSprintActive ? 'bg-emerald-400 animate-pulse' : 'bg-emerald-400'}`}></span>
+            <span>{isSprintDone ? '🎉 Belohnung!' : isSprintActive && sprintTimeFormatted ? `⏱️ ${sprintTimeFormatted}` : 'Fokus'}</span>
           </button>
         </div>
       </div>

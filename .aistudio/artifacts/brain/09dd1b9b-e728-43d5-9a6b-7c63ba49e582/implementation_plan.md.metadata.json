@@ -1,6 +1,6 @@
 {
-  "summary":  "Reduced XP gain across all learning activities and mini-games by approximately 80% to balance the game economy. Correct answers now award 20 XP (instead of 100), and mini-game rewards have been scaled down accordingly. Combo bonuses remain active but operate with smaller increments to keep progress challenging.",
-  "updatedAt":  "2026-11-02T12:37:58.629629881Z",
-  "requestFeedback":  true,
-  "userFacing":  true
+  "summary": "Implementation plan for fixing the passive focus timer flow. Resolves the issue where closing or starting the timer prompted an unwanted confirmation dialog and prevented users from studying app modules. Automatically minimizes to the learning modules on start, eliminates confirmation dialogs when closing the modal during passive mode, and provides seamless navigation back to learning modules while the timer runs in the background.",
+  "updatedAt": "2026-11-02T14:05:36.832028656Z",
+  "requestFeedback": true,
+  "userFacing": true
 }
