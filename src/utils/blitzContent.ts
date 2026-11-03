@@ -1,4 +1,4 @@
-import { CHAPTERS } from '../data/chaptersData';
+import { CHAPTERS, getModuleLevel2Questions } from '../data/chaptersData';
 import { EXAM_QUESTIONS } from '../data/examQuestions';
 
 export type BlitzItem =
@@ -155,7 +155,7 @@ export function buildBlitzPool(): BlitzItem[] {
   return sequentialItems.slice(0, 22);
 }
 
-export function buildCustomMixPool(selectedModuleIds: string[]): BlitzItem[] {
+export function buildCustomMixPool(selectedModuleIds: string[], isLevel2: boolean = false): BlitzItem[] {
   const selectedSet = new Set(selectedModuleIds);
   interface Cluster {
     knowledge: BlitzItem;
@@ -182,15 +182,16 @@ export function buildCustomMixPool(selectedModuleIds: string[]): BlitzItem[] {
         examFavorite: primaryNugget.examFavorite,
       };
 
-      const moduleQuestions: BlitzItem[] = (mod.quizQuestions || [])
+      const rawQuestions = isLevel2 ? getModuleLevel2Questions(mod) : (mod.quizQuestions || []);
+      const moduleQuestions: BlitzItem[] = rawQuestions
         .filter(q => isDesignRelevant(q.question))
         .slice(0, 2)
         .map((q, idx, arr) => ({
           type: 'quiz' as const,
           id: q.id,
           category: arr.length > 1
-            ? `Prüfungsfrage (${idx + 1}/2) • ${mod.title}`
-            : `Prüfungsfrage • ${mod.title}`,
+            ? (isLevel2 ? `Lvl 2 Meisterfrage (${idx + 1}/2) • ${mod.title}` : `Prüfungsfrage (${idx + 1}/2) • ${mod.title}`)
+            : (isLevel2 ? `Lvl 2 Meisterfrage • ${mod.title}` : `Prüfungsfrage • ${mod.title}`),
           question: q.question,
           options: q.options,
           merksatz: q.merksatz || primaryNugget.merksatz,

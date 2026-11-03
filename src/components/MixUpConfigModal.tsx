@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Chapter } from '../types/quiz';
 import { soundEffects } from '../services/audioService';
-import { X, Shuffle, CheckSquare, Square, MinusSquare, ChevronDown, ChevronUp, Layers, Sparkles } from 'lucide-react';
+import { X, Shuffle, CheckSquare, Square, MinusSquare, ChevronDown, ChevronUp, Layers, Sparkles, Star } from 'lucide-react';
 
 interface Props {
   isOpen: boolean;
   chapters: Chapter[];
   onClose: () => void;
-  onStart: (selectedModuleIds: string[]) => void;
+  onStart: (selectedModuleIds: string[], isLevel2: boolean) => void;
 }
 
 export const MixUpConfigModal: React.FC<Props> = ({
@@ -25,16 +25,10 @@ export const MixUpConfigModal: React.FC<Props> = ({
     return ids;
   }, [chapters]);
 
-  // Selected module IDs state - default all selected initially
-  const [selectedModuleIds, setSelectedModuleIds] = useState<Set<string>>(() => new Set(allModuleIds));
+  // Selected module IDs state - default nothing selected initially
+  const [selectedModuleIds, setSelectedModuleIds] = useState<Set<string>>(() => new Set());
+  const [isLevel2Mode, setIsLevel2Mode] = useState<boolean>(false);
   const [expandedChapterIds, setExpandedChapterIds] = useState<Set<string>>(() => new Set([chapters[0]?.id || '']));
-
-  // Reset or initialize on open
-  useEffect(() => {
-    if (isOpen && selectedModuleIds.size === 0) {
-      setSelectedModuleIds(new Set(allModuleIds));
-    }
-  }, [isOpen, allModuleIds]);
 
   // ESC key handler
   useEffect(() => {
@@ -106,7 +100,7 @@ export const MixUpConfigModal: React.FC<Props> = ({
   const handleStartClick = () => {
     if (selectedModuleIds.size === 0) return;
     soundEffects.playClick();
-    onStart(Array.from(selectedModuleIds));
+    onStart(Array.from(selectedModuleIds), isLevel2Mode);
   };
 
   return (
@@ -148,24 +142,66 @@ export const MixUpConfigModal: React.FC<Props> = ({
           </button>
         </div>
 
-        {/* Quick Toolbar */}
-        <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/30 flex flex-wrap items-center justify-between gap-2 text-xs">
+        {/* Level 2 Slider / Toggle Switch Banner */}
+        <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 bg-amber-50/60 dark:bg-amber-950/20 flex flex-col items-center justify-center gap-2 text-center">
+          <div className="text-[11px] font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+            <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+            <span>Schwierigkeitsgrad für Mix-Up wählen</span>
+          </div>
+          
+          <div className="flex items-center gap-3 py-0.5">
+            <span className={`text-xs font-bold transition-colors ${!isLevel2Mode ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>
+              Level 1 Grundlagen
+            </span>
+
+            {/* True Sliding Toggle Switch */}
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isLevel2Mode}
+              onClick={() => {
+                soundEffects.playClick();
+                setIsLevel2Mode(prev => !prev);
+              }}
+              className={`w-14 h-8 flex items-center rounded-full p-1 transition-colors duration-300 cursor-pointer shadow-inner ${
+                isLevel2Mode ? 'bg-amber-500 ring-2 ring-amber-400/40' : 'bg-slate-300 dark:bg-slate-700'
+              }`}
+              title="Level 2 Meistermodus Umschalter"
+            >
+              <div
+                className={`bg-white dark:bg-slate-950 w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 flex items-center justify-center font-bold text-xs ${
+                  isLevel2Mode ? 'translate-x-6 text-amber-500' : 'translate-x-0 text-slate-400'
+                }`}
+              >
+                {isLevel2Mode ? '★' : '○'}
+              </div>
+            </button>
+
+            <span className={`text-xs font-bold flex items-center gap-1 transition-colors ${isLevel2Mode ? 'text-amber-900 dark:text-amber-200' : 'text-slate-500 dark:text-slate-400'}`}>
+              <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+              Level 2 Meister
+            </span>
+          </div>
+        </div>
+
+        {/* Quick Toolbar: Selection Count & Select/Clear All on One Line */}
+        <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-800/30 flex items-center justify-between gap-3 text-xs">
           <div className="font-semibold text-slate-700 dark:text-slate-300">
-            <span className="font-bold text-indigo-600 dark:text-indigo-400 font-mono tabular-nums">{selectedModuleIds.size}</span> von {allModuleIds.length} Themen ausgewählt
+            <span className="font-bold text-indigo-600 dark:text-indigo-400 font-mono tabular-nums">{selectedModuleIds.size}</span> von {allModuleIds.length} Themen gewählt
           </div>
 
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={selectAll}
-              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold text-slate-700 dark:text-slate-300 transition-colors cursor-pointer text-[11px]"
+              className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold text-slate-700 dark:text-slate-300 transition-colors cursor-pointer text-[11px]"
             >
               Alle auswählen
             </button>
             <button
               type="button"
               onClick={clearAll}
-              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-slate-600 dark:text-slate-400 transition-colors cursor-pointer text-[11px]"
+              className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium text-slate-600 dark:text-slate-400 transition-colors cursor-pointer text-[11px]"
             >
               Auswahl leeren
             </button>

@@ -1023,8 +1023,8 @@ export default function App() {
     saveUserStats(updatedStats);
   };
 
-  const handleStartMixUp = (selectedModuleIds: string[]) => {
-    const items = buildCustomMixPool(selectedModuleIds);
+  const handleStartMixUp = (selectedModuleIds: string[], isLevel2: boolean = false) => {
+    const items = buildCustomMixPool(selectedModuleIds, isLevel2);
     if (items.length > 0) {
       setActiveMixUpItems(items);
       setIsMixUpModalOpen(false);

@@ -58,6 +58,7 @@ export const ModuleLearningView: React.FC<Props> = ({
 
   useEffect(() => {
     setCurrentLevel(initialLevel);
+    setShowSummaryModal(false);
     setAccumulatedXp(0);
     if (initialLevel === 2) {
       setViewState(module.miniGameType ? 'minigame' : 'quiz');
@@ -481,6 +482,7 @@ export const ModuleLearningView: React.FC<Props> = ({
       {/* 3. QUIZ VIEW */}
       {viewState === 'quiz' && (
         <QuizCard
+          key={`quiz-${module.id}-lvl${currentLevel}`}
           questions={activeQuestions}
           bionic={bionic}
           isLevel2={currentLevel === 2}

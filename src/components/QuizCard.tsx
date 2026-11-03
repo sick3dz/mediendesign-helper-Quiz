@@ -43,6 +43,18 @@ export const QuizCard: React.FC<Props> = ({
 
   const currentQuestion = questions[currentIndex] || questions[0];
 
+  // Reset state when questions or level mode changes
+  useEffect(() => {
+    setCurrentIndex(0);
+    setSelectedOptionId(null);
+    setShowDetailModal(false);
+    setCombo(0);
+    setScore(0);
+    setCorrectCount(0);
+    setAnswers({});
+    setIsCompleted(false);
+  }, [questions, isLevel2]);
+
   // Timer logic for Level 2
   useEffect(() => {
     if (!isLevel2 || isCompleted || selectedOptionId !== null) {
@@ -169,12 +181,16 @@ export const QuizCard: React.FC<Props> = ({
 
     return (
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 text-center shadow-xs transition-colors">
-        <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xs">
-          <Award className="w-9 h-9" />
+        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xs ${
+          isLevel2
+            ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 ring-2 ring-amber-400/30'
+            : 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400'
+        }`}>
+          {isLevel2 ? <Star className="w-9 h-9 fill-amber-500 text-amber-500" /> : <Award className="w-9 h-9" />}
         </div>
 
         <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-1 tracking-tight">
-          Wissens-Check abgeschlossen!
+          {isLevel2 ? 'Meister-Check (Level 2) abgeschlossen! ★' : 'Wissens-Check abgeschlossen!'}
         </h3>
 
         <p className="text-sm text-slate-600 dark:text-slate-400 mb-5">
