@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { QuizQuestion, QuizOption } from '../types/quiz';
 import { BionicText } from '../utils/bionicReading';
 import { soundEffects } from '../services/audioService';
@@ -40,8 +40,17 @@ export const QuizCard: React.FC<Props> = ({
   const [answers, setAnswers] = useState<Record<number, boolean>>({});
   const [comboToast, setComboToast] = useState<string | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [restartKey, setRestartKey] = useState(0);
 
-  const currentQuestion = questions[currentIndex] || questions[0];
+  // Randomize question option order on every quiz load or restart
+  const randomizedQuestions: QuizQuestion[] = useMemo(() => {
+    return questions.map(q => ({
+      ...q,
+      options: [...q.options].sort(() => Math.random() - 0.5)
+    }));
+  }, [questions, restartKey]);
+
+  const currentQuestion = randomizedQuestions[currentIndex] || randomizedQuestions[0];
 
   // Reset state when questions or level mode changes
   useEffect(() => {
@@ -170,6 +179,7 @@ export const QuizCard: React.FC<Props> = ({
     setCorrectCount(0);
     setAnswers({});
     setIsCompleted(false);
+    setRestartKey(prev => prev + 1);
   };
 
   if (!currentQuestion) {

@@ -1,6 +1,6 @@
 {
-  "summary": "Implementation plan for Mix-Up unselected initial state and Level 2 mix toggle feature",
-  "updatedAt": "2026-11-03T07:29:03.814105167Z",
+  "summary": "Implementation plan for shuffling quiz options on every quiz load or restart",
+  "updatedAt": "2026-11-03T07:43:45.948548731Z",
   "requestFeedback": true,
   "userFacing": true
 }
