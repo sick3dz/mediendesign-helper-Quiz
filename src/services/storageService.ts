@@ -222,6 +222,12 @@ export const ALL_BADGES: Badge[] = [
     icon: '💾',
   },
   {
+    id: 'wiso_master',
+    title: 'WiSo-Experte',
+    description: 'Kapitel Wirtschafts- & Sozialkunde (WiSo) erfolgreich gemeistert',
+    icon: '⚖️',
+  },
+  {
     id: 'exam_ready',
     title: 'Prüfungsbereit',
     description: 'Abschlussprüfungs-Simulator mit Note 1 oder 2 bestanden',

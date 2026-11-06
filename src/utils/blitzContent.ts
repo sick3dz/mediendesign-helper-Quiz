@@ -185,12 +185,12 @@ export function buildCustomMixPool(selectedModuleIds: string[], isLevel2: boolea
       const rawQuestions = isLevel2 ? getModuleLevel2Questions(mod) : (mod.quizQuestions || []);
       const moduleQuestions: BlitzItem[] = rawQuestions
         .filter(q => isDesignRelevant(q.question))
-        .slice(0, 2)
+        .slice(0, 3)
         .map((q, idx, arr) => ({
           type: 'quiz' as const,
           id: q.id,
           category: arr.length > 1
-            ? (isLevel2 ? `Lvl 2 Meisterfrage (${idx + 1}/2) • ${mod.title}` : `Prüfungsfrage (${idx + 1}/2) • ${mod.title}`)
+            ? (isLevel2 ? `Lvl 2 Meisterfrage (${idx + 1}/${arr.length}) • ${mod.title}` : `Prüfungsfrage (${idx + 1}/${arr.length}) • ${mod.title}`)
             : (isLevel2 ? `Lvl 2 Meisterfrage • ${mod.title}` : `Prüfungsfrage • ${mod.title}`),
           question: q.question,
           options: q.options,
@@ -201,14 +201,14 @@ export function buildCustomMixPool(selectedModuleIds: string[], isLevel2: boolea
       if (moduleQuestions.length === 0) {
         const chapterExamQuestions = EXAM_QUESTIONS
           .filter(eq => eq.chapterId === chap.id && isDesignRelevant(eq.question))
-          .slice(0, 2);
+          .slice(0, 3);
 
         chapterExamQuestions.forEach((eq, idx, arr) => {
           moduleQuestions.push({
             type: 'quiz',
             id: eq.id,
             category: arr.length > 1
-              ? `Prüfungsfrage (${idx + 1}/2) • ${mod.title}`
+              ? `Prüfungsfrage (${idx + 1}/${arr.length}) • ${mod.title}`
               : `Prüfungsfrage • ${mod.title}`,
             question: eq.question,
             options: eq.options,

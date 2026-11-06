@@ -310,6 +310,54 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
       { id: 'd', text: 'Weil XML-Dateien ausschließlich auf Floppy Disks gespeichert werden können', isCorrect: false, explanation: 'Unsinn.' }
     ],
     merksatz: 'JSON ist kompakter als XML, schneller im Parsing und nativ im Webbrowser integriert.'
+  },
+  {
+    id: 'exam-28',
+    chapterId: 'wiso',
+    question: 'Aufgabe 28 (WiSo - BBiG & Kündigungsrecht): Wie ist die Kündbarkeit eines Berufsausbildungsverhältnisses nach Ablauf der Probezeit gesetzlich geregelt?',
+    options: [
+      { id: 'a', text: 'Der Ausbildungsbetrieb kann nur noch außerordentlich aus wichtigem Grund kündigen; der Azubi kann mit 4 Wochen Frist bei Berufsaufgabe oder Berufswechsel ordentlich kündigen', isCorrect: true, explanation: 'Richtig! Nach § 22 Abs. 2 BBiG ist die ordentliche Kündigung durch den Betrieb nach der Probezeit gesetzlich ausgeschlossen.' },
+      { id: 'b', text: 'Beide Seiten können jederzeit mit einer Frist von 4 Wochen ohne Begründung kündigen', isCorrect: false, explanation: 'Falsch: Das BBiG schützt Azubis besonders vor betriebsbedingten Kündigungen.' },
+      { id: 'c', text: 'Eine Kündigung ist nach der Probezeit unter keinen Umständen mehr möglich', isCorrect: false, explanation: 'Falsch: Bei schweren Pflichtverletzungen (z. B. Diebstahl) ist eine fristlose Kündigung aus wichtigem Grund möglich.' },
+      { id: 'd', text: 'Die IHK entscheidet allein über die Kündigung', isCorrect: false, explanation: 'Falsch.' }
+    ],
+    merksatz: 'Nach der Probezeit: Betrieb kann nur außerordentlich fristlos kündigen; Azubi mit 4 Wochen Frist bei Berufswechsel!'
+  },
+  {
+    id: 'exam-29',
+    chapterId: 'wiso',
+    question: 'Aufgabe 29 (WiSo - Sozialversicherung): Welcher Zweig der gesetzlichen Sozialversicherung wird zu 100% allein vom Arbeitgeber finanziert?',
+    options: [
+      { id: 'a', text: 'Die gesetzliche Unfallversicherung (Berufsgenossenschaft, z. B. BG ETEM)', isCorrect: true, explanation: 'Exakt! Die Unfallversicherung ist eine reine Unternehmerhaftpflicht und wird zu 100% vom Arbeitgeber getragen.' },
+      { id: 'b', text: 'Die gesetzliche Krankenversicherung', isCorrect: false, explanation: 'Falsch: Wird paritätisch (ca. 50/50) finanziert.' },
+      { id: 'c', text: 'Die gesetzliche Rentenversicherung', isCorrect: false, explanation: 'Falsch: Wird je zur Hälfte von AN und AG getragen.' },
+      { id: 'd', text: 'Die Arbeitslosenversicherung', isCorrect: false, explanation: 'Falsch: Wird je zur Hälfte von AN und AG getragen.' }
+    ],
+    merksatz: 'Die gesetzliche Unfallversicherung (Berufsgenossenschaft) bezahlt der Arbeitgeber zu 100% allein!'
+  },
+  {
+    id: 'exam-30',
+    chapterId: 'wiso',
+    question: 'Aufgabe 30 (WiSo - Mitbestimmung & Kündigungsschutz): Ein Agenturleiter kündigt einem Mediengestalter, ohne zuvor den bestehenden Betriebsrat anzuhören. Welche rechtliche Konsequenz hat dies?',
+    options: [
+      { id: 'a', text: 'Die Kündigung ist nach § 102 BetrVG von vornherein unwirksam', isCorrect: true, explanation: 'Richtig! Die zwingende Anhörung des Betriebsrats ist eine Wirksamkeitsvoraussetzung jeder arbeitgeberseitigen Kündigung.' },
+      { id: 'b', text: 'Die Kündigung wird nach 2 Monaten automatisch wirksam', isCorrect: false, explanation: 'Falsch: Sie bleibt unwirksam.' },
+      { id: 'c', text: 'Der Mitarbeiter erhält lediglich ein Schmerzensgeld von 500 €', isCorrect: false, explanation: 'Falsch.' },
+      { id: 'd', text: 'Der Betriebsrat wird wegen Untätigkeit aufgelöst', isCorrect: false, explanation: 'Unsinn.' }
+    ],
+    merksatz: 'Jede Kündigung ohne vorherige Anhörung des Betriebsrats ist absolut unwirksam (§ 102 BetrVG)!'
+  },
+  {
+    id: 'exam-31',
+    chapterId: 'wiso',
+    question: 'Aufgabe 31 (WiSo - Unternehmensformen & Haftung): Welche der folgenden Unternehmensformen schützt das Privatvermögen der Gesellschafter vor geschäftlichen Schulden?',
+    options: [
+      { id: 'a', text: 'GmbH (Gesellschaft mit beschränkter Haftung) – Haftung ist auf das Gesellschaftsvermögen beschränkt', isCorrect: true, explanation: 'Richtig! Als juristische Person haftet die GmbH ausschließlich mit ihrem Stamm- und Gesellschaftsvermögen (mind. 25.000 € Stammkapital).' },
+      { id: 'b', text: 'Einzelunternehmen', isCorrect: false, explanation: 'Falsch: Der Einzelunternehmer haftet unbeschränkt persönlich mit seinem gesamten Privatvermögen.' },
+      { id: 'c', text: 'OHG (Offene Handelsgesellschaft)', isCorrect: false, explanation: 'Falsch: Alle Gesellschafter haften unbeschränkt, persönlich und solidarisch mit Privatvermögen.' },
+      { id: 'd', text: 'Komplementär einer KG', isCorrect: false, explanation: 'Falsch: Der Komplementär haftet als Vollhafter mit Privatvermögen.' }
+    ],
+    merksatz: 'GmbH = Kapitalgesellschaft mit Haftungsbeschränkung auf das Gesellschaftsvermögen!'
   }
 ];
 

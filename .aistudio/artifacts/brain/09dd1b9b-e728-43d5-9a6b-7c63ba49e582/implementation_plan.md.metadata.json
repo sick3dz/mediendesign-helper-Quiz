@@ -1,6 +1,6 @@
 {
-  "summary": "Implementation plan for shuffling quiz options on every quiz load or restart",
-  "updatedAt": "2026-11-03T07:43:45.948548731Z",
+  "summary": "Umsetzungsplan zur Vervollständigung und Vertiefung des WiSo-Bereichs (5-6 Fragen pro Modul, Abdeckung aller IHK/PAL-Schwerpunkte wie Kündigungsarten, Urlaubsanspruch, Kündigungsschutzgesetz, Inflation, EZB, Gewährleistung vs. Garantie) sowie Integration in den Abschlussprüfungs-Simulator.",
+  "updatedAt": "2026-11-06T09:04:45.841060398Z",
   "requestFeedback": true,
   "userFacing": true
 }

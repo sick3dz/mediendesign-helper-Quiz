@@ -126,7 +126,7 @@ export const MixUpConfigModal: React.FC<Props> = ({
               Mix-Up Mix: Modul- & Themen-Auswahl
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Wähle ganze Kapitel oder einzelne Modulthemen aus. Jedes Thema startet mit der Wissenskarte und stellt direkt 1–2 Prüfungsfragen.
+              Wähle ganze Kapitel oder einzelne Modulthemen aus. Jedes Thema startet mit der Wissenskarte und stellt direkt 2–3 Prüfungsfragen.
             </p>
           </div>
 

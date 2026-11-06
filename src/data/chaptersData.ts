@@ -3603,7 +3603,7 @@ export const CHAPTERS: Chapter[] = [
   },
   {
     id: 'graphics',
-    number: 8,
+    number: 9,
     title: 'Digitale Bild- & Grafikdaten',
     subtitle: 'Vektor vs. Pixel, Farbräume & medienneutrale Daten',
     description: 'Meistere die technischen Grundlagen der digitalen Produktion: SVG vs. WebP, Kompression, Auflösung und medienneutrale Workflows.',
@@ -3820,6 +3820,483 @@ export const CHAPTERS: Chapter[] = [
               { id: 'd', text: 'Weil er Bilder automatisch um 50% komprimiert', isCorrect: false, explanation: 'Ein Farbraum komprimiert keine Dateigrößen.' }
             ],
             merksatz: 'Late Binding & eciRGB-v2 sichern maximale Farbqualität für die spätere Transformation in Web (sRGB) oder Print (CMYK).'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'wiso',
+    number: 10,
+    title: 'Wirtschafts- & Sozialkunde (WiSo)',
+    subtitle: 'Recht, Sozialversicherung, Markt & Betriebswirtschaft 2026/27',
+    description: 'Offizieller bundesweiter Prüfungsstoff nach PAL- & KMK-Standard: Berufsausbildung (BBiG), Arbeitsvertrag, Kündigung, Arbeitsschutz (JArbSchG, ArbZG), die 5 Säulen der Sozialversicherung, Gehaltsabrechnung, Betriebsrat (BetrVG) und Unternehmensformen.',
+    accentColor: 'blue',
+    examMerksatz: 'WiSo verbindet rechtliche Schutzvorschriften (BBiG, JArbSchG, KSchG), soziale Sicherheit (5 Säulen der Sozialversicherung) und betriebswirtschaftliche Realität (Markt, Rechtsformen & Verträge) in konkreten Praxisfällen einer IHK-Musterfirma.',
+    examChecklist: [
+      { task: 'Duales Ausbildungssystem & BBiG', detail: 'Lernorte Betrieb & Berufsschule; Zustandekommen des Ausbildungsvertrags, Rechte & Pflichten der Vertragspartner.' },
+      { task: 'Probezeit & Kündigung im BBiG', detail: 'Probezeit mind. 1 bis max. 4 Monate; Kündigung in Probezeit fristlos ohne Grund; danach ordentlich nur durch Azubi mit 4 Wochen Frist bei Berufsaufgabe.' },
+      { task: 'Schutzgesetze am Arbeitsplatz', detail: 'JArbSchG (max. 8 Std./Tag, 40 Std./Woche, 5-Tage-Woche, Ruhepausen), ArbZG, Mutterschutzgesetz, Bundesurlaubsgesetz (BUrlG).' },
+      { task: 'Die 5 Säulen der Sozialversicherung', detail: 'Kranken-, Pflege-, Renten-, Arbeitslosen- und Unfallversicherung (wichtig: Unfallversicherung zahlt der Arbeitgeber zu 100%!).' },
+      { task: 'Entgeltabrechnung (Brutto vs. Netto)', detail: 'Bruttogehalt abzüglich Lohnsteuer, Solidaritätszuschlag/Kirchensteuer und Arbeitnehmeranteile der Sozialabgaben = Nettogehalt.' },
+      { task: 'Betriebliche Mitbestimmung (BetrVG)', detail: 'Betriebsrat ab 5 wahlberechtigten AN; Mitbestimmungsrechte bei Arbeitszeit, Überstunden und Urlaubsgrundsätzen; JAV ab 5 Jugendlichen/Azubis.' },
+      { task: 'Unternehmens- & Rechtsformen', detail: 'Einzelunternehmen (unbeschränkte Vollhaftung), Personengesellschaften (OHG, KG), Kapitalgesellschaften (GmbH mind. 25.000 € Stammkapital, AG mind. 50.000 € Grundkapital).' },
+      { task: 'Kaufvertrag & Störungen', detail: 'Zwei übereinstimmende Willenserklärungen (Antrag & Annahme); Mängelrüge, Lieferverzug und Zahlungsverzug rechtssicher anwenden.' }
+    ],
+    modules: [
+      {
+        id: 'wiso-1',
+        chapterId: 'wiso',
+        title: 'Berufsausbildung & Arbeitsrecht (BBiG & Schutzgesetze)',
+        shortDesc: 'Ausbildungsvertrag, Rechte & Pflichten, Probezeit, Kündigung, JArbSchG & ArbZG',
+        estimatedMinutes: 5,
+        nuggets: [
+          {
+            id: 'n-wiso-1-1',
+            title: 'Das duale System & der Berufsausbildungsvertrag',
+            coreConcept: 'Das duale System bildet an zwei Lernorten aus: Betrieb (Praxis) und Berufsschule (Theorie). Geregelt durch das Berufsbildungsgesetz (BBiG).',
+            bulletPoints: [
+              'Der Ausbildungsvertrag muss vor Beginn schriftlich niedergelegt und von Ausbildendem, Azubi (sowie bei Minderjährigen den gesetzlichen Vertretern) unterschrieben werden.',
+              'Wesentliche Vertragsinhalte: Art, sachliche und zeitliche Gliederung, Beginn und Dauer, tägliche Arbeitszeit, Dauer der Probezeit, Vergütung und Urlaub.',
+              'Eintragung: Der Vertrag muss unverzüglich zur Eintragung in das Verzeichnis der Berufsausbildungsverhältnisse bei der zuständigen IHK eingereicht werden.'
+            ],
+            merksatz: 'Der Ausbildungsvertrag ist vor Ausbildungsbeginn schriftlich abzufassen und bei der IHK einzureichen.'
+          },
+          {
+            id: 'n-wiso-1-2',
+            title: 'Rechte & Pflichten der Vertragspartner',
+            coreConcept: 'Die Pflichten des Ausbildenden spiegeln die Rechte des Auszubildenden wider und umgekehrt.',
+            bulletPoints: [
+              'Hauptpflichten des Ausbildenden: Ausbildungspflicht (Ausbildungsziel vermitteln), Vergütungspflicht, Fürsorgepflicht, Freistellung für Berufsschule & Prüfungen, Bereitstellung von Ausbildungsmitteln (z.B. Software, Arbeitsplatz), Zeugnisausstellung.',
+              'Hauptpflichten des Auszubildenden: Lernpflicht, Weisungsgebundenheit, Sorgfaltspflicht, Schweigepflicht (Betriebsgeheimnisse wahren), Berufsschulpflicht, Führen des Ausbildungsnachweises (Berichtsheft), Benachrichtigungspflicht bei Arbeitsunfähigkeit (AU).'
+            ],
+            examFavorite: true,
+            example: 'Ein Azubi wird 3 Wochen nur zum Kaffeekochen und Botengängen eingeteilt. Dies verstößt gegen die Ausbildungspflicht nach § 14 BBiG.'
+          },
+          {
+            id: 'n-wiso-1-3',
+            title: 'Probezeit & Kündigung im Ausbildungsverhältnis',
+            coreConcept: 'Prüfungsdauerbrenner bei der IHK! Strenge gesetzliche Vorgaben nach § 20 und § 22 BBiG schützen Azubis nach der Probezeit vor willkürlicher Kündigung.',
+            bulletPoints: [
+              'Probezeit (§ 20 BBiG): Mindestens 1 Monat, maximal 4 Monate. Während der Probezeit kann von beiden Seiten jederzeit ohne Einhaltung einer Frist und ohne Angabe von Gründen schriftlich gekündigt werden.',
+              'Nach der Probezeit kann der Betrieb nur noch außerordentlich (fristlos) aus wichtigem Grund kündigen (z.B. Diebstahl, beharrliche Arbeitsverweigerung) – Kündigung muss innerhalb von 2 Wochen nach Bekanntwerden des Grundes erfolgen.',
+              'Der Auszubildende kann nach der Probezeit mit einer Frist von 4 Wochen ordentlich kündigen, wenn er die Berufsausbildung aufgibt oder sich in einem anderen Beruf ausbilden lassen will.'
+            ],
+            merksatz: 'Probezeit: 1 bis 4 Monate, fristlos ohne Grund. Nach der Probezeit: Betrieb kann nur aus wichtigem Grund fristlos kündigen; Azubi mit 4 Wochen Frist bei Berufswechsel!'
+          },
+          {
+            id: 'n-wiso-1-4',
+            title: 'Jugendarbeitsschutz (JArbSchG) & Arbeitszeitgesetz (ArbZG)',
+            coreConcept: 'Schutz von jugendlichen Auszubildenden (unter 18 Jahren) vor Überlastung und Gefährdungen am Ausbildungsplatz.',
+            bulletPoints: [
+              'Höchstarbeitszeit für Jugendliche: Maximal 8 Stunden täglich, maximal 40 Stunden wöchentlich an 5 Tagen (Montag bis Freitag; Wochenende grundsätzlich frei).',
+              'Ruhepausen (JArbSchG): Bei 4,5 bis 6 Std. Arbeitszeit mind. 30 Minuten Pause; bei mehr als 6 Std. mind. 60 Minuten Pause (Pausen mind. 15 Minuten lang).',
+              'Schichtzeit & Freizeit: Zwischen zwei Arbeitstagen müssen mindestens 12 Stunden ununterbrochene Freizeit liegen.',
+              'Arbeitszeitgesetz (Erwachsene ab 18): Regelarbeitszeit 8 Std./Werktag (Montag bis Samstag = max. 48 Std./Woche), vorübergehend auf 10 Std. erweiterbar, wenn im Schnitt von 6 Monaten 8 Std. nicht überschritten werden.'
+            ],
+            examFavorite: true
+          }
+        ],
+        quizQuestions: [
+          {
+            id: 'q-wiso-1-1',
+            chapterId: 'wiso',
+            moduleId: 'wiso-1',
+            question: 'Wie lange darf die Probezeit in einem Berufsausbildungsverhältnis nach dem Berufsbildungsgesetz (BBiG) maximal dauern?',
+            options: [
+              { id: 'a', text: 'Maximal 4 Monate (gesetzlicher Rahmen: 1 bis 4 Monate)', isCorrect: true, explanation: 'Richtig! § 20 BBiG schreibt zwingend vor: Die Probezeit muss mindestens einen Monat und darf höchstens vier Monate betragen.' },
+              { id: 'b', text: 'Maximal 6 Monate wie bei normalen Arbeitsverträgen', isCorrect: false, explanation: 'Falsch: 6 Monate gilt für reguläre Arbeitnehmer nach BGB/KSchG, für Azubis im BBiG gilt die Obergrenze von 4 Monaten!' },
+              { id: 'c', text: 'Maximal 3 Monate', isCorrect: false, explanation: 'Falsch: 3 Monate ist zwar häufig vereinbart, die gesetzliche Obergrenze liegt aber bei 4 Monaten.' },
+              { id: 'd', text: 'Beliebig lang, sofern beide Vertragspartner im Vertrag zustimmen', isCorrect: false, explanation: 'Falsch: Das BBiG ist zwingendes Arbeitnehmerschutzrecht und kann nicht zuungunsten des Azubis abbedungen werden.' }
+            ],
+            merksatz: 'BBiG § 20: Probezeit mindestens 1 Monat, höchstens 4 Monate!'
+          },
+          {
+            id: 'q-wiso-1-2',
+            chapterId: 'wiso',
+            moduleId: 'wiso-1',
+            question: 'Ein Mediengestalter-Azubi hat seine 3-monatige Probezeit erfolgreich beendet. Nach 8 Monaten Ausbildung möchte der Betrieb dem Azubi ordentlich mit einer Frist von 4 Wochen kündigen, weil die Auftragslage eingebrochen ist. Ist diese Kündigung rechtmäßig?',
+            options: [
+              { id: 'a', text: 'Nein, nach der Probezeit ist eine ordentliche Kündigung durch den Ausbildungsbetrieb gesetzlich ausgeschlossen', isCorrect: true, explanation: 'Exakt! Nach § 22 Abs. 2 BBiG kann der Ausbildungsbetrieb nach Ablauf der Probezeit nicht mehr ordentlich (z. B. betriebsbedingt) kündigen, sondern nur noch außerordentlich aus wichtigem Grund.' },
+              { id: 'b', text: 'Ja, bei schlechter Auftragslage greift immer die gesetzliche Kündigungsfrist von 4 Wochen', isCorrect: false, explanation: 'Falsch: Der Ausbildungsbetrieb hat einen Erziehungs- und Ausbildungsauftrag; wirtschaftliche Flauten berechtigen nicht zur Kündigung eines Azubis.' },
+              { id: 'c', text: 'Ja, sofern der Betriebsrat vor der Kündigung nicht widersprochen hat', isCorrect: false, explanation: 'Falsch: Selbst mit Zustimmung des Betriebsrats ist eine ordentliche Kündigung durch den Betrieb nach § 22 BBiG gesetzlich unwirksam.' },
+              { id: 'd', text: 'Ja, aber nur mit einer Abfindung von 3 Monatsvergütungen', isCorrect: false, explanation: 'Falsch: Das BBiG sieht bei Kündigungen keinen Abfindungsanspruch vor, die Kündigung ist schlicht unwirksam.' }
+            ],
+            merksatz: 'Nach der Probezeit gibt es für den Ausbildungsbetrieb keine ordentliche Kündigung mehr!'
+          },
+          {
+            id: 'q-wiso-1-3',
+            chapterId: 'wiso',
+            moduleId: 'wiso-1',
+            question: 'Welche maximale tägliche Arbeitszeit und welche wöchentliche Obergrenze gilt nach dem Jugendarbeitsschutzgesetz (JArbSchG) für einen 17-jährigen Auszubildenden?',
+            options: [
+              { id: 'a', text: 'Maximal 8 Stunden täglich und maximal 40 Stunden wöchentlich an höchstens 5 Tagen pro Woche', isCorrect: true, explanation: 'Richtig! Nach § 8 JArbSchG dürfen Jugendliche nicht mehr als 8 Stunden täglich und nicht mehr als 40 Stunden wöchentlich beschäftigt werden. Samstags- und Sonntagsarbeit ist in Werbeagenturen grundsätzlich unzulässig.' },
+              { id: 'b', text: 'Maximal 10 Stunden täglich und maximal 48 Stunden wöchentlich', isCorrect: false, explanation: 'Falsch: Das sind Höchstgrenzen des ArbZG für volljährige Arbeitnehmer.' },
+              { id: 'c', text: 'Maximal 7 Stunden täglich und maximal 35 Stunden wöchentlich', isCorrect: false, explanation: 'Falsch: Die gesetzliche Obergrenze liegt bei 8 Std./Tag bzw. 40 Std./Woche.' },
+              { id: 'd', text: 'Maximal 8,5 Stunden täglich an 6 Tagen pro Woche', isCorrect: false, explanation: 'Falsch: Für Jugendliche gilt zwingend die 5-Tage-Woche nach § 15 JArbSchG.' }
+            ],
+            merksatz: 'JArbSchG: Max. 8 Stunden am Tag, max. 40 Stunden in der Woche, 5-Tage-Woche!'
+          },
+          {
+            id: 'q-wiso-1-4',
+            chapterId: 'wiso',
+            moduleId: 'wiso-1',
+            question: 'Wie hoch ist der gesetzliche Mindesturlaubsanspruch nach dem Bundesurlaubsgesetz (BUrlG) bei einer 5-Tage-Woche und wie ist er im Vergleich zum JArbSchG geregelt?',
+            options: [
+              { id: 'a', text: 'BUrlG: Mindestens 20 Arbeitstage (bzw. 24 Werktage bei 6-Tage-Woche); für Jugendliche nach JArbSchG gestaffelt 30, 27 bzw. 25 Werktage je nach Alter', isCorrect: true, explanation: 'Richtig! Das BUrlG garantiert 24 Werktage (= 20 Arbeitstage bei 5-Tage-Woche). Für Jugendliche unter 16/17/18 Jahren gelten zu Beginn des Kalenderjahres 30/27/25 Werktage nach § 19 JArbSchG.' },
+              { id: 'b', text: 'Genau 12 Arbeitstage für alle Arbeitnehmer und Azubis', isCorrect: false, explanation: 'Falsch: 12 Tage ist weit unter dem gesetzlichen Mindeststandard.' },
+              { id: 'c', text: 'Mindestens 30 Arbeitstage für Erwachsene und 20 für Jugendliche', isCorrect: false, explanation: 'Falsch: Jugendliche erhalten mehr Schutz und damit mehr Urlaubstage als Erwachsene.' },
+              { id: 'd', text: 'Urlaubsanspruch besteht erst nach 2 Jahren Betriebszugehörigkeit', isCorrect: false, explanation: 'Falsch: Der volle Urlaubsanspruch wird erstmals nach 6-monatigem Bestehen des Arbeitsverhältnisses erworben.' }
+            ],
+            merksatz: 'BUrlG: Mind. 20 Arbeitstage (5-Tage-Woche). JArbSchG: Unter 16 = 30, unter 17 = 27, unter 18 = 25 Werktage!'
+          },
+          {
+            id: 'q-wiso-1-5',
+            chapterId: 'wiso',
+            moduleId: 'wiso-1',
+            question: 'Wann greift das Kündigungsschutzgesetz (KSchG) für reguläre Arbeitnehmer und welche drei Kündigungsgründe unterscheidet es?',
+            options: [
+              { id: 'a', text: 'Ab mehr als 10 Vollzeit-Arbeitnehmern und mind. 6 Monaten Betriebszugehörigkeit; Kündigungsgründe: personenbedingt, verhaltensbedingt oder betriebsbedingt', isCorrect: true, explanation: 'Exakt! Das KSchG schützt Arbeitnehmer in Betrieben mit mehr als 10 Beschäftigten nach 6 Monaten Wartezeit. Eine Kündigung ist nur sozial gerechtfertigt, wenn sie personen-, verhaltens- oder betriebsbedingt ist.' },
+              { id: 'b', text: 'In allen Betrieben ab dem ersten Mitarbeiter und ab dem ersten Arbeitstag ohne sachlichen Grund', isCorrect: false, explanation: 'Falsch: Kleinbetriebe bis 10 AN sind vom KSchG ausgenommen.' },
+              { id: 'c', text: 'Nur für Auszubildende nach Ablauf des ersten Ausbildungsjahres', isCorrect: false, explanation: 'Falsch: Für Azubis gilt vorrangig das BBiG.' },
+              { id: 'd', text: 'Nur dann, wenn der Arbeitnehmer mehr als 50 Jahre alt ist', isCorrect: false, explanation: 'Falsch: Das KSchG gilt altersunabhängig.' }
+            ],
+            merksatz: 'KSchG: Gilt ab >10 Mitarbeitern nach 6 Monaten Wartezeit: personen-, verhaltens- oder betriebsbedingt!'
+          }
+        ]
+      },
+      {
+        id: 'wiso-2',
+        chapterId: 'wiso',
+        title: 'Arbeitsverhältnis, Entgeltabrechnung & Mitbestimmung',
+        shortDesc: 'Arbeitsvertrag, Brutto vs. Netto, Tarifverträge & Betriebsrat (BetrVG)',
+        estimatedMinutes: 5,
+        nuggets: [
+          {
+            id: 'n-wiso-2-1',
+            title: 'Der Arbeitsvertrag & die Tarifordnung',
+            coreConcept: 'Das Zustandekommen des Arbeitsvertrags basiert auf zwei übereinstimmenden Willenserklärungen (Angebot und Annahme). Geregelt durch BGB, Nachweisgesetz und Tarifvertragsrecht.',
+            bulletPoints: [
+              'Rangfolge der Rechtsquellen (Günstigkeitsprinzip): Grundgesetz → Gesetze (z.B. BGB, BUrlG, ArbZG) → Tarifvertrag → Betriebsvereinbarung → Einzelarbeitsvertrag → Direktionsrecht.',
+              'Günstigkeitsprinzip: Eine rangniedrigere Regelung darf von einer ranghöheren nur abweichen, wenn sie für den Arbeitnehmer günstiger ist (z.B. 30 Tage Urlaub im Arbeitsvertrag, obwohl gesetzlich nur 20 Tage bei 5-Tage-Woche vorgeschrieben sind).',
+              'Tarifparteien: Gewerkschaften (z.B. ver.di für Medien) und Arbeitgeberverbände. Tarifautonomie bedeutet: Der Staat mischt sich nicht in Tarifverhandlungen ein.'
+            ],
+            merksatz: 'Günstigkeitsprinzip: Der Arbeitsvertrag darf geltende Gesetze und Tarifverträge nur zugunsten des Arbeitnehmers übertreffen!'
+          },
+          {
+            id: 'n-wiso-2-2',
+            title: 'Entgeltabrechnung: Vom Brutto zum Netto',
+            coreConcept: 'Der Arbeitgeber ist verpflichtet, die gesetzlichen Abzüge (Steuern und Sozialversicherungsbeiträge) direkt vom Bruttogehalt einzubehalten und an Finanzamt bzw. Krankenkassen abzuführen.',
+            bulletPoints: [
+              'Gesamtbrutto = Grundgehalt + Zuschläge (z.B. Überstunden) + vermögenswirksame Leistungen (VWL) + geldwerte Vorteile.',
+              'Gesetzliche Abzüge 1 (Steuern): Lohnsteuer (nach Steuerklasse I bis VI), Solidaritätszuschlag (nur noch ab hohen Einkommen), Kirchensteuer (8% bzw. 9% der Lohnsteuer).',
+              'Gesetzliche Abzüge 2 (Sozialversicherung): Arbeitnehmeranteile zu Kranken-, Renten-, Arbeitslosen- und Pflegeversicherung.',
+              'Nettogehalt = Bruttogehalt - Steuern - Arbeitnehmeranteil Sozialversicherung.',
+              'Auszahlungsbetrag = Nettogehalt - persönliche Abzüge (z.B. Pfändung, VWL-Eigenanteil).'
+            ],
+            examFavorite: true,
+            example: 'Ein Bruttogehalt von 2.800 € führt nach Abzug von ca. 270 € Lohnsteuer und ca. 560 € Sozialabgaben zu einem Nettogehalt von ca. 1.970 €.'
+          },
+          {
+            id: 'n-wiso-2-3',
+            title: 'Betriebliche Mitbestimmung: Der Betriebsrat & JAV',
+            coreConcept: 'Geregelt durch das Betriebsverfassungsgesetz (BetrVG). Vertritt die Interessen der Belegschaft gegenüber der Geschäftsleitung.',
+            bulletPoints: [
+              'Voraussetzung für Betriebsrat: Mindestens 5 ständige wahlberechtigte Arbeitnehmer (ab 18 Jahre), von denen 3 wählbar sind (mind. 6 Monate im Betrieb). Amtszeit: 4 Jahre.',
+              'Mitbestimmungsrechte des Betriebsrats: 1. Echte Mitbestimmung (§ 87 BetrVG: Lage der Arbeitszeit, Pausen, Urlaubsplanung, Überstunden, Überwachungstechnik). 2. Mitwirkung/Anhörung (§ 102 BetrVG: Bei jeder Kündigung MUSS der Betriebsrat vorher angehört werden, sonst ist sie unwirksam!). 3. Informationsrechte (Wirtschaftliche Lage).',
+              'Jugend- und Auszubildendenvertretung (JAV): Kann in Betrieben mit Betriebsrat gegründet werden, wenn mindestens 5 Arbeitnehmer unter 18 Jahren oder Azubis unter 25 Jahren beschäftigt sind.'
+            ],
+            merksatz: 'Jede Kündigung ohne vorherige Anhörung des Betriebsrats ist nach § 102 BetrVG unwirksam!'
+          }
+        ],
+        quizQuestions: [
+          {
+            id: 'q-wiso-2-1',
+            chapterId: 'wiso',
+            moduleId: 'wiso-2',
+            question: 'Was besagt das sogenannte "Günstigkeitsprinzip" im Arbeits- und Tarifrecht?',
+            options: [
+              { id: 'a', text: 'Regelungen im Einzelarbeitsvertrag dürfen von geltenden Tarifverträgen abweichen, wenn sie für den Arbeitnehmer günstiger sind (z. B. mehr Urlaub oder höheres Gehalt)', isCorrect: true, explanation: 'Richtig! Das Günstigkeitsprinzip (§ 4 Abs. 3 TVG) schützt den Arbeitnehmer: Verschlechterungen gegenüber Gesetzen/Tarifverträgen sind unwirksam, Besserstellungen jederzeit erlaubt.' },
+              { id: 'b', text: 'Der Arbeitgeber darf immer die für das Unternehmen kostengünstigste Regelung auswählen', isCorrect: false, explanation: 'Falsch: Das Günstigkeitsprinzip dient dem Schutz der Beschäftigten, nicht der Kosteneinsparung des Betriebs.' },
+              { id: 'c', text: 'Ausländische Fachkräfte erhalten automatisch denselben Lohn wie einheimische Fachkräfte', isCorrect: false, explanation: 'Das regelt das Allgemeine Gleichbehandlungsgesetz (AGG), nicht das Günstigkeitsprinzip.' },
+              { id: 'd', text: 'Tarifverträge stehen rechtlich über dem Grundgesetz', isCorrect: false, explanation: 'Falsch: Das Grundgesetz ist die oberste Rechtsnorm in Deutschland.' }
+            ],
+            merksatz: 'Günstigkeitsprinzip: Abweichungen vom Tarifvertrag sind nur erlaubt, wenn sie den Arbeitnehmer besserstellen!'
+          },
+          {
+            id: 'q-wiso-2-2',
+            chapterId: 'wiso',
+            moduleId: 'wiso-2',
+            question: 'Welche Rechtsfolge hat es, wenn die Geschäftsführung einer Medienagentur einem festangestellten Webdesigner kündigt, ohne den bestehenden Betriebsrat vor Ausspruch der Kündigung anzuhören?',
+            options: [
+              { id: 'a', text: 'Die Kündigung ist nach § 102 BetrVG unwirksam', isCorrect: true, explanation: 'Exakt! Nach § 102 Abs. 1 BetrVG ist der Betriebsrat vor jeder Kündigung anzuhören. Eine ohne Anhörung des Betriebsrats ausgesprochene Kündigung ist von vornherein unwirksam.' },
+              { id: 'b', text: 'Die Kündigung ist gültig, der Betriebsrat erhält lediglich eine Entschädigungszahlung', isCorrect: false, explanation: 'Falsch: Die Kündigung selbst ist nach ständiger Rechtsprechung absolut unwirksam.' },
+              { id: 'c', text: 'Die Kündigungsfrist verlängert sich automatisch um 6 Monate', isCorrect: false, explanation: 'Falsch: Es gibt keine Verlängerung, die Kündigung ist rechtsunwirksam.' },
+              { id: 'd', text: 'Der Arbeitgeber muss lediglich ein Bußgeld an das Finanzamt zahlen', isCorrect: false, explanation: 'Falsch: Das BetrVG schützt das Arbeitsverhältnis des Mitarbeiters.' }
+            ],
+            merksatz: 'Ohne vorherige Betriebsratsanhörung ist jede Kündigung unwirksam (§ 102 BetrVG)!'
+          },
+          {
+            id: 'q-wiso-2-3',
+            chapterId: 'wiso',
+            moduleId: 'wiso-2',
+            question: 'Welcher Bestandteil wird bei einer Standard-Gehaltsabrechnung NICHT von den gesetzlichen Sozialversicherungsbeiträgen abgezogen?',
+            options: [
+              { id: 'a', text: 'Die gesetzliche Unfallversicherung (Berufsgenossenschaft)', isCorrect: true, explanation: 'Richtig! Die Beiträge zur gesetzlichen Unfallversicherung (z.B. BG ETEM) trägt der Arbeitgeber zu 100% allein; sie tauchen daher nicht als Abzug auf der Gehaltsabrechnung des Arbeitnehmers auf.' },
+              { id: 'b', text: 'Die gesetzliche Krankenversicherung', isCorrect: false, explanation: 'Wird paritätisch vom Bruttogehalt von AG und AN getragen.' },
+              { id: 'c', text: 'Die gesetzliche Rentenversicherung', isCorrect: false, explanation: 'Wird zur Hälfte vom Arbeitnehmerlohn abgezogen.' },
+              { id: 'd', text: 'Die gesetzliche Pflegeversicherung', isCorrect: false, explanation: 'Wird ebenfalls monatlich anteilig vom Lohn abgezogen.' }
+            ],
+            merksatz: 'Prüfungsfalle: Die Unfallversicherung bezahlt der Arbeitgeber zu 100% alleine!'
+          },
+          {
+            id: 'q-wiso-2-4',
+            chapterId: 'wiso',
+            moduleId: 'wiso-2',
+            question: 'Worin besteht der rechtliche Unterschied zwischen einem Manteltarifvertrag (Rahmentarifvertrag) und einem Lohn-/Gehaltstarifvertrag?',
+            options: [
+              { id: 'a', text: 'Der Manteltarifvertrag regelt grundlegende Arbeitsbedingungen (Arbeitszeit, Urlaub, Kündigungsfristen) mit mehrjähriger Laufzeit; der Entgelttarifvertrag regelt die Höhe der Vergütung mit kürzerer Laufzeit (meist 12–24 Monate)', isCorrect: true, explanation: 'Richtig! Manteltarifverträge haben lange Laufzeiten (oft 3–5 Jahre) für Arbeitszeiten/Urlaub; Lohn- und Gehaltstarifverträge werden regelmäßig neu verhandelt (meist 1 bis 2 Jahre).' },
+              { id: 'b', text: 'Der Manteltarifvertrag gilt nur für Führungskräfte, der Entgelttarifvertrag nur für Azubis', isCorrect: false, explanation: 'Falsch: Beide Tarifverträge gelten für die tarifgebundenen Arbeitnehmer der jeweiligen Branche.' },
+              { id: 'c', text: 'Der Manteltarifvertrag wird von der Bundesregierung beschlossen, der Gehaltstarifvertrag vom Betriebsrat', isCorrect: false, explanation: 'Falsch: Tarifverträge werden autonom zwischen Gewerkschaften und Arbeitgeberverbänden ausgehandelt (Tarifautonomie).' },
+              { id: 'd', text: 'Es gibt keinen Unterschied, die beiden Begriffe sind rechtlich identisch', isCorrect: false, explanation: 'Falsch: Es handelt sich um zwei getrennte Tarifvertragsarten.' }
+            ],
+            merksatz: 'Manteltarifvertrag = Rahmenbedingungen & lange Laufzeit. Entgelttarifvertrag = Lohnhöhe & kurze Laufzeit!'
+          },
+          {
+            id: 'q-wiso-2-5',
+            chapterId: 'wiso',
+            moduleId: 'wiso-2',
+            question: 'Welche formale Voraussetzung muss erfüllt sein, damit eine Gewerkschaft einen regulären unbefristeten Streik rechtmäßig ausrufen darf?',
+            options: [
+              { id: 'a', text: 'Die Friedenspflicht muss abgelaufen sein, die Tarifverhandlungen müssen für gescheitert erklärt worden sein und mind. 75 % der Gewerkschaftsmitglieder müssen in einer Urabstimmung zustimmen', isCorrect: true, explanation: 'Exakt! Während der Laufzeit eines Tarifvertrags gilt Friedenspflicht (kein Streik). Nach Scheitern der Verhandlungen ist eine Urabstimmung mit mindestens 75 % Zustimmung der Gewerkschaftsmitglieder zwingend erforderlich.' },
+              { id: 'b', text: 'Der Bundeskanzler muss den Streik per Eildekret genehmigen', isCorrect: false, explanation: 'Falsch: Der Staat mischt sich wegen der verfassungsrechtlichen Tarifautonomie (Art. 9 Abs. 3 GG) nicht ein.' },
+              { id: 'c', text: 'Ein Streik ist jederzeit spontan von einzelnen Mitarbeitern während der Arbeitszeit ohne Gewerkschaft erlaubt (wilder Streik)', isCorrect: false, explanation: 'Falsch: Sogenannte "wilde Streiks" ohne Gewerkschaftsträger sind in Deutschland rechtswidrig und können zur fristlosen Kündigung führen.' },
+              { id: 'd', text: 'Es genügt eine einfache Mehrheit von 51 % im Betriebsrat', isCorrect: false, explanation: 'Falsch: Der Betriebsrat darf niemals zum Streik aufrufen; Arbeitskämpfe führen ausschließlich die Tarifparteien!' }
+            ],
+            merksatz: 'Streik: Friedenspflicht abgelaufen + Urabstimmung (mind. 75 % Zustimmung) + Gewerkschaftsführung!'
+          }
+        ]
+      },
+      {
+        id: 'wiso-3',
+        chapterId: 'wiso',
+        title: 'Soziale Sicherung & die 5 Säulen der Sozialversicherung',
+        shortDesc: 'Kranken-, Unfall-, Renten-, Arbeitslosen- & Pflegeversicherung im Prüfungsfokus',
+        estimatedMinutes: 5,
+        nuggets: [
+          {
+            id: 'n-wiso-3-1',
+            title: 'Das Solidaritätsprinzip & die 5 Säulen',
+            coreConcept: 'Das deutsche Sozialversicherungssystem schützt Bürger vor den existenziellen Lebensrisiken. Gegründet von Bismarck (1883 ff.).',
+            bulletPoints: [
+              'Solidaritätsprinzip: Die Beiträge richten sich nach der finanziellen Leistungsfähigkeit (Einkommen bis zur Beitragsbemessungsgrenze), die Leistungen richten sich nach dem konkreten Bedarf (z.B. medizinische Behandlung).',
+              'Generationenvertrag: In der Rentenversicherung zahlen die heutigen Beitragszahler die Renten der heutigen Ruheständler (Umlageverfahren).',
+              'Die 5 Zweige: 1. Krankenversicherung (1883), 2. Unfallversicherung (1884), 3. Rentenversicherung (1889), 4. Arbeitslosenversicherung (1927), 5. Pflegeversicherung (1995).'
+            ],
+            merksatz: 'Die 5 Säulen: Kranken-, Unfall-, Renten-, Arbeitslosen- und Pflegeversicherung. Träger, Leistungen und Finanzierung müssen sicher beherrscht werden!'
+          },
+          {
+            id: 'n-wiso-3-2',
+            title: 'Träger, Finanzierung & Leistungen im Vergleich',
+            coreConcept: 'Die IHK prüft in jeder WiSo-Prüfung Träger und Kostenverteilung der Sozialversicherungen.',
+            bulletPoints: [
+              '1. Krankenversicherung: Träger: Krankenkassen (AOK, TK, Barmer etc.). Finanzierung: AG und AN je ca. 50% (zzgl. kassenindividueller Zusatzbeitrag). Leistung: Ärztliche Behandlung, Medikamente, Krankengeld ab der 7. Krankheitswoche.',
+              '2. Unfallversicherung: Träger: Berufsgenossenschaften (z.B. BG ETEM für Druck & Medien). Finanzierung: 100% durch den Arbeitgeber! Leistung: Arbeits- und Wegeunfälle, Berufskrankheiten, Rehabilitation, Verletztengeld.',
+              '3. Rentenversicherung: Träger: Deutsche Rentenversicherung (DRV). Finanzierung: AG 50%, AN 50%. Leistung: Altersrente, Erwerbsminderungsrente, Reha.',
+              '4. Arbeitslosenversicherung: Träger: Bundesagentur für Arbeit (BA). Finanzierung: AG 50%, AN 50%. Leistung: Arbeitslosengeld I (ALG I), Berufsberatung, Weiterbildung.',
+              '5. Pflegeversicherung: Träger: Pflegekassen bei den Krankenkassen. Finanzierung: AG und AN je 50% (Kinderlose ab 23 Jahren zahlen einen Zuschlag). Leistung: Pflegegeld, Pflegesachleistungen nach Pflegegraden (1-5).'
+            ],
+            examFavorite: true
+          },
+          {
+            id: 'n-wiso-3-3',
+            title: 'Entgeltfortzahlung im Krankheitsfall vs. Krankengeld',
+            coreConcept: 'Prüfungsklassiker: Wer zahlt wann bei Arbeitsunfähigkeit?',
+            bulletPoints: [
+              'Woche 1 bis 6: Der Arbeitgeber zahlt 100% des regulären Gehalts weiter (Entgeltfortzahlungsgesetz - EntgFG), vorausgesetzt das Arbeitsverhältnis besteht seit mind. 4 Wochen.',
+              'Ab der 7. Woche (Tag 43): Die Krankenkasse übernimmt und zahlt Krankengeld (70% des Bruttoeinkommens, max. 90% des Nettoentgelts) für dieselbe Krankheit für maximal 78 Wochen innerhalb von 3 Jahren.',
+              'Meldepflicht: Der Arbeitnehmer muss dem Arbeitgeber die Arbeitsunfähigkeit und deren voraussichtliche Dauer unverzüglich mitteilen. Eine ärztliche Arbeitsunfähigkeitsbescheinigung (eAU) ist spätestens am 4. Kalendertag vorzulegen (Arbeitgeber kann sie ab dem 1. Tag verlangen).'
+            ],
+            merksatz: 'Erste 6 Wochen: Arbeitgeber zahlt 100% (Entgeltfortzahlung). Ab 7. Woche: Krankenkasse zahlt Krankengeld (70% vom Brutto, max. 90% vom Netto)!'
+          }
+        ],
+        quizQuestions: [
+          {
+            id: 'q-wiso-3-1',
+            chapterId: 'wiso',
+            moduleId: 'wiso-3',
+            question: 'Welcher Träger ist für die gesetzliche Unfallversicherung in Betrieben der Medienbranche zuständig und wer trägt die Beiträge?',
+            options: [
+              { id: 'a', text: 'Die Berufsgenossenschaft (z. B. BG ETEM); die Beiträge werden zu 100% allein vom Arbeitgeber getragen', isCorrect: true, explanation: 'Richtig! Gesetzliche Unfallversicherung ist reine Unternehmerhaftpflicht. Träger sind die Berufsgenossenschaften, finanziert zu 100% vom Arbeitgeber.' },
+              { id: 'b', text: 'Die gesetzlichen Krankenkassen; finanziert zu gleichen Teilen (50/50) von Arbeitgeber und Arbeitnehmer', isCorrect: false, explanation: 'Falsch: Krankenkassen sind Träger der Krankenversicherung, nicht der Unfallversicherung.' },
+              { id: 'c', text: 'Die Deutsche Rentenversicherung Bund; finanziert aus dem Steueraufkommen des Bundes', isCorrect: false, explanation: 'Falsch: Rentenversicherung finanziert sich aus Beiträgen von AG/AN und Bundeszuschuss.' },
+              { id: 'd', text: 'Die Bundesagentur für Arbeit; finanziert zu 100% vom Arbeitnehmer', isCorrect: false, explanation: 'Falsch: Die Bundesagentur für Arbeit ist für Arbeitslosigkeit zuständig.' }
+            ],
+            merksatz: 'Unfallversicherung: Träger = Berufsgenossenschaft, Finanzierung = 100% Arbeitgeber!'
+          },
+          {
+            id: 'q-wiso-3-2',
+            chapterId: 'wiso',
+            moduleId: 'wiso-3',
+            question: 'Ein Mitarbeiter erkrankt schwer und ist wegen derselben Diagnose 10 Wochen lang ununterbrochen arbeitsunfähig geschrieben. Wer zahlt in den ersten 6 Wochen und wer ab der 7. Woche die finanzielle Unterstützung?',
+            options: [
+              { id: 'a', text: 'Woche 1–6: Der Arbeitgeber zahlt 100% Gehalt (Entgeltfortzahlung); ab Woche 7: Die Krankenkasse zahlt Krankengeld', isCorrect: true, explanation: 'Perfekt! Nach dem Entgeltfortzahlungsgesetz zahlt der Arbeitgeber bis zu 6 Wochen den vollen Lohn. Ab der 7. Woche springt die Krankenkasse mit Krankengeld ein.' },
+              { id: 'b', text: 'Woche 1–6: Die Krankenkasse zahlt Krankengeld; ab Woche 7: Die Agentur für Arbeit zahlt Bürgergeld', isCorrect: false, explanation: 'Falsch: Der Arbeitgeber ist gesetzlich zur 6-wöchigen Entgeltfortzahlung verpflichtet.' },
+              { id: 'c', text: 'Die Berufsgenossenschaft zahlt ab Tag 1 durchgehend Verletztengeld', isCorrect: false, explanation: 'Falsch: Berufsgenossenschaft zahlt nur bei Arbeitsunfällen oder Berufskrankheiten, nicht bei gewöhnlicher Krankheit.' },
+              { id: 'd', text: 'Der Arbeitgeber zahlt alle 10 Wochen zu 100% weiter', isCorrect: false, explanation: 'Falsch: Die gesetzliche Entgeltfortzahlungspflicht des Arbeitgebers endet nach genau 6 Wochen.' }
+            ],
+            merksatz: '1.–6. Woche: Arbeitgeber (100% Entgeltfortzahlung). Ab 7. Woche: Krankenkasse (Krankengeld).'
+          },
+          {
+            id: 'q-wiso-3-3',
+            chapterId: 'wiso',
+            moduleId: 'wiso-3',
+            question: 'Was versteht man unter dem "Umlageverfahren" in der gesetzlichen Rentenversicherung (Generationenvertrag)?',
+            options: [
+              { id: 'a', text: 'Die aktuellen Rentenbeiträge der erwerbstätigen Generation werden unmittelbar zur Auszahlung der Renten der heutigen Ruheständler verwendet', isCorrect: true, explanation: 'Richtig! Es wird kein individueller Spartopf angespart (Kapitaldeckungsverfahren), sondern die laufenden Einnahmen finanzieren direkt die aktuellen Rentenauszahlungen.' },
+              { id: 'b', text: 'Jeder Arbeitnehmer spart seine Beiträge auf einem persönlichen Sparkonto für sein eigenes Rentenalter an', isCorrect: false, explanation: 'Das wäre das Kapitaldeckungsverfahren (wie bei privaten Rentenversicherungen), nicht das gesetzliche Umlageverfahren.' },
+              { id: 'c', text: 'Die Renten werden zu 100% aus den Goldreserven der Bundesbank gedeckt', isCorrect: false, explanation: 'Falsch: Die Rentenversicherung finanziert sich über monatliche Sozialbeiträge und staatliche Steuerzuschüsse.' },
+              { id: 'd', text: 'Rentenbeiträge werden an der Börse ausschließlich in Technologie-Aktien investiert', isCorrect: false, explanation: 'Falsch: Die gesetzliche Rente ist umlagefinanziert.' }
+            ],
+            merksatz: 'Umlageverfahren: Die Jungen zahlen heute direkt für die Alten (Generationenvertrag).'
+          },
+          {
+            id: 'q-wiso-3-4',
+            chapterId: 'wiso',
+            moduleId: 'wiso-3',
+            question: 'Welche Funktion hat die "Beitragsbemessungsgrenze" (BBG) in den deutschen Sozialversicherungen?',
+            options: [
+              { id: 'a', text: 'Sie markiert den maximalen Bruttoeinkommensbetrag, bis zu dem Sozialversicherungsbeiträge berechnet werden; Einkommensanteile darüber hinaus sind beitragsfrei', isCorrect: true, explanation: 'Richtig! Wer z. B. mehr als die BBG verdient, zahlt für den darüber liegenden Betrag keine prozentualen Sozialabgaben mehr. Dadurch werden auch die Leistungsansprüche (z. B. Renten- oder Krankengeldhöhe) nach oben gedeckelt.' },
+              { id: 'b', text: 'Sie legt fest, ab welchem Einkommen man überhaupt erst Steuern zahlen muss', isCorrect: false, explanation: 'Falsch: Das ist der steuerliche Grundfreibetrag im Einkommensteuerrecht.' },
+              { id: 'c', text: 'Sie verbietet Arbeitgebern, Gehälter über 10.000 € monatlich auszuzahlen', isCorrect: false, explanation: 'Falsch: Es gibt keine Obergrenze für Gehälter.' },
+              { id: 'd', text: 'Sie bestimmt den Mindestlohn für ungelernte Aushilfskräfte', isCorrect: false, explanation: 'Falsch: Das regelt das Mindestlohngesetz (MiLoG).' }
+            ],
+            merksatz: 'Beitragsbemessungsgrenze: Einkommen oberhalb dieser Grenze ist beitragsfrei zur Sozialversicherung!'
+          },
+          {
+            id: 'q-wiso-3-5',
+            chapterId: 'wiso',
+            moduleId: 'wiso-3',
+            question: 'Warum raten Verbraucherzentralen und Gewerkschaften auch Mediengestaltern dringend zum frühzeitigen Abschluss einer privaten Berufsunfähigkeitsversicherung (BU)?',
+            options: [
+              { id: 'a', text: 'Weil die gesetzliche Rentenversicherung für nach 1961 Geborene keinen Berufsschutz mehr bietet, sondern nur eine stark reduzierte Erwerbsminderungsrente zahlt, wenn man überhaupt keine Arbeit mehr ausüben kann', isCorrect: true, explanation: 'Exakt! Wer seinen erlernten Beruf als Mediengestalter (z. B. durch Burnout, Sehsturz oder Rückenprobleme) nicht mehr ausüben kann, aber noch 6 Std. als Pförtner arbeiten könnte, erhält vom Staat 0 € Erwerbsminderungsrente.' },
+              { id: 'b', text: 'Weil der Arbeitgeber bei Berufsunfähigkeit automatisch das Gehalt lebenslang zu 100% weiterzahlt', isCorrect: false, explanation: 'Falsch: Die Entgeltfortzahlung des Arbeitgebers endet nach genau 6 Wochen.' },
+              { id: 'c', text: 'Weil der Gesetzgeber den Abschluss einer privaten BU für alle Bundesbürger gesetzlich zur Pflicht gemacht hat', isCorrect: false, explanation: 'Falsch: Die Berufsunfähigkeitsversicherung ist eine freiwillige Individualversicherung.' },
+              { id: 'd', text: 'Weil gesetzliche Krankenkassen die Behandlung von Bildschirmarbeitern verweigern', isCorrect: false, explanation: 'Unsinn: Die gesetzliche Krankenversicherung behandelt alle Versicherten unabhängig vom Beruf.' }
+            ],
+            merksatz: 'Gesetzlich gibt es nur noch Erwerbsminderungsrente ohne Berufsschutz – eine private BU sichert den eigenen Lebensstandard!'
+          }
+        ]
+      },
+      {
+        id: 'wiso-4',
+        chapterId: 'wiso',
+        title: 'Wirtschaftsordnung, Markt & Unternehmensformen',
+        shortDesc: 'Soziale Marktwirtschaft, Angebot & Nachfrage, Rechtsformen (GmbH, AG, OHG, KG) & Kaufvertrag',
+        estimatedMinutes: 5,
+        nuggets: [
+          {
+            id: 'n-wiso-4-1',
+            title: 'Die Soziale Marktwirtschaft & Preisbildung',
+            coreConcept: 'Verbindung von wirtschaftlicher Freiheit (freier Markt, Wettbewerb, Privateigentum) mit sozialem Ausgleich (Sozialversicherungen, Kündigungsschutz, Kartellverbot). Begründet von Ludwig Erhard.',
+            bulletPoints: [
+              'Markt & Preisbildung: Der Marktpreis entsteht durch das Zusammenspiel von Angebot und Nachfrage (Gleichgewichtspreis).',
+              'Marktformen: Polypol (viele Anbieter, viele Nachfrager = vollkommener Wettbewerb), Oligopol (wenige Anbieter, viele Nachfrager = z.B. Tankstellen/Mobilfunk), Monopol (ein einziger Anbieter bestimmt den Preis = z.B. Schienennetz).',
+              'Eingriffe des Staates: Soziale Hilfen, progressive Einkommensteuer, Arbeitsschutzgesetze, Kartellamt gegen Monopolbildung.'
+            ],
+            merksatz: 'Soziale Marktwirtschaft = Freier Markt und Wettbewerb, abgesichert durch sozialen Ausgleich und staatliche Leitplanken!'
+          },
+          {
+            id: 'n-wiso-4-2',
+            title: 'Unternehmensformen & Haftungsrisiken',
+            coreConcept: 'Die Wahl der Rechtsform entscheidet über Haftung, Startkapital, Geschäftsführung und Kreditwürdigkeit einer Agentur oder Druckerei.',
+            bulletPoints: [
+              'Einzelunternehmen: 1 Inhaber. Haftung: Unbeschränkt, persönlich mit Geschäfts- und Privatvermögen! Kein Mindestkapital.',
+              'Offene Handelsgesellschaft (OHG): Mind. 2 Gesellschafter. Haftung: Unbeschränkt, persönlich und solidarisch (jeder haftet für alle Schulden).',
+              'Kommanditgesellschaft (KG): Mind. ein Komplementär (vollhaftend mit Privatvermögen) und mind. ein Kommanditist (Teilhafter, haftet nur mit seiner Vermögenseinlage).',
+              'Gesellschaft mit beschränkter Haftung (GmbH): Kapitalgesellschaft. Mindeststammkapital: 25.000 € (mind. 12.500 € bei Gründung eingezahlt). Haftung: Nur mit dem Gesellschaftsvermögen (keine Privathaftung!). Vertreten durch Geschäftsführer.',
+              'Aktiengesellschaft (AG): Mindestgrundkapital: 50.000 €. Organe: Vorstand (Leitung), Aufsichtsrat (Kontrolle), Hauptversammlung (Aktionäre).'
+            ],
+            examFavorite: true,
+            example: 'Eine Agentur geht pleite und hinterlässt 100.000 € Schulden. Als Einzelunternehmer haftet der Gründer mit seinem Privathaus. Bei einer GmbH haftet nur das Agenturvermögen.'
+          },
+          {
+            id: 'n-wiso-4-3',
+            title: 'Der Kaufvertrag & Kaufvertragsstörungen',
+            coreConcept: 'Rechtsgeschäft entsteht durch zwei übereinstimmende Willenserklärungen: Antrag (Angebot) und Annahme (Bestellung).',
+            bulletPoints: [
+              'Pflichten beim Kaufvertrag: Verkäufer muss Ware mangelfrei und rechtzeitig übergeben sowie Eigentum verschaffen (§ 433 BGB). Käufer muss vereinbarten Preis zahlen und Ware annehmen.',
+              'Kaufvertragsstörungen: 1. Mangelhafte Lieferung (Sachmangel: Falsche Farbe, beschädigt, Zuweniglieferung). 2. Lieferverzug (Ware kommt zu spät). 3. Zahlungsverzug (Kunde zahlt nicht rechtzeitig). 4. Annahmeverzug (Kunde nimmt bestellte Ware nicht ab).',
+              'Rechte des Käufers bei Mängeln (Vorrang): Zuerst immer Nacherfüllung verlangen (Nachbesserung/Reparatur oder Ersatzlieferung). Erst nach Fristablauf: Rücktritt vom Vertrag, Minderung des Kaufpreises oder Schadensersatz.'
+            ],
+            merksatz: 'Bei mangelhafter Ware gilt das Recht der zweiten Andienung: Der Verkäufer darf zuerst reparieren oder neu liefern (Nacherfüllung)!'
+          }
+        ],
+        quizQuestions: [
+          {
+            id: 'q-wiso-4-1',
+            chapterId: 'wiso',
+            moduleId: 'wiso-4',
+            question: 'Welches Mindeststammkapital ist gesetzlich vorgeschrieben, um eine Gesellschaft mit beschränkter Haftung (GmbH) zu gründen, und wie haftet sie für Geschäftsschulden?',
+            options: [
+              { id: 'a', text: 'Mindestens 25.000 € Stammkapital; die Haftung ist auf das Gesellschaftsvermögen beschränkt (keine Privathaftung)', isCorrect: true, explanation: 'Richtig! § 5 Abs. 1 GmbHG schreibt 25.000 € Stammkapital vor. Die Gesellschafter haften grundsätzlich nicht mit ihrem Privatvermögen.' },
+              { id: 'b', text: 'Mindestens 50.000 € Stammkapital; Gesellschafter haften voll mit ihrem Privatvermögen', isCorrect: false, explanation: 'Falsch: 50.000 € ist das Grundkapital einer Aktiengesellschaft (AG).' },
+              { id: 'c', text: 'Kein Mindestkapital; Haftung erfolgt persönlich und unbeschränkt', isCorrect: false, explanation: 'Falsch: Das gilt für Einzelunternehmen oder GbR, nicht für eine reguläre GmbH.' },
+              { id: 'd', text: 'Mindestens 10.000 €; Haftung übernimmt die örtliche Industrie- und Handelskammer', isCorrect: false, explanation: 'Falsch: Die IHK übernimmt niemals Schulden privater Unternehmen.' }
+            ],
+            merksatz: 'GmbH: Mindeststammkapital 25.000 €; Haftung beschränkt auf das Gesellschaftsvermögen!'
+          },
+          {
+            id: 'q-wiso-4-2',
+            chapterId: 'wiso',
+            moduleId: 'wiso-4',
+            question: 'In einer Kommanditgesellschaft (KG) gibt es zwei Typen von Gesellschaftern. Worin besteht der wesentliche Unterschied zwischen Komplementär und Kommanditist bezüglich der Haftung?',
+            options: [
+              { id: 'a', text: 'Der Komplementär haftet unbeschränkt mit seinem gesamten Privat- und Geschäftsvermögen; der Kommanditist haftet nur beschränkt mit seiner im Handelsregister eingetragenen Vermögenseinlage', isCorrect: true, explanation: 'Perfekt! Komplementär = Vollhafter (persönlich & unbeschränkt), Kommanditist = Teilhafter (haftet nur mit seiner Einlage).' },
+              { id: 'b', text: 'Beide Gesellschafter haften ausschließlich mit dem Firmenvermögen bis maximal 25.000 €', isCorrect: false, explanation: 'Falsch: Bei Personengesellschaften haftet mindestens ein Partner immer persönlich mit Privatvermögen.' },
+              { id: 'c', text: 'Der Kommanditist leitet die Geschäfte allein und haftet mit Haus und Hof; der Komplementär haftet gar nicht', isCorrect: false, explanation: 'Falsch: Es ist genau umgekehrt – der Komplementär leitet und haftet voll.' },
+              { id: 'd', text: 'Es gibt keinen Unterschied, beide haften zu 50% für alle Schulden', isCorrect: false, explanation: 'Falsch: Der Hauptgrund für eine KG ist die Trennung in Vollhafter und Teilhafter.' }
+            ],
+            merksatz: 'KG: Komplementär = haftet VOLL (mit Privatvermögen), Kommanditist = haftet TEIL (nur Einlage)!'
+          },
+          {
+            id: 'q-wiso-4-3',
+            chapterId: 'wiso',
+            moduleId: 'wiso-4',
+            question: 'Eine Druckerei liefert 5.000 Kundenflyer, die erhebliche Fehldrucke und Farbstreifen aufweisen (Sachmangel). Welches vorrangige Recht hat der Käufer nach BGB gegenüber der Druckerei?',
+            options: [
+              { id: 'a', text: 'Recht auf Nacherfüllung (Neulieferung mangelfreier Flyer oder Nachbesserung)', isCorrect: true, explanation: 'Richtig! Nach § 439 BGB gilt der Vorrang der Nacherfüllung. Erst wenn die Nacherfüllung fehlschlägt oder verweigert wird, darf der Käufer mindern oder vom Vertrag zurücktreten.' },
+              { id: 'b', text: 'Sofortige fristlose Kündigung aller Verträge und Strafanzeige bei der Polizei', isCorrect: false, explanation: 'Falsch: Das BGB gibt dem Verkäufer zunächst das Recht zur zweiten Andienung (Nacherfüllung).' },
+              { id: 'c', text: 'Sofortige 100%ige Preisminderung ohne Rücksprache mit der Druckerei', isCorrect: false, explanation: 'Falsch: Minderung ist erst nach erfolglosem Nacherfüllungsverlangen zulässig.' },
+              { id: 'd', text: 'Der Käufer hat keinerlei Rechte, wenn die Ware bereits bezahlt wurde', isCorrect: false, explanation: 'Falsch: Gewährleistungsrechte bestehen 2 Jahre ab Ablieferung der Ware.' }
+            ],
+            merksatz: 'Recht der zweiten Andienung: Bei Sachmängeln zuerst immer Nacherfüllung verlangen!'
+          },
+          {
+            id: 'q-wiso-4-4',
+            chapterId: 'wiso',
+            moduleId: 'wiso-4',
+            question: 'Was versteht man unter Inflation und welche geldpolitische Maßnahme ergreift die Europäische Zentralbank (EZB) typischerweise zur Bekämpfung einer zu hohen Inflationsrate?',
+            options: [
+              { id: 'a', text: 'Inflation ist ein anhaltender Anstieg des allgemeinen Preisniveaus und damit Kaufkraftverlust des Geldes; die EZB erhöht die Leitzinsen, um Kredite zu verteuern und die Nachfrage zu bremsen', isCorrect: true, explanation: 'Richtig! Durch Zinserhöhungen der EZB werden Kredite für Unternehmen und Verbraucher teurer, Sparen wird attraktiver, die überhitzte Nachfrage kühlt ab und der Preisauftrieb sinkt.' },
+              { id: 'b', text: 'Inflation bedeutet, dass Waren immer billiger werden; die EZB senkt daraufhin die Steuern der Bürger', isCorrect: false, explanation: 'Falsch: Das Sinken des allgemeinen Preisniveaus heißt Deflation. Steuern beschließt zudem das Parlament, nicht die EZB.' },
+              { id: 'c', text: 'Die EZB druckt massenhaft neues Bargeld und verteilt es kostenlos an Agenturen', isCorrect: false, explanation: 'Falsch: Zusätzliche Geldmengenausweitung würde die Inflation weiter anheizen.' },
+              { id: 'd', text: 'Die EZB schließt für 3 Monate alle Bankfilialen in der Europäischen Union', isCorrect: false, explanation: 'Unsinn.' }
+            ],
+            merksatz: 'Inflation = Kaufkraftverlust. Reaktion der EZB: Leitzinsen anheben, um den Geldwert zu stabilisieren!'
+          },
+          {
+            id: 'q-wiso-4-5',
+            chapterId: 'wiso',
+            moduleId: 'wiso-4',
+            question: 'Worin liegt der fundamentale rechtliche Unterschied zwischen der gesetzlichen Sachmängelhaftung (Gewährleistung) und einer kaufmännischen Garantie?',
+            options: [
+              { id: 'a', text: 'Gewährleistung ist ein gesetzlicher Anspruch gegen den Verkäufer (2 Jahre ab Kauf), dass die Ware bei Übergabe fehlerfrei war; Garantie ist eine rein freiwillige Zusicherung des Herstellers oder Verkäufers zu eigenen Bedingungen', isCorrect: true, explanation: 'Exakt! Die 2-jährige Gewährleistung ist zwingendes BGB-Recht. Eine Garantie (z. B. 3 Jahre Herstellergarantie auf einen Monitor) ist eine freiwillige Leistung, die die gesetzliche Gewährleistung niemals einschränken darf.' },
+              { id: 'b', text: 'Garantie ist gesetzlich vorgeschrieben, Gewährleistung existiert im BGB seit 2002 nicht mehr', isCorrect: false, explanation: 'Falsch: Genau umgekehrt, Gewährleistung ist das gesetzliche Recht.' },
+              { id: 'c', text: 'Gewährleistung gilt nur für Software-Lizenzen, Garantie nur für Hardware-Geräte', isCorrect: false, explanation: 'Falsch: Gewährleistungsrechte gelten für alle Kaufverträge über bewegliche Sachen.' },
+              { id: 'd', text: 'Beide Begriffe bezeichnen exakt dasselbe und können beliebig vom Verkäufer gestrichen werden', isCorrect: false, explanation: 'Falsch: Gewährleistung kann beim Verbrauchsgüterkauf nicht ausgeschlossen werden.' }
+            ],
+            merksatz: 'Gewährleistung = 2 Jahre gesetzliche Pflicht des Verkäufers! Garantie = freiwilliges Versprechen!'
           }
         ]
       }

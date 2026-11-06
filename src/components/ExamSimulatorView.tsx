@@ -131,7 +131,7 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
               Mediengestalter Abschlussprüfung: Designkonzeption
             </h2>
             <p className="text-sm text-slate-600 dark:text-slate-300 mt-2">
-              {EXAM_QUESTIONS.length} originalgetreue Fragen zu Interaktionsdesign, Wireframing, Prototyping, IT-Sicherheit, Barrierefreiheit (WCAG), Scrum, SQL/JSON und medienneutralen Daten (IHK-Schwerpunkt Winter 2026/27).
+              {EXAM_QUESTIONS.length} originalgetreue Fragen zu Interaktionsdesign, Wireframing, Prototyping, IT-Sicherheit, Barrierefreiheit (WCAG), Scrum, SQL/JSON, medienneutralen Daten sowie Wirtschafts- & Sozialkunde (WiSo).
             </p>
           </div>
 

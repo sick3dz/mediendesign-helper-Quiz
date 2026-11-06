@@ -289,6 +289,10 @@ export default function App() {
     const dbDone = CHAPTERS[6]?.modules.every(m => currentStats.completedModules.includes(m.id));
     if (dbDone && !newlyEarned.includes('database_architect')) newlyEarned.push('database_architect');
 
+    const wisoChapter = CHAPTERS.find(c => c.id === 'wiso');
+    const wisoDone = wisoChapter && wisoChapter.modules.every(m => currentStats.completedModules.includes(m.id));
+    if (wisoDone && !newlyEarned.includes('wiso_master')) newlyEarned.push('wiso_master');
+
     // Level 2 Mastery Badges
     const lvl2List = currentStats.completedModulesLevel2 || [];
     if (lvl2List.length >= 1 && !newlyEarned.includes('master_first')) {
