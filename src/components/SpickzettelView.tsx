@@ -22,6 +22,8 @@ import {
   Lightbulb,
   Filter,
   Star,
+  Image,
+  Scale,
 } from 'lucide-react';
 import { soundEffects } from '../services/audioService';
 
@@ -63,6 +65,8 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
     CheckCircle2: <CheckCircle2 className="w-5 h-5 text-emerald-500" />,
     Clock: <Clock className="w-5 h-5 text-amber-500" />,
     Database: <Database className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />,
+    Image: <Image className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />,
+    Scale: <Scale className="w-5 h-5 text-blue-500 dark:text-blue-400" />,
   };
 
   // Categories list

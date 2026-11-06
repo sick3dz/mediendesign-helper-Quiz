@@ -1,6 +1,6 @@
 {
-  "summary": "Implementierungsplan für die Vervollständigung der WiSo-Logik:\n- Erstellung von 8 maßgeschneiderten IHK-Prüfungsdossiers in src/data/checklistDetailsData.ts für alle WiSo-Schwerpunkte mit konkreten Prüfungsaufgaben, Punkteschlüsseln und Prüferwarnungen.\n- Optimierung des Kapitel-Navigationsrasters in src/components/ChapterListView.tsx auf 10 Spalten für Desktop, damit alle 10 Kapitel nahtlos dargestellt werden.\n- Beibehaltung des bestehenden wiso_master Badges ohne zusätzliches Haustier-Accessoire gemäß Nutzerentscheidung.",
-  "updatedAt": "2026-11-06T09:13:21.571103877Z",
+  "summary": "Implementierungsplan für die Erweiterung des Digital-Leitfadens (IHK) von 8 auf 10 Kapitel:\n- Erweiterung von src/data/digitalGuideData.ts um Thema 9 (Digitale Bild- & Grafikdaten: Vektor vs. Pixel, Farbräume, Kompression) und Thema 10 (Wirtschafts- & Sozialkunde: BBiG, Schutzgesetze, 5 Säulen der Sozialversicherung, Mitbestimmung, Rechtsformen).\n- Aktualisierung von src/components/SpickzettelView.tsx zur Einbindung der Icons Image und Scale in iconMap für eine konsistente visuelle Darstellung.\n- Vollständige Synchronisierung zwischen Haupt-Lernbereich (10 Kapitel) und Digital-Leitfaden (10 Themen).",
+  "updatedAt": "2026-11-06T09:22:35.030652601Z",
   "requestFeedback": true,
   "userFacing": true
 }

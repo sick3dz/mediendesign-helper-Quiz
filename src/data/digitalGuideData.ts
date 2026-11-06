@@ -196,5 +196,73 @@ export const DIGITAL_GUIDE_TOPICS: DigitalTopic[] = [
         examTip: 'JSON verwendet Key-Value Paare in geschweiften Klammern { "name": "Wert" }.'
       }
     ]
+  },
+  {
+    id: 'graphics-image-data',
+    title: '9. Digitale Bild- & Grafikdaten (Vektor, Pixel, Farbräume & Kompression)',
+    category: 'Grafik & Produktion',
+    iconName: 'Image',
+    ihkFocusSummary: 'Vektorgrafiken (SVG), Rastergrafiken (WebP, AVIF, PNG, JPG), Auflösung (PPI/DPI) & medienneutrale Farbräume (RGB vs. CMYK).',
+    whatFailsAway: 'Analoge Reprotechnik, manuelle Druckrasterätzung & starre Farbauszüge.',
+    whatIsNewAndTested: 'Moderne Webformate (WebP, AVIF), verlustfreie vs. verlustbehaftete Kompression, Single Source Publishing & medienneutrale Workflows.',
+    keyConcepts: [
+      {
+        term: 'Vektor (SVG) vs. Raster (Pixel)',
+        explanation: 'Vektoren basieren auf mathematischen Pfaden (Punkte, Kurven) und sind ohne Qualitätsverlust unendlich skalierbar. Rastergrafiken bestehen aus festen Pixelmatrizen, die beim Vergrößern pixelig/unscharf werden.',
+        examTip: 'IHK-Klassiker: Logos und Icons immer als SVG anlegen; Fotos und komplexe Bildmotive als WebP/JPG ausgeben.'
+      },
+      {
+        term: 'Moderne Webformate (WebP & AVIF)',
+        explanation: 'WebP bietet 25-35 % kleinere Dateigrößen als JPEG/PNG bei gleicher visueller Qualität und unterstützt Transparenz. AVIF komprimiert noch effizienter und basiert auf dem modernen AV1-Videocodec.',
+        examTip: 'Für performante Ladezeiten (Core Web Vitals) werden Bilddaten im Web heute standardmäßig in WebP/AVIF bereitgestellt.'
+      },
+      {
+        term: 'RGB vs. CMYK & Medienneutralität',
+        explanation: 'RGB ist das additive Farbmodell für Bildschirme (Rot, Grün, Blau; Lichtfarben). CMYK ist das subtraktive Farbmodell für Druck (Cyan, Magenta, Yellow, Key/Schwarz; Körperfarben). Medienneutralität speichert Daten im großen RGB-Farbraum und konvertiert erst bei der Ausgabe in CMYK.',
+        examTip: 'Prüfungsfalle: Warum niemals in CMYK für das Web speichern? Webbrowser interpretieren CMYK unzuverlässig und der Farbraum ist viel kleiner als sRGB.'
+      },
+      {
+        term: 'Auflösung: PPI vs. DPI',
+        explanation: 'PPI (Pixels Per Inch) beschreibt die Pixeldichte digitaler Displays und Sensoren. DPI (Dots Per Inch) beschreibt die physischen Druckpunkte pro Zoll einer Druckmaschine.',
+        examTip: 'Merksatz: Bildschirme kennen nur Pixel (PPI); Druckmaschinen drucken Farbpunkte (DPI). Für Standard-Druck sind 300 DPI bei 100 % Skalierung die IHK-Norm.'
+      }
+    ]
+  },
+  {
+    id: 'wiso-wirtschaft-soziales',
+    title: '10. Wirtschafts- & Sozialkunde (WiSo - BBiG, Sozialversicherungen & Recht)',
+    category: 'Recht & Wirtschaft',
+    iconName: 'Scale',
+    ihkFocusSummary: 'Berufsausbildung (BBiG), Arbeitsschutz (JArbSchG, ArbZG, BUrlG), 5 Säulen der Sozialversicherung, Mitbestimmung (BetrVG) & Unternehmensformen.',
+    whatFailsAway: 'Veraltete Paragraphen vor der BBiG- und Schuldrechtsreform.',
+    whatIsNewAndTested: 'Ausbildungsvertrag (§ 11 BBiG), Probezeit (1-4 Monate), Kündigungsfristen, 100% AG-Beitrag der Unfallversicherung, § 102 BetrVG Betriebsratsanhörung, Rechtsformen (GmbH, KG, OHG).',
+    keyConcepts: [
+      {
+        term: 'Ausbildungsvertrag & Probezeit (§§ 11, 20 BBiG)',
+        explanation: 'Schriftform vor Beginn zwingend. Probezeit: mind. 1, max. 4 Monate. Während der Probezeit jederzeit fristlos ohne Grund kündbar. Nach der Probezeit: Betrieb kann nur aus wichtigem Grund außerordentlich kündigen; Azubi mit 4 Wochen Frist bei Berufswechsel.',
+        examTip: 'Häufigste IHK-Falle: Kündigungen bedürfen nach § 623 BGB immer der Schriftform auf Papier – mündlich oder per WhatsApp ist absolut nichtig!'
+      },
+      {
+        term: 'Arbeitsschutz & Urlaub (JArbSchG, ArbZG, BUrlG)',
+        explanation: 'JArbSchG (unter 18): max. 8 Std./Tag, 40 Std./Woche, 5-Tage-Woche, Pausen 30 Min (bei 4,5-6 Std.) bzw. 60 Min (bei >6 Std.). BUrlG: mind. 24 Werktage (= 20 Arbeitstage bei 5-Tage-Woche).',
+        examTip: 'Prüfer fragen oft nach der Mindesturlaubsdauer für Jugendliche: unter 16 = 30, unter 17 = 27, unter 18 = 25 Werktage.'
+      },
+      {
+        term: 'Die 5 Säulen der Sozialversicherung',
+        explanation: '1. Kranken- (GKV), 2. Pflege- (SPV), 3. Renten- (GRV), 4. Arbeitslosen- (ALV) und 5. Gesetzliche Unfallversicherung (GUV). Säulen 1-4 werden paritätisch (ca. 50/50) getragen. Die Unfallversicherung (Berufsgenossenschaft) wird zu 100 % allein vom Arbeitgeber finanziert!',
+        examTip: 'Super-Prüfungsfalle: Die Gesetzliche Unfallversicherung zahlt niemals der Arbeitnehmer – sie ist eine reine Unternehmerhaftpflicht (100 % AG)!'
+      },
+      {
+        term: 'Betriebliche Mitbestimmung (§§ 1, 87, 102 BetrVG)',
+        explanation: 'Betriebsrat wählbar ab 5 wahlberechtigten Arbeitnehmern. Echte Mitbestimmung nach § 87 BetrVG bei Arbeitszeit, Pausen, Überstunden und Urlaubsgrundsätzen. Nach § 102 BetrVG ist jede Kündigung ohne vorherige Betriebsratsanhörung unwirksam.',
+        examTip: 'Wichtig: Der Betriebsrat darf niemals zum Streik aufrufen; Arbeitskämpfe führen ausschließlich Gewerkschaften!'
+      },
+      {
+        term: 'Rechtsformen & Kaufvertragsstörungen',
+        explanation: 'GmbH: Kapitalgesellschaft, mind. 25.000 € Stammkapital, Haftung auf Gesellschaftsvermögen beschränkt. KG: Komplementär haftet voll mit Privatvermögen, Kommanditist nur mit Einlage. Bei Sachmängeln gilt der Vorrang der Nacherfüllung (§ 439 BGB).',
+        examTip: 'Merke: Zuerst immer Nacherfüllung (Reparatur oder Neulieferung) verlangen. Ein sofortiger Rücktritt vom Kaufvertrag ist gesetzlich unwirksam.'
+      }
+    ]
   }
 ];
+

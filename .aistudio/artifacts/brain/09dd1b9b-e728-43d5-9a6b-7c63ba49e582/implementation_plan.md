@@ -1,49 +1,46 @@
-# WiSo-Prüfungsdossiers & Navigations-Optimierung
+# Digital-Leitfaden (IHK): Erweiterung von 8 auf 10 Kapitel
 
-Schließen der verbleibenden Wissens- und Layout-Lücken für das neue Prüfungs-Kapitel 10 "Wirtschafts- & Sozialkunde (WiSo)", sodass Prüflinge für alle 8 IHK-Schwerpunkte tiefe Musterklausur-Dossiers erhalten und die Kapitel-Leiste alle 10 Kapitel harmonisch anzeigt.
+Vollständige Synchronisierung des "Digital-Leitfaden (IHK)" im Bereich Spickzettel & Prüfungskompass von bisher 8 auf alle 10 Prüfungs-Themen, sodass auch **Thema 9 (Digitale Bild- & Grafikdaten)** und **Thema 10 (Wirtschafts- & Sozialkunde - WiSo)** mit IHK-Schwerpunkten, "Was fällt weg"-Vergleichen und Prüfungstipps abgedeckt sind.
 
 ### User Review & Critical Decisions
 
 > [!IMPORTANT]
 > **Bestätigte Entscheidungen aus Phase 1:**
-> - **Haustier-Accessoire:** Kein zusätzliches Pet-Accessoire für Kapitel 10 nötig; das bestehende Abzeichen `wiso_master` ("WiSo-Experte" ⚖️) reicht dem Nutzer vollkommen aus.
-> - **IHK-Prüfungsdossiers:** Es werden vollständige, handgefertigte IHK-Dossiers für alle 8 WiSo-Prüfungsschwerpunkte mit realistischen Aufgabenstellungen, IHK-Punkteschlüsseln, Musterantworten und typischen Prüfungsfallen in `src/data/checklistDetailsData.ts` hinterlegt.
-> - **UI-Navigation:** Das Raster in `ChapterListView.tsx` wird von 8 Spalten auf 10 Spalten (`lg:grid-cols-10`) erweitert, damit alle 10 Kapitel auf Desktop-Displays einheitlich in einer Reihe stehen.
+> - **10 Kapitel Synchronisierung:** Der Digital-Leitfaden wird vollständig an die 10 Kapitel der App angepasst (Kapitel 9: Bilddaten & Kapitel 10: WiSo).
+> - **WiSo-Schwerpunkte:** Der Leitfaden fokussiert BBiG-Ausbildungsrecht, Kündigungsfristen, Schutzgesetze (JArbSchG, ArbZG, BUrlG), die 5 Säulen der Sozialversicherung (inkl. 100% AG-Beitrag der Unfallversicherung), betriebliche Mitbestimmung (BetrVG § 102) und Unternehmensformen (GmbH, KG, OHG).
+> - **Bilddaten-Schwerpunkte:** Thema 9 fokussiert Vektoren (SVG) vs. Rasterformate (WebP, AVIF, JPG, PNG), PPI vs. DPI, verlustfreie/verlustbehaftete Kompression und medienneutrale Farbräume (RGB vs. CMYK).
 
 ---
 
 ### 1. Overview & Core Concept
 
-- **Was es tut:** Wenn Prüflinge in Kapitel 10 auf einen beliebigen Punkt der IHK-Prüfungs-Checkliste klicken (z.B. "Duales Ausbildungssystem & BBiG" oder "Die 5 Säulen der Sozialversicherung"), öffnet sich anstelle eines Standardtextes ein vollwertiges IHK-Prüfungsdossier mit rechtlicher Definition, echten Klausurbeispielen, 4–6 Punkte-Aufgaben und konkreten Prüfertipps.
-- **Zielgruppe:** Mediengestalter Digital & Print in der IHK-Abschlussprüfungsvorbereitung 2026/2027.
-- **Kernwert:** Rechtssicheres Prüfungswissen im offiziellen KMK/PAL-Stil ohne vage Formulierungen.
+- **Was es tut:** Im Reiter *Spickzettel & Prüfungskompass* -> *Digital-Leitfaden (IHK)* stehen Prüflingen nun 10 statt 8 interaktive Themenkarten zur Verfügung. Jede Karte bietet den bewährten Dreiklang:
+  1. **IHK-Fokus:** Was wird 2026/27 konkret verlangt?
+  2. **Vergleich ("Was fällt weg vs. Was ist neu"):** Kontrastierung veralteter Print-/Formel-Themen mit den modernen Prüfungsanforderungen.
+  3. **Schlüsselbegriffe mit Prüfungs-Tipps:** Kurze, prägnante Definitionen mit Warnungen vor typischen IHK-Fallen.
+- **Zielgruppe:** Auszubildende Mediengestalter Digital und Print vor der IHK-Abschlussprüfung Teil 1 und Teil 2.
 
 ---
 
 ### 2. User Experience & Visual Design
 
-- **Checklisten-Interaktion:**
-  - Nutzer klickt auf eine WiSo-Aufgabe in der Checkliste.
-  - Das interaktive Modal öffnet sich mit:
-    - **Rechtlicher Definition & Kernbegriffen:** Klare Verweise auf Gesetzesparagraphen (BBiG, JArbSchG, ArbZG, BetrVG, BGB, SGB).
-    - **Praxisbeispiel:** Realitätsnaher Agenturfall (z.B. Azubi-Überstunden, Abmahnung, Krankenkassenwechsel).
-    - **Originalgetreue IHK-Prüfungsaufgabe:** Inklusive Punkteangabe (z.B. 4–6 Punkte) und offiziellem Erwartungshorizont der Korrektoren.
-    - **Prüferfalle:** Warnung vor typischen Punktabzügen (z.B. Verwechslung von Arbeitslosengeld I und Bürgergeld, oder Nichteinhalten der 2-Wochen-Ausschlussfrist bei fristloser Kündigung).
-- **Kapitel-Navigation (Desktop-Grid):**
-  - Aktualisierung der Rasterklassen in `ChapterListView.tsx`:
-    `grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-1.5 sm:gap-2`
-  - Alle 10 Kapitel (Kapitel 1 bis 10) erscheinen auf Desktops sauber nebeneinander in einer Reihe, auf Tablets in zwei gleichmäßigen 5er-Reihen.
+- **Themen-Navigation:** Die Zähleranzeige schaltet auf *Kapitel X von 10* um. Die horizontale Scroll-Liste und die Vor-/Zurück-Pfeile führen nahtlos durch alle 10 Kapitel.
+- **Kategorie-Filter:** Die neuen Kategorien *"Grafik & Produktion"* und *"Recht & Wirtschaft"* erscheinen automatisch in der Filterleiste.
+- **Visuelle Konsistenz:**
+  - Thema 9 erhält das `Image`-Icon (grafisch, Slate/Indigo).
+  - Thema 10 erhält das `Scale`-Icon (Justitia-Waage, edles Blau).
+- **Kopierfunktion & Bionic Reading:** Alle Definitionen und Prüfungstipps unterstützen weiterhin die One-Click-Kopierfunktion in die Zwischenablage und die zuschaltbare bionische Lesehilfe.
 
 ---
 
 ### 3. Key Product Decisions & Trade-Offs
 
-- **Entscheidung 1: Kein neues Haustier-Accessoire**
-  - *Gewählter Ansatz:* Gemäß Nutzerentscheidung bleibt `CHAPTER_SURPRISES` unverändert. Das Erreichen von 100% in WiSo schaltet wie gewohnt das goldene Profil-Badge `wiso_master` frei.
-  - *Warum:* Der Nutzer hat explizit bestätigt, dass das Abzeichen genügt und kein Pet-Accessoire gewünscht ist.
-- **Entscheidung 2: 8 dedizierte Dossier-Einträge in `CHECKLIST_DOSSIERS`**
-  - *Gewählter Ansatz:* Jeder der 8 Checklisten-Punkte aus `chaptersData.ts` wird exakt mit seinem normalisierten Suchschlüssel gematcht.
-  - *Warum:* Garantiert 100% konsistente Tiefe und verhindert das Ausweichen auf generische Platzhalter.
+- **Entscheidung: Direkte Integration in `DIGITAL_GUIDE_TOPICS`**
+  - *Gewählter Ansatz:* Hinzufügen von `graphics-image-data` und `wiso-wirtschaft-soziales` als vollwertige `DigitalTopic`-Objekte in `src/data/digitalGuideData.ts`.
+  - *Warum:* Das gesamte Spickzettel-System (Filterung, Suche, Zähler, Weiter-Buttons) arbeitet generisch auf Basis von `DIGITAL_GUIDE_TOPICS` und profitiert automatisch von den neuen Inhalten.
+- **Entscheidung: Lucide-Icons erweitern**
+  - *Gewählter Ansatz:* Import von `Image` und `Scale` in `SpickzettelView.tsx` und Ergänzung in `iconMap`.
+  - *Warum:* Verhindert generische Fallbacks und verleiht den beiden neuen Themen sofort erkennbare, eigenständige Ikonografie.
 
 ---
 
@@ -51,37 +48,29 @@ Schließen der verbleibenden Wissens- und Layout-Lücken für das neue Prüfungs
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│                   ChapterListView                      │
-│   (Grid aktualisiert: 10 Spalten für Kap 1 bis 10)     │
+│                   SpickzettelView                      │
+│   (Zähler: 10 Kapitel; Filter & Suche generisch)       │
 └──────────────────────────┬─────────────────────────────┘
-                           │ Klick auf Checklisten-Eintrag
+                           │ rendert
                            ▼
 ┌────────────────────────────────────────────────────────┐
-│               QuestionDetailModal                      │
-│           (getChecklistDossier aufgerufen)             │
-└──────────────────────────┬─────────────────────────────┘
-                           │ Exakter Key-Match
-                           ▼
-┌────────────────────────────────────────────────────────┐
-│             CHECKLIST_DOSSIERS (Data Store)            │
-│  - duales ausbildungssystem & bbig                     │
-│  - probezeit & kündigung im bbig                       │
-│  - schutzgesetze am arbeitsplatz                       │
-│  - die 5 säulen der sozialversicherung                 │
-│  - entgeltabrechnung (brutto vs. netto)                │
-│  - betriebliche mitbestimmung (betrvg)                 │
-│  - unternehmens- & rechtsformen                        │
-│  - kaufvertrag & störungen                             │
+│              DIGITAL_GUIDE_TOPICS (Array)              │
+│  Thema 1: Designkonzeption (IHK Kern-Schwerpunkt)     │
+│  Thema 2: Interaktionsdesign (IxD) & Usability         │
+│  Thema 3: Wireframing, Prototyping & Design-Systeme   │
+│  Thema 4: Responsive Design & Digitales Publishing     │
+│  Thema 5: IT-Sicherheit, Datenschutz & DSGVO          │
+│  Thema 6: Barrierefreiheit (WCAG 2.2 - POUR)           │
+│  Thema 7: Agiles Projektmanagement & Workflows        │
+│  Thema 8: Datenbanken & Schnittstellen (SQL, JSON)    │
+│  ───────────────────────────────────────────────────   │
+│  Thema 9: Digitale Bild- & Grafikdaten [NEU]           │
+│  Thema 10: Wirtschafts- & Sozialkunde (WiSo) [NEU]     │
 └────────────────────────────────────────────────────────┘
 ```
 
-#### Zu implementierende Datenstrukturen:
-In `src/data/checklistDetailsData.ts`:
-1. `'duales ausbildungssystem & bbig'`: BBiG § 11, Pflichtenheft, Ausbildungsrahmenplan, Berichtsheft.
-2. `'probezeit & kündigung im bbig'`: BBiG § 20–22, Kündigungsfristen, Formvorschriften, Kündigungsschutz.
-3. `'schutzgesetze am arbeitsplatz'`: JArbSchG (Ruhepausen, Nachtarbeitsverbot), ArbZG, MuSchG, BUrlG.
-4. `'die 5 säulen der sozialversicherung'`: SGB-System, Beitragsbemessungsgrenzen, Parität vs. 100% AG-Beitrag (Unfallversicherung/BG).
-5. `'entgeltabrechnung (brutto vs. netto)'`: Lohnsteuertabelle, Steuerklassen 1–6, Sozialversicherungsbeiträge.
-6. `'betriebliche mitbestimmung (betrvg)'`: § 87 BetrVG Mitbestimmung, JAV, Betriebsratswahl Voraussetzungen.
-7. `'unternehmens- & rechtsformen'`: Einzelkaufmann, OHG, KG, GmbH, AG, Haftung und Mindestkapital.
-8. `'kaufvertrag & störungen'`: Willenserklärungen, Sach- und Rechtsmängel, Nacherfüllung vor Rücktritt/Minderung.
+#### Neue Einträge im Datenmodell:
+1. `id: 'graphics-image-data'`, `title: '9. Digitale Bild- & Grafikdaten (Vektor vs. Pixel, Farbräume & Kompression)'`
+   - Key-Concepts: *Vektoren (SVG) vs. Rastergrafiken*, *Moderne Formate (WebP/AVIF)*, *RGB vs. CMYK & Medienneutralität*, *Auflösung (PPI vs. DPI)*.
+2. `id: 'wiso-wirtschaft-soziales'`, `title: '10. Wirtschafts- & Sozialkunde (WiSo - BBiG, Sozialversicherungen & Recht)'`
+   - Key-Concepts: *BBiG & Ausbildungsvertrag*, *Arbeitsschutz (JArbSchG, ArbZG, BUrlG)*, *Die 5 Säulen der Sozialversicherung*, *Betriebliche Mitbestimmung (BetrVG)*, *Rechtsformen & Kaufvertragsstörungen*.
