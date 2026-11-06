@@ -28,6 +28,7 @@ import { ExamSimulatorView } from './components/ExamSimulatorView';
 import { SpickzettelView } from './components/SpickzettelView';
 import { MiniGamesHubView } from './components/MiniGamesHubView';
 import { ChapterChallengesView } from './components/ChapterChallengesView';
+import { FreetextTrainerQuizView } from './components/FreetextTrainerQuizView';
 import { DataSandboxView } from './components/DataSandboxView';
 import { FocusSprintModal } from './components/FocusSprintModal';
 import { BackupModal } from './components/BackupModal';
@@ -1316,6 +1317,13 @@ export default function App() {
 
             {activeTab === 'challenges' && (
               <ChapterChallengesView
+                onScoreEarned={handleScoreEarned}
+                onBack={() => setActiveTab('chapters')}
+              />
+            )}
+
+            {activeTab === 'freetext' && (
+              <FreetextTrainerQuizView
                 onScoreEarned={handleScoreEarned}
                 onBack={() => setActiveTab('chapters')}
               />

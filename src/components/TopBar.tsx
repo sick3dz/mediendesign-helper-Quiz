@@ -12,9 +12,10 @@ import {
   Star,
   Trophy,
   Layers,
+  FileText,
 } from 'lucide-react';
 
-export type ActiveTab = 'chapters' | 'spickzettel' | 'stats' | 'exam' | 'sandbox' | 'minigames' | 'challenges' | 'rank' | 'achievements' | 'pet' | 'shop';
+export type ActiveTab = 'chapters' | 'spickzettel' | 'stats' | 'exam' | 'sandbox' | 'minigames' | 'challenges' | 'freetext' | 'rank' | 'achievements' | 'pet' | 'shop';
 
 interface Props {
   activeTab: ActiveTab;
@@ -133,6 +134,12 @@ export const TopBar: React.FC<Props> = ({
           icon: <Layers className="w-4 h-4 text-indigo-500 dark:text-indigo-400 shrink-0" />,
           color: 'text-indigo-600 dark:text-indigo-400',
         };
+      case 'freetext':
+        return {
+          title: 'IHK Freitext-Trainer',
+          icon: <FileText className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />,
+          color: 'text-emerald-600 dark:text-emerald-400',
+        };
       default:
         return {
           title: 'Lernzentrum',
@@ -204,6 +211,14 @@ export const TopBar: React.FC<Props> = ({
       icon: <Layers className="w-4 h-4 text-indigo-500" />,
       iconBg: 'bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300',
       badge: 'Kapitel-Duelle',
+    },
+    {
+      tab: 'freetext',
+      title: 'IHK Freitext-Trainer',
+      subtitle: 'Offene Prüfungsfragen mit Hybrid-Schlagwort-Auswertung',
+      icon: <FileText className="w-4 h-4 text-emerald-500" />,
+      iconBg: 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400',
+      badge: 'Neu',
     },
     {
       tab: 'rank',

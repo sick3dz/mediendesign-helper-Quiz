@@ -1,6 +1,6 @@
 {
-  "summary": "Implementierungsplan fuer universelle Antwort-Optionen-Mischung across all views:\n1. Implementierung / Nutzung einer sauberen Hilfsfunktion shuffleArray zur dynamischen Optionen-Mischung bei jedem Fragenaufruf.\n2. Aktualisierung von blitzContent.ts (Mix-Up) zur Durchmischung aller Quiz-Optionen.\n3. Aktualisierung von ExamSimulatorView.tsx (Abschlusspruefungs-Simulator) zur Durchmischung der Antworten pro Pruefungsversuch.\n4. Aktualisierung der Spiele-Komponenten (SpeedQuizGame, BossRaidGame, WisoDuelGame, GraphicsFormatGame) zur Durchmischung der Antwortmoeglichkeiten.\n5. Aktualisierung von FocusSprintModal.tsx fuer abwechslungsreiche Sprint-Fragen.",
-  "updatedAt": "2026-11-06T09:47:16.722015862Z",
+  "summary": "Implementation plan for adding a dedicated Freitext-Trainer (Open Text Exam Question Trainer) with hybrid keyword & Gemini AI evaluation in the TopBar and navigation.",
+  "updatedAt": "2026-11-06T11:29:39.544556630Z",
   "requestFeedback": true,
   "userFacing": true
 }
