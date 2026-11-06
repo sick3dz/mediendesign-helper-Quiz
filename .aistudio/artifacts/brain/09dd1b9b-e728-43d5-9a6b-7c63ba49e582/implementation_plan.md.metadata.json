@@ -1,6 +1,6 @@
 {
-  "summary": "Umsetzungsplan zur Vervollständigung und Vertiefung des WiSo-Bereichs (5-6 Fragen pro Modul, Abdeckung aller IHK/PAL-Schwerpunkte wie Kündigungsarten, Urlaubsanspruch, Kündigungsschutzgesetz, Inflation, EZB, Gewährleistung vs. Garantie) sowie Integration in den Abschlussprüfungs-Simulator.",
-  "updatedAt": "2026-11-06T09:04:45.841060398Z",
+  "summary": "Implementierungsplan für die Vervollständigung der WiSo-Logik:\n- Erstellung von 8 maßgeschneiderten IHK-Prüfungsdossiers in src/data/checklistDetailsData.ts für alle WiSo-Schwerpunkte mit konkreten Prüfungsaufgaben, Punkteschlüsseln und Prüferwarnungen.\n- Optimierung des Kapitel-Navigationsrasters in src/components/ChapterListView.tsx auf 10 Spalten für Desktop, damit alle 10 Kapitel nahtlos dargestellt werden.\n- Beibehaltung des bestehenden wiso_master Badges ohne zusätzliches Haustier-Accessoire gemäß Nutzerentscheidung.",
+  "updatedAt": "2026-11-06T09:13:21.571103877Z",
   "requestFeedback": true,
   "userFacing": true
 }

@@ -303,6 +303,168 @@ export const CHECKLIST_DOSSIERS: Record<string, ChecklistDetailInfo> = {
     examinerWarning: 'Häufiger Fehler: Prüflinge schreiben "alt weglassen". Falsch! Wenn das alt-Attribut fehlt, liest der Screenreader den Dateipfad vor. Es muss zwingend alt="" sein!',
     relatedModuleId: 'a11y-3',
     relatedModuleName: 'Alt-Texte & Screenreader-Optimierung'
+  },
+
+  // === KAPITEL 10: WIRTSCHAFTS- & SOZIALKUNDE (WiSo) ===
+  'duales ausbildungssystem & bbig': {
+    definition: 'Die duale Berufsausbildung verbindet die betriebliche Praxis mit dem schulischen Unterricht in der Berufsschule. Gesetzliche Hauptgrundlage ist das Berufsbildungsgesetz (BBiG). Der Ausbildungsvertrag bedarf nach § 11 BBiG zwingend der Schriftform und muss vor Beginn der Ausbildung von Ausbildendem, Auszubildendem (und bei Minderjährigen den gesetzlichen Vertretern) unterzeichnet sowie in das Verzeichnis der Berufsausbildungsverhältnisse bei der zuständigen Kammer (IHK) eingetragen werden.',
+    keywords: ['Duales System', 'BBiG § 11 (Vertragsniederschrift)', 'Lernorte Betrieb & Berufsschule', 'Fürsorge- & Ausbildungspflicht', 'Berichtsheft (Ausbildungsnachweis)', 'IHK-Kammerverzeichnis'],
+    practicalExample: {
+      context: 'Ein Auszubildender im Betrieb soll über mehrere Monate ausschließlich Botengänge erledigen und Akten schreddern, ohne fachliche Anleitung zu erhalten.',
+      application: 'Der Azubi kann sich auf § 14 BBiG berufen: Der Ausbildende ist gesetzlich verpflichtet, die im Ausbildungsrahmenplan festgelegten Fertigkeiten und Kenntnisse planmäßig und zielgerichtet zu vermitteln. Ausbildungsfremde Arbeiten sind unzulässig.'
+    },
+    examQuestion: {
+      questionText: 'Nennen Sie vier wesentliche Mindestinhalte, die nach § 11 BBiG zwingend in die schriftliche Niederschrift eines Berufsausbildungsvertrags aufzunehmen sind.',
+      points: 4,
+      sampleAnswer: '1. Art, sachliche und zeitliche Gliederung sowie Ziel der Berufsausbildung (Ausbildungsberuf). 2. Beginn und Dauer der Berufsausbildung. 3. Dauer der regelmäßigen täglichen Ausbildungszeit. 4. Dauer der Probezeit (mind. 1, max. 4 Monate). Weitere zulässige Nennungen: Zahlung und Höhe der Vergütung, Dauer des Urlaubs, Kündigungsvoraussetzungen.',
+      scoringCriteria: [
+        'Je 1 Punkt pro korrekt nach § 11 BBiG benanntem Vertragsinhalt (maximal 4 Punkte)'
+      ]
+    },
+    examinerWarning: 'Häufiger Punktabzug: Verwende präzise Fachbegriffe! Bezeichne die Zahlung als "Vergütung" (nicht "Gehalt" oder "Lohn") und formuliere "tägliche Ausbildungszeit" (nicht "normale Arbeitszeit").',
+    relatedModuleId: 'wiso-1',
+    relatedModuleName: 'Berufsausbildung & Arbeitsrecht (BBiG & Schutzgesetze)'
+  },
+  'probezeit & kündigung im bbig': {
+    definition: 'Nach § 20 BBiG muss das Ausbildungsverhältnis zwingend mit einer Probezeit beginnen (mindestens 1 Monat, höchstens 4 Monate). Während der Probezeit kann das Verhältnis von beiden Seiten jederzeit ohne Einhaltung einer Kündigungsfrist und ohne Angabe von Gründen schriftlich gekündigt werden (§ 22 Abs. 1 BBiG). Nach der Probezeit kann der Ausbildende nur noch außerordentlich aus wichtigem Grund fristlos kündigen (Ausschlussfrist: 2 Wochen ab Kenntnis der Kündigungstatsache, § 626 BGB). Der Auszubildende hat nach der Probezeit ein Sonderkündigungsrecht mit 4 Wochen Frist bei Berufsaufgabe oder Wechsel der Fachrichtung (§ 22 Abs. 2 Nr. 2 BBiG).',
+    keywords: ['BBiG § 20 (Probezeit 1-4 Monate)', 'Fristlos ohne Grund in Probezeit', 'Wichtiger Grund (§ 626 BGB)', '2-Wochen-Ausschlussfrist', '4-Wochen-Frist bei Berufsaufgabe', 'Schriftform (§ 623 BGB)'],
+    practicalExample: {
+      context: 'Ein Mediengestalter-Azubi im 3. Ausbildungsmonat erhält vom Chef am Freitag mündlich die Kündigung, weil er unpünktlich war.',
+      application: 'Die Kündigung ist nach § 22 Abs. 3 BBiG und § 623 BGB absolut unwirksam (nichtig), da jede Kündigung zwingend der Schriftform auf Papier bedarf. Mündliche Kündigungen, SMS oder WhatsApp sind rechtlich wirkungslos.'
+    },
+    examQuestion: {
+      questionText: 'Ein Auszubildender im 2. Ausbildungsjahr möchte seine Ausbildung zum Mediengestalter beenden, um ein Vollzeit-Studium der Informatik zu beginnen. Erläutern Sie die gesetzlichen Voraussetzungen und die Kündigungsfrist für diesen Fall nach dem BBiG.',
+      points: 4,
+      sampleAnswer: 'Gemäß § 22 Abs. 2 Nr. 2 BBiG kann der Auszubildende nach der Probezeit mit einer Kündigungsfrist von 4 Wochen kündigen, wenn er die Berufsausbildung aufgeben oder sich für eine andere Berufstätigkeit ausbilden lassen will. Die Kündigung muss zwingend schriftlich unter Angabe des Kündigungsgrundes (Aufgabe der Ausbildung / Berufswechsel) erfolgen.',
+      scoringCriteria: [
+        '2 Punkte für die korrekte Frist von 4 Wochen',
+        '1 Punkt für das Schriftformerfordernis',
+        '1 Punkt für die Pflicht zur Begründungsangabe'
+      ]
+    },
+    examinerWarning: 'IHK-Prüfungsfalle: Prüflinge vergessen, dass bei einer Kündigung durch den Azubi nach der Probezeit der Grund (Berufsaufgabe/Fachrichtungswechsel) zwingend im Kündigungsschreiben stehen MUSS, da die Kündigung sonst formnichtig ist!',
+    relatedModuleId: 'wiso-1',
+    relatedModuleName: 'Berufsausbildung & Arbeitsrecht (BBiG & Schutzgesetze)'
+  },
+  'schutzgesetze am arbeitsplatz': {
+    definition: 'Arbeitsschutzgesetze teilen sich in allgemeinen und besonderen Arbeitsschutz. Für Jugendliche unter 18 Jahren gilt das Jugendarbeitsschutzgesetz (JArbSchG): max. 8 Stunden täglich (bzw. 8,5 Std. bei Freitagsausgleich), max. 40 Stunden wöchentlich, 5-Tage-Woche, Verbot von Nachtarbeit (20:00–06:00 Uhr) sowie Ruhepausen von 30 Minuten (bei 4,5–6 Std.) bzw. 60 Minuten (bei >6 Std.). Für Volljährige gilt das Arbeitszeitgesetz (ArbZG): max. 8 Std./Werktag (Verlängerung auf 10 Std. nur bei 6-Monats-Ausgleich). Das Bundesurlaubsgesetz (BUrlG) gewährt mind. 24 Werktage gesetzlichen Mindesturlaub (bezogen auf die 6-Tage-Woche = 20 Arbeitstage bei 5-Tage-Woche).',
+    keywords: ['JArbSchG (max. 8 Std./Tag, 40 Std./Woche)', 'Ruhepausen (30 bzw. 60 Min)', 'ArbZG (Ruhezeit 11 Std.)', 'BUrlG (24 Werktage = 20 Arbeitstage)', 'Mutterschutzgesetz (MuSchG)'],
+    practicalExample: {
+      context: 'Eine 17-jährige Auszubildende soll vor einem Messe-Launch 11 Stunden arbeiten und am folgenden Samstag ebenfalls erscheinen.',
+      application: 'Dies verstößt zweifach gegen das JArbSchG: Die absolute Höchstarbeitszeit von 8 (ausnahmsweise 8,5) Stunden wird überschritten (§ 8 JArbSchG) und die gesetzliche 5-Tage-Woche (§ 15 JArbSchG) wird durch den Samstagseinsatz ohne Ersatzruhetag verletzt.'
+    },
+    examQuestion: {
+      questionText: 'Ein 16-jähriger Auszubildender arbeitet an einem Werktag von 08:00 Uhr bis 15:30 Uhr mit 30 Minuten Pause. Beurteilen Sie diese Einteilung nach dem Jugendarbeitsschutzgesetz (JArbSchG) hinsichtlich Arbeitszeit und Pausendauer.',
+      points: 4,
+      sampleAnswer: '1. Arbeitszeit: Anwesenheit 7,5 Stunden abzüglich 0,5 Stunden Pause = 7,0 Stunden reine Arbeitszeit. Dies ist zulässig (max. 8 Stunden nach § 8 JArbSchG). 2. Ruhepause: Bei mehr als 6 Stunden Arbeitszeit schreibt § 11 JArbSchG eine Mindestpause von insgesamt 60 Minuten vor. 30 Minuten sind unzulässig und müssen um weitere 30 Minuten aufgestockt werden.',
+      scoringCriteria: [
+        '2 Punkte für die Feststellung der zulässigen täglichen Arbeitszeit (7 Std. <= 8 Std.)',
+        '2 Punkte für die Beanstandung der Pausendauer (60 Min Pflicht nach § 11 JArbSchG)'
+      ]
+    },
+    examinerWarning: 'Achtung: Im Bundesurlaubsgesetz (BUrlG) wird von Werktagen (Montag bis Samstag = 6-Tage-Woche) gesprochen. 24 Werktage Mindesturlaub entsprechen in einer modernen 5-Tage-Woche exakt 20 Arbeitstagen!',
+    relatedModuleId: 'wiso-1',
+    relatedModuleName: 'Berufsausbildung & Arbeitsrecht (BBiG & Schutzgesetze)'
+  },
+  'die 5 säulen der sozialversicherung': {
+    definition: 'Das deutsche Sozialversicherungssystem basiert auf dem Solidaritätsprinzip und umfasst fünf gesetzliche Pflichtversicherungen: 1. Gesetzliche Krankenversicherung (GKV, SGB V), 2. Soziale Pflegeversicherung (SPV, SGB XI), 3. Gesetzliche Rentenversicherung (GRV, SGB VI), 4. Arbeitslosenversicherung (ALV, SGB III) und 5. Gesetzliche Unfallversicherung (GUV, SGB VII). Die ersten vier Säulen werden paritätisch zu je 50% von Arbeitnehmer und Arbeitgeber finanziert. Die Gesetzliche Unfallversicherung (Träger: Berufsgenossenschaften wie die BG ETEM) wird zu 100% allein vom Arbeitgeber bezahlt.',
+    keywords: ['Solidaritätsprinzip', '5 Säulen (KV, PV, RV, AV, UV)', 'Paritätische Finanzierung (50/50)', 'Berufsgenossenschaft (100% AG-Beitrag)', 'Beitragsbemessungsgrenze', 'Wege- & Arbeitsunfälle'],
+    practicalExample: {
+      context: 'Ein Mediengestalter stürzt auf dem direkten Weg von seiner Wohnung zur Agentur mit dem Fahrrad und bricht sich das Handgelenk.',
+      application: 'Es liegt ein versicherter Wegeunfall vor. Die Kosten für Krankenhaus, Operation, Reha und Verletztengeld übernimmt die Berufsgenossenschaft (Gesetzliche Unfallversicherung), nicht die gesetzliche Krankenkasse.'
+    },
+    examQuestion: {
+      questionText: 'Nennen Sie die fünf Zweige der gesetzlichen Sozialversicherung in Deutschland. Geben Sie für jeden Zweig an, wer die Beiträge bezahlt (Arbeitnehmer, Arbeitgeber oder beide gemeinsam) und nennen Sie den Träger der Gesetzlichen Unfallversicherung.',
+      points: 6,
+      sampleAnswer: '1. Krankenversicherung: AG und AN paritätisch (je 50% zzgl. Zusatzbeitrag). 2. Pflegeversicherung: AG und AN paritätisch (je 50% zzgl. Kinderlosenzuschlag AN). 3. Rentenversicherung: AG und AN paritätisch (je 50%). 4. Arbeitslosenversicherung: AG und AN paritätisch (je 50%). 5. Unfallversicherung: 100% allein durch den Arbeitgeber finanziert. Träger der Unfallversicherung: Berufsgenossenschaften (bzw. Unfallkassen der öffentlichen Hand).',
+      scoringCriteria: [
+        '5 Punkte für die korrekte Benennung aller fünf Säulen inklusive Finanzierungsverteilung',
+        '1 Punkt für die Nennung der Berufsgenossenschaft als Träger'
+      ]
+    },
+    examinerWarning: 'Die beliebteste IHK-Prüfungsfalle: Bei der Finanzierung der Gesetzlichen Unfallversicherung kreuzen unzählige Prüflinge "50% AG / 50% AN" an. Falsch! Die Unfallversicherung wird ausnahmslos zu 100% vom Arbeitgeber getragen!',
+    relatedModuleId: 'wiso-2',
+    relatedModuleName: 'Sozialversicherung, Gehaltsabrechnung & Markt'
+  },
+  'entgeltabrechnung (brutto vs. netto)': {
+    definition: 'Die Entgeltabrechnung ermittelt ausgehend vom Bruttoentgelt das tatsächlich ausgezahlte Nettoentgelt. Gesetzliche Abzüge gliedern sich in: 1. Steuern (Lohnsteuer nach Steuerklasse 1 bis 6, Solidaritätszuschlag bei Überschreiten der Freigrenzen, Kirchensteuer je nach Konfession). 2. Arbeitnehmeranteile zur Sozialversicherung (KV, PV, RV, AV bis zur Beitragsbemessungsgrenze). Schema: Bruttogehalt - Lohnsteuer - Kirchensteuer/Soli - AN-Sozialabgaben = Nettogehalt. Das Nettogehalt abzüglich vermögenswirksamer Leistungen (AN-Anteil) ergibt den Auszahlungsbetrag.',
+    keywords: ['Bruttoentgelt', 'Lohnsteuerklassen I-VI', 'Solidaritätszuschlag', 'Arbeitnehmeranteile KV/PV/RV/AV', 'Nettogehalt / Überweisungsbetrag', 'Beitragsbemessungsgrenze'],
+    practicalExample: {
+      context: 'Ein Mediengestalter erhält ein Bruttogehalt von 3.000 €. Auf seinem Kontoauszug erscheinen jedoch nur 2.015 €.',
+      application: 'Die Differenz von 985 € ergibt sich aus den gesetzlichen Pflichtabzügen: ca. 360 € Lohnsteuer (Steuerklasse I) und ca. 625 € Arbeitnehmer-Sozialversicherungsbeiträge (KV, PV, RV, AV).'
+    },
+    examQuestion: {
+      questionText: 'Erläutern Sie den Unterschied zwischen Bruttoentgelt, Nettoentgelt und dem tatsächlichen Auszahlungsbetrag anhand des Abrechnungsschemas.',
+      points: 4,
+      sampleAnswer: '1. Bruttoentgelt: Das vertraglich vereinbarte Gesamteinkommen vor Abzug von Steuern und Sozialabgaben. 2. Nettoentgelt: Das Bruttoentgelt abzüglich Lohnsteuer, Solidaritätszuschlag, Kirchensteuer und den Arbeitnehmeranteilen zur Sozialversicherung (KV, PV, RV, AV). 3. Auszahlungsbetrag: Der tatsächlich überwiesene Betrag, bereinigt um persönliche vermögenswirksame Leistungen (VL), Vorschüsse oder Sachbezüge.',
+      scoringCriteria: [
+        '2 Punkte für die präzise Definition von Brutto- und Nettoentgelt mit Abzugsposten',
+        '2 Punkte für die Abgrenzung des Nettoentgelts zum Auszahlungsbetrag'
+      ]
+    },
+    examinerWarning: 'Achte auf die korrekte Berechnungsreihenfolge: Die Lohnsteuer wird immer auf Basis des steuerpflichtigen Bruttoentgelts berechnet, nicht erst nach Abzug der Sozialversicherungsbeiträge!',
+    relatedModuleId: 'wiso-2',
+    relatedModuleName: 'Sozialversicherung, Gehaltsabrechnung & Markt'
+  },
+  'betriebliche mitbestimmung (betrvg)': {
+    definition: 'Das Betriebsverfassungsgesetz (BetrVG) regelt die innerbetriebliche Mitbestimmung der Beschäftigten. In Betrieben mit mindestens fünf ständig wahlberechtigten Arbeitnehmern (ab 18 Jahren), von denen drei wählbar sind (mind. 6 Monate Betriebszugehörigkeit), kann ein Betriebsrat gewählt werden (§ 1 BetrVG). Die stärkste Befugnis ist die echte Mitbestimmung nach § 87 BetrVG (z.B. Beginn und Ende der täglichen Arbeitszeit, Pausen, Anordnung von Überstunden, Urlaubsgrundsätze, technische Überwachungseinrichtungen). Eine Jugend- und Auszubildendenvertretung (JAV) kann gewählt werden, wenn mindestens fünf Arbeitnehmer unter 18 Jahren oder Auszubildende unter 25 Jahren beschäftigt sind (§ 60 BetrVG).',
+    keywords: ['BetrVG § 1 (mind. 5 wahlberechtigte AN)', 'Echte Mitbestimmung (§ 87 BetrVG)', 'Überstunden & Arbeitszeitregelungen', 'Betriebsvereinbarung', 'JAV (§ 60 BetrVG)', 'Einigungsstelle'],
+    practicalExample: {
+      context: 'Die Geschäftsführung installiert heimlich Kameras und eine Software, die jeden Tastenanschlag und Bildschirm der Mediengestalter aufzeichnet.',
+      application: 'Dies ist nach § 87 Abs. 1 Nr. 6 BetrVG (Einführung technischer Einrichtungen zur Überwachung von Verhalten oder Leistung) zwingend mitbestimmungspflichtig. Ohne vorherige Betriebsvereinbarung mit dem Betriebsrat ist der Einsatz rechtswidrig.'
+    },
+    examQuestion: {
+      questionText: 'Nennen Sie zwei Voraussetzungen für das Entstehen eines Betriebsrats nach § 1 BetrVG und nennen Sie zwei Bereiche, in denen der Betriebsrat ein zwingendes Mitbestimmungsrecht nach § 87 BetrVG besitzt.',
+      points: 4,
+      sampleAnswer: 'Voraussetzungen: 1. Mindestens fünf ständig wahlberechtigte Arbeitnehmer (mind. 18 Jahre alt). 2. Mindestens drei von ihnen müssen wählbar sein (mind. 6 Monate Betriebszugehörigkeit). Mitbestimmungsbereiche (§ 87 BetrVG): z.B. 1. Beginn und Ende der täglichen Arbeitszeit einschließlich der Pausen. 2. Vorübergehende Verkürzung oder Verlängerung der betriebsüblichen Arbeitszeit (Überstunden). (Alternativen: Urlaubsplan, Einführung von Überwachungssoftware).',
+      scoringCriteria: [
+        '2 Punkte für die beiden Wahlvoraussetzungen nach § 1 BetrVG',
+        '2 Punkte für zwei korrekt genannte Mitbestimmungstatbestände nach § 87 BetrVG'
+      ]
+    },
+    examinerWarning: 'Wichtig: Ein Betriebsrat ist ein Recht der Belegschaft, aber KEINE Pflicht. Der Arbeitgeber muss keinen Betriebsrat gründen, darf aber dessen Wahl in keiner Weise behindern oder beeinflussen (§ 20 BetrVG).',
+    relatedModuleId: 'wiso-3',
+    relatedModuleName: 'Betriebsrat, Mitbestimmung & Unternehmensformen'
+  },
+  'unternehmens- & rechtsformen': {
+    definition: 'Die Rechtsform bestimmt Haftung, Mindestkapital, Geschäftsführung und Vertretung eines Unternehmens. Hauptformen: 1. Einzelunternehmen (1 Inhaber, volle unbeschränkte persönliche Haftung mit Betriebs- und Privatvermögen, kein Mindestkapital). 2. Personengesellschaften (z.B. OHG: alle Gesellschafter haften unbeschränkt, unmittelbar und solidarisch; KG: Komplementär haftet voll und unbeschränkt, Kommanditist haftet nur beschränkt bis zur Höhe seiner im Handelsregister eingetragenen Einlage). 3. Kapitalgesellschaften (z.B. GmbH: Mindeststammkapital 25.000 €, Haftung auf das Gesellschaftsvermögen beschränkt; AG: Mindestgrundkapital 50.000 €, Organe: Vorstand, Aufsichtsrat, Hauptversammlung).',
+    keywords: ['Einzelunternehmen (Vollhaftung)', 'OHG (solidarische Vollhaftung)', 'KG (Komplementär vs. Kommanditist)', 'GmbH (mind. 25.000 € Stammkapital)', 'AG (mind. 50.000 € Grundkapital)', 'Handelsregister (Abteilung A und B)'],
+    practicalExample: {
+      context: 'Drei Mediengestalter möchten eine Agentur gründen, haben jedoch Angst, bei Schadensersatzforderungen oder Insolvenz ihr privates Vermögen zu verlieren.',
+      application: 'Sie entscheiden sich für eine GmbH. Mit Aufbringung des gesetzlichen Mindeststammkapitals von 25.000 € ist die Haftung für Verbindlichkeiten auf das Gesellschaftsvermögen beschränkt; das private Vermögen der Gesellschafter bleibt geschützt.'
+    },
+    examQuestion: {
+      questionText: 'Vergleichen Sie eine Offene Handelsgesellschaft (OHG) und eine Gesellschaft mit beschränkter Haftung (GmbH) hinsichtlich des gesetzlichen Mindestkapitals und des Haftungsumfangs der Gesellschafter.',
+      points: 4,
+      sampleAnswer: '1. Mindestkapital: Die OHG benötigt kein gesetzlich vorgeschriebenes Mindestkapital; bei der GmbH beträgt das Mindeststammkapital 25.000 €. 2. Haftung: Die Gesellschafter der OHG haften persönlich, unbeschränkt, unmittelbar und solidarisch (gesamtschuldnerisch) mit ihrem Geschäfts- und Privatvermögen; bei der GmbH haftet ausschließlich die Gesellschaft mit ihrem Gesellschaftsvermögen.',
+      scoringCriteria: [
+        '2 Punkte für die Gegenüberstellung des Mindestkapitals (0 € vs. 25.000 €)',
+        '2 Punkte für die Unterscheidung der persönlichen Vollhaftung vs. beschränkte Gesellschaftshaftung'
+      ]
+    },
+    examinerWarning: 'Sehr beliebte Frage: "Welcher Gesellschafter der KG haftet voll?" Merke dir die Eselsbrücke: Der KompleMENTÄR haftet KOMPLETT (unbeschränkt mit Privatvermögen), der KommanDITIST haftet nur mit seiner Distanz-Einlage!',
+    relatedModuleId: 'wiso-3',
+    relatedModuleName: 'Betriebsrat, Mitbestimmung & Unternehmensformen'
+  },
+  'kaufvertrag & störungen': {
+    definition: 'Ein Kaufvertrag kommt durch zwei übereinstimmende Willenserklärungen zustande: Antrag (Angebot) und Annahme (§§ 145 ff. BGB). Bei Pflichtverletzungen spricht man von Vertragsstörungen: 1. Schlechtleistung (Sach- oder Rechtsmangel nach § 434 BGB). Bei Vorliegen eines Mangels gilt zwingend der Vorrang der Nacherfüllung (§ 439 BGB: Käufer kann Nachbesserung/Reparatur oder Nachlieferung verlangen). Erst nach erfolglosem Ablauf einer angemessenen Frist greifen die nachrangigen Rechte: Rücktritt vom Vertrag (§ 440 BGB), Minderung des Kaufpreises (§ 441 BGB) oder Schadensersatz (§ 437 Nr. 3 BGB). Weitere Vertragsstörungen sind Lieferungsverzug, Zahlungsverzug und Annahmeverzug.',
+    keywords: ['Antrag & Annahme (§§ 145 ff. BGB)', 'Sachmangel (§ 434 BGB)', 'Vorrang der Nacherfüllung (§ 439 BGB)', 'Recht der zweiten Andienung', 'Rücktritt & Minderung', 'Schadensersatz statt der Leistung'],
+    practicalExample: {
+      context: 'Eine Digitalagentur kauft fünf High-End Monitore. Bei der Lieferung stellt sich heraus, dass zwei Bildschirme Pixelfehler und Streifen aufweisen.',
+      application: 'Es liegt ein Sachmangel vor. Die Agentur darf nicht sofort das Geld zurückverlangen oder die Rechnung kürzen, sondern muss dem Verkäufer im Rahmen der Nacherfüllung (§ 439 BGB) eine Frist zur Reparatur oder Ersatzlieferung setzen.'
+    },
+    examQuestion: {
+      questionText: 'Ein Werbestudio kauft drei neue Grafiktabletts. Bei Inbetriebnahme erweist sich ein Gerät als defekt. Erläutern Sie, welche vorrangigen Rechte dem Käufer zustehen und unter welcher Bedingung er nachrangige Rechte wie Rücktritt oder Minderung geltend machen darf.',
+      points: 4,
+      sampleAnswer: '1. Vorrangiges Recht: Anspruch auf Nacherfüllung nach § 439 BGB, wahlweise durch Mangelbeseitigung (Reparatur) oder Lieferung einer neuen, mangelfreien Sache (Ersatzlieferung). 2. Bedingung für nachrangige Rechte: Der Käufer darf erst vom Vertrag zurücktreten (§ 440 BGB) oder den Kaufpreis mindern (§ 441 BGB), wenn er dem Verkäufer eine angemessene Frist zur Nacherfüllung gesetzt hat und diese erfolglos verstrichen ist (oder die Nacherfüllung zweimal fehlschlug / verweigert wurde).',
+      scoringCriteria: [
+        '2 Punkte für die Nennung der Nacherfüllung (Reparatur oder Neulieferung) als Primäranspruch',
+        '2 Punkte für die korrekte Bedingung (erfolgloser Ablauf einer angemessenen Nachfrist)'
+      ]
+    },
+    examinerWarning: 'Typische IHK-Falle: Prüflinge schreiben bei Defekten sofort "Kaufpreis zurückfordern" (Rücktritt). Das Gesetz gewährt dem Verkäufer jedoch das "Recht der zweiten Andienung". Ohne Nacherfüllungsverlangen ist ein Rücktritt unwirksam!',
+    relatedModuleId: 'wiso-4',
+    relatedModuleName: 'Vertragsrecht, Verbraucherschutz & Wirtschaftskreislauf'
   }
 };
 
