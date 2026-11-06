@@ -10,6 +10,7 @@ import { ProcessSorterGame } from './InteractiveMinigames/ProcessSorterGame';
 import { WcagMatchGame } from './InteractiveMinigames/WcagMatchGame';
 import { WisoDuelGame } from './InteractiveMinigames/WisoDuelGame';
 import { GraphicsFormatGame } from './InteractiveMinigames/GraphicsFormatGame';
+import { WisoFristenDragDropGame } from './InteractiveMinigames/WisoFristenDragDropGame';
 import { SqlBuilderWidget } from './SqlBuilderWidget';
 import { JsonInspectorWidget } from './JsonInspectorWidget';
 import { CrossmediaPublishingWidget } from './CrossmediaPublishingWidget';
@@ -499,6 +500,17 @@ export const ModuleLearningView: React.FC<Props> = ({
           {module.miniGameType === 'graphics_format_match' && (
             <GraphicsFormatGame
               isLevel2={currentLevel === 2}
+              onComplete={score => {
+                const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
+                setAccumulatedXp(prev => prev + finalXp);
+                onMiniGameCompleted?.(module.id);
+                setViewState('quiz');
+              }}
+            />
+          )}
+
+          {module.miniGameType === 'wiso_fristen_dragdrop' && (
+            <WisoFristenDragDropGame
               onComplete={score => {
                 const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
                 setAccumulatedXp(prev => prev + finalXp);

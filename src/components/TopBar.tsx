@@ -11,9 +11,10 @@ import {
   BarChart3,
   Star,
   Trophy,
+  Layers,
 } from 'lucide-react';
 
-export type ActiveTab = 'chapters' | 'spickzettel' | 'stats' | 'exam' | 'sandbox' | 'minigames' | 'rank' | 'achievements' | 'pet' | 'shop';
+export type ActiveTab = 'chapters' | 'spickzettel' | 'stats' | 'exam' | 'sandbox' | 'minigames' | 'challenges' | 'rank' | 'achievements' | 'pet' | 'shop';
 
 interface Props {
   activeTab: ActiveTab;
@@ -126,6 +127,12 @@ export const TopBar: React.FC<Props> = ({
           icon: <Gamepad2 className="w-4 h-4 text-rose-500 dark:text-rose-400 shrink-0" />,
           color: 'text-rose-600 dark:text-rose-400',
         };
+      case 'challenges':
+        return {
+          title: 'Spezifische Kapitel-Challenges',
+          icon: <Layers className="w-4 h-4 text-indigo-500 dark:text-indigo-400 shrink-0" />,
+          color: 'text-indigo-600 dark:text-indigo-400',
+        };
       default:
         return {
           title: 'Lernzentrum',
@@ -189,6 +196,14 @@ export const TopBar: React.FC<Props> = ({
       subtitle: 'Speed-Quiz, Memory-Flip & Boss-Raid Mini-Games',
       icon: <Gamepad2 className="w-4 h-4 text-rose-500" />,
       iconBg: 'bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400',
+    },
+    {
+      tab: 'challenges',
+      title: 'Spezifische Kapitel-Challenges',
+      subtitle: 'Drag & Drop, Rechtsfall-Duelle, A11y & Format-Sorter',
+      icon: <Layers className="w-4 h-4 text-indigo-500" />,
+      iconBg: 'bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300',
+      badge: 'Kapitel-Duelle',
     },
     {
       tab: 'rank',

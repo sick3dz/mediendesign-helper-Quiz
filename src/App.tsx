@@ -27,6 +27,7 @@ import { ModuleLearningView } from './components/ModuleLearningView';
 import { ExamSimulatorView } from './components/ExamSimulatorView';
 import { SpickzettelView } from './components/SpickzettelView';
 import { MiniGamesHubView } from './components/MiniGamesHubView';
+import { ChapterChallengesView } from './components/ChapterChallengesView';
 import { DataSandboxView } from './components/DataSandboxView';
 import { FocusSprintModal } from './components/FocusSprintModal';
 import { BackupModal } from './components/BackupModal';
@@ -1307,6 +1308,14 @@ export default function App() {
 
             {activeTab === 'minigames' && (
               <MiniGamesHubView
+                onScoreEarned={handleScoreEarned}
+                onBack={() => setActiveTab('chapters')}
+                onGoToChallenges={() => setActiveTab('challenges')}
+              />
+            )}
+
+            {activeTab === 'challenges' && (
+              <ChapterChallengesView
                 onScoreEarned={handleScoreEarned}
                 onBack={() => setActiveTab('chapters')}
               />

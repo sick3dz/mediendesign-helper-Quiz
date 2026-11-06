@@ -8,6 +8,7 @@ import { MemoryMatchGame } from './InteractiveMinigames/MemoryMatchGame';
 import { BossRaidGame } from './InteractiveMinigames/BossRaidGame';
 import { UiInspectorGame } from './InteractiveMinigames/UiInspectorGame';
 import { WisoDuelGame } from './InteractiveMinigames/WisoDuelGame';
+import { WisoFristenDragDropGame } from './InteractiveMinigames/WisoFristenDragDropGame';
 import {
   Gamepad2,
   ArrowLeft,
@@ -21,12 +22,14 @@ import {
   Trophy,
   Search,
   Scale,
+  Clock,
 } from 'lucide-react';
 import { soundEffects } from '../services/audioService';
 
 interface Props {
   onScoreEarned: (score: number) => void;
   onBack?: () => void;
+  onGoToChallenges?: () => void;
 }
 
 type GameId =
@@ -38,9 +41,10 @@ type GameId =
   | 'phishing'
   | 'process'
   | 'wcag'
-  | 'wiso-duel';
+  | 'wiso-duel'
+  | 'wiso-fristen';
 
-export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => {
+export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack, onGoToChallenges }) => {
   const [activeGame, setActiveGame] = useState<GameId | null>(null);
 
   const studyQuestGames = [
@@ -119,6 +123,14 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
       icon: Scale,
       xpBonus: '+30 EXP',
     },
+    {
+      id: 'wiso-fristen' as const,
+      title: 'WiSo-Fristen Drag & Drop Duell',
+      desc: 'Ordnung muss sein: Ordne Kündigungsfristen, Klagefristen (§ 4 KSchG) & JArbSchG-Regeln per Drag & Drop zu!',
+      badge: 'BBiG & Arbeitsrecht',
+      icon: Clock,
+      xpBonus: '+35 EXP',
+    },
   ];
 
   if (activeGame) {
@@ -169,6 +181,10 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
 
         {activeGame === 'wiso-duel' && (
           <WisoDuelGame onComplete={score => onScoreEarned(score)} />
+        )}
+
+        {activeGame === 'wiso-fristen' && (
+          <WisoFristenDragDropGame onComplete={score => onScoreEarned(score)} />
         )}
       </div>
     );
@@ -262,11 +278,24 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
 
       {/* Section 2: Specific Chapter Micro-Challenges */}
       <div className="space-y-4 pt-2">
-        <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-indigo-500" />
-          <h3 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
-            Spezifische Kapitel-Challenges
-          </h3>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-indigo-500" />
+            <h3 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
+              Spezifische Kapitel-Challenges
+            </h3>
+          </div>
+          {onGoToChallenges && (
+            <button
+              onClick={() => {
+                soundEffects.playClick();
+                onGoToChallenges();
+              }}
+              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800 transition-all cursor-pointer flex items-center gap-1.5"
+            >
+              <span>🚀 Eigenständigen Bereich öffnen</span>
+            </button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

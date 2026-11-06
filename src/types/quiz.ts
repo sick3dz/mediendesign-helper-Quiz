@@ -38,7 +38,7 @@ export interface LearningModule {
   nuggets: LearningNugget[];
   quizQuestions: QuizQuestion[];
   level2QuizQuestions?: QuizQuestion[]; // IHK-Transfer & Praxisfälle für Meisterstufe (Level 2)
-  miniGameType?: 'affordance' | 'phishing' | 'process_order' | 'wcag_match' | 'wiso_case_match' | 'graphics_format_match';
+  miniGameType?: 'affordance' | 'phishing' | 'process_order' | 'wcag_match' | 'wiso_case_match' | 'graphics_format_match' | 'wiso_fristen_dragdrop';
 }
 
 export interface ChecklistDetailInfo {
