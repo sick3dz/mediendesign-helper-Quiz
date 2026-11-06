@@ -229,7 +229,7 @@ const WISO_CASES: WisoDuelCase[] = [
   }
 ];
 
-export const WisoDuelGame: React.FC<{ onComplete: (score: number) => void }> = ({ onComplete }) => {
+export const WisoDuelGame: React.FC<{ onComplete: (score: number) => void; isLevel2?: boolean }> = ({ onComplete, isLevel2 = false }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);

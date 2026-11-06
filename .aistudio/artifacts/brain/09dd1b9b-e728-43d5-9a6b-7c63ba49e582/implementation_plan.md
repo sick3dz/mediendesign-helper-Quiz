@@ -1,51 +1,53 @@
-# WiSo-Spiele-Integration: Paragraphen-Duell & erweitertes Memory
+# Mini-Challenge Modul-Badges, Status-Tracking & Level-2 Meister-Challenges
 
-Vollständige Integration der neuen Prüfungsfächer in das Gamification- und Spiele-System: Ein brandneues interaktives Minispiel **„WiSo-Paragraphen & Fristen-Duell“** für Kapitel 10 und Erweiterung des **Memory-Match-Spiels** um Begriffspaare aus WiSo und Bilddaten.
+Vollständige Integration von Mini-Challenge-Indikatoren auf allen Modul-Karten, visuelle Markierung absolvierter Challenges, neue interaktive Challenges für WiSo & Grafikformate sowie Einführung der Level-2 Meister-Challenges.
+
+---
 
 ### User Review & Critical Decisions
 
 > [!IMPORTANT]
 > **Bestätigte Entscheidungen aus Phase 1:**
-> - **WiSo-Themenspiel:** Ein eigenständiges, interaktives Minispiel `WisoDuelGame.tsx` (*WiSo-Paragraphen & Fristen-Duell*) wird im Spiele-Hub für Kapitel 10 implementiert.
-> - **Memory-Match Erweiterung:** Der Begriffspool von `MemoryMatchGame.tsx` wird erweitert. Pro Spielrunde werden nun zufällig 6 bis 8 Begriffspaare aus allen Themen (inkl. WiSo und digitaler Bilddaten) gezogen, was für hohe Wiederspielbarkeit sorgt.
+> - **Modul-Karten Badges & Status:** Alle Module, die eine interaktive Mini-Challenge besitzen, erhalten auf ihren Übersichtskarten ein deutliches Abzeichen ("🎮 Mini-Challenge"). Bereits absolvierte Challenges werden mit einem grünen Haken und Erfolgs-Badge markiert.
+> - **Neue Mini-Challenges:** Integration neuer Mini-Challenges direkt im Lernfluss (zwischen Lern-Häppchen und Quiz) für:
+>   1. **WiSo Rechtsfälle & Paragraphen (`wiso_case_match`)** in Kapitel 10 (Berufsausbildung, Arbeitsrecht, Sozialversicherung).
+>   2. **Grafik-Formate & Farbräume (`graphics_format_match`)** in Kapitel 9 (SVG vs. WebP, RGB vs. CMYK, PPI vs. DPI).
+> - **Level 2 Meister-Challenges:** Wenn der Meistermodus (Level 2) aktiviert ist, schaltet auch die Mini-Challenge in eine anspruchsvollere **Meister-Stufe** mit erschwerten IHK-Transferszenarien und Zeitboni um.
 
 ---
 
 ### 1. Overview & Core Concept
 
 - **Was es tut:**
-  1. **WiSo-Paragraphen & Fristen-Duell (`WisoDuelGame`):** Ein interaktives Rechts-Quiz mit 10 typischen IHK-Praxisfällen (z. B. Probezeit-Kündigung, Unfallversicherung 100% AG, Betriebsrat nach § 102 BetrVG, Nacherfüllung vor Rücktritt, Formvorschriften § 623 BGB). Mit Sofort-Feedback, Paragraphen-Erklärung, Combo-Punkten und Sound-Effekten.
-  2. **Erweitertes Memory-Match (`MemoryMatchGame`):** Ergänzung von Schlüsselbegriffen aus WiSo (*BBiG Probezeit*, *Gesetzliche Unfallversicherung*, *Betriebliche Mitbestimmung*, *GmbH Stammkapital*) und Bilddaten (*SVG Vektorgrafik*, *WebP Kompression*, *RGB vs. CMYK*).
-- **Zielgruppe:** Mediengestalter-Azubis, die rechtliche Fristen und Definitionen spielerisch festigen wollen.
+  - Lernende sehen auf einen Blick in der Modulübersicht jedes Kapitels, welche Module eine interaktive Mini-Challenge enthalten und welche sie bereits erfolgreich gemeistert haben.
+  - Beim Durcharbeiten der Module (zwischen den Text-Häppchen und dem Wissens-Quiz) kann die Mini-Challenge direkt als praktischer Zwischenschritt absolviert werden.
+  - Auf Level 2 (Meisterstufe) steht eine erweiterte Meister-Challenge zur Verfügung, die tiefere IHK-Rechtsfälle und Experten-Entscheidungen fordert.
+- **Zielgruppe:** Mediengestalter-Azubis, die praxiserprobtes Wissen vor dem Abschlusstest festigen wollen.
 
 ---
 
 ### 2. User Experience & Visual Design
 
-- **WiSo-Duell Gameplay:**
-  - Jede Runde präsentiert einen konkreten Fall aus dem Agenturalltag mit zwei bis drei rechtlichen Optionen.
-  - Sofortiges visuelles Feedback (Grün für Treffer, Rose mit Paragraphen-Aufklärung bei Fehlern).
-  - Sound-Effekte (`playCorrect`, `playWrong`), animierte Combo-Zähler und ein Confetti-Abschluss mit +30 EXP Belohnung.
-- **Spiele-Hub (`MiniGamesHubView`):**
-  - Neue Karte in der Sektion *Kapitel-Spezialspiele*:
-    - Titel: *WiSo-Paragraphen & Fristen-Duell*
-    - Badge: *Kapitel 10: WiSo*
-    - Icon: `Scale` (Justitia-Waage in edlem Blau)
-    - Bonus: `+30 EXP`
-- **Memory-Match Runderneuerung:**
-  - Der Pool wächst von 6 auf 14 Begriffspaare.
-  - Bei jedem Spielstart wird ein dynamisches 12-Karten-Set (6 Paare) zufällig gemischt, sodass kein Spieldurchlauf dem vorherigen gleicht.
+- **Modul-Karten (ChapterView / ChapterListView):**
+  - **Badge:** `🎮 Mini-Challenge` (dezent gestylt mit Indigo-/Amber-Akzent).
+  - **Status-Marker:** Grüner Haken `✓ Challenge absolviert` für im Nutzerprofil gespeicherte Erfolge.
+- **Modul-Lernansicht (`ModuleLearningView`):**
+  - Der Tab-Header hebt hervor: `Sparkles Lern-Häppchen` ➔ `Gamepad2 Mini-Challenge` ➔ `HelpCircle Quiz`.
+  - Bei Level 2 schaltet der Tab auf `🏆 Meister-Challenge (Lvl 2)` um.
+- **Neue Mini-Game-Typen:**
+  - `wiso_case_match`: Interaktives Zuordnen von Paragraphen und Rechtsfolgen.
+  - `graphics_format_match`: Schnelligkeits-Sorting von Dateiformaten (SVG, WebP, AVIF, PNG) und Farbräumen.
 
 ---
 
 ### 3. Key Product Decisions & Trade-Offs
 
-- **Entscheidung: Schnelle, fallbasierte Duelle statt reiner Multiple-Choice:**
-  - *Gewählter Ansatz:* Das WiSo-Duell stellt praxisnahe Dilemmata (z.B. "Darf die Kündigung per WhatsApp ausgesprochen werden?").
-  - *Warum:* Entspricht exakt der Denkweise von IHK-Klausuraufgaben und bereitet effektiv auf Prüfungsfallen vor.
-- **Entscheidung: Zufallsauswahl im Memory:**
-  - *Gewählter Ansatz:* Statt das Spielfeld mit 28 Karten zu überladen, zieht das Spiel bei jedem Neustart 6 Paare (12 Karten) zufällig aus dem großen Pool.
-  - *Warum:* Optimale Spielzeit von 60–90 Sekunden, kein visueller Overload und hoher Trainingswert durch Rotation.
+- **Entscheidung: Speicher-Erweiterung in `UserStats`**
+  - *Gewählter Ansatz:* Hinzufügen des Feldes `completedMiniGames: string[]` in `UserStats` (`storageService.ts` & `quiz.ts`).
+  - *Warum:* Garantiert die dauerhafte Speicherung der absolvierten Mini-Challenges über Sitzungen hinweg.
+- **Entscheidung: Level 2 Meister-Modus für Mini-Challenges**
+  - *Gewählter Ansatz:* Die Mini-Games erhalten einen `isLevel2`-Modus mit anspruchsvolleren Aufgaben und veränderten Zeit-/Punkte-Parometern.
+  - *Warum:* Schafft Anreiz, auch nach Level 1 nochmals die Meisterstufe für doppelte EXP anzutreten.
 
 ---
 
@@ -53,23 +55,24 @@ Vollständige Integration der neuen Prüfungsfächer in das Gamification- und Sp
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│                   MiniGamesHubView                     │
-│  - studyQuestGames (SpeedQuiz, BossRaid, Memory)       │
-│  - topicGames (Affordance, Phishing, Workflow, WCAG)   │
-│    + [NEU] WiSo-Paragraphen & Fristen-Duell            │
+│                   UserStats Store                      │
+│   (completedModules, completedMiniGames, lvl2List)     │
 └──────────────────────────┬─────────────────────────────┘
                            │
              ┌─────────────┴─────────────┐
              ▼                           ▼
 ┌──────────────────────────┐┌────────────────────────────┐
-│      WisoDuelGame        ││     MemoryMatchGame        │
-│  - 10 IHK-Praxisfälle    ││  - Pool: 14 Begriffspaare  │
-│  - Sofortige Paragraphen ││  - Randomisiert 6 Paare    │
-│  - Sound & EXP-Belohnung ││  - Inkl. WiSo & Bilddaten  │
+│      ChapterView         ││    ModuleLearningView      │
+│  - zeigt Modul-Karten    ││  - Tabs: Häppchen/Game/Quiz│
+│  - "🎮 Mini-Challenge"   ││  - Schaltet Lvl 1 / Lvl 2  │
+│  - "✓ Absolviert" Haken  ││  - Rendert Mini-Game       │
 └──────────────────────────┘└────────────────────────────┘
 ```
 
-#### Neue und modifizierte Komponenten:
-1. `src/components/InteractiveMinigames/WisoDuelGame.tsx` (Neue Komponente)
-2. `src/components/InteractiveMinigames/MemoryMatchGame.tsx` (Pool-Erweiterung & Zufallsauswahl)
-3. `src/components/MiniGamesHubView.tsx` (Einbindung des WiSo-Duell Games)
+#### Zu aktualisierende Dateien:
+1. `src/types/quiz.ts`: `miniGameType` erweitern um `'wiso_case_match'` & `'graphics_format_match'`. `UserStats` um `completedMiniGames` erweitern.
+2. `src/data/chaptersData.ts`: `miniGameType` bei Kapitel 9 (Bilddaten) und Kapitel 10 (WiSo) eintragen.
+3. `src/services/storageService.ts`: Standard-Initialisierung & Hilfsfunktionen für `completedMiniGames`.
+4. `src/components/ChapterView.tsx`: Badges & Status-Haken auf den Modul-Karten rendern.
+5. `src/components/ModuleLearningView.tsx`: Mini-Challenge-Erledigung beim Gamewinn abspeichern & Level 2 Meister-Challenge-Modus aktivieren.
+6. `src/components/InteractiveMinigames/`: Hinzufügen bzw. Erweitern der Minispiel-Komponenten für Grafik-Formate & WiSo-Rechtsfälle.

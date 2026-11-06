@@ -336,6 +336,17 @@ export default function App() {
     };
   };
 
+  const handleMiniGameCompleted = (moduleId: string) => {
+    setStats(prev => {
+      const curGames = prev.completedMiniGames || [];
+      if (curGames.includes(moduleId)) return prev;
+      return {
+        ...prev,
+        completedMiniGames: [...curGames, moduleId],
+      };
+    });
+  };
+
   const handleModuleCompleted = (moduleId: string, gainedXp: number, level: 1 | 2 = 1) => {
     setStats(prev => {
       const alreadyCompleted = prev.completedModules.includes(moduleId);
@@ -1176,6 +1187,7 @@ export default function App() {
             isLevel2Completed={Boolean(stats.completedModulesLevel2?.includes(currentModule.id))}
             onBack={() => setSelectedModuleMeta(null)}
             onModuleCompleted={(modId, xp, lvl) => handleModuleCompleted(modId, xp, lvl)}
+            onMiniGameCompleted={handleMiniGameCompleted}
             onCorrectAnswer={handleCorrectAnswer}
             onAnswer={handleAnswer}
             onNextModule={handleNextModule}

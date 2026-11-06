@@ -8,6 +8,8 @@ import { AffordanceSignifierGame } from './InteractiveMinigames/AffordanceSignif
 import { PhishingDetectorGame } from './InteractiveMinigames/PhishingDetectorGame';
 import { ProcessSorterGame } from './InteractiveMinigames/ProcessSorterGame';
 import { WcagMatchGame } from './InteractiveMinigames/WcagMatchGame';
+import { WisoDuelGame } from './InteractiveMinigames/WisoDuelGame';
+import { GraphicsFormatGame } from './InteractiveMinigames/GraphicsFormatGame';
 import { SqlBuilderWidget } from './SqlBuilderWidget';
 import { JsonInspectorWidget } from './JsonInspectorWidget';
 import { CrossmediaPublishingWidget } from './CrossmediaPublishingWidget';
@@ -24,6 +26,7 @@ interface Props {
   isLevel2Completed?: boolean;
   onBack: () => void;
   onModuleCompleted: (moduleId: string, gainedXp: number, level: 1 | 2) => void;
+  onMiniGameCompleted?: (moduleId: string) => void;
   onCorrectAnswer?: () => void;
   onAnswer?: (questionId: string, isCorrect: boolean) => void;
   onNextModule?: () => void;
@@ -39,6 +42,7 @@ export const ModuleLearningView: React.FC<Props> = ({
   isLevel2Completed = false,
   onBack,
   onModuleCompleted,
+  onMiniGameCompleted,
   onCorrectAnswer,
   onAnswer,
   onNextModule,
@@ -290,7 +294,7 @@ export const ModuleLearningView: React.FC<Props> = ({
             }`}
           >
             <Gamepad2 className="w-3.5 h-3.5" />
-            <span>Mini-Challenge</span>
+            <span>{currentLevel === 2 ? 'Meister-Challenge (Lvl 2)' : 'Mini-Challenge'}</span>
           </button>
         )}
 
@@ -438,6 +442,7 @@ export const ModuleLearningView: React.FC<Props> = ({
               onComplete={score => {
                 const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
                 setAccumulatedXp(prev => prev + finalXp);
+                onMiniGameCompleted?.(module.id);
                 setViewState('quiz');
               }}
             />
@@ -449,6 +454,7 @@ export const ModuleLearningView: React.FC<Props> = ({
               onComplete={score => {
                 const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
                 setAccumulatedXp(prev => prev + finalXp);
+                onMiniGameCompleted?.(module.id);
                 setViewState('quiz');
               }}
             />
@@ -460,6 +466,7 @@ export const ModuleLearningView: React.FC<Props> = ({
               onComplete={score => {
                 const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
                 setAccumulatedXp(prev => prev + finalXp);
+                onMiniGameCompleted?.(module.id);
                 setViewState('quiz');
               }}
             />
@@ -471,11 +478,35 @@ export const ModuleLearningView: React.FC<Props> = ({
               onComplete={score => {
                 const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
                 setAccumulatedXp(prev => prev + finalXp);
+                onMiniGameCompleted?.(module.id);
                 setViewState('quiz');
               }}
             />
           )}
 
+          {module.miniGameType === 'wiso_case_match' && (
+            <WisoDuelGame
+              isLevel2={currentLevel === 2}
+              onComplete={score => {
+                const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
+                setAccumulatedXp(prev => prev + finalXp);
+                onMiniGameCompleted?.(module.id);
+                setViewState('quiz');
+              }}
+            />
+          )}
+
+          {module.miniGameType === 'graphics_format_match' && (
+            <GraphicsFormatGame
+              isLevel2={currentLevel === 2}
+              onComplete={score => {
+                const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
+                setAccumulatedXp(prev => prev + finalXp);
+                onMiniGameCompleted?.(module.id);
+                setViewState('quiz');
+              }}
+            />
+          )}
         </div>
       )}
 

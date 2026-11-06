@@ -17,6 +17,7 @@ import {
   Star,
   RotateCcw,
   Shuffle,
+  Gamepad2,
 } from 'lucide-react';
 import { soundEffects } from '../services/audioService';
 import { ChecklistDetailModal } from './ChecklistDetailModal';
@@ -387,6 +388,19 @@ export const ChapterListView: React.FC<Props> = ({
                             <Star className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
                             +{baseXp} EXP
                           </span>
+                          {module.miniGameType && (
+                            <span
+                              className={`text-[9px] font-bold px-1.5 py-0.2 rounded-md border flex items-center gap-1 ${
+                                stats.completedMiniGames?.includes(module.id)
+                                  ? 'bg-emerald-100 dark:bg-emerald-950/80 border-emerald-300 dark:border-emerald-700/80 text-emerald-800 dark:text-emerald-300 font-extrabold'
+                                  : 'bg-indigo-50 dark:bg-indigo-950/70 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300'
+                              }`}
+                              title={stats.completedMiniGames?.includes(module.id) ? 'Mini-Challenge bereits gemeistert!' : 'Dieses Modul enthält eine interaktive Mini-Challenge'}
+                            >
+                              <Gamepad2 className="w-2.5 h-2.5 text-indigo-500 dark:text-indigo-400" />
+                              {stats.completedMiniGames?.includes(module.id) ? 'Challenge geschafft ✓' : 'Mini-Challenge'}
+                            </span>
+                          )}
                           {isLevel2Completed ? (
                             <span className="text-[9px] font-black px-1.5 py-0.2 rounded-md bg-amber-100 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-700/80 text-amber-800 dark:text-amber-300 flex items-center gap-1">
                               <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />

@@ -3622,6 +3622,7 @@ export const CHAPTERS: Chapter[] = [
         title: 'Pixel vs. Vektor (SVG & WebP)',
         shortDesc: 'Skalierbarkeit, Auflösung und moderne Webformate',
         estimatedMinutes: 4,
+        miniGameType: 'graphics_format_match',
         nuggets: [
           {
             id: 'n-gfx-1',
@@ -3850,6 +3851,7 @@ export const CHAPTERS: Chapter[] = [
         title: 'Berufsausbildung & Arbeitsrecht (BBiG & Schutzgesetze)',
         shortDesc: 'Ausbildungsvertrag, Rechte & Pflichten, Probezeit, Kündigung, JArbSchG & ArbZG',
         estimatedMinutes: 5,
+        miniGameType: 'wiso_case_match',
         nuggets: [
           {
             id: 'n-wiso-1-1',

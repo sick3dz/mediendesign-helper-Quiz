@@ -38,7 +38,7 @@ export interface LearningModule {
   nuggets: LearningNugget[];
   quizQuestions: QuizQuestion[];
   level2QuizQuestions?: QuizQuestion[]; // IHK-Transfer & Praxisfälle für Meisterstufe (Level 2)
-  miniGameType?: 'affordance' | 'phishing' | 'process_order' | 'wcag_match';
+  miniGameType?: 'affordance' | 'phishing' | 'process_order' | 'wcag_match' | 'wiso_case_match' | 'graphics_format_match';
 }
 
 export interface ChecklistDetailInfo {
@@ -184,6 +184,7 @@ export interface UserStats {
   lastActiveDate: string;
   completedModules: string[];
   completedModulesLevel2?: string[]; // Module, die auf Meisterstufe (Level 2) abgeschlossen wurden
+  completedMiniGames?: string[]; // IDs der absolvierten Mini-Challenges
   answeredQuestionsCount: number;
   correctAnswersCount: number;
   currentCombo: number;
