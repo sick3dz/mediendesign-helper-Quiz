@@ -15,7 +15,7 @@ interface MemoryCard {
   isMatched: boolean;
 }
 
-const MEMORY_PAIRS = [
+const ALL_MEMORY_PAIRS = [
   {
     pairId: 'p1',
     term: 'IxD (Interaktionsdesign)',
@@ -46,13 +46,56 @@ const MEMORY_PAIRS = [
     term: 'SQL JOIN',
     definition: 'Verknüpft Daten aus zwei oder mehreren Tabellen anhand gemeinsamer Schlüssel.',
   },
+  {
+    pairId: 'p7',
+    term: 'BBiG Probezeit',
+    definition: 'Mindestens 1 bis maximal 4 Monate; fristlos ohne Grund schriftlich kündbar.',
+  },
+  {
+    pairId: 'p8',
+    term: 'Unfallversicherung (BG)',
+    definition: 'Zweig der Sozialversicherung, der zu 100% allein vom Arbeitgeber bezahlt wird.',
+  },
+  {
+    pairId: 'p9',
+    term: '§ 87 BetrVG Mitbestimmung',
+    definition: 'Betriebsrat bestimmt verbindlich bei Arbeitszeit, Pausen und Überstunden mit.',
+  },
+  {
+    pairId: 'p10',
+    term: 'GmbH Stammkapital',
+    definition: 'Mindestens 25.000 €; Haftung ist auf das Gesellschaftsvermögen beschränkt.',
+  },
+  {
+    pairId: 'p11',
+    term: 'SVG Vektorgrafik',
+    definition: 'Mathematisch berechnete Vektorpfade; ohne jeden Qualitätsverlust unendlich skalierbar.',
+  },
+  {
+    pairId: 'p12',
+    term: 'WebP & AVIF Formate',
+    definition: 'Moderne Web-Rasterformate mit 25–35% höherer Kompression und Transparenz.',
+  },
+  {
+    pairId: 'p13',
+    term: 'Single Source Publishing',
+    definition: 'Medienneutrale Datenhaltung: Inhalte einmal pflegen und flexibel in Web, App & Print ausgeben.',
+  },
+  {
+    pairId: 'p14',
+    term: 'Nacherfüllung (§ 439 BGB)',
+    definition: 'Recht der zweiten Andienung: Verkäufer darf bei Mängeln vorrangig reparieren oder neu liefern.',
+  },
 ];
+
+const PAIRS_PER_ROUND = 6;
 
 export const MemoryMatchGame: React.FC<Props> = ({ onComplete }) => {
   const [cards, setCards] = useState<MemoryCard[]>([]);
   const [flippedCards, setFlippedCards] = useState<MemoryCard[]>([]);
   const [moves, setMoves] = useState(0);
   const [matches, setMatches] = useState(0);
+  const [totalPairsInRound, setTotalPairsInRound] = useState(PAIRS_PER_ROUND);
   const [isGameOver, setIsGameOver] = useState(false);
   const [earnedXp, setEarnedXp] = useState(0);
 
@@ -61,8 +104,12 @@ export const MemoryMatchGame: React.FC<Props> = ({ onComplete }) => {
   }, []);
 
   const restartGame = () => {
+    // Randomly select 6 pairs from the expanded pool for maximum replayability
+    const selectedPairs = [...ALL_MEMORY_PAIRS].sort(() => 0.5 - Math.random()).slice(0, PAIRS_PER_ROUND);
+    setTotalPairsInRound(selectedPairs.length);
+
     const list: MemoryCard[] = [];
-    MEMORY_PAIRS.forEach(p => {
+    selectedPairs.forEach(p => {
       list.push({
         id: `${p.pairId}-term`,
         pairId: p.pairId,
@@ -116,7 +163,7 @@ export const MemoryMatchGame: React.FC<Props> = ({ onComplete }) => {
           const newMatches = matches + 1;
           setMatches(newMatches);
 
-          if (newMatches === MEMORY_PAIRS.length) {
+          if (newMatches === totalPairsInRound) {
             handleWin(moves + 1);
           }
         }, 500);
@@ -206,7 +253,7 @@ export const MemoryMatchGame: React.FC<Props> = ({ onComplete }) => {
             Züge: {moves}
           </span>
           <span className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-            Paare: {matches} / {MEMORY_PAIRS.length}
+            Paare: {matches} / {totalPairsInRound}
           </span>
         </div>
       </div>

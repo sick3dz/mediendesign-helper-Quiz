@@ -1,6 +1,6 @@
 {
-  "summary": "Implementierungsplan für die Erweiterung des Digital-Leitfadens (IHK) von 8 auf 10 Kapitel:\n- Erweiterung von src/data/digitalGuideData.ts um Thema 9 (Digitale Bild- & Grafikdaten: Vektor vs. Pixel, Farbräume, Kompression) und Thema 10 (Wirtschafts- & Sozialkunde: BBiG, Schutzgesetze, 5 Säulen der Sozialversicherung, Mitbestimmung, Rechtsformen).\n- Aktualisierung von src/components/SpickzettelView.tsx zur Einbindung der Icons Image und Scale in iconMap für eine konsistente visuelle Darstellung.\n- Vollständige Synchronisierung zwischen Haupt-Lernbereich (10 Kapitel) und Digital-Leitfaden (10 Themen).",
-  "updatedAt": "2026-11-06T09:22:35.030652601Z",
+  "summary": "Implementierungsplan für die WiSo- und Bilddaten-Integration in die Spiele:\n- Erstellung des neuen interaktiven Minispiels WisoDuelGame.tsx (WiSo-Paragraphen & Fristen-Duell) mit 10 realitätsnahen IHK-Rechtsfällen zu BBiG, JArbSchG, SGB, BetrVG und BGB.\n- Einbindung des neuen Spiels in MiniGamesHubView.tsx als Highlight für Kapitel 10 (WiSo) inklusive Scale-Icon und Belohnungssystem.\n- Erweiterung des Memory-Match-Spiels (MemoryMatchGame.tsx) um einen dynamischen Kartenpool mit Fachbegriffen zu WiSo (BBiG, Berufsgenossenschaft, GmbH, Mitbestimmung) und Bilddaten (SVG, WebP/AVIF, RGB/CMYK).",
+  "updatedAt": "2026-11-06T09:27:36.979939338Z",
   "requestFeedback": true,
   "userFacing": true
 }

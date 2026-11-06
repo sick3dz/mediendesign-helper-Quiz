@@ -7,6 +7,7 @@ import { SpeedQuizGame } from './InteractiveMinigames/SpeedQuizGame';
 import { MemoryMatchGame } from './InteractiveMinigames/MemoryMatchGame';
 import { BossRaidGame } from './InteractiveMinigames/BossRaidGame';
 import { UiInspectorGame } from './InteractiveMinigames/UiInspectorGame';
+import { WisoDuelGame } from './InteractiveMinigames/WisoDuelGame';
 import {
   Gamepad2,
   ArrowLeft,
@@ -19,6 +20,7 @@ import {
   Brain,
   Trophy,
   Search,
+  Scale,
 } from 'lucide-react';
 import { soundEffects } from '../services/audioService';
 
@@ -35,7 +37,8 @@ type GameId =
   | 'affordance'
   | 'phishing'
   | 'process'
-  | 'wcag';
+  | 'wcag'
+  | 'wiso-duel';
 
 export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => {
   const [activeGame, setActiveGame] = useState<GameId | null>(null);
@@ -108,6 +111,14 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
       icon: CheckCircle2,
       xpBonus: '+20 EXP',
     },
+    {
+      id: 'wiso-duel' as const,
+      title: 'WiSo-Paragraphen & Fristen-Duell',
+      desc: 'Probezeit, Kündigungsschutz, 100% AG-Unfallversicherung & GmbH-Recht: Meistere die IHK-Rechtsfälle!',
+      badge: 'Kapitel 10: WiSo',
+      icon: Scale,
+      xpBonus: '+30 EXP',
+    },
   ];
 
   if (activeGame) {
@@ -154,6 +165,10 @@ export const MiniGamesHubView: React.FC<Props> = ({ onScoreEarned, onBack }) => 
 
         {activeGame === 'wcag' && (
           <WcagMatchGame onComplete={score => onScoreEarned(score)} />
+        )}
+
+        {activeGame === 'wiso-duel' && (
+          <WisoDuelGame onComplete={score => onScoreEarned(score)} />
         )}
       </div>
     );
