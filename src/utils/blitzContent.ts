@@ -1,5 +1,6 @@
 import { CHAPTERS, getModuleLevel2Questions } from '../data/chaptersData';
 import { EXAM_QUESTIONS } from '../data/examQuestions';
+import { shuffleArray } from './learningLogic';
 
 export type BlitzItem =
   | {
@@ -107,7 +108,7 @@ export function buildBlitzPool(): BlitzItem[] {
             ? `Prüfungsfrage (${idx + 1}/2) • ${chap.title}` 
             : `Prüfungsfrage • ${chap.title}`,
           question: q.question,
-          options: q.options,
+          options: shuffleArray(q.options),
           merksatz: q.merksatz || primaryNugget.merksatz,
           linkedFromNuggetTitle: primaryNugget.title,
         }));
@@ -126,7 +127,7 @@ export function buildBlitzPool(): BlitzItem[] {
               ? `Prüfungsfrage (${idx + 1}/2) • ${chap.title}`
               : `Prüfungsfrage • ${chap.title}`,
             question: eq.question,
-            options: eq.options,
+            options: shuffleArray(eq.options),
             merksatz: eq.merksatz || primaryNugget.merksatz,
             linkedFromNuggetTitle: primaryNugget.title,
           });
@@ -193,7 +194,7 @@ export function buildCustomMixPool(selectedModuleIds: string[], isLevel2: boolea
             ? (isLevel2 ? `Lvl 2 Meisterfrage (${idx + 1}/${arr.length}) • ${mod.title}` : `Prüfungsfrage (${idx + 1}/${arr.length}) • ${mod.title}`)
             : (isLevel2 ? `Lvl 2 Meisterfrage • ${mod.title}` : `Prüfungsfrage • ${mod.title}`),
           question: q.question,
-          options: q.options,
+          options: shuffleArray(q.options),
           merksatz: q.merksatz || primaryNugget.merksatz,
           linkedFromNuggetTitle: primaryNugget.title,
         }));
@@ -211,7 +212,7 @@ export function buildCustomMixPool(selectedModuleIds: string[], isLevel2: boolea
               ? `Prüfungsfrage (${idx + 1}/${arr.length}) • ${mod.title}`
               : `Prüfungsfrage • ${mod.title}`,
             question: eq.question,
-            options: eq.options,
+            options: shuffleArray(eq.options),
             merksatz: eq.merksatz || primaryNugget.merksatz,
             linkedFromNuggetTitle: primaryNugget.title,
           });

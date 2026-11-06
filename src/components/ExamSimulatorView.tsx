@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { EXAM_QUESTIONS, calculateIhkGrade } from '../data/examQuestions';
 import { QuizOption } from '../types/quiz';
 import { BionicText } from '../utils/bionicReading';
@@ -7,6 +7,7 @@ import confetti from 'canvas-confetti';
 import { Award, Check, X, ArrowLeft, ArrowRight, RotateCcw, Clock, AlertTriangle, ShieldCheck, BookOpen } from 'lucide-react';
 import { QuestionDetailModal } from './QuestionDetailModal';
 import { QuizQuestion } from '../types/quiz';
+import { shuffleArray } from '../utils/learningLogic';
 
 interface Props {
   bionic: boolean;
@@ -26,6 +27,16 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [detailModalQuestion, setDetailModalQuestion] = useState<{ question: QuizQuestion; selectedOption: QuizOption | null } | null>(null);
 
+  const [examKey, setExamKey] = useState(0);
+
+  // Shuffle question options on every exam attempt
+  const shuffledExamQuestions = useMemo(() => {
+    return EXAM_QUESTIONS.map(q => ({
+      ...q,
+      options: shuffleArray(q.options),
+    }));
+  }, [examKey]);
+
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (hasStarted && !isFinished) {
@@ -38,7 +49,7 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
     };
   }, [hasStarted, isFinished]);
 
-  const currentQ = EXAM_QUESTIONS[currentIndex];
+  const currentQ = shuffledExamQuestions[currentIndex];
 
   const handleSelect = (opt: QuizOption) => {
     if (selectedInCurrent !== null) return;
@@ -59,7 +70,7 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
     soundEffects.playClick();
     setSelectedInCurrent(null);
 
-    if (currentIndex + 1 < EXAM_QUESTIONS.length) {
+    if (currentIndex + 1 < shuffledExamQuestions.length) {
       setCurrentIndex(i => i + 1);
     } else {
       finishExam();
@@ -70,12 +81,12 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
     setIsFinished(true);
 
     let correctCount = 0;
-    EXAM_QUESTIONS.forEach(q => {
+    shuffledExamQuestions.forEach(q => {
       const chosenOpt = q.options.find(o => o.id === userAnswers[q.id]);
       if (chosenOpt?.isCorrect) correctCount++;
     });
 
-    const percentage = Math.round((correctCount / EXAM_QUESTIONS.length) * 100);
+    const percentage = Math.round((correctCount / shuffledExamQuestions.length) * 100);
     const gradeInfo = calculateIhkGrade(percentage);
 
     if (gradeInfo.passed) {
@@ -87,13 +98,14 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
 
     onExamCompleted({
       score: correctCount,
-      total: EXAM_QUESTIONS.length,
+      total: shuffledExamQuestions.length,
       percentage,
       grade: gradeInfo.grade,
     });
   };
 
   const restartExam = () => {
+    setExamKey(k => k + 1);
     setHasStarted(true);
     setCurrentIndex(0);
     setUserAnswers({});

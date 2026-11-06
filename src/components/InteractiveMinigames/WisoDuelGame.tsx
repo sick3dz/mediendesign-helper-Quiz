@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { soundEffects } from '../../services/audioService';
 import confetti from 'canvas-confetti';
 import { Scale, Check, X, RotateCcw, Award, Sparkles, ArrowRight, ShieldCheck, HelpCircle } from 'lucide-react';
+import { shuffleArray } from '../../utils/learningLogic';
 
 interface WisoDuelCase {
   id: string;
@@ -237,8 +238,16 @@ export const WisoDuelGame: React.FC<{ onComplete: (score: number) => void; isLev
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ isCorrect: boolean; lawParagraph: string; explanation: string } | null>(null);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [gameKey, setGameKey] = useState(0);
 
-  const currentCase = WISO_CASES[currentIndex];
+  const shuffledCases = useMemo(() => {
+    return WISO_CASES.map(c => ({
+      ...c,
+      options: shuffleArray(c.options)
+    }));
+  }, [gameKey]);
+
+  const currentCase = shuffledCases[currentIndex];
 
   const handleChoose = (optId: string) => {
     if (feedback !== null) return;
@@ -298,6 +307,7 @@ export const WisoDuelGame: React.FC<{ onComplete: (score: number) => void; isLev
     setSelectedOptionId(null);
     setFeedback(null);
     setIsGameOver(false);
+    setGameKey(k => k + 1);
   };
 
   if (isGameOver) {

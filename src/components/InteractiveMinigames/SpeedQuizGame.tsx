@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { EXAM_QUESTIONS } from '../../data/examQuestions';
+import { shuffleArray } from '../../utils/learningLogic';
 import { QuizQuestion } from '../../types/quiz';
 import { soundEffects } from '../../services/audioService';
 import { Timer, Star, Trophy, RotateCcw, CheckCircle2, XCircle, Flame, Sparkles } from 'lucide-react';
@@ -36,7 +37,13 @@ export const SpeedQuizGame: React.FC<Props> = ({ onComplete }) => {
   }, []);
 
   const restartGame = () => {
-    const shuffled = [...EXAM_QUESTIONS].sort(() => 0.5 - Math.random()).slice(0, TOTAL_QUESTIONS);
+    const shuffled = [...EXAM_QUESTIONS]
+      .sort(() => 0.5 - Math.random())
+      .slice(0, TOTAL_QUESTIONS)
+      .map(q => ({
+        ...q,
+        options: shuffleArray(q.options),
+      }));
     setQuestions(shuffled);
     setCurrentIndex(0);
     setSelectedOptionId(null);

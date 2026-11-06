@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { EXAM_QUESTIONS } from '../../data/examQuestions';
+import { shuffleArray } from '../../utils/learningLogic';
 import { QuizQuestion } from '../../types/quiz';
 import { soundEffects } from '../../services/audioService';
 import { Swords, Shield, Heart, Trophy, RotateCcw, Sparkles, CheckCircle2, XCircle } from 'lucide-react';
@@ -30,7 +31,12 @@ export const BossRaidGame: React.FC<Props> = ({ onComplete }) => {
   }, []);
 
   const restartGame = () => {
-    const shuffled = [...EXAM_QUESTIONS].sort(() => 0.5 - Math.random());
+    const shuffled = [...EXAM_QUESTIONS]
+      .sort(() => 0.5 - Math.random())
+      .map(q => ({
+        ...q,
+        options: shuffleArray(q.options),
+      }));
     setQuestions(shuffled);
     setCurrentIndex(0);
     setBossHp(100);

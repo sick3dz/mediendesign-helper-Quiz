@@ -1,6 +1,6 @@
-# Mini-Challenge Modul-Badges, Status-Tracking & Level-2 Meister-Challenges
+# Universelle Antwort-Optionen-Mischung (Dynamic Option Shuffling)
 
-Vollständige Integration von Mini-Challenge-Indikatoren auf allen Modul-Karten, visuelle Markierung absolvierter Challenges, neue interaktive Challenges für WiSo & Grafikformate sowie Einführung der Level-2 Meister-Challenges.
+Einführung einer flächendeckenden, dynamischen Misch-Logik für Antwort-Optionen in allen Modul-Quizzen, Mix-Up-Serien, dem Abschlussprüfungs-Simulator und den Mini-Games. Dadurch stehen die richtigen Antworten nicht mehr primär an erster Stelle (Option A), sondern werden bei jedem Durchlauf zufällig über alle Positionen verteilt.
 
 ---
 
@@ -8,46 +8,41 @@ Vollständige Integration von Mini-Challenge-Indikatoren auf allen Modul-Karten,
 
 > [!IMPORTANT]
 > **Bestätigte Entscheidungen aus Phase 1:**
-> - **Modul-Karten Badges & Status:** Alle Module, die eine interaktive Mini-Challenge besitzen, erhalten auf ihren Übersichtskarten ein deutliches Abzeichen ("🎮 Mini-Challenge"). Bereits absolvierte Challenges werden mit einem grünen Haken und Erfolgs-Badge markiert.
-> - **Neue Mini-Challenges:** Integration neuer Mini-Challenges direkt im Lernfluss (zwischen Lern-Häppchen und Quiz) für:
->   1. **WiSo Rechtsfälle & Paragraphen (`wiso_case_match`)** in Kapitel 10 (Berufsausbildung, Arbeitsrecht, Sozialversicherung).
->   2. **Grafik-Formate & Farbräume (`graphics_format_match`)** in Kapitel 9 (SVG vs. WebP, RGB vs. CMYK, PPI vs. DPI).
-> - **Level 2 Meister-Challenges:** Wenn der Meistermodus (Level 2) aktiviert ist, schaltet auch die Mini-Challenge in eine anspruchsvollere **Meister-Stufe** mit erschwerten IHK-Transferszenarien und Zeitboni um.
+> - **Dynamische Mischung:** Die Antwort-Optionen aller Multiple-Choice-Fragen werden bei jedem Aufruf und Neustart dynamisch per Zufallsgenerator durchgemischt.
+> - **Flächendeckende Anwendung:** Die Mischung gilt ausnahmslos für alle Bereiche der Anwendung:
+>   1. Modul-Quizze (Level 1 Standard & Level 2 Meisterstufe in `QuizCard.tsx`)
+>   2. Mix-Up Lerneinheiten (`blitzContent.ts` / `DidacticMixUpView.tsx`)
+>   3. IHK Abschlussprüfungs-Simulator (`ExamSimulatorView.tsx`)
+>   4. Alle interaktiven Quiz-Spiele (`SpeedQuizGame`, `BossRaidGame`, `WisoDuelGame`, `GraphicsFormatGame`)
+>   5. Fokus-Sprint Modal (`FocusSprintModal.tsx`)
 
 ---
 
 ### 1. Overview & Core Concept
 
 - **Was es tut:**
-  - Lernende sehen auf einen Blick in der Modulübersicht jedes Kapitels, welche Module eine interaktive Mini-Challenge enthalten und welche sie bereits erfolgreich gemeistert haben.
-  - Beim Durcharbeiten der Module (zwischen den Text-Häppchen und dem Wissens-Quiz) kann die Mini-Challenge direkt als praktischer Zwischenschritt absolviert werden.
-  - Auf Level 2 (Meisterstufe) steht eine erweiterte Meister-Challenge zur Verfügung, die tiefere IHK-Rechtsfälle und Experten-Entscheidungen fordert.
-- **Zielgruppe:** Mediengestalter-Azubis, die praxiserprobtes Wissen vor dem Abschlusstest festigen wollen.
+  - Bisher waren in den zentralen Datendateien (`chaptersData.ts`, `examQuestions.ts`) die korrekten Antworten herstellungsbedingt meist als erste Option (`options[0]`) eingetragen.
+  - Mit der neuen Logik werden die Antwort-Optionen jeder Frage unmittelbar vor dem Rendern mit einem bewährten Fisher-Yates-/Math.random-Algorithmus gemischt.
+  - Die Auswertung der Richtigkeit (`isCorrect`-Eigenschaft) und der Erklärungen bleibt dabei zu 100 % erhalten.
+- **Zielgruppe:** Mediengestalter-Prüflinge, die echtes Fachwissen trainieren wollen anstatt sich bloße Antwort-Positionen (A/B/C/D) zu merken.
 
 ---
 
 ### 2. User Experience & Visual Design
 
-- **Modul-Karten (ChapterView / ChapterListView):**
-  - **Badge:** `🎮 Mini-Challenge` (dezent gestylt mit Indigo-/Amber-Akzent).
-  - **Status-Marker:** Grüner Haken `✓ Challenge absolviert` für im Nutzerprofil gespeicherte Erfolge.
-- **Modul-Lernansicht (`ModuleLearningView`):**
-  - Der Tab-Header hebt hervor: `Sparkles Lern-Häppchen` ➔ `Gamepad2 Mini-Challenge` ➔ `HelpCircle Quiz`.
-  - Bei Level 2 schaltet der Tab auf `🏆 Meister-Challenge (Lvl 2)` um.
-- **Neue Mini-Game-Typen:**
-  - `wiso_case_match`: Interaktives Zuordnen von Paragraphen und Rechtsfolgen.
-  - `graphics_format_match`: Schnelligkeits-Sorting von Dateiformaten (SVG, WebP, AVIF, PNG) und Farbräumen.
+- **Echtes Lerneffekt-Training:**
+  - Jede Quiz-Frage präsentiert ihre 2 bis 4 Antwortmöglichkeiten in wechselnder Reihenfolge.
+  - Tastatur-Shortcuts (1, 2, 3, 4) in der `QuizCard` greifen dynamisch auf die gemischte Reihenfolge zu.
+- **Konsistenz im Simulator:**
+  - Wenn ein Prüflung den IHK-Prüfungs-Simulator neu startet, stehen die Antwort-Optionen an anderen Positionen als im vorherigen Versuch.
 
 ---
 
 ### 3. Key Product Decisions & Trade-Offs
 
-- **Entscheidung: Speicher-Erweiterung in `UserStats`**
-  - *Gewählter Ansatz:* Hinzufügen des Feldes `completedMiniGames: string[]` in `UserStats` (`storageService.ts` & `quiz.ts`).
-  - *Warum:* Garantiert die dauerhafte Speicherung der absolvierten Mini-Challenges über Sitzungen hinweg.
-- **Entscheidung: Level 2 Meister-Modus für Mini-Challenges**
-  - *Gewählter Ansatz:* Die Mini-Games erhalten einen `isLevel2`-Modus mit anspruchsvolleren Aufgaben und veränderten Zeit-/Punkte-Parometern.
-  - *Warum:* Schafft Anreiz, auch nach Level 1 nochmals die Meisterstufe für doppelte EXP anzutreten.
+- **Entscheidung: Clientseitiges Shuffling vor dem Rendern**
+  - *Gewählter Ansatz:* Die Rohdaten in `chaptersData.ts` und `examQuestions.ts` bleiben sauber geordnet (für einfache Wartbarkeit). Das Mischen erfolgt beim Erstellen der Fragen-Arrays via `useMemo` oder `shuffleArray`.
+  - *Warum:* Verhindert inkonsistente Quellcode-Dateien und stellt sicher, dass jeder Neustart automatisch frische Optionen generiert.
 
 ---
 
@@ -55,24 +50,30 @@ Vollständige Integration von Mini-Challenge-Indikatoren auf allen Modul-Karten,
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│                   UserStats Store                      │
-│   (completedModules, completedMiniGames, lvl2List)     │
+│            Original Quiz Question (Data)               │
+│  options: [Correct, Wrong1, Wrong2, Wrong3]            │
 └──────────────────────────┬─────────────────────────────┘
                            │
-             ┌─────────────┴─────────────┐
-             ▼                           ▼
-┌──────────────────────────┐┌────────────────────────────┐
-│      ChapterView         ││    ModuleLearningView      │
-│  - zeigt Modul-Karten    ││  - Tabs: Häppchen/Game/Quiz│
-│  - "🎮 Mini-Challenge"   ││  - Schaltet Lvl 1 / Lvl 2  │
-│  - "✓ Absolviert" Haken  ││  - Rendert Mini-Game       │
-└──────────────────────────┘└────────────────────────────┘
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│          shuffleArray(options) Helper                  │
+│  - Vertauscht Reihenfolge zufällig                     │
+│  - Bewahrt isCorrect & explanation Eigenschaft         │
+└──────────────────────────┬─────────────────────────────┘
+                           │
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│               Rendered Quiz Component                  │
+│  options: [Wrong2, Correct, Wrong3, Wrong1]            │
+└────────────────────────────────────────────────────────┘
 ```
 
-#### Zu aktualisierende Dateien:
-1. `src/types/quiz.ts`: `miniGameType` erweitern um `'wiso_case_match'` & `'graphics_format_match'`. `UserStats` um `completedMiniGames` erweitern.
-2. `src/data/chaptersData.ts`: `miniGameType` bei Kapitel 9 (Bilddaten) und Kapitel 10 (WiSo) eintragen.
-3. `src/services/storageService.ts`: Standard-Initialisierung & Hilfsfunktionen für `completedMiniGames`.
-4. `src/components/ChapterView.tsx`: Badges & Status-Haken auf den Modul-Karten rendern.
-5. `src/components/ModuleLearningView.tsx`: Mini-Challenge-Erledigung beim Gamewinn abspeichern & Level 2 Meister-Challenge-Modus aktivieren.
-6. `src/components/InteractiveMinigames/`: Hinzufügen bzw. Erweitern der Minispiel-Komponenten für Grafik-Formate & WiSo-Rechtsfälle.
+#### Anzupassende Dateien & Stellen:
+1. `src/utils/learningLogic.ts`: Zentrale Hilfsfunktion `shuffleArray<T>(arr: T[]): T[]` bereitstellen.
+2. `src/utils/blitzContent.ts` (`buildCustomMixPool`): `options: shuffleArray(q.options)` beim Zusammenstellen der Mix-Up-Fragen anwenden.
+3. `src/components/ExamSimulatorView.tsx`: `shuffledQuestions` mit gemischten Optionen vor dem Start initialisieren.
+4. `src/components/InteractiveMinigames/SpeedQuizGame.tsx`: `options: shuffleArray(q.options)` in `restartGame` anwenden.
+5. `src/components/InteractiveMinigames/BossRaidGame.tsx`: `options: shuffleArray(q.options)` in `restartGame` anwenden.
+6. `src/components/InteractiveMinigames/WisoDuelGame.tsx`: `options: shuffleArray(c.options)` in `WISO_CASES` verarbeiten.
+7. `src/components/InteractiveMinigames/GraphicsFormatGame.tsx`: `options: shuffleArray(t.options)` verarbeiten.
+8. `src/components/FocusSprintModal.tsx`: `options: shuffleArray(q.options)` beim Generieren der Sprint-Fragen anwenden.

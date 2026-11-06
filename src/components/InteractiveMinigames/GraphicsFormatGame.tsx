@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { soundEffects } from '../../services/audioService';
 import confetti from 'canvas-confetti';
 import { Image, Check, X, RotateCcw, Award, Sparkles, ArrowRight, Layers, HelpCircle } from 'lucide-react';
+import { shuffleArray } from '../../utils/learningLogic';
 
 interface FormatTask {
   id: string;
@@ -82,8 +83,16 @@ export const GraphicsFormatGame: React.FC<{ onComplete: (score: number) => void;
   const [selectedOptId, setSelectedOptId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ isCorrect: boolean; text: string } | null>(null);
   const [done, setDone] = useState(false);
+  const [gameKey, setGameKey] = useState(0);
 
-  const current = tasks[index];
+  const shuffledTasks = useMemo(() => {
+    return tasks.map(t => ({
+      ...t,
+      options: shuffleArray(t.options)
+    }));
+  }, [tasks, gameKey]);
+
+  const current = shuffledTasks[index];
 
   const handleChoose = (optId: string) => {
     if (feedback !== null) return;
@@ -123,6 +132,7 @@ export const GraphicsFormatGame: React.FC<{ onComplete: (score: number) => void;
     setSelectedOptId(null);
     setFeedback(null);
     setDone(false);
+    setGameKey(k => k + 1);
   };
 
   if (done) {

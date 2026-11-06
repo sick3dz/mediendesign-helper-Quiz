@@ -1,6 +1,6 @@
 {
-  "summary": "Implementierungsplan fuer Mini-Challenge Modul-Badges, Erledigungs-Status und Level-2 Meister-Challenges:\n1. Modul-Karten-Visuelle Kennzeichnung: Anzeige eines \"🎮 Mini-Challenge\" Badges auf allen Modul-Karten mit interaktiver Challenge sowie ein gruener Haken bei geschaffter Challenge.\n2. Neue Mini-Challenges in den Lernmodulen:\n   - WiSo-Rechtsfaelle & Paragraphen-Challenge (in Kapitel 10 WiSo-Modulen)\n   - Grafik-Format- & Farbraum-Sorter (in Kapitel 9 Grafik-Modulen)\n3. Level 2 Meister-Challenges: Erweiterung von ModuleLearningView um eine anspruchsvollere Meisterstufe für Mini-Challenges mit IHK-Transferaufstellung und Zeitherausforderung.\n4. Persistence & Stats: Nachverfolgung der absolvierten Mini-Challenges im UserStats-Speicher (completedMiniGames).",
-  "updatedAt": "2026-11-06T09:37:45.499030535Z",
+  "summary": "Implementierungsplan fuer universelle Antwort-Optionen-Mischung across all views:\n1. Implementierung / Nutzung einer sauberen Hilfsfunktion shuffleArray zur dynamischen Optionen-Mischung bei jedem Fragenaufruf.\n2. Aktualisierung von blitzContent.ts (Mix-Up) zur Durchmischung aller Quiz-Optionen.\n3. Aktualisierung von ExamSimulatorView.tsx (Abschlusspruefungs-Simulator) zur Durchmischung der Antworten pro Pruefungsversuch.\n4. Aktualisierung der Spiele-Komponenten (SpeedQuizGame, BossRaidGame, WisoDuelGame, GraphicsFormatGame) zur Durchmischung der Antwortmoeglichkeiten.\n5. Aktualisierung von FocusSprintModal.tsx fuer abwechslungsreiche Sprint-Fragen.",
+  "updatedAt": "2026-11-06T09:47:16.722015862Z",
   "requestFeedback": true,
   "userFacing": true
 }
