@@ -25,6 +25,7 @@ export const CHAPTERS: Chapter[] = [
         title: 'Definition & Unterschied: UI, UX und IxD',
         shortDesc: 'Die 3 Leitfragen: Wie sieht es aus? Wie fühlt es sich an? Wie funktioniert es?',
         estimatedMinutes: 3,
+        hasNewContent: true,
         nuggets: [
           {
             id: 'n-ixd-1',

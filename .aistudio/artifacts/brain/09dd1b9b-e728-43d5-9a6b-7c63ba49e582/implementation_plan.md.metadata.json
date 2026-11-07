@@ -1,6 +1,6 @@
 {
-  "summary":  "Umsetzungsplan fuer die Vollstaendigkeit von Kapitel 1-10 und die Implementierung von interaktiven Klapptexten (\"Weiterlesen\" mit sanftem Farbverlauf) fuer lange Wissens-Nuggets und Erklaerungen.",
-  "updatedAt":  "2026-11-07T15:39:54.610281604Z",
+  "summary":  "Implementierung von NEU-Badges (✦ IHK-Original Update) fuer neu hinzugefuegte Kapitel und Fragen bei gleichzeitiger Beibehaltung des Erledigt-Status.",
+  "updatedAt":  "2026-11-07T21:35:14.509193342Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

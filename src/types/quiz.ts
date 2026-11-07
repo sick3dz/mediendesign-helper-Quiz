@@ -51,6 +51,7 @@ export interface LearningModule {
   quizQuestions: QuizQuestion[];
   level2QuizQuestions?: QuizQuestion[]; // IHK-Transfer & Praxisfälle für Meisterstufe (Level 2)
   miniGameType?: 'affordance' | 'phishing' | 'process_order' | 'wcag_match' | 'wiso_case_match' | 'graphics_format_match' | 'wiso_fristen_dragdrop';
+  hasNewContent?: boolean; // Kennzeichnet Module mit neu hinzugefügten Fragen/Inhalten trotz vorherigem Abschluss
 }
 
 export interface ChecklistDetailInfo {

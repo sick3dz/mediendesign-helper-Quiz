@@ -1,81 +1,63 @@
-# Wissens-Vollständigkeit & Interaktive Klapptexte ("Weiterlesen") für Kapitel 1–10
+# NEU-Badges (✦ IHK-Original Update) & Erhalt des Erledigt-Status
 
-Integrieren einer klaren Lesbarkeit mit ausklappbaren "Weiterlesen"-Funktionen bei langen Wissens-Nuggets, Erklärungen und IHK-Szenarien sowie Sicherstellung der fachlichen Vollständigkeit über alle 10 Basiskapitel.
+Sicherstellen, dass bereits abgeschlossene Module und Kapitel ihren "Erledigt"-Status behalten (auch wenn neue Fragen oder Kapitel wie Kapitel 11 hinzugefügt werden) und gleichzeitig neu hinzugefügte Inhalte mit einem auffälligen **"✦ IHK-Original Update"**-Badge gekennzeichnet werden.
 
 ## User Review & Critical Decisions
 
 > [!IMPORTANT]
 > Bestätigte Entscheidungen aus der Nutzerbefragung (Phase 1):
-> - **Klapptext-Schwelle**: Texte mit mehr als 3 Bulletpoints oder mehr als 400 Zeichen werden mit einem eleganten "Weiterlesen"-Button, Ausklapp-Animation und sanftem Farbverlauf-Overlay abgekürzt.
-> - **Inhalts-Vollständigkeit**: Alle Kapitel 1–10 erhalten vertiefte IHK-Prüfungsdossiers mit ausklappbaren Praxis-Beispielen, Prüfer-Warnungen und vollständigen Abdeckungen.
+> - **Kennzeichnung von Neuem**: Neu hinzugefügte Kapitel (z.B. Kapitel 11) und Module erhalten ein auffälliges **"✦ IHK-Original Update"**-Badge in der Navigation und Modulliste.
+> - **Erhalt des Erledigt-Status**: `stats.completedModules` speichert abgeschlossene IDs. Das Hinzufügen neuer Unterfragen oder Kapitel beeinträchtigt den bestehenden Abschlussstatus bereits absolvierter Module nicht.
 
-- **Bestätigte Entscheidung 1**: Erstellung der wiederverwendbaren Komponente `ExpandableText.tsx` für saubere Textverkürzung mit Farbverlauf.
-- **Bestätigte Entscheidung 2**: Erweiterung aller Modulansichten (`ModuleLearningView`, `QuizCard`, `SpickzettelView`) um die `ExpandableText`-Logik.
+- **Bestätigte Entscheidung 1**: Markierung von Kapitel 11 und den zugehörigen Modulen mit dem `✦ IHK-Original Update` Badge.
+- **Bestätigte Entscheidung 2**: Anzeige von neuen Fragen innerhalb von Modulen mit einem dezenten "Neu"-Indikator im Quiz-Fortschritt.
 
 ---
 
 ## 1. Overview & Core Concept
 
 - **What It Does**:
-  1. Verhindert unendliches Scrollen und Text-Überflutung durch smarte "Weiterlesen"-Klappelemente bei Wissens-Nuggets, Modul-Zusammenfassungen und Fragen-Szenarien.
-  2. Stellt sicher, dass alle 10 Kapitel (IxD, Usability, Responsive Design, WCAG, HTML/CSS, SQL/Datenbanken, DSGVO, Git/Workflow, Agiles Projektmanagement, WiSo) 100% vollständig und prüfungsreif aufbereitet sind.
-- **Target Audience**: IHK-Mediengestalter, die schnell die Kernaussage erfassen wollen, aber per Klick die vollständige Tiefe abrufen können.
-- **Key Value**: Maximale Übersichtlichkeit auf allen Bildschirmgrößen mit stufenlosem Zugang zu allen Detailinformationen.
+  1. Ergänzt ein klares **"✦ IHK-Original Update"** Badge für Kapitel 11 und spezifische Originalmodule.
+  2. Garantiert, dass der grüne Häkchen-Status (`✓ Lvl 1 erledigt`) für alle zuvor gelösten Module intakt bleibt, selbst wenn neue Level-1 oder Level-2 Fragen dazukommen.
+  3. Ermöglicht Nutzern, gezielt zu erkennen, welche Inhalte frisch hinzugekommen sind.
+- **Target Audience**: IHK-Prüflinge, die ihren Lernstand genau verfolgen und sofort sehen möchten, wo neue Originalprüfungsaufgaben bereitstehen.
 
 ---
 
 ## 2. User Experience & Visual Design
 
-- **ExpandableText Component Design**:
-  - **Kompakter Zustand**: Zeigt die ersten 3 Bulletpoints / ca. 400 Zeichen. Am unteren Rand liegt ein transparenter Farbverlauf-Overlay (`bg-gradient-to-t from-white dark:from-slate-900 to-transparent`), der sanft in den Hintergrund übergeht.
-  - **Interaktiver Ausklapp-Button**: Ausgestattet mit einem subtilen Pfeil-Icon (`ChevronDown` / `ChevronUp`), lesbarem Text ("Weiterlesen...", "Weniger anzeigen") und flüssiger CSS-Höhenanimation (`transition-all duration-300`).
-  - **Erweiterter Zustand**: Entfaltet den vollständigen Text samt Formeln, Beispielen und IHK-Prüfer-Tipps ohne abgeschnittene Zeilen.
+- **Badge Styling**:
+  - `bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full shadow-xs flex items-center gap-1 animate-pulse`: Verwendet für das "✦ IHK-Original Update" Badge bei Kapitel 11.
+  - Subtiler `✦ Neu`-Indikator an Fragen oder Modulen, die kürzlich erweitert wurden.
+- **Erledigt-Status Schutz**:
+  - Ein Modul gilt als abgeschlossen, wenn seine ID in `stats.completedModules` verzeichnet ist. Zusätzliche Fragen (z.B. in Kapitel 11 oder Erweiterungen) erlauben das erneute Durchlaufen für Bonuspunkte und EXP, ohne den erreichten Haken zu löschen.
 
 ---
 
 ## 3. Key Product Decisions & Trade-Offs
 
-- **Decision 1: Wiederverwendbare `ExpandableText.tsx` Komponente**:
-  - *Chosen Approach*: Eine universelle Komponente mit Konfigurationsparametern für Schwellenwert (`maxHeight` / `maxChars`), Farbverlauf und Barrierefreiheit.
-  - *Why*: Wiederverwendbar in `ModuleLearningView`, `QuizCard`, `TopicCard`, `SpickzettelView` und `ChecklistDetailModal`.
-- **Decision 2: Vollständigkeits-Check Kapitel 1–10**:
-  - *Chosen Approach*: Überprüfung aller 10 Kapitel in `chaptersData.ts`, um sicherzustellen, dass jedes Modul mindestens 2–3 Nuggets und 3+ Fragen mit Ausklapp-Möglichkeit besitzt.
+- **Decision 1: Explizites Update-Badge für Kapitel 11**:
+  - *Chosen Approach*: Hinzufügen des `isNewUpdate: true` Flags oder Erkennung über `chapter.number === 11` zur Anzeige des violetten "✦ IHK-Original Update" Badges.
+  - *Why*: Macht sofort transparent, dass dieses Kapitel auf den echten IHK-Prüfungsbogen-Seiten 1–5 basiert.
+- **Decision 2: Trennung von Abschluss und Fragen-Pool**:
+  - *Chosen Approach*: `stats.completedModules` ist idempotent; das Hinzufügen neuer Fragen ändert den Status von `completedModules` nicht, sodass Lernfortschritte nie verloren gehen.
 
 ---
 
 ## 4. Technical Architecture & Data Strategy
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                        ExpandableText Component                        │
-├────────────────────────────────────────────────────────────────────────┤
-│  Input: text / children / bulletPoints / maxChars / isExpanded        │
-│        │                                                               │
-│        ├──► Collapsed State: Gradient Overlay + ChevronDown Button     │
-│        │                                                               │
-│        └──► Expanded State: Full Text View + ChevronUp Button          │
-├────────────────────────────────────────────────────────────────────────┤
-│ Used in: ModuleLearningView · QuizCard · SpickzettelView · Dossiers   │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
-- **Integrierte Module**:
-  1. `src/components/ExpandableText.tsx`: Neue UI-Komponente für Klapptexte.
-  2. `src/components/ModuleLearningView.tsx`: Anwendung bei Nugget-Bulletpoints & Praxisbeispielen.
-  3. `src/components/QuizCard.tsx`: Anwendung bei langen Szenarien & Erklärungen.
-  4. `src/components/SpickzettelView.tsx`: Anwendung bei langen Schlüsselkonzepten in TopicCards.
+- **Updated Files**:
+  1. `src/data/chaptersData.ts` & `src/data/ihkOriginalChapterData.ts`: Kennzeichnung von Kapitel 11 als Original-Update.
+  2. `src/components/ChapterListView.tsx`: Rendering des "✦ IHK-Original Update" Badges in der Kapitel-Grid-Ansicht und Modulliste.
+  3. `src/components/QuizCard.tsx`: Anzeige des Updates bei frisch hinzugefügten Fragen.
 
 ---
 
 ## 5. Implementation Roadmap
 
-1. **Phase 1: Erstellung `ExpandableText.tsx`**:
-   - Entwicklung der Komponente mit Farbverlauf-Overlay, Schwellenwert-Erkennung und smooth Toggle.
-2. **Phase 2: Integration in Wissens-Views**:
-   - Einbau in `ModuleLearningView.tsx` für Lern-Nuggets.
-   - Einbau in `QuizCard.tsx` und `QuestionDetailModal.tsx` für Fragen-Szenarien & Fallenanalysen.
-   - Einbau in `SpickzettelView.tsx` für Digital-Leitfaden Schlüsselkonzepte.
-3. **Phase 3: Inhalts- & Vollständigkeitsprüfung**:
-   - Verifizierung aller Kapitel 1–10 auf Vollständigkeit der Dossiers und Beispieldaten.
-4. **Phase 4: Verifizierung & Compilation**:
+1. **Phase 1: Update-Flag & Kapitel-Badge**:
+   - Ergänzung des Badges in `ChapterListView.tsx` für Kapitel 11 und neuere Module.
+2. **Phase 2: Status-Integrität verifizieren**:
+   - Sicherstellen, dass `stats.completedModules` beim Hinzufügen von Fragen unverändert bleibt.
+3. **Phase 3: Compilation & Build**:
    - Ausführen von `compile_applet` & `lint_applet`.
