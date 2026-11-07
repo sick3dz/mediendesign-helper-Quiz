@@ -1080,6 +1080,7 @@ export default function App() {
             setPetInitialTab('shop');
           }
           setActiveTab(tab);
+          window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
         }}
         darkMode={settings.darkMode}
         onToggleDarkMode={handleToggleDarkMode}
