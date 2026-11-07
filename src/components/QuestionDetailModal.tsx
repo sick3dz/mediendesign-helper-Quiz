@@ -4,6 +4,7 @@ import { CHAPTERS } from '../data/chaptersData';
 import { CHECKLIST_DOSSIERS, getChecklistDossier } from '../data/checklistDetailsData';
 import { BionicText } from '../utils/bionicReading';
 import { soundEffects } from '../services/audioService';
+import { QuestionAssetWidget } from './QuestionAssetWidget';
 import {
   X,
   BookOpen,
@@ -87,6 +88,9 @@ export const QuestionDetailModal: React.FC<Props> = ({
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed italic bg-slate-100/70 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-800">
                 <BionicText text={question.scenario} enabled={bionic} />
               </p>
+            )}
+            {question.asset && (
+              <QuestionAssetWidget asset={question.asset} />
             )}
           </div>
 

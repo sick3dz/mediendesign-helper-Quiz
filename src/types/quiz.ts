@@ -8,6 +8,17 @@ export interface QuizOption {
   trapExplanation?: string; // Spezifische IHK-Prüfer-Erklärung, warum diese Falle verlockend wirkte
 }
 
+export interface QuestionAsset {
+  type: 'histogram' | 'gradationskurve' | 'ppi_blueprint' | 'tac_chart' | 'table' | 'diagram';
+  title: string;
+  subtitle?: string;
+  description: string;
+  tableData?: { headers: string[]; rows: (string | number)[][] };
+  labels?: { x: string; y: string };
+  dataValues?: number[];
+  highlights?: string[];
+}
+
 export interface QuizQuestion {
   id: string;
   chapterId: string;
@@ -17,6 +28,7 @@ export interface QuizQuestion {
   options: QuizOption[];
   examTip?: string;
   merksatz?: string;
+  asset?: QuestionAsset;
 }
 
 export interface LearningNugget {

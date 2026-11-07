@@ -150,6 +150,26 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
         { term: 'Datentypen', focus: 'Typisierung', visual: 'String, Number (42), Boolean (true), Null, Array, Object', interaction: 'XML speichert alles als reinen Text/String', goal: 'Direkte Nutzung ohne Typ-Casting' },
         { term: 'Web-APIs', focus: 'Datenaustausch Client/Server', visual: 'Server liefert JSON -> Frontend baut Design', interaction: 'Standard moderner Single-Page-Apps', goal: 'Trennung von Daten und Präsentation' },
       ]
+    },
+    {
+      id: 'cmp-7',
+      title: 'IHK-Original Formeln: Bildauflösung (PPI) & Umrechnung (Aufgabe 9 & 10)',
+      formula: 'ppi = Pixelbreite / (cm-Breite / 2,54) | Max. Druckbreite = (Pixelbreite / 300 ppi) * 2,54',
+      rows: [
+        { term: 'PPI-Formel', focus: 'Effektive Auflösung berechnen', visual: '18 cm / 2,54 = 7,0866 Zoll', interaction: '1800 px / 7,0866 Zoll = 254 ppi', goal: '254 ppi < 300 ppi → Reicht NICHT für Offset' },
+        { term: 'Max. Druckbreite', focus: 'Grenzmaß für 300 ppi', visual: '1800 px / 300 ppi = 6 Zoll', interaction: '6 * 2,54 cm = 15,24 cm', goal: 'Maximal 15,24 cm bei 300 ppi möglich' },
+        { term: 'Web-Skalierung', focus: 'Proportionale Reduktion', visual: '1300x867 px → 960 px Breite', interaction: '867 / 1300 * 960 = 640 px Höhe', goal: 'Genaue Höhe 640 px ohne Verzerrung' },
+      ]
+    },
+    {
+      id: 'cmp-8',
+      title: 'Farbmanagement & Gradation (IHK Original Aufgaben 4, 7, 11)',
+      formula: 'ISO Coated v2 = 300% TAC | Zeitungsdruck = max. 240% TAC | 8-Bit = 256 Tonwerte vs 16-Bit = 65.536',
+      rows: [
+        { term: 'TAC (Farbauftrag)', focus: 'Offset (300%) vs. Zeitung (240%)', visual: 'Ungestrichenes Papier saugt stark', interaction: 'Profil PSO SNP Paper wählt TAC 240%', goal: 'Verhindert Verschmieren & Ablegen' },
+        { term: 'Datentiefe', focus: '8 Bit (256) vs. 16 Bit (65.536)', visual: 'Kontrastdehnung erzeugt Lücken', interaction: 'RAW/16-Bit bietet mathematische Reserven', goal: 'Schutz vor sichtbaren Tonwertabrissen' },
+        { term: 'Gradationskurve', focus: 'Tunnel-Schattenaufhellung', visual: 'Anhebung im 3/4-Tonbereich', interaction: 'Lichterpunkt bei 0% bleibt unberührt', goal: 'Kompensation von extremem Objektkontrast' },
+      ]
     }
   ];
 

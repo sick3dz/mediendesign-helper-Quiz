@@ -6,6 +6,7 @@ import { soundEffects } from '../services/audioService';
 import confetti from 'canvas-confetti';
 import { Award, Check, X, ArrowLeft, ArrowRight, RotateCcw, Clock, AlertTriangle, ShieldCheck, BookOpen } from 'lucide-react';
 import { QuestionDetailModal } from './QuestionDetailModal';
+import { QuestionAssetWidget } from './QuestionAssetWidget';
 import { QuizQuestion } from '../types/quiz';
 import { shuffleArray } from '../utils/learningLogic';
 
@@ -422,6 +423,14 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
           <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-snug">
             <BionicText text={currentQ.question} enabled={bionic} />
           </h3>
+          {currentQ.scenario && (
+            <p className="text-xs text-slate-600 dark:text-slate-300 mt-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-800 leading-relaxed">
+              {currentQ.scenario}
+            </p>
+          )}
+          {currentQ.asset && (
+            <QuestionAssetWidget asset={currentQ.asset} />
+          )}
         </div>
 
         {/* Options */}

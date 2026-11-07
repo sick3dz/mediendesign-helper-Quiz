@@ -341,6 +341,13 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           moduleId: 'ihk-orig-4',
           question: 'Aufgabe 4c (6 Punkte): Erläutere anhand von Histogramm Abb. 1 (8 Bit) die Entstehung von Qualitätsverlusten bei Tonwertkorrekturen.',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 4c: Histogrammanalyse.',
+          asset: {
+            type: 'histogram',
+            title: 'Histogramm Abb. 1: Tonwertverteilung & Lückenbildung',
+            subtitle: 'Analysiere die Lücken (Kämme) in den 256 Tonwertstufen nach einer Kontrastspreizung.',
+            description: 'Bei 8 Bit stehen lediglich 256 diskrete Tonwerte pro Farbkanal zur Verfügung. Wird ein flaues Bild stark im Kontrast gedehnt, entstehen unbesetzte Tonwertstufen (Lücken/Kämme im Histogramm). Die Folge sind sichtbare Farbabrisse und Posterisation.',
+            highlights: ['8-Bit Dynamik = 256 Stufen', 'Sichtbarer Tonwertabriss', 'Kammbildung im Diagramm']
+          },
           options: [
             { id: 'a', text: 'Durch Spreizung geringer Tonwerte (256 Stufen) entstehen Lücken im Histogramm (Kammbildung); sichtbare Tonwertabrisse/Posterisation sind die Folge', isCorrect: true, explanation: 'Exakte IHK-Erklärung aus Teil c)!' },
             { id: 'b', text: 'Zacken im Histogramm bedeuten, dass das Bild schärfer geworden ist', isCorrect: false, explanation: 'Falsch. Kämme bedeuten fehlende Daten.' },
@@ -594,6 +601,13 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           chapterId: 'ihk-original-teil1',
           moduleId: 'ihk-orig-7',
           question: 'Aufgabe 7a (3 Punkte): Erläutere, warum das Profil ISO Coated v2 (300%) für den Zeitungsdruck NICHT ohne Weiteres geeignet ist.',
+          asset: {
+            type: 'tac_chart',
+            title: 'Gesamtfarbauftrag (TAC): ISO Coated v2 (300%) vs. ISOnewspaper (240%)',
+            subtitle: 'Unterscheidliche Papierqualitäten verlangen streng begrenzte Tinten-/Farbmengen.',
+            description: 'Zeitungspapier (PSO SNP Paper) ist ungestrichen, rau und extrem saugfähig. Ein Farbauftrag von 300% (C+M+Y+K) führt zu starkem Punktzuwachs, Ablegen (Verschmieren auf dem Folgebogen) und unvollständiger Trocknung. Das Zeitungsprofil begrenzt den TAC auf maximal 240%.',
+            highlights: ['ISO Coated v2 = 300% TAC', 'ISOnewspaper (PSO SNP) = max. 240% TAC', 'Verhinderung von Ablegen & Verschmieren']
+          },
           options: [
             { id: 'a', text: 'Weil Zeitungspapier ungestrichen und stark saugfähig ist; 300% Farbauftrag führt zu starkem Punktzuwachs, Verschmieren und Trocknungsproblemen', isCorrect: true, explanation: 'Exakte IHK-Musterantwort aus Teil a)!' },
             { id: 'b', text: 'Weil ISO Coated v2 nur Schwarz-Weiß-Bilder unterstützt', isCorrect: false, explanation: 'Falsch.' },
@@ -771,6 +785,13 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           chapterId: 'ihk-original-teil1',
           moduleId: 'ihk-orig-9',
           question: 'Aufgabe 9a (4 Punkte): Berechne die effektive Bildauflösung in ppi bei 1800 x 1200 Pixeln und einer Druckgröße von 18 x 12 cm. Geben Sie den Rechenweg an.',
+          asset: {
+            type: 'ppi_blueprint',
+            title: 'Rechenweg-Blueprint: Effektiv-PPI & Druckgröße',
+            subtitle: 'Schritt-für-Schritt Umrechnung von Zentimetern über Zoll in Pixel pro Zoll (ppi).',
+            description: '1. Umrechnung der Druckbreite von cm in Zoll: 18 cm / 2,54 cm/Zoll = 7,0866 Zoll. 2. Division der Pixelanzahl durch die Zoll-Breite: 1800 Pixel / 7,0866 Zoll = 254 ppi. Da im Offsetdruck 300 ppi gefordert sind, reicht die Datei bei 18 cm Druckbreite qualitativ nicht aus.',
+            highlights: ['18 cm / 2,54 = 7,0866 Zoll', '1800 px / 7,0866 = 254 ppi', '254 ppi < 300 ppi → Reicht nicht!']
+          },
           options: [
             { id: 'a', text: '18 cm / 2,54 = 7,0866 Zoll -> 1800 px / 7,0866 Zoll = ca. 254 ppi', isCorrect: true, explanation: 'Exakter IHK-Rechenweg für Teil a)!' },
             { id: 'b', text: '1800 px / 18 cm = 100 ppi', isCorrect: false, explanation: 'Falsch. Hier wurde die Umrechnung in Zoll vergessen.' },
@@ -947,6 +968,13 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           chapterId: 'ihk-original-teil1',
           moduleId: 'ihk-orig-11',
           question: 'Aufgabe 11a (4 Punkte): Zeichnen Sie die erforderliche Gradationsänderung ein. Wie muss der Verlauf der Kurve gestaltet werden?',
+          asset: {
+            type: 'gradationskurve',
+            title: 'Gradationskurve Abb. 1: Tunnel-Schattenaufhellung',
+            subtitle: 'Selektive Anhebung der 3/4-Töne bei fixierten Lichtern auf der 45°-Linie.',
+            description: 'Das Foto zeigt einen dunklen Tunnel im Vordergrund und sonnenbeschienene Fachwerkhäuser im Hintergrund. Um das Tunnelmauerwerk aufzuhellen, ohne die sonnigen Häuser auszubrennen, wird die Gradationskurve im Dreiviertelton-Bereich (Schatten) steil nach oben gebogen, während die Lichter am Schnittpunkt fixiert bleiben.',
+            highlights: ['Dreivierteltöne stark aufgehellt (+25%)', 'Lichter bei 0% unberührt fixiert', 'Vermeidung flauer Kontraste']
+          },
           options: [
             { id: 'a', text: 'Die Kurve wird im Schatten/Dreivierteltonbereich nach oben gebogen, während der Endpunkt in den Lichtern fixiert auf der 45°-Linie bleibt', isCorrect: true, explanation: 'Exakte IHK-Musterlösung für Teil a)!' },
             { id: 'b', text: 'Die gesamte 45°-Linie wird parallel nach unten verschoben', isCorrect: false, explanation: 'Falsch. Das dunkelt das Bild weiter ab.' },

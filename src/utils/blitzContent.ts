@@ -1,6 +1,7 @@
 import { CHAPTERS, getModuleLevel2Questions } from '../data/chaptersData';
 import { EXAM_QUESTIONS } from '../data/examQuestions';
 import { shuffleArray } from './learningLogic';
+import { QuestionAsset } from '../types/quiz';
 
 export type BlitzItem =
   | {
@@ -11,6 +12,7 @@ export type BlitzItem =
       options: { id: string; text: string; isCorrect: boolean; explanation?: string }[];
       merksatz?: string;
       linkedFromNuggetTitle?: string;
+      asset?: QuestionAsset;
     }
   | {
       type: 'knowledge';
@@ -111,6 +113,7 @@ export function buildBlitzPool(): BlitzItem[] {
           options: shuffleArray(q.options),
           merksatz: q.merksatz || primaryNugget.merksatz,
           linkedFromNuggetTitle: primaryNugget.title,
+          asset: q.asset,
         }));
 
       // Fallback to exam questions from the same chapter if module has fewer questions
@@ -130,6 +133,7 @@ export function buildBlitzPool(): BlitzItem[] {
             options: shuffleArray(eq.options),
             merksatz: eq.merksatz || primaryNugget.merksatz,
             linkedFromNuggetTitle: primaryNugget.title,
+            asset: eq.asset,
           });
         });
       }

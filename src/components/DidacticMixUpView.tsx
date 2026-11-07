@@ -15,6 +15,7 @@ import {
   Award,
   RotateCcw,
 } from 'lucide-react';
+import { QuestionAssetWidget } from './QuestionAssetWidget';
 
 interface Props {
   items: BlitzItem[];
@@ -326,6 +327,9 @@ export const DidacticMixUpView: React.FC<Props> = ({
             <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white leading-relaxed">
               <BionicText text={currentItem.question} enabled={bionic} />
             </h3>
+            {currentItem.asset && (
+              <QuestionAssetWidget asset={currentItem.asset} />
+            )}
           </div>
 
           {/* Options */}
