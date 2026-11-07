@@ -13,6 +13,7 @@ import {
   Award
 } from 'lucide-react';
 import { soundEffects } from '../services/audioService';
+import { ExpandableText } from './ExpandableText';
 
 interface Props {
   module: LearningModule;
@@ -148,14 +149,12 @@ export const ModuleSummaryModal: React.FC<Props> = ({
                     <BionicText text={nugget.coreConcept} enabled={bionic} />
                   </p>
 
-                  <ul className="space-y-1.5 pt-1 text-xs text-slate-700 dark:text-slate-300">
-                    {nugget.bulletPoints.map((bp, bpIdx) => (
-                      <li key={bpIdx} className="flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0 mt-1.5" />
-                        <span className="leading-relaxed"><BionicText text={bp} enabled={bionic} /></span>
-                      </li>
-                    ))}
-                  </ul>
+                  <ExpandableText
+                    bulletPoints={nugget.bulletPoints}
+                    bionic={bionic}
+                    maxBullets={3}
+                    className="pt-1 text-xs text-slate-700 dark:text-slate-300"
+                  />
 
                   {nugget.example && (
                     <div className="pt-2 text-[11px] text-slate-600 dark:text-slate-400 italic bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg border border-slate-100 dark:border-slate-800">

@@ -1,6 +1,6 @@
 {
-  "summary":  "Audit und Logikpruefung aller 11 IHK-Kapitel, des Pruefungs-Simulators, des Spickzettels und Implementierung eines interaktiven Asset-Viewers fuer Original-Graphiken (Histogramm, Gradationskurve, PPI-Skizzen, TAC-Diagramme).",
-  "updatedAt":  "2026-11-07T15:22:03.118629549Z",
+  "summary":  "Umsetzungsplan fuer die Vollstaendigkeit von Kapitel 1-10 und die Implementierung von interaktiven Klapptexten (\"Weiterlesen\" mit sanftem Farbverlauf) fuer lange Wissens-Nuggets und Erklaerungen.",
+  "updatedAt":  "2026-11-07T15:39:54.610281604Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

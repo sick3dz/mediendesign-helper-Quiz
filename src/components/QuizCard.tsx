@@ -6,6 +6,7 @@ import confetti from 'canvas-confetti';
 import { Check, X, ArrowRight, RotateCcw, Award, Lightbulb, Star, Sparkles, AlertTriangle, BookOpen, HelpCircle, Zap } from 'lucide-react';
 import { QuestionDetailModal } from './QuestionDetailModal';
 import { QuestionAssetWidget } from './QuestionAssetWidget';
+import { ExpandableText } from './ExpandableText';
 
 interface Props {
   questions: QuizQuestion[];
@@ -353,9 +354,9 @@ export const QuizCard: React.FC<Props> = ({
           <BionicText text={currentQuestion.question} enabled={bionic} />
         </h3>
         {currentQuestion.scenario && (
-          <p className="text-xs text-slate-600 dark:text-slate-300 mt-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-800 leading-relaxed">
-            {currentQuestion.scenario}
-          </p>
+          <div className="mt-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300">
+            <ExpandableText text={currentQuestion.scenario} bionic={bionic} maxChars={280} />
+          </div>
         )}
         {currentQuestion.asset && (
           <QuestionAssetWidget asset={currentQuestion.asset} />

@@ -26,6 +26,7 @@ import {
   Scale,
 } from 'lucide-react';
 import { soundEffects } from '../services/audioService';
+import { QuestionAssetWidget } from './QuestionAssetWidget';
 
 interface Props {
   bionic: boolean;
@@ -578,6 +579,10 @@ const TopicCard: React.FC<{
           <p className="text-slate-700 dark:text-slate-300 font-medium">{topic.whatIsNewAndTested}</p>
         </div>
       </div>
+
+      {topic.asset && (
+        <QuestionAssetWidget asset={topic.asset} />
+      )}
 
       {/* Key Concepts List */}
       <div className="space-y-3 pt-2">

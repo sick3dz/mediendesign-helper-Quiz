@@ -1,3 +1,5 @@
+import { QuestionAsset } from '../types/quiz';
+
 export interface DigitalTopic {
   id: string;
   title: string;
@@ -6,6 +8,7 @@ export interface DigitalTopic {
   ihkFocusSummary: string;
   whatFailsAway: string;
   whatIsNewAndTested: string;
+  asset?: QuestionAsset;
   keyConcepts: {
     term: string;
     explanation: string;
@@ -22,6 +25,13 @@ export const DIGITAL_GUIDE_TOPICS: DigitalTopic[] = [
     ihkFocusSummary: 'Zielgruppenanalyse, Personas, Storytelling, Gestaltgesetze, Corporate Design & Pitch-Präsentationen.',
     whatFailsAway: 'Reine drucktechnische Druckbogen-Passermarken & Druckplattenbelichtung.',
     whatIsNewAndTested: 'Personas & User Journeys, Informationsarchitektur (Sitemaps), Gestaltgesetze der Wahrnehmung & Pitch-Decks.',
+    asset: {
+      type: 'diagram',
+      title: 'IHK Leitfaden-Asset: Gestaltgesetze der Wahrnehmung',
+      subtitle: 'Gesetz der Nähe, Ähnlichkeit & Prägnanz in Benutzeroberflächen.',
+      description: 'Gestaltgesetze erklären, wie das menschliche Gehirn visuelle Reize strukturiert. Das Gesetz der Nähe besagt, dass nahe beieinander liegende Elemente als zusammengehörige Gruppe wahrgenommen werden (z. B. Label & Input-Feld). Das Gesetz der Ähnlichkeit verbindet gleiche Farben/Formen (z. B. primäre Action-Buttons).',
+      highlights: ['Gesetz der Nähe (Gruppierung)', 'Gesetz der Ähnlichkeit (Farb-Semantik)', 'Gesetz der Geschlossenheit (Card-Container)']
+    },
     keyConcepts: [
       {
         term: 'Persona & User Journey Mapping',
@@ -53,6 +63,13 @@ export const DIGITAL_GUIDE_TOPICS: DigitalTopic[] = [
     ihkFocusSummary: 'Zentrale Unterscheidung von UI, IxD und UX sowie Verhaltensmuster digitaler Schnittstellen.',
     whatFailsAway: 'Klassische Offset-Druckbogenmontage, Papierlaufrichtung & Farbauftrag.',
     whatIsNewAndTested: 'Verhalten digitaler Oberflächen, Feedback-Latenzen, Fitts\' Law & Affordance vs. Signifier.',
+    asset: {
+      type: 'diagram',
+      title: 'IHK Leitfaden-Asset: Affordance vs. Signifier & Fitts\' Law',
+      subtitle: 'Visuelles Signalisieren von Interaktionsmöglichkeiten und Zielgrößen.',
+      description: 'Affordance beschreibt das tatsächliche Handlungspotenzial eines Elements. Der Signifier ist das eindeutige visuelle Merkmal (Schatten, Farbe, Icon), das dem Nutzer signalisiert, WO und WIE er interagieren kann. Fitts\' Law bestimmt die Klickzeit basierend auf Zielgröße und Entfernung.',
+      highlights: ['Affordance = Handlungsmöglichkeit', 'Signifier = Visueller Hinweis (Signal)', 'Fitts\' Law = Zielgröße & Klick-Distanz']
+    },
     keyConcepts: [
       {
         term: 'UI vs. IxD vs. UX Formel',
@@ -261,6 +278,44 @@ export const DIGITAL_GUIDE_TOPICS: DigitalTopic[] = [
         term: 'Rechtsformen & Kaufvertragsstörungen',
         explanation: 'GmbH: Kapitalgesellschaft, mind. 25.000 € Stammkapital, Haftung auf Gesellschaftsvermögen beschränkt. KG: Komplementär haftet voll mit Privatvermögen, Kommanditist nur mit Einlage. Bei Sachmängeln gilt der Vorrang der Nacherfüllung (§ 439 BGB).',
         examTip: 'Merke: Zuerst immer Nacherfüllung (Reparatur oder Neulieferung) verlangen. Ein sofortiger Rücktritt vom Kaufvertrag ist gesetzlich unwirksam.'
+      }
+    ]
+  },
+  {
+    id: 'ihk-original-pruefung-12-aufgaben',
+    title: '11. ★ IHK Original-Prüfung Teil 1 (12 Aufgaben - Druck & Digital)',
+    category: 'IHK Original-Prüfung',
+    iconName: 'Award',
+    ihkFocusSummary: 'Die 12 gedruckten Original-Aufgaben (a, b, c, d) mit Histogrammen, Gradationskurven, TAC-Farbauftrag & PPI-Rechenwegen.',
+    whatFailsAway: 'Veraltete Faustregeln ohne mathematische IHK-Musterlösung.',
+    whatIsNewAndTested: 'Medienneutrale Datenhaltung (Single Source), Bit-Datentiefe (8 Bit vs 16 Bit), TAC 240% vs 300%, PPI-Grenzmaße & Gradationskurve Tunnel.',
+    asset: {
+      type: 'ppi_blueprint',
+      title: 'IHK Original-Kapitel 11: 120 Punkte Abschluss-Prüfungsdossier',
+      subtitle: 'Enthält alle 12 Original-Aufgaben mit Histogramm, Gradationskurve Tunnel & TAC-Farbauftrag.',
+      description: 'Kapitel 11 bildet den offiziellen Abschluss des IHK-Lernpfads. Es deckt alle 12 Aufgaben der gedruckten IHK-Prüfungsseiten 1–5 vollständig in Level 1 (Fakten & Grundlagen) und Level 2 (Praxisfälle & Rechenwege) ab.',
+      highlights: ['Medienneutralität (Single Source)', 'PPI-Formel & Skalierung', 'Gradationskurve Tunnel-Aufstellung', 'Datentiefe 8-Bit vs 16-Bit']
+    },
+    keyConcepts: [
+      {
+        term: 'Medienneutrale Datenhaltung (Single Source of Truth)',
+        explanation: 'Master-Dateien im hochauflösenden RGB-Farbraum (eciRGBv2) und verlustfreien Formaten (TIFF/RAW) pflegen. Erst beim Export in Ziel-Farbräume konvertieren (ISO Coated v2 für Print, sRGB für Web).',
+        examTip: 'IHK-Aufgabe 1: Welche 3 Strukturierungsmaßnahmen nutzen dem Kundenbestand? -> Verzeichnishierarchie, Namenskonventionen & Metadaten.'
+      },
+      {
+        term: 'PPI-Berechnung & Druckauflösung',
+        explanation: 'Formel: 18 cm / 2,54 = 7,0866 Zoll -> 1800 px / 7,0866 Zoll = 254 ppi. Bei 300 ppi geforderter Offset-Auflösung beträgt die maximale Druckbreite 15,24 cm.',
+        examTip: 'IHK-Aufgabe 9: Immer erst Zentimeter durch 2,54 in Zoll umrechnen, bevor Pixel dividiert werden!'
+      },
+      {
+        term: 'Gesamtfarbauftrag (TAC) & Papierklassen',
+        explanation: 'ISO Coated v2 erlaubt bis zu 300% TAC. Ungestrichenes Zeitungspapier (PSO SNP) erfordert eine Begrenzung auf max. 240% TAC, um Punktezuwachs und Ablegen zu verhindern.',
+        examTip: 'IHK-Aufgabe 7: Profil ISO Coated v2 erzeugt auf Zeitungspapier Verschmieren und Trocknungsstau!'
+      },
+      {
+        term: 'Gradationskurve Schattenaufhellung (Tunnel-Motiv)',
+        explanation: 'Schatten im Dreivierteltonbereich um 25 % anheben, um das Tunnelmauerwerk aufzuhellen, während der Lichterpunkt bei 0 % unberührt auf der 45°-Linie fixiert bleibt.',
+        examTip: 'IHK-Aufgabe 11: So bleiben sonnige Fachwerkhäuser im Hintergrund geschützt und zeichnen nicht aus!'
       }
     ]
   }
