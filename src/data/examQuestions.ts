@@ -1,6 +1,9 @@
 import { QuizQuestion } from '../types/quiz';
+import { IHK_ORIGINAL_CHAPTER } from './ihkOriginalChapterData';
 
-export const EXAM_QUESTIONS: QuizQuestion[] = [
+const ihkOriginalExamQuestions: QuizQuestion[] = IHK_ORIGINAL_CHAPTER.modules.flatMap(m => m.quizQuestions);
+
+const BASE_EXAM_QUESTIONS: QuizQuestion[] = [
   {
     id: 'exam-1',
     chapterId: 'ixd',
@@ -359,6 +362,11 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
     ],
     merksatz: 'GmbH = Kapitalgesellschaft mit Haftungsbeschränkung auf das Gesellschaftsvermögen!'
   }
+];
+
+export const EXAM_QUESTIONS: QuizQuestion[] = [
+  ...BASE_EXAM_QUESTIONS,
+  ...ihkOriginalExamQuestions,
 ];
 
 export function calculateIhkGrade(percentage: number): { grade: string; text: string; passed: boolean } {

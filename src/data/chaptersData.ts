@@ -1,4 +1,5 @@
 import { Chapter, QuizQuestion, LearningModule } from '../types/quiz';
+import { IHK_ORIGINAL_CHAPTER } from './ihkOriginalChapterData';
 
 export const CHAPTERS: Chapter[] = [
   {
@@ -4303,7 +4304,8 @@ export const CHAPTERS: Chapter[] = [
         ]
       }
     ]
-  }
+  },
+  IHK_ORIGINAL_CHAPTER
 ];
 
 /**

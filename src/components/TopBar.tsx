@@ -15,6 +15,8 @@ import {
   FileText,
 } from 'lucide-react';
 
+import { CHAPTERS } from '../data/chaptersData';
+
 export type ActiveTab = 'chapters' | 'spickzettel' | 'stats' | 'exam' | 'sandbox' | 'minigames' | 'challenges' | 'freetext' | 'rank' | 'achievements' | 'pet' | 'shop';
 
 interface Props {
@@ -164,7 +166,7 @@ export const TopBar: React.FC<Props> = ({
     {
       tab: 'chapters',
       title: 'IHK-Lernpfad & Kapitel',
-      subtitle: 'Alle 8 IHK-Kapitel, Module & Interaktionsdesign',
+      subtitle: `Alle ${CHAPTERS.length} IHK-Kapitel, Module & Original-Prüfung`,
       icon: <BookOpen className="w-4 h-4 text-indigo-500" />,
       iconBg: 'bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300',
     },
