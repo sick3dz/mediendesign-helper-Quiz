@@ -602,17 +602,46 @@ const PhotoshopWebDialog: React.FC = () => {
   );
 };
 
-// Diagram 7: Interactive Gradation Curve Editor for Aufgabe 11
+// Diagram 7: Interactive Gradation Curve Editor for Aufgabe 11 with Authentic Exam Assets
 const GradationCurveDiagram: React.FC = () => {
   const [curvePreset, setCurvePreset] = useState<'original' | 'ihk' | 'extreme'>('ihk');
+  const [diagramMode, setDiagramMode] = useState<'interactive' | 'original-scan' | 'comparison'>('interactive');
+
+  // Compute live CSS image filters applied to the authentic tunnel photo based on the gradation curve
+  const getPhotoFilterStyle = () => {
+    switch (curvePreset) {
+      case 'original':
+        // Linear scan: natural dark shadows in tunnel archway
+        return {
+          filter: 'contrast(1.05) brightness(0.95)',
+        };
+      case 'ihk':
+        // IHK target: Shadows lifted (+35% to +40%), highlights preserved
+        return {
+          filter: 'brightness(1.38) contrast(1.12) saturate(1.05)',
+        };
+      case 'extreme':
+        // Over-correction: extreme shadow lift causing flat contrast and visible noise
+        return {
+          filter: 'brightness(1.9) contrast(0.75) saturate(1.4)',
+        };
+      default:
+        return {};
+    }
+  };
 
   return (
     <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/60 dark:border-slate-800 pb-3">
         <div>
-          <span className="text-[10px] uppercase font-bold text-slate-400 block">
-            Prüfungsabbildung & Simulator zu Aufgabe 11
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block">
+              Prüfungsabbildung & Simulator zu Aufgabe 11
+            </span>
+            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-800">
+              Original IHK-Assets (Seite 5)
+            </span>
+          </div>
           <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">
             Gradationskurven-Korrektur (Tunnel & Fachwerkhäuser)
           </h4>
@@ -657,127 +686,142 @@ const GradationCurveDiagram: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Left: Tunnel Photo Simulation */}
-        <div className="space-y-1.5">
-          <div className="relative h-48 bg-slate-950 rounded-xl overflow-hidden border border-slate-300 dark:border-slate-700 flex items-center justify-center p-2">
-            {/* Sunny historic background houses viewed through arch */}
-            <div className="relative w-full h-full flex items-center justify-center">
-              {/* Sunlit backdrop through arch */}
-              <div className={`w-32 h-36 rounded-t-full bg-amber-100 overflow-hidden relative shadow-inner transition-opacity duration-300 ${
-                curvePreset === 'extreme' ? 'brightness-125 contrast-75' : ''
-              }`}>
-                {/* Sun ray sky */}
-                <div className="absolute inset-0 bg-gradient-to-b from-sky-400 to-amber-200" />
-                {/* Historic Fachwerk Facades */}
-                <div className="absolute bottom-0 inset-x-2 h-24 bg-amber-50 border-t-2 border-amber-800/80 p-1 flex flex-col justify-between">
-                  <div className="flex justify-between items-center px-1">
-                    <div className="w-4 h-5 bg-sky-200 border border-amber-900" />
-                    <div className="w-5 h-6 bg-sky-300 border border-amber-900" />
-                    <div className="w-4 h-5 bg-sky-200 border border-amber-900" />
-                  </div>
-                  {/* Timber cross beams */}
-                  <div className="h-0.5 bg-amber-900 w-full" />
-                  <div className="flex justify-around items-center">
-                    <div className="w-5 h-7 bg-amber-900/80 rounded-t-sm" />
-                    <div className="w-5 h-7 bg-amber-900/80 rounded-t-sm" />
-                  </div>
-                </div>
-              </div>
+        {/* Left: Authentic Tunnel Photo from Exam Sheet with live grading filter */}
+        <div className="space-y-1.5 flex flex-col justify-between">
+          <div className="relative h-48 bg-slate-950 rounded-xl overflow-hidden border border-slate-300 dark:border-slate-700 flex items-center justify-center p-1.5 group shadow-inner">
+            {/* Real Tunnel Photo */}
+            <img
+              src="/assets/aistudio/tunnel_photo_original.jpg"
+              alt="Original Prüfungsfoto Tunnel mit Fachwerkhäusern"
+              style={getPhotoFilterStyle()}
+              className="w-full h-full object-contain rounded-lg transition-all duration-300"
+            />
 
-              {/* Tunnel Arch Foreground Frame */}
-              <div
-                className={`absolute inset-0 pointer-events-none transition-all duration-300 ${
-                  curvePreset === 'original'
-                    ? 'bg-slate-950/95 ring-inset ring-[40px] ring-slate-950'
-                    : curvePreset === 'ihk'
-                    ? 'bg-stone-900/50 ring-inset ring-[36px] ring-stone-900/90'
-                    : 'bg-stone-700/60 ring-inset ring-[36px] ring-stone-700/90 [background-image:radial-gradient(#fff_1px,transparent_1px)] [background-size:6px_6px]'
-                }`}
-              >
-                {/* Arch outline cutout */}
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="w-34 h-38 rounded-t-full border-[8px] border-stone-800/90" />
-                </div>
-              </div>
+            {/* Noise simulation layer for extreme preset */}
+            {curvePreset === 'extreme' && (
+              <div className="absolute inset-0 pointer-events-none bg-stone-900/25 [background-image:radial-gradient(#fff_1.2px,transparent_1.2px)] [background-size:4px_4px] opacity-40 mix-blend-overlay" />
+            )}
 
-              {/* Status Badge on Photo */}
-              <div className="absolute bottom-2 left-2 text-[9px] font-mono px-2 py-0.5 rounded bg-black/75 text-white">
-                {curvePreset === 'original' && 'Tunnel: 95% Tiefen (dunkel/absaufend)'}
-                {curvePreset === 'ihk' && 'Tunnel: 55% Tiefen (geöffnet & scharf)'}
-                {curvePreset === 'extreme' && 'Tunnel: Sensorrauschen & Grauschleier!'}
-              </div>
+            {/* Status Badge on Photo */}
+            <div className="absolute top-2 left-2 text-[9px] font-mono px-2 py-0.5 rounded bg-black/85 text-amber-300 border border-amber-500/40">
+              Echtes IHK-Prüfungsfoto
+            </div>
+
+            <div className="absolute bottom-2 left-2 text-[9px] font-mono px-2 py-0.5 rounded bg-black/85 text-white border border-white/20">
+              {curvePreset === 'original' && 'Tunnel: Tiefen saufen ab (kaum Zeichnung)'}
+              {curvePreset === 'ihk' && 'Tunnel: Mauerwerk sichtbar & Häuser erhalten ✓'}
+              {curvePreset === 'extreme' && 'Tunnel: Tonwertabrisse & Farbrauschen!'}
             </div>
           </div>
-          <div className="text-[11px] text-center text-slate-500">
-            {curvePreset === 'original' && 'Original: Der Tunnel ist viel zu dunkel, kaum Steinstruktur erkennbar.'}
-            {curvePreset === 'ihk' && 'IHK-Optimum: Tunnel ist gut ausgeleuchtet, sonnige Häuser bleiben kontrastreich.'}
-            {curvePreset === 'extreme' && 'Warnung: Zu starke Aufhellung verstärkt Farbrauschen und macht das Bild flau.'}
+
+          <div className="text-[11px] text-center text-slate-500 px-1">
+            {curvePreset === 'original' && 'Original-Scan: Der Tunnelbogen im Vordergrund ist zu dunkel für den hochwertigen Druck.'}
+            {curvePreset === 'ihk' && 'IHK-Optimum: Schatten & Mitteltöne gezielt angehoben, Lichter bleiben unverändert stabil.'}
+            {curvePreset === 'extreme' && 'Warnung zu Teil c: Übermäßige Aufhellung erzeugt sichtbares Sensorrauschen und flauen Kontrast.'}
           </div>
         </div>
 
-        {/* Right: SVG Gradation Coordinate System */}
+        {/* Right: Authentic IHK Diagram vs Interactive SVG Solution Curve */}
         <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between text-[11px] font-bold">
-            <span className="text-slate-500">PS-Ausgang (%)</span>
-            <span className="font-mono text-indigo-600 dark:text-indigo-400">
-              {curvePreset === 'original' && 'Lineare Diagonale'}
-              {curvePreset === 'ihk' && 'Kurve: Tiefen angehoben + Lichter fix'}
-              {curvePreset === 'extreme' && 'Übermäßige Spreizung'}
-            </span>
+            <span className="text-slate-500">Gradationskurve (PS-Ausgang %):</span>
+            
+            {/* Switcher: Interactive Curve vs Original IHK Scan Sheet */}
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setDiagramMode('interactive')}
+                className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors cursor-pointer border ${
+                  diagramMode === 'interactive'
+                    ? 'bg-indigo-600 text-white border-indigo-500'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                Musterkurve
+              </button>
+              <button
+                type="button"
+                onClick={() => setDiagramMode('original-scan')}
+                className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors cursor-pointer border ${
+                  diagramMode === 'original-scan'
+                    ? 'bg-indigo-600 text-white border-indigo-500'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                Original-Gitter
+              </button>
+            </div>
           </div>
 
+          {/* Diagram Display Area */}
           <div className="relative h-40 w-full flex items-center justify-center">
-            <svg viewBox="0 0 200 200" className="w-full h-full">
-              {/* 10x10 Grid Lines */}
-              {[...Array(11)].map((_, i) => (
-                <g key={i}>
-                  <line x1={20 + i * 16} y1={20} x2={20 + i * 16} y2={180} stroke="#cbd5e1" strokeWidth="0.5" className="dark:stroke-slate-800" />
-                  <line x1={20} y1={20 + i * 16} x2={180} y2={20 + i * 16} stroke="#cbd5e1" strokeWidth="0.5" className="dark:stroke-slate-800" />
-                </g>
-              ))}
+            {diagramMode === 'original-scan' ? (
+              <div className="relative w-full h-full flex flex-col items-center justify-center">
+                <img
+                  src="/assets/aistudio/ihk_curve_diagram_original.jpg"
+                  alt="Original IHK Kurvendiagramm aus Prüfungsblatt"
+                  className="max-h-36 object-contain rounded border border-slate-300 dark:border-slate-700 shadow-sm"
+                />
+                <span className="text-[9px] font-mono text-purple-600 dark:text-purple-400 mt-1">
+                  Original-Raster aus der IHK-Aufgabenstellung (10×10 Einteilung)
+                </span>
+              </div>
+            ) : (
+              <svg viewBox="0 0 200 200" className="w-full h-full">
+                {/* 10x10 Grid Lines matching IHK template exactly */}
+                {[...Array(11)].map((_, i) => (
+                  <g key={i}>
+                    <line x1={20 + i * 16} y1={20} x2={20 + i * 16} y2={180} stroke="#cbd5e1" strokeWidth="0.5" className="dark:stroke-slate-800" />
+                    <line x1={20} y1={20 + i * 16} x2={180} y2={20 + i * 16} stroke="#cbd5e1" strokeWidth="0.5" className="dark:stroke-slate-800" />
+                  </g>
+                ))}
 
-              {/* Axis Labels */}
-              <text x="18" y="195" fontSize="8" fill="#94a3b8">0</text>
-              <text x="96" y="195" fontSize="8" fill="#94a3b8">50</text>
-              <text x="172" y="195" fontSize="8" fill="#94a3b8">100</text>
-              <text x="5" y="183" fontSize="8" fill="#94a3b8">0</text>
-              <text x="5" y="103" fontSize="8" fill="#94a3b8">50</text>
-              <text x="2" y="24" fontSize="8" fill="#94a3b8">100</text>
+                {/* Axis Labels */}
+                <text x="18" y="195" fontSize="8" fill="#94a3b8">0</text>
+                <text x="56" y="195" fontSize="8" fill="#94a3b8">25</text>
+                <text x="96" y="195" fontSize="8" fill="#94a3b8">50</text>
+                <text x="136" y="195" fontSize="8" fill="#94a3b8">75</text>
+                <text x="172" y="195" fontSize="8" fill="#94a3b8">100</text>
+                <text x="5" y="183" fontSize="8" fill="#94a3b8">0</text>
+                <text x="5" y="103" fontSize="8" fill="#94a3b8">50</text>
+                <text x="2" y="24" fontSize="8" fill="#94a3b8">100</text>
 
-              {/* 45 Degree Dashed Reference Line */}
-              <line x1="20" y1="180" x2="180" y2="20" stroke="#94a3b8" strokeDasharray="3 3" strokeWidth="1.5" />
+                {/* 45 Degree Dashed Reference Line */}
+                <line x1="20" y1="180" x2="180" y2="20" stroke="#94a3b8" strokeDasharray="3 3" strokeWidth="1.5" />
 
-              {/* Dynamic Correction Curve */}
-              {curvePreset === 'original' && (
-                <path d="M 20 180 L 180 20" stroke="#6366f1" strokeWidth="2.5" fill="none" />
-              )}
+                {/* Dynamic Correction Curve */}
+                {curvePreset === 'original' && (
+                  <path d="M 20 180 L 180 20" stroke="#6366f1" strokeWidth="2.5" fill="none" />
+                )}
 
-              {curvePreset === 'ihk' && (
-                <>
-                  {/* Curve lifted in shadows/midtones, then flattening back to highlights */}
-                  <path d="M 20 180 Q 60 70, 120 70 T 180 20" stroke="#10b981" strokeWidth="3" fill="none" />
-                  {/* Shadow Lift Point */}
-                  <circle cx="70" cy="95" r="4" fill="#10b981" stroke="#fff" strokeWidth="1.5" />
-                  {/* Highlight Anchor Point (pinned on 45° line) */}
-                  <circle cx="140" cy="60" r="4" fill="#6366f1" stroke="#fff" strokeWidth="1.5" />
-                  <text x="45" y="85" fontSize="8" fill="#10b981" fontWeight="bold">Schatten +40%</text>
-                  <text x="125" y="50" fontSize="8" fill="#6366f1" fontWeight="bold">Lichter fix</text>
-                </>
-              )}
+                {curvePreset === 'ihk' && (
+                  <>
+                    {/* Curve lifted in shadows/midtones, then flattening back to highlights */}
+                    <path d="M 20 180 Q 60 70, 120 70 T 180 20" stroke="#10b981" strokeWidth="3" fill="none" />
+                    {/* Shadow Lift Point (Dreivierteltöne ~75% Eingang nach oben auf ca. 50-55% gehoben) */}
+                    <circle cx="60" cy="80" r="4.5" fill="#10b981" stroke="#fff" strokeWidth="1.5" />
+                    {/* Highlight Anchor Point (pinned on 45° line ~20-25% Eingang) */}
+                    <circle cx="140" cy="60" r="4" fill="#6366f1" stroke="#fff" strokeWidth="1.5" />
+                    <text x="35" y="65" fontSize="8" fill="#10b981" fontWeight="bold">Schatten angehoben</text>
+                    <text x="125" y="50" fontSize="8" fill="#6366f1" fontWeight="bold">Lichter fixiert</text>
+                  </>
+                )}
 
-              {curvePreset === 'extreme' && (
-                <>
-                  <path d="M 20 180 Q 40 30, 180 20" stroke="#ef4444" strokeWidth="3" fill="none" />
-                  <circle cx="50" cy="50" r="4" fill="#ef4444" stroke="#fff" strokeWidth="1.5" />
-                </>
-              )}
-            </svg>
+                {curvePreset === 'extreme' && (
+                  <>
+                    <path d="M 20 180 Q 40 30, 180 20" stroke="#ef4444" strokeWidth="3" fill="none" />
+                    <circle cx="50" cy="50" r="4.5" fill="#ef4444" stroke="#fff" strokeWidth="1.5" />
+                    <text x="60" y="45" fontSize="8" fill="#ef4444" fontWeight="bold">Überriss / Flau</text>
+                  </>
+                )}
+              </svg>
+            )}
           </div>
 
           <div className="flex justify-between items-center text-[10px] text-slate-400 font-mono pt-1 border-t border-slate-100 dark:border-slate-800">
-            <span>Tiefen (75%)</span>
-            <span>Mitteltöne (50%)</span>
-            <span>Lichter (25%)</span>
+            <span>Dunkel / Schatten (Dreivierteltöne)</span>
+            <span>Mitteltöne</span>
+            <span>Hell / Lichter (Vierteltöne)</span>
           </div>
         </div>
       </div>

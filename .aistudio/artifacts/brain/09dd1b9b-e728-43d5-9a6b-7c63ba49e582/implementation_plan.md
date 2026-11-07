@@ -1,28 +1,31 @@
-# Implementierungsplan: Echtes Foto der Schweine-Nahaufnahme für Aufgabe 10
+# Implementierungsplan: Original-Tunnelfoto & IHK-Kurvendiagramm für Aufgabe 11
 
-Austausch der SVG-Grafik durch das reale Original-Foto aus dem hochgeladenen IHK-Prüfungsblatt (Seite 4) im Photoshop-Bildgröße-Dialog von Aufgabe 10.
-
----
-
-## 1. Ausgangslage & Anforderung
-- In Aufgabe 10 („Web-Bildaufbereitung & Motivwirkung Erlebnisbauernhof“) soll das **echte Original-Foto** bewertet werden, wie es in der IHK-Aufgabe abgedruckt ist (das Ferkel mit herausgestreckter Zunge im Matsch vor blauem Himmel und Holzzaun sowie das geöffnete Bildgröße-Dialogfenster).
-- Der Nutzer hat in der Klärung bestätigt: *„Den Foto-Ausschnitt aus deinem hochgeladenen Prüfungsblatt anzeigen“*.
+In Aufgabe 11 („Gradationsänderung für Druck im Reiseführer – Tunnel & Fachwerkhäuser“) wird die bisherige stilisierte CSS-Simulation durch die authentischen Abbildungen aus dem IHK-Prüfungsblatt (Seite 5) ersetzt.
 
 ---
 
-## 2. Geplante Umsetzung
-
-1. **Asset-Vorbereitung:**
-   - Das Originalfoto wurde in hoher Qualität verlustfrei direkt aus dem Prüfungsblatt (`/public/assets/aistudio/Image_November_07__2026_-_11_41AM_77ac78af`) präzise freigestellt und als Bildressource `/assets/aistudio/pig_photo_original.jpg` (Photoshop-Gesamtansicht) und `/assets/aistudio/pig_photo_only.jpg` (Motiv-Nahaufnahme) gespeichert.
-
-2. **Anpassung in `src/components/FreetextTrainerQuizView.tsx` (`PhotoshopWebDialog`):**
-   - Im linken Vorschaufenster des Photoshop-Dialogs wird anstelle der vereinfachten Illustration nun das **reale Foto aus dem Prüfungsblatt** mit Zoom-Fokus und Bilddetails gerendert.
-   - Zusätzlich wird ein Zoom-/Vollbild-Modal bzw. eine Ansicht hinzugefügt, sodass der Prüfling das Originalbild in voller Schärfe begutachten kann, um die Motivwirkung für Teilaufgabe c) (fehlender Hofkontext, Makro-Ausschnitt, fehlender Negativraum) optimal beurteilen zu können.
-   - Der technische Photoshop-Wertebereich (1300 × 867 px, CMYK, 240 ppi, TIFF 4,3 MB) bleibt nahtlos interaktiv erhalten.
+## 1. Bild-Extraktion aus dem Original-Scan (Seite 5)
+- **Original-Tunnelfoto:** Verlustfreier Zuschnitt des echten Fotos aus `/public/assets/aistudio/Image_November_07__2026_-_11_54AM_0753b17c` nach `/public/assets/aistudio/tunnel_photo_original.jpg`.
+  - Zeigt den dunklen Mauerwerk-Tunnelbogen mit den durchscheinenden sonnigen Fachwerkhäusern.
+- **Original IHK-Kurvendiagramm:** Zuschnitt des offiziellen Prüfungsgitters nach `/public/assets/aistudio/ihk_curve_diagram_original.jpg`.
+  - Zeigt das 10×10-Koordinatensystem mit Achsenbeschriftung „PS-Eingang“ und „PS-Ausgang“ (0–100%) sowie der gestrichelten 45°-Linearitätslinie.
 
 ---
 
-## 3. Verifikation
-- Prüfung der visuellen Einbindung im Browser.
-- Kompilierung (`compile_applet`) und Typprüfung (`lint_applet`).
-- Dev-Server Neustart via `restart_dev_server`.
+## 2. Anpassung der Komponente `GradationCurveDiagram` in `FreetextTrainerQuizView.tsx`
+- **Echtes Tunnelfoto mit Live-Filterung:**
+  - Das Originalfoto wird als primäre Abbildung eingebunden.
+  - Beim Umschalten der Modi („1. Original linear“, „2. IHK-Schattenaufhellung ✓“, „3. Überkorrektur / Rauschen“) wird der Kurveneffekt direkt live als CSS-Filter (`brightness`, `contrast`, `sepia-tone/shadow-lift`) auf das **echte Prüfungsfoto** angewendet. So erleben Prüflinge unmittelbar, wie sich die Zeichnung im dunklen Tunnel verbessert, ohne dass die sonnigen Häuser ausfressen.
+  - Zusätzlicher Toggle „Original vs. Simuliert“ für maximale Nachvollziehbarkeit.
+- **Original IHK-Diagramm & Interaktive Musterkurve:**
+  - Umschalter zwischen dem **„Original IHK-Gitter“** aus dem Prüfungsbogen und der **„Interaktiven IHK-Musterlösung“** (SVG-Kurve mit Viertel-, Mittel- und Dreiviertelton-Werten).
+  - Kennzeichnung mit dem etablierten Prüfungs-Badge („Original aus IHK-Prüfungsblatt“).
+
+---
+
+## 3. Didaktische Musterlösung & Qualitätssicherung
+- Nahtlose Abstimmung mit den Prüfungsfragen 11 a), b) und c):
+  - **Teil a:** Visualisierung des Kurvenverlaufs (im Dreivierteltonbereich/Schatten stark angehoben, Lichter linear belassen).
+  - **Teil b:** Auswirkung auf Vierteltöne (fast unverändert), Mitteltöne (leicht angehoben), Dreivierteltöne (maximal aufgehellt).
+  - **Teil c:** Rauschen/Artefakte in Schatten und Tonwertabrisse bei zu starker Anhebung.
+- Build- und TypeScript-Prüfung via `compile_applet` und `lint_applet`.
