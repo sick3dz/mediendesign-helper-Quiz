@@ -1,31 +1,46 @@
-# Implementierungsplan: Original-Tunnelfoto & IHK-Kurvendiagramm für Aufgabe 11
+# Implementierungsplan: Gestufter Tipp-Button & Ausführlicher Abschlussbericht im Freitext-Trainer
 
-In Aufgabe 11 („Gradationsänderung für Druck im Reiseführer – Tunnel & Fachwerkhäuser“) wird die bisherige stilisierte CSS-Simulation durch die authentischen Abbildungen aus dem IHK-Prüfungsblatt (Seite 5) ersetzt.
-
----
-
-## 1. Bild-Extraktion aus dem Original-Scan (Seite 5)
-- **Original-Tunnelfoto:** Verlustfreier Zuschnitt des echten Fotos aus `/public/assets/aistudio/Image_November_07__2026_-_11_54AM_0753b17c` nach `/public/assets/aistudio/tunnel_photo_original.jpg`.
-  - Zeigt den dunklen Mauerwerk-Tunnelbogen mit den durchscheinenden sonnigen Fachwerkhäusern.
-- **Original IHK-Kurvendiagramm:** Zuschnitt des offiziellen Prüfungsgitters nach `/public/assets/aistudio/ihk_curve_diagram_original.jpg`.
-  - Zeigt das 10×10-Koordinatensystem mit Achsenbeschriftung „PS-Eingang“ und „PS-Ausgang“ (0–100%) sowie der gestrichelten 45°-Linearitätslinie.
+Wir erweitern das Freitext-Modul um zwei didaktische Kernfunktionen:
+1. Einen interaktiven **Tipp-Button mit gestuften Denkanstößen** direkt am Aufgaben-/Eingabefeld, damit Prüflinge erst selbst nachdenken und bei Bedarf dosierte Hilfe erhalten.
+2. Einen **ausführlichen Abschlussbericht („Was du geschrieben hast & Wie es besser wäre“)** mit direkter Gegenüberstellung Ihres Texts, erkannter Stärken, fehlender IHK-Fachbegriffe und konkreter Formulierungstipps.
 
 ---
 
-## 2. Anpassung der Komponente `GradationCurveDiagram` in `FreetextTrainerQuizView.tsx`
-- **Echtes Tunnelfoto mit Live-Filterung:**
-  - Das Originalfoto wird als primäre Abbildung eingebunden.
-  - Beim Umschalten der Modi („1. Original linear“, „2. IHK-Schattenaufhellung ✓“, „3. Überkorrektur / Rauschen“) wird der Kurveneffekt direkt live als CSS-Filter (`brightness`, `contrast`, `sepia-tone/shadow-lift`) auf das **echte Prüfungsfoto** angewendet. So erleben Prüflinge unmittelbar, wie sich die Zeichnung im dunklen Tunnel verbessert, ohne dass die sonnigen Häuser ausfressen.
-  - Zusätzlicher Toggle „Original vs. Simuliert“ für maximale Nachvollziehbarkeit.
-- **Original IHK-Diagramm & Interaktive Musterkurve:**
-  - Umschalter zwischen dem **„Original IHK-Gitter“** aus dem Prüfungsbogen und der **„Interaktiven IHK-Musterlösung“** (SVG-Kurve mit Viertel-, Mittel- und Dreiviertelton-Werten).
-  - Kennzeichnung mit dem etablierten Prüfungs-Badge („Original aus IHK-Prüfungsblatt“).
+## 1. Gestufter Tipp-Button („Denkanstoß anfordern“)
+- **Position & Interaktion:** 
+  - Ersetzt die bisher statisch eingeblendete gelbe Hinweisbox direkt über dem Textfeld durch eine diskrete, motivierende Tipp-Leiste.
+  - Button `[💡 Tipp anfordern]` mit visueller Stufenanzeige (Stufe 0 / Stufe 1 / Stufe 2).
+- **Die 2 Stufen:**
+  - **Stufe 1 (Struktur & Leitfragen):** Gliederungshilfe und Fragestellung (z.B. „Wie viele Teilaspekte werden verlangt? Gliedere strukturiert nach a, b, c...“).
+  - **Stufe 2 (Fachbegriff-Impulse):** Wesentliche IHK-Schlüsselbegriffe und Denkanstöße, ohne die vollständige Musterlösung vorwegzunehmen (z.B. „Relevante Fachbegriffe: RGB-Master, Farbraumkonvertierung, Zukunftsfähigkeit...“).
+- **Möglichkeit zum vollständigen Einklappen:** Lernende können geöffnete Tipps jederzeit wieder minimieren.
 
 ---
 
-## 3. Didaktische Musterlösung & Qualitätssicherung
-- Nahtlose Abstimmung mit den Prüfungsfragen 11 a), b) und c):
-  - **Teil a:** Visualisierung des Kurvenverlaufs (im Dreivierteltonbereich/Schatten stark angehoben, Lichter linear belassen).
-  - **Teil b:** Auswirkung auf Vierteltöne (fast unverändert), Mitteltöne (leicht angehoben), Dreivierteltöne (maximal aufgehellt).
-  - **Teil c:** Rauschen/Artefakte in Schatten und Tonwertabrisse bei zu starker Anhebung.
-- Build- und TypeScript-Prüfung via `compile_applet` und `lint_applet`.
+## 2. Ausführlicher Abschlussbericht („Was du geschrieben hast & Was besser wäre“)
+- **Zugang:** 
+  - Prominenter Button in der Trainer-Übersicht: `[📊 Gesamt-Abschlussbericht ansehen ({X} Aufgaben gelöst)]`.
+  - Direkter Link auch am Ende jeder korrigierten Aufgabe im Auswertungsbereich.
+- **Inhalte des Berichts:**
+  - **Gesamt-Performance:** Erreichte Gesamtpunktzahl, IHK-Notenäquivalent (Sehr gut bis Ungenügend nach IHK-Schlüssel) und Erfolgsquote.
+  - **Detaillierte Aufgaben-Gegenüberstellung:**
+    1. **Dein geschriebener Text:** Exakte Anzeige der eigenen Ausarbeitung in einem übersichtlichen Textkarten-Format.
+    2. **Was gut war (Erreichte Punkte & Stärken):** Grün hervorgehobene erkannte Schlüsselwörter und erfüllte Teilkriterien.
+    3. **Wie, wo & was besser wäre (Konkrete Optimierungsvorschläge):**
+       - Spezifische Auflistung fehlender IHK-Fachbegriffe je Teilaufgabe.
+       - Klarer Verbesserungshinweis (z.B. „Formuliere den Unterschied zwischen Tonwertkorrektur und Gradation präziser über Kurvenkrümmung vs. Spreizung“).
+       - Didaktischer Abgleich mit der offiziellen IHK-Musterlösung.
+    4. **Aktion „Jetzt nachbessern“:** Direkter 1-Klick-Sprung zurück in die Aufgabe zur Textüberarbeitung.
+  - **Druck- / Export-Funktion:** `window.print()`-optimierte Druckansicht zum Wiederholen auf Papier oder als PDF.
+
+---
+
+## 3. Datenhaltung & Persistenz
+- Speicherung des Fortschritts (`progress`) in `localStorage` unter `ihk_freetext_progress_v2`, damit eingegebene Texte und Auswertungen beim Neuladen der Seite erhalten bleiben.
+- Button zum Zurücksetzen oder Neustarten der Prüfungssitzung.
+
+---
+
+## 4. Validierung & Qualitätssicherung
+- Prüfung aller Komponenten mit `compile_applet` und `lint_applet`.
+- Verifikation des responsiven Layouts (Desktop & Mobil) und des Dark/Light-Modes.

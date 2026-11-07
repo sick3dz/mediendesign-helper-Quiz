@@ -25,6 +25,15 @@ import {
   Layers,
   ArrowDown,
   ArrowUp,
+  Lightbulb,
+  ChevronDown,
+  ChevronUp,
+  Printer,
+  BarChart3,
+  Target,
+  TrendingUp,
+  ThumbsUp,
+  CheckCheck,
 } from 'lucide-react';
 
 interface Props {
@@ -611,19 +620,19 @@ const GradationCurveDiagram: React.FC = () => {
   const getPhotoFilterStyle = () => {
     switch (curvePreset) {
       case 'original':
-        // Linear scan: natural dark shadows in tunnel archway
+        // Linear scan as in the original exam sheet: very dark tunnel shadows
         return {
-          filter: 'contrast(1.05) brightness(0.95)',
+          filter: 'brightness(1.1) contrast(1.1)',
         };
       case 'ihk':
-        // IHK target: Shadows lifted (+35% to +40%), highlights preserved
+        // IHK target: Shadows & midtones lifted (+50% brightness in shadows), archway becomes visible
         return {
-          filter: 'brightness(1.38) contrast(1.12) saturate(1.05)',
+          filter: 'brightness(1.65) contrast(1.2) saturate(1.1)',
         };
       case 'extreme':
         // Over-correction: extreme shadow lift causing flat contrast and visible noise
         return {
-          filter: 'brightness(1.9) contrast(0.75) saturate(1.4)',
+          filter: 'brightness(2.2) contrast(0.65) saturate(1.5)',
         };
       default:
         return {};
@@ -688,13 +697,13 @@ const GradationCurveDiagram: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Left: Authentic Tunnel Photo from Exam Sheet with live grading filter */}
         <div className="space-y-1.5 flex flex-col justify-between">
-          <div className="relative h-48 bg-slate-950 rounded-xl overflow-hidden border border-slate-300 dark:border-slate-700 flex items-center justify-center p-1.5 group shadow-inner">
+          <div className="relative h-48 bg-slate-900 rounded-xl overflow-hidden border border-slate-300 dark:border-slate-700 flex items-center justify-center p-2 group shadow-inner">
             {/* Real Tunnel Photo */}
             <img
               src="/assets/aistudio/tunnel_photo_original.jpg"
               alt="Original Prüfungsfoto Tunnel mit Fachwerkhäusern"
               style={getPhotoFilterStyle()}
-              className="w-full h-full object-contain rounded-lg transition-all duration-300"
+              className="w-full h-full object-contain rounded transition-all duration-300"
             />
 
             {/* Noise simulation layer for extreme preset */}
@@ -704,20 +713,20 @@ const GradationCurveDiagram: React.FC = () => {
 
             {/* Status Badge on Photo */}
             <div className="absolute top-2 left-2 text-[9px] font-mono px-2 py-0.5 rounded bg-black/85 text-amber-300 border border-amber-500/40">
-              Echtes IHK-Prüfungsfoto
+              Original IHK-Foto (Sehr dunkler Tunnel)
             </div>
 
             <div className="absolute bottom-2 left-2 text-[9px] font-mono px-2 py-0.5 rounded bg-black/85 text-white border border-white/20">
-              {curvePreset === 'original' && 'Tunnel: Tiefen saufen ab (kaum Zeichnung)'}
-              {curvePreset === 'ihk' && 'Tunnel: Mauerwerk sichtbar & Häuser erhalten ✓'}
-              {curvePreset === 'extreme' && 'Tunnel: Tonwertabrisse & Farbrauschen!'}
+              {curvePreset === 'original' && 'Tunnel: 90% Tiefen (abgesoffener Tunnelbogen)'}
+              {curvePreset === 'ihk' && 'Tunnel: Aufgehellt (Mauerwerk & Fachwerkhäuser klar ✓)'}
+              {curvePreset === 'extreme' && 'Tunnel: Tonwertabrisse & sichtbares Farbrauschen!'}
             </div>
           </div>
 
-          <div className="text-[11px] text-center text-slate-500 px-1">
-            {curvePreset === 'original' && 'Original-Scan: Der Tunnelbogen im Vordergrund ist zu dunkel für den hochwertigen Druck.'}
-            {curvePreset === 'ihk' && 'IHK-Optimum: Schatten & Mitteltöne gezielt angehoben, Lichter bleiben unverändert stabil.'}
-            {curvePreset === 'extreme' && 'Warnung zu Teil c: Übermäßige Aufhellung erzeugt sichtbares Sensorrauschen und flauen Kontrast.'}
+          <div className="text-[11px] text-center text-slate-600 dark:text-slate-400 px-1 leading-snug">
+            {curvePreset === 'original' && 'ℹ️ Das Foto ist im IHK-Original bewusst extrem dunkel im Tunnelbereich (Aufgabenstellung fordert Aufhellung der Schatten).'}
+            {curvePreset === 'ihk' && '✨ IHK-Musterlösung: Der Tunnelbereich wird durch die Kurvenanhebung in den Tiefen gut durchgezeichnet, ohne die sonnigen Häuser zu überbelichten.'}
+            {curvePreset === 'extreme' && '⚠️ Zu starke Anhebung: Verursacht starkes Bildrauschen in den dunklen Tunnelbereichen und flauen Kontrast.'}
           </div>
         </div>
 
@@ -999,10 +1008,496 @@ const DamMetadataInspector: React.FC = () => {
   );
 };
 
+const FREETEXT_STORAGE_KEY = 'ihk_freetext_progress_v2';
+
+const getIhkGrade = (pct: number) => {
+  if (pct >= 92) return { grade: '1', label: 'Sehr gut (1)', badgeBg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800' };
+  if (pct >= 81) return { grade: '2', label: 'Gut (2)', badgeBg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800' };
+  if (pct >= 67) return { grade: '3', label: 'Befriedigend (3)', badgeBg: 'bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300 border-blue-300 dark:border-blue-800' };
+  if (pct >= 50) return { grade: '4', label: 'Ausreichend (4)', badgeBg: 'bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border-amber-300 dark:border-amber-800' };
+  if (pct >= 30) return { grade: '5', label: 'Mangelhaft (5)', badgeBg: 'bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300 border-rose-300 dark:border-rose-800' };
+  return { grade: '6', label: 'Ungenügend (6)', badgeBg: 'bg-rose-200 text-rose-900 dark:bg-rose-950 dark:text-rose-200 border-rose-400' };
+};
+
+interface SummaryReportProps {
+  progress: ProgressMap;
+  onSelectQuestion: (qId: string) => void;
+  onClose: () => void;
+  onResetProgress: () => void;
+}
+
+const FreetextSummaryReport: React.FC<SummaryReportProps> = ({
+  progress,
+  onSelectQuestion,
+  onClose,
+  onResetProgress,
+}) => {
+  const [reportFilter, setReportFilter] = useState<'all' | 'needs-work' | 'mastered' | 'ihk1'>('all');
+  const [expandedSolutions, setExpandedSolutions] = useState<Record<string, boolean>>({});
+
+  const toggleSolution = (qId: string) => {
+    soundEffects.playClick();
+    setExpandedSolutions(prev => ({ ...prev, [qId]: !prev[qId] }));
+  };
+
+  const evaluatedQuestions = useMemo(() => {
+    return FREETEXT_QUESTIONS.filter(q => progress[q.id]?.isEvaluated);
+  }, [progress]);
+
+  const totalPointsEarned = evaluatedQuestions.reduce((acc, q) => acc + (progress[q.id]?.score || 0), 0);
+  const totalPointsMax = evaluatedQuestions.reduce((acc, q) => acc + q.maxPoints, 0);
+  const avgPercentage = totalPointsMax > 0 ? Math.round((totalPointsEarned / totalPointsMax) * 100) : 0;
+  const gradeInfo = getIhkGrade(avgPercentage);
+
+  const needsWorkCount = evaluatedQuestions.filter(q => (progress[q.id]?.percentage || 0) < 80).length;
+  const masteredCount = evaluatedQuestions.filter(q => (progress[q.id]?.percentage || 0) >= 80).length;
+  const ihk1QuestionsEvaluated = evaluatedQuestions.filter(q => q.series === 'ihk-teil-1');
+  const ihk1Points = ihk1QuestionsEvaluated.reduce((acc, q) => acc + (progress[q.id]?.score || 0), 0);
+  const ihk1Max = ihk1QuestionsEvaluated.reduce((acc, q) => acc + q.maxPoints, 0);
+
+  const filteredList = useMemo(() => {
+    return evaluatedQuestions.filter(q => {
+      const ev = progress[q.id];
+      if (!ev) return false;
+      if (reportFilter === 'needs-work') return ev.percentage < 80;
+      if (reportFilter === 'mastered') return ev.percentage >= 80;
+      if (reportFilter === 'ihk1') return q.series === 'ihk-teil-1';
+      return true;
+    });
+  }, [evaluatedQuestions, reportFilter, progress]);
+
+  const handlePrint = () => {
+    soundEffects.playClick();
+    window.print();
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in duration-200 print:max-w-none print:space-y-4">
+      {/* Top Navigation & Action Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs print:hidden">
+        <button
+          onClick={onClose}
+          className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Zurück zu den Aufgaben</span>
+        </button>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer shadow-2xs"
+            title="Drucken oder als PDF abspeichern"
+          >
+            <Printer className="w-3.5 h-3.5 text-indigo-500" />
+            <span>Bericht drucken / PDF</span>
+          </button>
+
+          {evaluatedQuestions.length > 0 && (
+            <button
+              onClick={onResetProgress}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-semibold transition-colors cursor-pointer"
+              title="Alle gespeicherten Ausarbeitungen löschen"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Verlauf leeren</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Main Score & Grade Banner */}
+      <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-md space-y-6">
+        <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
+                IHK Freitext-Prüfungsauswertung
+              </span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                Abschlussbericht & Feedback
+              </span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white flex items-center gap-2.5">
+              <BarChart3 className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
+              <span>Gesamt-Zusammenfassung & Optimierungsanalyse</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-2xl leading-relaxed">
+              Detaillierter Prüfungsspiegel: Was du geschrieben hast, welche Fachbegriffe erkannt wurden und an welchen Stellen du nach IHK-Bewertungskriterien noch Punkte herausholen kannst.
+            </p>
+          </div>
+
+          {/* IHK Grade Badge */}
+          {evaluatedQuestions.length > 0 && (
+            <div className={`p-4 rounded-2xl border text-center min-w-[140px] shadow-sm ${gradeInfo.badgeBg}`}>
+              <span className="text-[10px] uppercase font-bold tracking-wider block opacity-80">
+                IHK-Notenäquivalent
+              </span>
+              <div className="text-3xl font-black mt-0.5">
+                Note {gradeInfo.grade}
+              </div>
+              <span className="text-xs font-extrabold block mt-0.5">
+                {gradeInfo.label}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* 4 Stats Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+          <div className="p-4 bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block">Gesamtpunktzahl</span>
+            <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1 font-mono">
+              {totalPointsEarned} <span className="text-sm font-normal text-slate-400">/ {totalPointsMax || 0} Pkt</span>
+            </div>
+          </div>
+
+          <div className="p-4 bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block">Erfolgsquote</span>
+            <div className={`text-xl sm:text-2xl font-black mt-1 font-mono ${
+              avgPercentage >= 80 ? 'text-emerald-600 dark:text-emerald-400' : avgPercentage >= 50 ? 'text-amber-600 dark:text-amber-400' : 'text-rose-600'
+            }`}>
+              {avgPercentage}%
+            </div>
+          </div>
+
+          <div className="p-4 bg-purple-50/50 dark:bg-purple-950/20 rounded-2xl border border-purple-200/80 dark:border-purple-800/60 shadow-2xs">
+            <span className="text-[10px] uppercase font-bold text-purple-600 dark:text-purple-400 block">IHK Prüfung Teil 1</span>
+            <div className="text-xl sm:text-2xl font-black text-purple-700 dark:text-purple-300 mt-1 font-mono">
+              {ihk1Points} <span className="text-sm font-normal text-purple-400">/ {ihk1Max || 0} Pkt</span>
+            </div>
+          </div>
+
+          <div className="p-4 bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block">Aufgaben gelöst</span>
+            <div className="text-xl sm:text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1 font-mono">
+              {evaluatedQuestions.length} <span className="text-sm font-normal text-slate-400">/ {FREETEXT_QUESTIONS.length}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Segmented Filter Control */}
+      {evaluatedQuestions.length > 0 && (
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 p-1 bg-slate-100 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-800 print:hidden scrollbar-none">
+          <button
+            onClick={() => setReportFilter('all')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              reportFilter === 'all'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            Alle bearbeiteten Aufgaben ({evaluatedQuestions.length})
+          </button>
+          <button
+            onClick={() => setReportFilter('needs-work')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+              reportFilter === 'needs-work'
+                ? 'bg-amber-500 text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <span>Nachbesserungsbedarf (&lt; 80%)</span>
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-600 text-white font-mono">
+              {needsWorkCount}
+            </span>
+          </button>
+          <button
+            onClick={() => setReportFilter('mastered')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+              reportFilter === 'mastered'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <span>Top gemeistert (≥ 80%)</span>
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-700 text-white font-mono">
+              {masteredCount}
+            </span>
+          </button>
+          <button
+            onClick={() => setReportFilter('ihk1')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              reportFilter === 'ihk1'
+                ? 'bg-purple-600 text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            IHK Prüfungszettel Teil 1 ({ihk1QuestionsEvaluated.length})
+          </button>
+        </div>
+      )}
+
+      {/* Empty State if No Questions Evaluated */}
+      {evaluatedQuestions.length === 0 ? (
+        <div className="p-12 text-center rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto">
+            <FileText className="w-7 h-7" />
+          </div>
+          <div>
+            <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+              Noch keine Freitext-Aufgaben ausgewertet
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto mt-1 leading-relaxed">
+              Sobald du eine Aufgabe bearbeitest und einreichst, wird hier dein vollständiger Text mit Stärken, fehlenden Fachbegriffen und Verbesserungstipps aufgeschlüsselt.
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
+          >
+            Zur ersten Aufgabe
+          </button>
+        </div>
+      ) : filteredList.length === 0 ? (
+        <div className="p-8 text-center rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500 text-xs">
+          Keine Aufgaben entsprechen dem gewählten Filter.
+        </div>
+      ) : (
+        /* Detailed List of Task Reviews */
+        <div className="space-y-6">
+          {filteredList.map(q => {
+            const ev = progress[q.id];
+            if (!ev) return null;
+
+            const isOriginal = Boolean(q.isOriginalSheet);
+            const isFullScore = ev.percentage === 100;
+            const isPassing = ev.percentage >= 50;
+            const wordCount = ev.userAnswer.trim() ? ev.userAnswer.trim().split(/\s+/).filter(Boolean).length : 0;
+            const isSolutionOpen = Boolean(expandedSolutions[q.id]);
+
+            return (
+              <div
+                key={q.id}
+                className={`rounded-3xl p-6 sm:p-7 space-y-5 transition-all shadow-sm ${
+                  isOriginal
+                    ? 'border-2 border-purple-300 dark:border-purple-700/80 bg-white dark:bg-slate-900'
+                    : 'border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'
+                }`}
+              >
+                {/* Task Header */}
+                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      {isOriginal && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700">
+                          IHK Original-Prüfungszettel
+                        </span>
+                      )}
+                      <span className="text-[11px] font-semibold text-slate-400">
+                        {q.category}
+                      </span>
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                      {q.title}
+                    </h3>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`font-mono text-xs sm:text-sm font-black px-3 py-1 rounded-xl border ${
+                        isFullScore
+                          ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
+                          : isPassing
+                          ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800'
+                          : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-800'
+                      }`}
+                    >
+                      {ev.score} / {ev.maxPoints} Punkte ({ev.percentage}%)
+                    </span>
+                  </div>
+                </div>
+
+                {/* Section 1: Dein geschriebener Text (Originalzitat) */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
+                    <span className="flex items-center gap-1.5">
+                      <FileText className="w-3.5 h-3.5 text-indigo-500" />
+                      <span>1. Dein geschriebener Text (Eingereichte Antwort):</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-400">
+                      {wordCount} Wörter
+                    </span>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200/80 dark:border-slate-800 text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-sans leading-relaxed whitespace-pre-line shadow-inner">
+                    {ev.userAnswer || <span className="italic text-slate-400">Keine Textantwort hinterlegt.</span>}
+                  </div>
+                </div>
+
+                {/* Section 2 & 3: Gegenüberstellung Stärken vs. Was besser wäre */}
+                <div className="space-y-3 pt-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
+                    2. Detail-Auswertung & Was besser wäre:
+                  </span>
+
+                  <div className="grid grid-cols-1 gap-3">
+                    {ev.subTaskResults.map(stResult => {
+                      const subTaskDef = q.subTasks.find(s => s.id === stResult.id);
+                      const isComplete = stResult.pointsEarned === stResult.maxPoints;
+
+                      // Extract missing keywords
+                      const missingKeyConcepts: string[] = [];
+                      if (subTaskDef && !isComplete) {
+                        subTaskDef.keywordGroups.forEach(group => {
+                          const matched = group.some(syn => {
+                            const cleanSyn = syn.toLowerCase();
+                            return ev.userAnswer.toLowerCase().includes(cleanSyn);
+                          });
+                          if (!matched && group[0]) {
+                            missingKeyConcepts.push(group[0]);
+                          }
+                        });
+                      }
+
+                      return (
+                        <div
+                          key={stResult.id}
+                          className={`p-4 rounded-2xl border text-xs space-y-3 ${
+                            isComplete
+                              ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-800/80'
+                              : stResult.pointsEarned > 0
+                              ? 'bg-amber-50/40 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800/80'
+                              : 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/60'
+                          }`}
+                        >
+                          {/* Subtask Title & Points */}
+                          <div className="flex items-center justify-between font-bold">
+                            <span className="text-slate-900 dark:text-white font-semibold">
+                              {stResult.label}
+                            </span>
+                            <span
+                              className={`font-mono text-xs px-2 py-0.5 rounded-md ${
+                                isComplete
+                                  ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200'
+                                  : 'bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200'
+                              }`}
+                            >
+                              {stResult.pointsEarned} / {stResult.maxPoints} Pkt.
+                            </span>
+                          </div>
+
+                          {/* Matched Keywords (What was good) */}
+                          {stResult.matchedKeywords.length > 0 && (
+                            <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
+                              <span className="text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <span>Erkannte Fachbegriffe:</span>
+                              </span>
+                              {stResult.matchedKeywords.map((kw, idx) => (
+                                <span
+                                  key={idx}
+                                  className="px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 font-mono text-[10px] font-bold"
+                                >
+                                  ✓ {kw}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Concrete Improvement Guidance (How & What could be better) */}
+                          {!isComplete ? (
+                            <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-amber-200 dark:border-amber-800/70 space-y-1.5">
+                              <div className="flex items-center gap-1 text-amber-800 dark:text-amber-300 font-bold text-[11px]">
+                                <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+                                <span>Wie & wo du mehr Punkte holst:</span>
+                              </div>
+
+                              {missingKeyConcepts.length > 0 && (
+                                <div className="text-[11px] text-slate-700 dark:text-slate-300 leading-snug">
+                                  <span>Für volle Punktzahl fehlten noch zentrale IHK-Begriffe: </span>
+                                  <span className="font-semibold text-rose-600 dark:text-rose-400">
+                                    {missingKeyConcepts.slice(0, 4).join(', ')}
+                                  </span>
+                                </div>
+                              )}
+
+                              {subTaskDef && (
+                                <div className="pt-1 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400">
+                                  <strong className="text-indigo-600 dark:text-indigo-400">IHK-Musterkriterium: </strong>
+                                  <span>{subTaskDef.modelAnswer}</span>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-[11px] text-emerald-700 dark:text-emerald-300 font-medium flex items-center gap-1">
+                              <CheckCheck className="w-3.5 h-3.5" />
+                              <span>Vollständig erfasst! Alle IHK-Kriterien und Fachtermini für diese Teilaufgabe wurden einwandfrei genannt.</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Collapsible Full Model Answer */}
+                <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleSolution(q.id)}
+                    className="flex items-center justify-between w-full text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors cursor-pointer py-1"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <BookOpen className="w-4 h-4" />
+                      <span>Offizielle vollständige IHK-Musterlösung ansehen</span>
+                    </span>
+                    {isSolutionOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </button>
+
+                  {isSolutionOpen && (
+                    <div className="mt-2.5 p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-800/80 text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-sans whitespace-pre-line animate-in fade-in duration-200">
+                      {q.modelAnswer}
+                    </div>
+                  )}
+                </div>
+
+                {/* Card Action Footer */}
+                <div className="flex justify-end pt-1 print:hidden">
+                  <button
+                    onClick={() => onSelectQuestion(q.id)}
+                    className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <span>Diese Aufgabe im Trainer nachbessern</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const FreetextTrainerQuizView: React.FC<Props> = ({ onScoreEarned, onBack }) => {
   const [selectedTopicFilter, setSelectedTopicFilter] = useState<string>('all');
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
-  const [progress, setProgress] = useState<ProgressMap>({});
+  const [showSummaryReport, setShowSummaryReport] = useState<boolean>(false);
+  const [reportFilter, setReportFilter] = useState<'all' | 'needs-work' | 'mastered' | 'ihk1'>('all');
+  const [tipStage, setTipStage] = useState<number>(0);
+
+  // Initialize progress from localStorage
+  const [progress, setProgress] = useState<ProgressMap>(() => {
+    try {
+      const saved = localStorage.getItem(FREETEXT_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // Save progress to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(FREETEXT_STORAGE_KEY, JSON.stringify(progress));
+    } catch (e) {
+      console.error('Failed to save freetext progress', e);
+    }
+  }, [progress]);
+
   const [currentAnswerInput, setCurrentAnswerInput] = useState('');
   const [isEvaluating, setIsEvaluating] = useState(false);
 
@@ -1033,6 +1528,9 @@ export const FreetextTrainerQuizView: React.FC<Props> = ({ onScoreEarned, onBack
   const ihk1Points = ihk1Questions.reduce((acc, q) => acc + (progress[q.id]?.score || 0), 0);
   const ihk1MaxPoints = ihk1Questions.reduce((acc, q) => acc + q.maxPoints, 0);
 
+  const totalPercentage = evaluatedCount > 0 ? Math.round((totalEarnedPoints / (evaluatedCount * 10)) * 100) : 0;
+  const overallGrade = getIhkGrade(totalPercentage);
+
   const detailTopRef = useRef<HTMLDivElement>(null);
   const answerSectionRef = useRef<HTMLDivElement>(null);
 
@@ -1042,12 +1540,14 @@ export const FreetextTrainerQuizView: React.FC<Props> = ({ onScoreEarned, onBack
     if (detailTopRef.current) {
       detailTopRef.current.scrollIntoView({ behavior: 'instant', block: 'start' });
     }
-  }, [selectedQuestionId]);
+  }, [selectedQuestionId, showSummaryReport]);
 
   // Navigate to question detail and ensure top viewport alignment
   const handleSelectQuestion = (qId: string) => {
     soundEffects.playClick();
     setSelectedQuestionId(qId);
+    setShowSummaryReport(false);
+    setTipStage(0);
     const existing = progress[qId];
     setCurrentAnswerInput(existing ? existing.userAnswer : '');
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
@@ -1056,7 +1556,28 @@ export const FreetextTrainerQuizView: React.FC<Props> = ({ onScoreEarned, onBack
   const handleBackToOverview = () => {
     soundEffects.playClick();
     setSelectedQuestionId(null);
+    setShowSummaryReport(false);
+    setTipStage(0);
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  };
+
+  const handleOpenSummaryReport = () => {
+    soundEffects.playClick();
+    setSelectedQuestionId(null);
+    setShowSummaryReport(true);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  };
+
+  const handleResetAllProgress = () => {
+    if (window.confirm('Möchtest du wirklich alle bisherigen Freitext-Auswertungen und Antworten zurücksetzen?')) {
+      soundEffects.playClick();
+      setProgress({});
+      try {
+        localStorage.removeItem(FREETEXT_STORAGE_KEY);
+      } catch (e) {
+        console.error(e);
+      }
+    }
   };
 
   const scrollToAnswer = () => {
@@ -1186,6 +1707,18 @@ export const FreetextTrainerQuizView: React.FC<Props> = ({ onScoreEarned, onBack
     }, 450);
   };
 
+  // SUMMARY REPORT VIEW
+  if (showSummaryReport) {
+    return (
+      <FreetextSummaryReport
+        progress={progress}
+        onSelectQuestion={handleSelectQuestion}
+        onClose={handleBackToOverview}
+        onResetProgress={handleResetAllProgress}
+      />
+    );
+  }
+
   // OVERVIEW DASHBOARD VIEW
   if (selectedQuestionId === null) {
     return (
@@ -1203,28 +1736,30 @@ export const FreetextTrainerQuizView: React.FC<Props> = ({ onScoreEarned, onBack
         )}
 
         {/* Header Banner */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-7 shadow-xs transition-colors">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-              IHK Prüfungs-Trainer
-            </span>
-            <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300">
-              Freitext & Prüfungsfragen
-            </span>
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-7 shadow-xs transition-colors space-y-5">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                IHK Prüfungs-Trainer
+              </span>
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300">
+                Freitext & Prüfungsfragen
+              </span>
+            </div>
+
+            <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+              <FileText className="w-6 h-6 text-emerald-500" />
+              <span>IHK Freitext-Trainer Übersicht</span>
+            </h2>
+
+            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-3xl">
+              Trainiere authentische IHK-Prüfungsfragen mit Erläuterungen und Fachbegriffen.
+              Aufgaben aus den Original-Prüfungszetteln sind mit einem <strong>lila Rahmen</strong> hervorgehoben und werden nach IHK-Standard bewertet.
+            </p>
           </div>
 
-          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-            <FileText className="w-6 h-6 text-emerald-500" />
-            <span>IHK Freitext-Trainer Übersicht</span>
-          </h2>
-
-          <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-3xl mb-5">
-            Trainiere authentische IHK-Prüfungsfragen mit Erläuterungen und Fachbegriffen.
-            Aufgaben aus den Original-Prüfungszetteln sind mit einem <strong>lila Rahmen</strong> hervorgehoben und werden nach IHK-Standard bewertet.
-          </p>
-
           {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1 border-t border-slate-100 dark:border-slate-800">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
             <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-slate-800">
               <span className="text-[10px] uppercase font-bold text-slate-400 block">Aufgaben gelöst</span>
               <div className="text-lg font-black text-slate-900 dark:text-white mt-0.5 font-mono">
@@ -1253,6 +1788,33 @@ export const FreetextTrainerQuizView: React.FC<Props> = ({ onScoreEarned, onBack
                 <span>+50 EXP Bonus</span>
               </div>
             </div>
+          </div>
+
+          {/* Action Row for Comprehensive Summary Report */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <button
+              onClick={handleOpenSummaryReport}
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-extrabold text-xs sm:text-sm flex items-center gap-2 shadow-sm transition-all active:scale-95 cursor-pointer"
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>
+                {evaluatedCount > 0
+                  ? `Gesamt-Abschlussbericht & Feedback ansehen (${evaluatedCount} gelöst • ${overallGrade.label})`
+                  : 'Ausführlicher Abschlussbericht & Feedback (nach Aufgabenabgabe aktiv)'}
+              </span>
+              <ArrowRight className="w-4 h-4 ml-0.5" />
+            </button>
+
+            {evaluatedCount > 0 && (
+              <button
+                onClick={handleResetAllProgress}
+                className="text-xs text-slate-400 hover:text-rose-500 transition-colors flex items-center gap-1 cursor-pointer"
+                title="Bisherigen Verlauf leeren"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Verlauf zurücksetzen</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -1397,6 +1959,17 @@ export const FreetextTrainerQuizView: React.FC<Props> = ({ onScoreEarned, onBack
         </button>
 
         <div className="flex items-center gap-2">
+          {evaluatedCount > 0 && (
+            <button
+              onClick={handleOpenSummaryReport}
+              className="flex items-center gap-1.5 text-[11px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 hover:bg-purple-100 dark:hover:bg-purple-900/60 px-2.5 py-1.5 rounded-lg border border-purple-200 dark:border-purple-800/80 transition-colors cursor-pointer"
+              title="Zum ausführlichen Abschlussbericht mit allen Aufgaben"
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Abschlussbericht</span>
+            </button>
+          )}
+
           <button
             onClick={scrollToAnswer}
             className="flex items-center gap-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 px-2.5 py-1.5 rounded-lg border border-indigo-200 dark:border-indigo-800/80 transition-colors cursor-pointer"
@@ -1556,13 +2129,129 @@ export const FreetextTrainerQuizView: React.FC<Props> = ({ onScoreEarned, onBack
           </div>
         </div>
 
-        {/* Hint Box */}
-        <div className="p-3.5 bg-amber-50/60 dark:bg-amber-950/30 rounded-2xl border border-amber-200/60 dark:border-amber-800/60 text-xs text-amber-950 dark:text-amber-200 flex items-start gap-2.5">
-          <HelpCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-          <div>
-            <strong className="block mb-0.5">IHK-Lösungsleitfaden & Struktur:</strong>
-            {currentQ.hint}
+        {/* Tiered Tip Component */}
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 p-4 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-2xs">
+                <Lightbulb className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    Denkanstoß & Tipp-Hilfe
+                  </span>
+                  {tipStage > 0 && (
+                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-md bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-200">
+                      Stufe {tipStage} von 2 aktiv
+                    </span>
+                  )}
+                </div>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 block leading-tight">
+                  {tipStage === 0 && 'Erst selbst versuchen – bei Bedarf stufenweise Denkanstöße anfordern'}
+                  {tipStage === 1 && 'Stufe 1 aktiv: Gliederungshilfe & Leitgedanken'}
+                  {tipStage === 2 && 'Stufe 2 aktiv: Wesentliche IHK-Schlüsselbegriffe & Fachtermini'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {tipStage === 0 ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEffects.playClick();
+                    setTipStage(1);
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95"
+                >
+                  <Lightbulb className="w-3.5 h-3.5" />
+                  <span>Tipp anfordern (Stufe 1)</span>
+                </button>
+              ) : tipStage === 1 ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEffects.playClick();
+                      setTipStage(2);
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95"
+                  >
+                    <Lightbulb className="w-3.5 h-3.5" />
+                    <span>Weiterer Tipp (Stufe 2)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEffects.playClick();
+                      setTipStage(0);
+                    }}
+                    className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors"
+                    title="Tipps einklappen"
+                  >
+                    <ChevronUp className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEffects.playClick();
+                    setTipStage(0);
+                  }}
+                  className="px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer flex items-center gap-1.5"
+                >
+                  <ChevronUp className="w-3.5 h-3.5" />
+                  <span>Tipps ausblenden</span>
+                </button>
+              )}
+            </div>
           </div>
+
+          {/* Expanded Tip Content */}
+          {tipStage >= 1 && (
+            <div className="pt-3 border-t border-slate-200/80 dark:border-slate-800 space-y-2.5 animate-in fade-in duration-200">
+              {/* Stage 1: Structure & Guiding Questions */}
+              <div className="p-3.5 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200/80 dark:border-amber-800/60 text-xs text-amber-950 dark:text-amber-200 space-y-1.5">
+                <div className="flex items-center gap-1.5 font-bold text-amber-800 dark:text-amber-300">
+                  <span className="px-1.5 py-0.5 rounded bg-amber-200/80 dark:bg-amber-900/60 text-[10px] font-mono">Stufe 1</span>
+                  <span>Strukturierung & Leitgedanken:</span>
+                </div>
+                <p className="leading-relaxed text-[11px] sm:text-xs">
+                  {currentQ.hint}
+                </p>
+              </div>
+
+              {/* Stage 2: IHK Keywords & Conceptual Impulses */}
+              {tipStage >= 2 && (
+                <div className="p-3.5 bg-purple-50 dark:bg-purple-950/40 rounded-xl border border-purple-200/80 dark:border-purple-800/60 text-xs text-purple-950 dark:text-purple-200 space-y-2 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between gap-1.5">
+                    <div className="flex items-center gap-1.5 font-bold text-purple-800 dark:text-purple-300">
+                      <span className="px-1.5 py-0.5 rounded bg-purple-200/80 dark:bg-purple-900/60 text-[10px] font-mono">Stufe 2</span>
+                      <span>IHK-Fachbegriffe & Denkanstöße:</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-purple-600 dark:text-purple-400">Zur Selbstkontrolle</span>
+                  </div>
+
+                  <p className="text-[11px] leading-relaxed text-purple-900/80 dark:text-purple-200/90">
+                    Prüfe vor der Abgabe, ob du diese IHK-Schlüsselbegriffe und didaktischen Konzepte in deiner Formulierung verwendet hast:
+                  </p>
+
+                  <div className="flex flex-wrap gap-1.5 pt-0.5">
+                    {currentQ.requiredKeywords.slice(0, 8).map((kw, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-800 font-mono text-[11px] font-bold text-purple-700 dark:text-purple-300 shadow-2xs"
+                      >
+                        💡 {kw}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Answer Textarea */}
@@ -1727,12 +2416,21 @@ c) ...`}
             </div>
 
             {/* Footer Navigation */}
-            <div className="flex justify-end pt-2">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
               <button
                 onClick={handleBackToOverview}
+                className="px-5 py-3 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Zurück zur Übersicht</span>
+              </button>
+
+              <button
+                onClick={handleOpenSummaryReport}
                 className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-extrabold text-xs sm:text-sm flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer"
               >
-                <span>Zurück zur Übersicht</span>
+                <BarChart3 className="w-4 h-4" />
+                <span>Zum ausführlichen Abschlussbericht & Feedback</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
