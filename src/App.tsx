@@ -292,8 +292,20 @@ export default function App() {
     if (dbDone && !newlyEarned.includes('database_architect')) newlyEarned.push('database_architect');
 
     const wisoChapter = CHAPTERS.find(c => c.id === 'wiso');
-    const wisoDone = wisoChapter && wisoChapter.modules.every(m => currentStats.completedModules.includes(m.id));
+    const wisoDone = wisoChapter && wisoChapter.modules.length > 0 && wisoChapter.modules.every(m => currentStats.completedModules.includes(m.id));
     if (wisoDone && !newlyEarned.includes('wiso_master')) newlyEarned.push('wiso_master');
+
+    const crossmediaChapter = CHAPTERS.find(c => c.id === 'crossmedia');
+    const crossmediaDone = crossmediaChapter && crossmediaChapter.modules.length > 0 && crossmediaChapter.modules.every(m => currentStats.completedModules.includes(m.id));
+    if (crossmediaDone && !newlyEarned.includes('crossmedia_expert')) newlyEarned.push('crossmedia_expert');
+
+    const graphicsChapter = CHAPTERS.find(c => c.id === 'graphics');
+    const graphicsDone = graphicsChapter && graphicsChapter.modules.length > 0 && graphicsChapter.modules.every(m => currentStats.completedModules.includes(m.id));
+    if (graphicsDone && !newlyEarned.includes('graphics_guru')) newlyEarned.push('graphics_guru');
+
+    const ihkOriginalChapter = CHAPTERS.find(c => c.id === 'ihk-original-teil1');
+    const ihkOriginalDone = ihkOriginalChapter && ihkOriginalChapter.modules.length > 0 && ihkOriginalChapter.modules.every(m => currentStats.completedModules.includes(m.id));
+    if (ihkOriginalDone && !newlyEarned.includes('ihk_original_master')) newlyEarned.push('ihk_original_master');
 
     // Level 2 Mastery Badges
     const lvl2List = currentStats.completedModulesLevel2 || [];

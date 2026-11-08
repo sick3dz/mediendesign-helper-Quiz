@@ -156,6 +156,7 @@ export const ChapterListView: React.FC<Props> = ({
             const isSelected = chapter.id === currentChapter.id;
             const { completed, total, isFullyCompleted, isFullyMastered } = getChapterCompletion(chapter);
             const chapterXpReward = calculateChapterTotalXp(chapter);
+            const hasCatchUp = chapter.modules.some(m => m.hasNewContent);
 
             return (
               <button
@@ -166,6 +167,8 @@ export const ChapterListView: React.FC<Props> = ({
                 className={`p-2 rounded-lg border text-left transition-all cursor-pointer relative flex flex-col justify-between group ${
                   isSelected
                     ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs ring-2 ring-indigo-500/20'
+                    : hasCatchUp
+                    ? 'bg-purple-50/50 dark:bg-purple-950/30 border-purple-400 dark:border-purple-500/70 text-slate-800 dark:text-slate-200 ring-1 ring-purple-400/30 shadow-xs'
                     : !isFullyCompleted
                     ? 'bg-white dark:bg-slate-900 border-indigo-200 dark:border-indigo-900/60 text-slate-800 dark:text-slate-200 hover:border-indigo-400'
                     : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 hover:border-indigo-300'
@@ -174,11 +177,14 @@ export const ChapterListView: React.FC<Props> = ({
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <span
-                      className={`text-[9px] font-mono font-bold tracking-wider uppercase ${
-                        isSelected ? 'text-indigo-200' : 'text-slate-400 dark:text-slate-500'
+                      className={`text-[9px] font-mono font-bold tracking-wider uppercase flex items-center gap-1 ${
+                        isSelected ? 'text-indigo-200' : hasCatchUp ? 'text-purple-600 dark:text-purple-300' : 'text-slate-400 dark:text-slate-500'
                       }`}
                     >
                       KAP {chapter.number}
+                      {hasCatchUp && !isSelected && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" title="Neuer Inhalt / Fragen zum Nachholen" />
+                      )}
                     </span>
 
                     {isFullyMastered ? (

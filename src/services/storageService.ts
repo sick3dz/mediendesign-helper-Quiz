@@ -229,6 +229,24 @@ export const ALL_BADGES: Badge[] = [
     icon: '⚖️',
   },
   {
+    id: 'crossmedia_expert',
+    title: 'Crossmedia-Pionier',
+    description: 'Kapitel 8 Medienneutralität, XML & Single Source Publishing gemeistert',
+    icon: '🔄',
+  },
+  {
+    id: 'graphics_guru',
+    title: 'Bilddaten-Guru',
+    description: 'Kapitel 9 Digitale Bild- & Grafikdaten (SVG, WebP, RGB/CMYK) gemeistert',
+    icon: '🎨',
+  },
+  {
+    id: 'ihk_original_master',
+    title: 'IHK-Prüfungsmeister',
+    description: 'Kapitel 11 Original-IHK-Prüfung Teil 1 (alle 12 Aufgaben) gemeistert',
+    icon: '🏅',
+  },
+  {
     id: 'exam_ready',
     title: 'Prüfungsbereit',
     description: 'Abschlussprüfungs-Simulator mit Note 1 oder 2 bestanden',

@@ -315,6 +315,30 @@ const BASE_EXAM_QUESTIONS: QuizQuestion[] = [
     merksatz: 'JSON ist kompakter als XML, schneller im Parsing und nativ im Webbrowser integriert.'
   },
   {
+    id: 'exam-27b',
+    chapterId: 'graphics',
+    question: 'Aufgabe 27b (Bilddaten & Vektoren): Warum ist das SVG-Format für Icons und Responsive Webdesign dem PNG-Format überlegen?',
+    options: [
+      { id: 'a', text: 'SVG basiert auf mathematischen XML-Vektoren und lässt sich verlustfrei auf beliebige Display-Auflösungen (auch Retina/HiDPI) ohne Qualitätsverlust und ohne Speicheranstieg skalieren', isCorrect: true, explanation: 'Richtig! SVG ist ein offener Vektor-Standard auf XML-Basis und bleibt bei jeder Bildschirmgröße gestochen scharf.' },
+      { id: 'b', text: 'SVG kann nur von Druckmaschinen gelesen werden', isCorrect: false, explanation: 'Falsch: SVG ist der Standard für moderne Webbrowser.' },
+      { id: 'c', text: 'SVG verbraucht zehnmal mehr Speicherplatz als PNG', isCorrect: false, explanation: 'Falsch: Für Vektordaten ist SVG deutlich kompakter.' },
+      { id: 'd', text: 'SVG unterstützt keine Transparenzen', isCorrect: false, explanation: 'Falsch: SVG unterstützt native Alpha-Transparenzen und CSS-Styling.' }
+    ],
+    merksatz: 'SVG = XML-Vektoren für verlustfreie Skalierbarkeit im Responsive Webdesign!'
+  },
+  {
+    id: 'exam-27c',
+    chapterId: 'graphics',
+    question: 'Aufgabe 27c (Farbmanagement): Welches Farbprofil gilt als kleinster gemeinsamer Nenner für medienneutrale Web-Grafiken?',
+    options: [
+      { id: 'a', text: 'sRGB (Standard-RGB) – da es von nahezu allen Consumer-Displays und Webbrowsern einheitlich interpretiert wird', isCorrect: true, explanation: 'Exakt! sRGB ist der universelle Internet-Standard zur Vermeidung unkontrollierter Farbabweichungen.' },
+      { id: 'b', text: 'ISO Coated v2 (Druckfarbraum)', isCorrect: false, explanation: 'Falsch: Das ist ein CMYK-Profil für gestrichenes Papier.' },
+      { id: 'c', text: 'ProPhoto RGB', isCorrect: false, explanation: 'Falsch: Viel zu groß für Web, führt auf Standard-Displays zu ausgewaschenen Farben.' },
+      { id: 'd', text: 'Graustufen 8-Bit', isCorrect: false, explanation: 'Falsch: Enthält keinerlei Farbinformationen.' }
+    ],
+    merksatz: 'sRGB ist der verbindliche Standard-Farbraum für das World Wide Web!'
+  },
+  {
     id: 'exam-28',
     chapterId: 'wiso',
     question: 'Aufgabe 28 (WiSo - BBiG & Kündigungsrecht): Wie ist die Kündbarkeit eines Berufsausbildungsverhältnisses nach Ablauf der Probezeit gesetzlich geregelt?',

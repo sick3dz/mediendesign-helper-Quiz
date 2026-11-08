@@ -465,6 +465,154 @@ export const CHECKLIST_DOSSIERS: Record<string, ChecklistDetailInfo> = {
     examinerWarning: 'Typische IHK-Falle: Prüflinge schreiben bei Defekten sofort "Kaufpreis zurückfordern" (Rücktritt). Das Gesetz gewährt dem Verkäufer jedoch das "Recht der zweiten Andienung". Ohne Nacherfüllungsverlangen ist ein Rücktritt unwirksam!',
     relatedModuleId: 'wiso-4',
     relatedModuleName: 'Vertragsrecht, Verbraucherschutz & Wirtschaftskreislauf'
+  },
+
+  // === KAPITEL 8: CROSSMEDIA & MEDIENNEUTRALITÄT ===
+  'layout- vs. strukturbasiert': {
+    definition: 'Im layoutbasierten Workflow (Desktop Publishing / Print-First) wird Content direkt in feste Layoutrahmen platziert (z. B. InDesign-Dokument). Änderungen erfordern manuellen Satzaufwand in jedem Kanal. Im strukturbasierten Workflow (Single Source Publishing) werden Inhalte medienneutral und rein semantisch (z.B. in XML oder Markdown) erfasst. Die Formatierung erfolgt automatisch über Templates und Stylesheets je nach Zielmedium (Print, Web, Mobile App).',
+    keywords: ['Layoutbasiert (Print-First)', 'Strukturbasiert (Single Source)', 'Medienneutralität', 'Inhalt-Layout-Trennung', 'Multi-Channel Publishing'],
+    practicalExample: {
+      context: 'Ein Modehändler bringt vierteljährlich einen Print-Katalog und gleichzeitig einen aktualisierten Webshop heraus. Bisher tippen Layouter alle Produktpreise manuell in InDesign ab.',
+      application: 'Durch die Umstellung auf einen strukturbasierten Workflow mit zentralem PIM-System (XML-Export) fließen Texte, Bilder und Preise automatisch in InDesign per EasyCatalog und zeitgleich per API in den Shopify-Webshop.'
+    },
+    examQuestion: {
+      questionText: 'Stellen Sie den layoutbasierten und den strukturbasierten Workflow im Rahmen der medienneutralen Publikation gegenüber. Nennen Sie zwei entscheidende Vorteile des strukturbasierten Workflows.',
+      points: 6,
+      sampleAnswer: '1. Layoutbasiert: Text und Layout sind fest miteinander verschmolzen (z. B. InDesign-Datei). Medienwechsel bedeutet Neugestaltung. 2. Strukturbasiert: Strikte Trennung von Inhalt (Datenhaltung) und Form (Templates). Vorteile: a) Effizienzgewinn & Vermeidung von Redundanzen (Single Source of Truth), b) Kanalunabhängige automatisierte Ausspielung für Print, Web und mobile Endgeräte.',
+      scoringCriteria: [
+        '2 Punkte für die präzise Gegenüberstellung beider Workflow-Konzepte',
+        '2 Punkte für den ersten Vorteil (Single Source of Truth / Fehlerreduktion)',
+        '2 Punkte für den zweiten Vorteil (automatisierte Mehrkanal-Ausspielung)'
+      ]
+    },
+    examinerWarning: 'IHK-Prüfer achten penibel auf das Grundprinzip: "Trennung von Inhalt und Form". Wer dieses Schlagwort vergisst, verschenkt wertvolle Kernpunkte.',
+    relatedModuleId: 'cross-1',
+    relatedModuleName: 'Medienneutrale Workflows & Workflows-Konzepte'
+  },
+  'xml- wohlgeformtheit': {
+    definition: 'Ein XML-Dokument ist syntaktisch wohlgeformt (well-formed), wenn es 4 unverhandelbare Grundregeln erfüllt: 1. Genau ein einziges Wurzelelement (Root-Element) umschließt den gesamten Inhalt. 2. Jedes Start-Tag besitzt ein exakt passendes End-Tag (oder ist Empty-Tag <tag/>). 3. Elemente sind hierarchisch sauber geschachtelt (keine Überkreuzungen wie <a><b></a></b>). 4. XML beachtet strikte Case-Sensitivity (Groß-/Kleinschreibung muss übereinstimmen: <Titel> ≠ </titel>).',
+    keywords: ['Wurzelelement (Root)', 'End-Tags', 'Saubere Schachtelung', 'Case-Sensitivity', 'Well-formed XML'],
+    practicalExample: {
+      context: 'Ein Auszubildender übergibt eine Produktliste im XML-Format. Der Parser bricht sofort mit einem Fatal Error ab.',
+      application: 'Die Fehlersuche deckt auf: Ein schließendes Tag wurde als </item> geschrieben, das öffnende war <Item>. Nach Korrektur der Case-Sensitivity ist die Wohlgeformtheit hergestellt und der Parser lädt die Daten fehlerfrei.'
+    },
+    examQuestion: {
+      questionText: 'Nennen Sie die vier formalen Bedingungen, die ein XML-Dokument zwingend erfüllen muss, um als „wohlgeformt“ (well-formed) anerkannt zu werden.',
+      points: 4,
+      sampleAnswer: '1. Genau ein Root-Element (Wurzel-Tag). 2. Alle Tags müssen korrekt geschlossen werden. 3. Korrekte hierarchische Verschachtelung ohne Überschneidung. 4. Strikte Beachtung der Groß- und Kleinschreibung (Case-Sensitivity) aller Bezeichner.',
+      scoringCriteria: [
+        'Je 1 Punkt pro korrekt genannter Wohlgeformtheits-Bedingung (max. 4 Punkte)'
+      ]
+    },
+    examinerWarning: 'Achtung Unterschied: Wohlgeformt (Well-formed) bedeutet nur syntaktisch fehlerfrei lesbar. Gültig (Valid) bedeutet, dass das Dokument zusätzlich gegen ein Regelwerk (DTD oder XML-Schema/XSD) geprüft und freigegeben wurde!',
+    relatedModuleId: 'cross-2',
+    relatedModuleName: 'XML Grundlagen & Wohlgeformtheit'
+  },
+
+  // === KAPITEL 9: DIGITALE BILD- & GRAFIKDATEN ===
+  'vektor vs. pixel': {
+    definition: 'Pixelgrafiken (Rasterdaten, z. B. JPG, PNG, WebP) bestehen aus einem festen Raster einzelner quadratischer Farbpunkte (Pixel). Sie besitzen eine feste physikalische Auflösung und zeigen beim Skalieren Treppeneffekte (Pixelation). Vektorgrafiken (z. B. SVG, EPS, AI) bestehen aus mathematischen Formeln, Pfaden, Ankerpunkten und Bézier-Kurven. Sie sind auflösungsunabhängig, beliebig ohne Qualitätsverlust skalierbar und weisen bei geometrischen Formen winzige Dateigrößen auf.',
+    keywords: ['Rastergrafik / Pixel', 'Vektorgrafik (Mathematische Pfade)', 'Bézier-Kurven', 'Auflösungsunabhängig', 'Treppeneffekt / Artefakte'],
+    practicalExample: {
+      context: 'Ein Firmenlogo liegt als 300x150 Pixel PNG-Datei vor und soll für ein 4x2 Meter großes Messebanner gedruckt werden.',
+      application: 'Wird das Pixelbild auf 4 Meter vergrößert, sinkt die effektive Druckauflösung auf unter 2 ppi (extreme Unschärfe und Riesenpixel). Die Grafik muss zwingend als SVG bzw. EPS als echte Vektorgrafik neu gesetzt oder nachgezeichnet werden.'
+    },
+    examQuestion: {
+      questionText: 'Vergleichen Sie Pixel- und Vektorgrafiken anhand von Skalierbarkeit, typischem Einsatzzweck und je zwei standardisierten Dateiformaten.',
+      points: 6,
+      sampleAnswer: '1. Skalierbarkeit: Vektoren sind unbegrenzt verlustfrei skalierbar; Pixel verlieren beim Vergrößern Schärfe und verpixeln. 2. Einsatzzweck: Vektoren für Logos, Icons und Schriften; Pixel für detailreiche Fotos und komplexe Farbverläufe. 3. Formate: Vektor = SVG, EPS; Pixel = WebP, JPG, PNG.',
+      scoringCriteria: [
+        '2 Punkte für die präzise Skalierbarkeits-Erklärung',
+        '2 Punkte für die Abgrenzung der Einsatzzwecke (Fotos vs. Logos)',
+        '2 Punkte für je zwei korrekte Formate'
+      ]
+    },
+    examinerWarning: 'Sehr häufige IHK-Falle: "SVG ist ein Bildformat für Fotos". Falsch! Vektoren können keine fotorealistischen Bilddaten mit Millionen Einzelnuancen wirtschaftlich abbilden!',
+    relatedModuleId: 'gfx-1',
+    relatedModuleName: 'Pixel vs. Vektor (SVG & WebP)'
+  },
+  'rgb vs. cmyk': {
+    definition: 'RGB (Rot, Grün, Blau) ist ein additives Farbmodell für Selbstleuchter (Monitore, Displays, Beamer). Überlagerung aller drei Farben mit voller Intensität ergibt Weiß (Lichtfarben). CMYK (Cyan, Magenta, Yellow, blacK/Key) ist ein subtraktives Farbmodell für Körperfarben im Vierfarbdruck. Druckfarben absorbieren Lichtwellen; Überlagerung ergibt theoretisch Schwarz (in der Praxis Dunkelbraun, daher K/Key-Schwarz als vierte Druckfarbe). Der RGB-Farbraum (insbes. AdobeRGB/sRGB) ist deutlich größer als der druckbare CMYK-Farbraum (z. B. ISO Coated v2).',
+    keywords: ['Additives Farbmodell (RGB)', 'Subtraktives Farbmodell (CMYK)', 'Körperfarben vs. Lichtfarben', 'Gamut / Farbraumumfang', 'ISO Coated v2'],
+    practicalExample: {
+      context: 'Ein Kunde liefert ein Plakat mit grell leuchtendem Neongrün in sRGB. Nach dem Offsetdruck beschwert er sich, dass das Grün stumpf und erdig aussieht.',
+      application: 'Erklärung des Farbraumunterschieds: Die Neonfarbe liegt außerhalb des CMYK-Druckfarbraums (Gamut). Zur Vermeidung solcher Überraschungen muss vor Drucklegung ein Farb-Softproof mit CMYK-Profil simuliert werden oder eine Sonderfarbe (z. B. Pantone) gewählt werden.'
+    },
+    examQuestion: {
+      questionText: 'Erklären Sie den Unterschied zwischen additiver und subtraktiver Farbmischung unter Nennung der Primärfarben, der Mischwirkung und des primären Anwendungsbereichs.',
+      points: 6,
+      sampleAnswer: '1. Additive Mischung: Primärfarben Rot, Grün, Blau (RGB). Mischung von Lichtfarben: Addition ergibt Weiß. Einsatz: Bildschirme, Video, Web. 2. Subtraktive Mischung: Primärfarben Cyan, Magenta, Gelb plus Schwarz (CMYK). Mischung von Druckpigmenten: Licht wird absorbiert (subtrahiert), Mischung aller Farben ergibt Schwarz. Einsatz: Vierfarb-Offsetdruck und Digitaldruck.',
+      scoringCriteria: [
+        '3 Punkte für die additive Mischung (RGB, Licht, Weiß, Monitor)',
+        '3 Punkte für die subtraktive Mischung (CMYK, Pigment, Schwarz, Druck)'
+      ]
+    },
+    examinerWarning: 'Wichtig für IHK-Punkte: Bei CMYK stets das "K" als Key-Color (Schwarz zur Kontrast- und Tiefensteigung) begründen können!',
+    relatedModuleId: 'gfx-3',
+    relatedModuleName: 'RGB vs. CMYK & medienneutrale Farbräume'
+  },
+
+  // === KAPITEL 11: IHK ORIGINAL-PRÜFUNG TEIL 1 ===
+  'aufgabe 7: farbmanagement & zeitungsdruck': {
+    definition: 'Im Zeitungsdruck (z. B. ICC-Profil ISOnewspaper26v4) muss der maximale Gesamtfarbauftrag (TAC / Gesamtfarbdeckung) strikt auf max. 240% begrenzt werden. Grund: Das poröse, ungestrichene Zeitungspapier besitzt eine hohe Saugfähigkeit und geringe Grammatur (ca. 45 g/m²). Zu hoher Farbauftrag (z. B. 300% aus ISO Coated v2) führt zum Durchschlagen der Farbe auf die Rückseite, extremem Schmieren und Makulatur bei hoher Rotationsgeschwindigkeit.',
+    keywords: ['ISOnewspaper26v4 (max. 240% TAC)', 'ISO Coated v2 (300% TAC)', 'Papier-Saugfähigkeit', 'Farbablegen / Durchschlagen', 'Rotationsdruck'],
+    practicalExample: {
+      context: 'Eine Werbeagentur schickt eine Bildanzeige, die zuvor in einem Hochglanzmagazin (ISO Coated v2) gedruckt wurde, 1:1 an die Lokalzeitung.',
+      application: 'Die Druckerei stoppt den Druck: Die Anzeige hat 310% Gesamtfarbauftrag. Das Motiv muss in Photoshop mit dem Profil "ISOnewspaper26v4" konvertiert werden, wodurch der Schwarzaufbau (GCR) verstärkt und Buntfarben reduziert werden, um die 240%-Grenze exakt einzuhalten.'
+    },
+    examQuestion: {
+      questionText: 'Begründen Sie, warum für den Zeitungsdruck ein maximaler Gesamtfarbauftrag von 240% vorgeschrieben ist, während im Bogenoffset auf Bilderdruckpapier bis zu 300% zulässig sind.',
+      points: 4,
+      sampleAnswer: 'Zeitungspapier ist ein sehr saugfähiges, ungestrichenes Papier mit geringem Flächengewicht. Bei mehr als 240% Farbauftrag saugt das Papier zu viel Farbe auf: Die Farbe schlägt auf die Rückseite durch, trocknet bei schneller Rollenrotation nicht rechtzeitig und führt zu Farbablegen und Verwischen.',
+      scoringCriteria: [
+        '2 Punkte für die Papierbeschaffenheit (ungestrichen, saugfähig, dünn)',
+        '2 Punkte für die technischen Druckfolgen (Durchschlagen, Trocknungsproblem, Schmieren)'
+      ]
+    },
+    examinerWarning: 'Original-Prüfungsaufgabe 7! Prüfer verlangen stets die Begründung über die Papiereigenschaften (Saugfähigkeit, Durchschlagen) und die Trocknungszeit.',
+    relatedModuleId: 'ihk-orig-7',
+    relatedModuleName: 'Aufgabe 7: Farbmanagement & Zeitungsdruck'
+  },
+  'aufgabe 9: effektiv-ppi & rechenweg': {
+    definition: 'Die effektive Bildauflösung (ppi = Pixel per Inch) berechnet sich nach der Formel: Effektiv-PPI = Pixelanzahl / (Druckbreite in cm / 2,54). Für hochwertige Printprodukte im 60er- bzw. 70er-Raster gilt der Standard: 300 ppi gefordert (Qualitätsfaktor QF = 2 bei 150 lpi). Liegt ein Bild mit 1800 Pixel Breite vor und soll 18 cm breit gedruckt werden, beträgt die effektive Auflösung 1800 / (18 / 2,54) = 254 ppi. Dies liegt unter den geforderten 300 ppi. Die maximal zulässige Druckbreite bei 300 ppi errechnet sich als: 1800 px / 300 ppi * 2,54 = 15,24 cm.',
+    keywords: ['1 Zoll = 2,54 cm', 'Formel: Pixel / (cm / 2,54)', 'Gefordert: 300 ppi', 'Max. Druckbreite = (Pixel / 300) * 2,54', 'Qualitätsfaktor QF = 2'],
+    practicalExample: {
+      context: 'Ein Kunde liefert ein Foto mit 2400 x 1600 Pixeln und verlangt einen doppelseitigen Druck mit 40 cm Breite.',
+      application: 'Rechnung: 2400 / (40 / 2,54) = 152 ppi. Da 152 ppi weit unter 300 ppi liegt, wird das Bild im Druck pixelig wirken. Der Kunde muss schriftlich auf den Qualitätsmangel hingewiesen werden.'
+    },
+    examQuestion: {
+      questionText: 'Ein digitales Bild hat eine Breite von 1800 Pixeln. Es soll im Offsetdruck mit einer Breite von 18 cm ausgegeben werden. Berechnen Sie die effektive Auflösung in ppi und ermitteln Sie die maximale Breite in cm, bei der die Qualitätsforderung von 300 ppi noch erfüllt wird (1 Inch = 2,54 cm).',
+      points: 6,
+      sampleAnswer: '1. Effektive Auflösung: 18 cm / 2,54 = 7,0866 Inch. 1800 px / 7,0866 Inch = 254 ppi (Anforderung von 300 ppi nicht erfüllt). 2. Maximale Druckbreite bei 300 ppi: 1800 px / 300 ppi = 6 Inch. 6 Inch * 2,54 cm/Inch = 15,24 cm.',
+      scoringCriteria: [
+        '3 Punkte für die korrekte Berechnung der 254 ppi inklusive Formelansatz',
+        '3 Punkte für die korrekte Ermittlung der maximalen Druckbreite von 15,24 cm'
+      ]
+    },
+    examinerWarning: 'Original-Prüfungsaufgabe 9: Achte exakt auf die Umrechnung 2,54 cm pro Zoll. Viele Prüflinge runden zu früh auf 2,5 cm, was zu Punktabzug führt!',
+    relatedModuleId: 'ihk-orig-9',
+    relatedModuleName: 'Aufgabe 9: Auflösungsberechnung & Effektiv-PPI'
+  },
+  'aufgabe 11: gradationskurve (tunnel)': {
+    definition: 'Bei einem unterbelichteten Tunnel-Innenraum (Schatten zulaufend, Scheinwerfer und Sonnenlicht am Ausgang extrem hell) muss die Gradationskurve gezielt s-förmig bzw. im Dreivierteltonbereich angehoben werden: 1. Fixieren der Lichter im oberen Quadranten (ca. 90-100%), um das Ausfressen der Tunneleinfahrt zu verhindern. 2. Anheben der Tonwerte im Schatten- und Mitteltönungsbereich (ca. 25-45%), um Details im Fahrbahnbelag und an der Tunnelwand sichtbar zu machen, ohne Bildrauschen übermäßig zu verstärken.',
+    keywords: ['Gradationskurve', 'Schattenaufhellung', 'Lichterfixierung', 'Ausfressen verhindern', 'Tonwertspreizung'],
+    practicalExample: {
+      context: 'Für ein Tourismusmagazin wird das Foto einer Tropfsteinhöhle mit Gegenlicht eingereicht. Die Höhlenwände sind komplett schwarz.',
+      application: 'Anstatt die Gesamtbelichtung hochzuziehen (wodurch die Lichtscheinwerfer ausbleichen), wird die Gradationskurve verwendet: Kontrollpunkte fixieren das Licht, während die dunklen Höhlenwände gezielt um 30% aufgehellt werden.'
+    },
+    examQuestion: {
+      questionText: 'Beschreiben Sie anhand des IHK-Prüfungsbeispiels (Tunnel mit Gegenlicht am Ausgang), wie eine Gradationskurve in Photoshop angepasst werden muss, um Zeichnung in den Schatten zu gewinnen, ohne die Lichter zu zerstören.',
+      points: 5,
+      sampleAnswer: '1. Lichterpunkt im oberen Bereich fixieren, damit die Tunneleinfahrt nicht ausfrisst. 2. Kurve im Bereich der Tiefen/Schatten (unteres Drittel bis Mitte) nach oben biegen, um die dunklen Tunnelwände und Fahrbahndetails aufzuhellen. 3. Schwarzpunkt so wählen, dass Kontrast erhalten bleibt und kein Grauschleier entsteht.',
+      scoringCriteria: [
+        '2 Punkte für die Fixierung der Lichter im oberen Bereich',
+        '2 Punkte für die gezielte Schattenaufhellung im unteren Bereich',
+        '1 Punkt für die Vermeidung von Kontrastverlust/Grauschleier'
+      ]
+    },
+    examinerWarning: 'Original-Prüfungsaufgabe 11! IHK-Prüfer verlangen explizit zwei Schritte: Lichter fixieren und Schatten differenziert anheben!',
+    relatedModuleId: 'ihk-orig-11',
+    relatedModuleName: 'Aufgabe 11: Bildoptimierung & Gradationskurve'
   }
 };
 
