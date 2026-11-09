@@ -1,6 +1,6 @@
 {
-  "summary":  "Plan to fix the mobile layout overflow in QuestionAssetWidget and optimize AssetViewerModal for full-width responsive display of the PM cycle SVG graphic.",
-  "updatedAt":  "2026-11-09T19:10:13.358253060Z",
+  "summary":  "Architekturplan für den realistischen IHK-Prüfungssimulator mit 90-Minuten-Zeitmodus, 100-Punkte-Skalierung, 10 strukturierten Szenario-Hauptaufgaben über alle 12 Kapitel, Aufgaben-Flagging und Notenspiegel.",
+  "updatedAt":  "2026-11-09T19:19:58.031052149Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

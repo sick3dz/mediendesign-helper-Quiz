@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { EXAM_QUESTIONS, calculateIhkGrade } from '../data/examQuestions';
-import { QuizOption } from '../types/quiz';
+import { EXAM_QUESTIONS, IHK_EXAM_SCENARIOS, calculateIhkGrade, IhkExamScenario } from '../data/examQuestions';
+import { QuizOption, QuizQuestion } from '../types/quiz';
 import { BionicText } from '../utils/bionicReading';
 import { soundEffects } from '../services/audioService';
 import confetti from 'canvas-confetti';
-import { Award, Check, X, ArrowLeft, ArrowRight, RotateCcw, Clock, AlertTriangle, ShieldCheck, BookOpen } from 'lucide-react';
+import { Award, Check, X, ArrowLeft, ArrowRight, RotateCcw, Clock, AlertTriangle, ShieldCheck, Flag, Sparkles, BookOpen, Building2, CheckCircle2, ChevronRight, HelpCircle } from 'lucide-react';
 import { QuestionDetailModal } from './QuestionDetailModal';
 import { QuestionAssetWidget } from './QuestionAssetWidget';
-import { QuizQuestion } from '../types/quiz';
-import { shuffleArray } from '../utils/learningLogic';
 
 interface Props {
   bionic: boolean;
@@ -19,107 +17,154 @@ interface Props {
 }
 
 export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, onAnswer, onGoToChapter, onBack }) => {
-  const [hasStarted, setHasStarted] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // Modes: 'selection' | 'real_exam' | 'topic_practice'
+  const [mode, setMode] = useState<'selection' | 'real_exam' | 'topic_practice'>('selection');
+  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
+
+  // Active Exam state
+  const [currentScenarioIndex, setCurrentScenarioIndex] = useState(0);
+  const [currentQuestionInScenarioIndex, setCurrentQuestionInScenarioIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<{ [qId: string]: string }>({});
-  const [selectedInCurrent, setSelectedInCurrent] = useState<string | null>(null);
+  const [flaggedQuestions, setFlaggedQuestions] = useState<{ [qId: string]: boolean }>({});
   const [isFinished, setIsFinished] = useState(false);
-  const [secondsElapsed, setSecondsElapsed] = useState(0);
+  const [secondsRemaining, setSecondsRemaining] = useState(90 * 60); // 90 minutes real IHK exam
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [detailModalQuestion, setDetailModalQuestion] = useState<{ question: QuizQuestion; selectedOption: QuizOption | null } | null>(null);
 
-  const [examKey, setExamKey] = useState(0);
+  // Scenarios list
+  const activeScenarios = useMemo(() => {
+    if (mode === 'topic_practice' && selectedTopicId) {
+      return IHK_EXAM_SCENARIOS.filter((s) => s.id === selectedTopicId);
+    }
+    return IHK_EXAM_SCENARIOS;
+  }, [mode, selectedTopicId]);
 
-  // Shuffle question options on every exam attempt
-  const shuffledExamQuestions = useMemo(() => {
-    return EXAM_QUESTIONS.map(q => ({
-      ...q,
-      options: shuffleArray(q.options),
-    }));
-  }, [examKey]);
+  const currentScenario = activeScenarios[currentScenarioIndex] || activeScenarios[0];
 
+  // Questions in current active scenario
+  const scenarioQuestions = useMemo(() => {
+    if (!currentScenario) return [];
+    return EXAM_QUESTIONS.filter((q) => currentScenario.questionIds.includes(q.id));
+  }, [currentScenario]);
+
+  const currentQuestion = scenarioQuestions[currentQuestionInScenarioIndex] || scenarioQuestions[0];
+
+  // Timer for 90-minute real IHK mode
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    if (hasStarted && !isFinished) {
+    if (mode === 'real_exam' && !isFinished) {
       interval = setInterval(() => {
-        setSecondsElapsed(s => s + 1);
+        setSecondsRemaining((sec) => {
+          if (sec <= 1) {
+            clearInterval(interval!);
+            finishExam();
+            return 0;
+          }
+          return sec - 1;
+        });
       }, 1000);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [hasStarted, isFinished]);
+  }, [mode, isFinished]);
 
-  const currentQ = shuffledExamQuestions[currentIndex];
+  const handleSelectAnswer = (optionId: string) => {
+    if (!currentQuestion) return;
+    setUserAnswers((prev) => ({ ...prev, [currentQuestion.id]: optionId }));
 
-  const handleSelect = (opt: QuizOption) => {
-    if (selectedInCurrent !== null) return;
-    setSelectedInCurrent(opt.id);
-    setUserAnswers(prev => ({ ...prev, [currentQ.id]: opt.id }));
-    if (opt.isCorrect) {
+    const selectedOpt = currentQuestion.options.find((o) => o.id === optionId);
+    if (selectedOpt?.isCorrect) {
       soundEffects.playCorrect();
     } else {
       soundEffects.playWrong();
     }
 
-    if (onAnswer) {
-      onAnswer(currentQ.id, opt.isCorrect);
+    if (onAnswer && selectedOpt) {
+      onAnswer(currentQuestion.id, selectedOpt.isCorrect);
     }
   };
 
-  const handleNext = () => {
+  const toggleFlag = (qId: string) => {
     soundEffects.playClick();
-    setSelectedInCurrent(null);
+    setFlaggedQuestions((prev) => ({ ...prev, [qId]: !prev[qId] }));
+  };
 
-    if (currentIndex + 1 < shuffledExamQuestions.length) {
-      setCurrentIndex(i => i + 1);
+  const handleNextSubquestion = () => {
+    soundEffects.playClick();
+    if (currentQuestionInScenarioIndex + 1 < scenarioQuestions.length) {
+      setCurrentQuestionInScenarioIndex((i) => i + 1);
+    } else if (currentScenarioIndex + 1 < activeScenarios.length) {
+      setCurrentScenarioIndex((s) => s + 1);
+      setCurrentQuestionInScenarioIndex(0);
     } else {
-      finishExam();
+      setShowSubmitModal(true);
+    }
+  };
+
+  const handlePrevSubquestion = () => {
+    soundEffects.playClick();
+    if (currentQuestionInScenarioIndex > 0) {
+      setCurrentQuestionInScenarioIndex((i) => i - 1);
+    } else if (currentScenarioIndex > 0) {
+      setCurrentScenarioIndex((s) => s - 1);
+      const prevQuestions = EXAM_QUESTIONS.filter((q) => activeScenarios[currentScenarioIndex - 1].questionIds.includes(q.id));
+      setCurrentQuestionInScenarioIndex(prevQuestions.length - 1);
     }
   };
 
   const finishExam = () => {
+    setShowSubmitModal(false);
     setIsFinished(true);
 
-    let correctCount = 0;
-    shuffledExamQuestions.forEach(q => {
-      const chosenOpt = q.options.find(o => o.id === userAnswers[q.id]);
-      if (chosenOpt?.isCorrect) correctCount++;
+    let totalPointsEarned = 0;
+    let totalMaxPoints = 100;
+
+    activeScenarios.forEach((scen: IhkExamScenario) => {
+      const qList = EXAM_QUESTIONS.filter((q: QuizQuestion) => scen.questionIds.includes(q.id));
+      let scenCorrect = 0;
+      qList.forEach((q: QuizQuestion) => {
+        const chosen = q.options.find((o: QuizOption) => o.id === userAnswers[q.id]);
+        if (chosen?.isCorrect) scenCorrect++;
+      });
+      const ratio = qList.length > 0 ? scenCorrect / qList.length : 0;
+      totalPointsEarned += Math.round(ratio * scen.points);
     });
 
-    const percentage = Math.round((correctCount / shuffledExamQuestions.length) * 100);
+    const percentage = Math.round((totalPointsEarned / totalMaxPoints) * 100);
     const gradeInfo = calculateIhkGrade(percentage);
 
     if (gradeInfo.passed) {
       soundEffects.playLevelUp();
-      confetti({ particleCount: 100, spread: 80 });
+      confetti({ particleCount: 120, spread: 80 });
     } else {
       soundEffects.playWrong();
     }
 
     onExamCompleted({
-      score: correctCount,
-      total: shuffledExamQuestions.length,
+      score: totalPointsEarned,
+      total: totalMaxPoints,
       percentage,
       grade: gradeInfo.grade,
     });
   };
 
   const restartExam = () => {
-    setExamKey(k => k + 1);
-    setHasStarted(true);
-    setCurrentIndex(0);
+    setMode('selection');
+    setCurrentScenarioIndex(0);
+    setCurrentQuestionInScenarioIndex(0);
     setUserAnswers({});
-    setSelectedInCurrent(null);
+    setFlaggedQuestions({});
     setIsFinished(false);
-    setSecondsElapsed(0);
-    setShowExitConfirm(false);
+    setSecondsRemaining(90 * 60);
+    setShowSubmitModal(false);
   };
 
-  // Welcome / Intro screen
-  if (!hasStarted) {
+  // Render 1: Mode Selection Screen
+  if (mode === 'selection') {
     return (
-      <div className="max-w-2xl mx-auto space-y-4">
+      <div className="max-w-4xl mx-auto space-y-6">
         {/* Top Back Navigation */}
         <div className="flex items-center justify-between">
           <button
@@ -131,216 +176,256 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
           </button>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-xs text-center space-y-6 transition-colors">
-          <div className="w-16 h-16 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mx-auto">
-            <ShieldCheck className="w-8 h-8" />
-          </div>
-
-          <div>
-            <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
-              Offizieller Prüfungs-Simulator
-            </span>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-              Mediengestalter Abschlussprüfung: Designkonzeption
-            </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-300 mt-2">
-              {EXAM_QUESTIONS.length} originalgetreue Fragen zu Interaktionsdesign, Wireframing, Prototyping, IT-Sicherheit, Barrierefreiheit (WCAG), Scrum, SQL/JSON, medienneutralen Daten sowie Wirtschafts- & Sozialkunde (WiSo).
-            </p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3 p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
-            <div>
-              <div className="font-bold text-slate-900 dark:text-white font-mono text-base">{EXAM_QUESTIONS.length}</div>
-              <div className="text-slate-500 dark:text-slate-400">Prüfungsfragen</div>
+        {/* Hero Banner */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 shrink-0">
+              <ShieldCheck className="w-10 h-10" />
             </div>
             <div>
-              <div className="font-bold text-slate-900 dark:text-white font-mono text-base">IHK</div>
-              <div className="text-slate-500 dark:text-slate-400">Notenschlüssel</div>
-            </div>
-            <div>
-              <div className="font-bold text-slate-900 dark:text-white font-mono text-base">+300</div>
-              <div className="text-slate-500 dark:text-slate-400">EXP Bonus</div>
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                Offizieller Prüfungs-Simulator (Mediengestalter 2026)
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
+                IHK Abschlussprüfung: Designkonzeption & PM
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1">
+                Strukturierte Prüfungsaufgaben nach IHK-Standard über alle 12 Fachkapitel. Wähle zwischen der realen 90-Minuten-Prüfung oder gezielten Themen-Happen.
+              </p>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <button
+          {/* Mode Selector Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            {/* Mode 1: Real IHK Exam */}
+            <div
               onClick={() => {
                 soundEffects.playClick();
-                setHasStarted(true);
+                setMode('real_exam');
+                setSecondsRemaining(90 * 60);
               }}
-              className="w-full sm:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-xl text-sm font-semibold transition-colors shadow-xs cursor-pointer"
+              className="p-6 rounded-2xl bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 border-2 border-indigo-500/50 hover:border-indigo-400 text-white shadow-xl hover:shadow-2xl transition-all cursor-pointer group space-y-4 relative overflow-hidden"
             >
-              Prüfungssimulation jetzt starten
-            </button>
-            <button
-              onClick={onBack}
-              className="w-full sm:w-auto px-5 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold transition-colors cursor-pointer"
-            >
-              Abbrechen & Zurück
-            </button>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-mono font-bold uppercase">
+                  Offizielles Format
+                </span>
+                <Clock className="w-5 h-5 text-indigo-400" />
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold text-white group-hover:text-indigo-200 transition-colors flex items-center gap-2">
+                  <span>⚡ Reale IHK-Abschlussprüfung</span>
+                </h3>
+                <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+                  90 Minuten Zeitlimit, 100 Punkte Gesamtskala über 10 Firmen-Szenarios. Beantwortung aller Hauptaufgaben mit Notenspiegel am Ende.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-indigo-900/80 text-[11px] font-mono text-indigo-200">
+                <div>⏱️ 90 Min.</div>
+                <div>💯 100 Pkt.</div>
+                <div>📋 10 Szenarios</div>
+              </div>
+
+              <div className="w-full py-2.5 rounded-xl bg-indigo-600 group-hover:bg-indigo-500 text-white text-xs font-bold text-center transition-colors shadow-xs">
+                Prüfungssimulation jetzt starten ➔
+              </div>
+            </div>
+
+            {/* Mode 2: Topic Practice */}
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 hover:border-indigo-500/50 text-slate-900 dark:text-white shadow-md hover:shadow-lg transition-all space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[10px] font-mono font-bold uppercase">
+                  Gezieltes Training
+                </span>
+                <Sparkles className="w-5 h-5 text-emerald-500" />
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>🎯 Freies Themen-Happen Üben</span>
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
+                  Übe einzelne IHK-Aufgabenblöcke ohne Zeitdruck mit sofortiger Auswertung und ausführlichen Prüfer-Erklärungen.
+                </p>
+              </div>
+
+              <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800 max-h-[160px] overflow-y-auto pr-1">
+                {IHK_EXAM_SCENARIOS.map((scen) => (
+                  <button
+                    key={scen.id}
+                    onClick={() => {
+                      soundEffects.playClick();
+                      setSelectedTopicId(scen.id);
+                      setMode('topic_practice');
+                    }}
+                    className="w-full p-2.5 rounded-xl bg-slate-50 hover:bg-indigo-50 dark:bg-slate-800/60 dark:hover:bg-indigo-950/40 border border-slate-200 dark:border-slate-800 hover:border-indigo-300 text-left text-xs font-medium transition-all flex items-center justify-between group/btn cursor-pointer"
+                  >
+                    <span className="font-bold text-slate-800 dark:text-slate-200 group-hover/btn:text-indigo-600 dark:group-hover/btn:text-indigo-400 truncate">
+                      {scen.title}
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover/btn:text-indigo-500 shrink-0" />
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  // Result Screen
+  // Render 3: Exam Finished / Results Certificate Screen
   if (isFinished) {
-    let correctCount = 0;
-    EXAM_QUESTIONS.forEach(q => {
-      const chosen = q.options.find(o => o.id === userAnswers[q.id]);
-      if (chosen?.isCorrect) correctCount++;
+    let totalEarned = 0;
+    const totalMax = 100;
+
+    const scenarioResults = activeScenarios.map((scen: IhkExamScenario) => {
+      const qList = EXAM_QUESTIONS.filter((q: QuizQuestion) => scen.questionIds.includes(q.id));
+      let correct = 0;
+      qList.forEach((q: QuizQuestion) => {
+        const chosen = q.options.find((o: QuizOption) => o.id === userAnswers[q.id]);
+        if (chosen?.isCorrect) correct++;
+      });
+      const ratio = qList.length > 0 ? correct / qList.length : 0;
+      const pts = Math.round(ratio * scen.points);
+      totalEarned += pts;
+      return { scen, pts, maxPts: scen.points, qList, correct };
     });
 
-    const percentage = Math.round((correctCount / EXAM_QUESTIONS.length) * 100);
+    const percentage = Math.round((totalEarned / totalMax) * 100);
     const gradeInfo = calculateIhkGrade(percentage);
-    const mins = Math.floor(secondsElapsed / 60);
-    const secs = secondsElapsed % 60;
 
     return (
-      <div className="max-w-3xl mx-auto space-y-6">
-        {/* Top Back Navigation */}
+      <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+        {/* Top Bar */}
         <div className="flex items-center justify-between">
           <button
-            onClick={onBack}
+            onClick={restartExam}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Zurück zur Kapitelübersicht</span>
+            <span>Zurück zur Prüfungsauswahl</span>
           </button>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 text-center shadow-xs transition-colors">
-          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 ${
-            gradeInfo.passed ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400'
-          }`}>
-            <Award className="w-8 h-8" />
+        {/* Certificate Card */}
+        <div className="bg-white dark:bg-slate-900 border-2 border-indigo-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="w-20 h-20 rounded-3xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center mx-auto shadow-inner">
+            <Award className="w-10 h-10" />
           </div>
 
-          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-1">
-            Note {gradeInfo.grade} ({gradeInfo.text})
-          </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">
-            {gradeInfo.passed
-              ? 'Herzlichen Glückwunsch! Du hast die Prüfungssimulation bestanden.'
-              : 'Knapp verfehlt – nutze die Detailauswertung unten zur gezielten Wiederholung.'}
-          </p>
+          <div>
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+              OFFIZIELLES IHK-PRÜFUNGSZERTIFIKAT
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+              Note {gradeInfo.grade} · {gradeInfo.text}
+            </h2>
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-300 mt-2 max-w-lg mx-auto">
+              {gradeInfo.passed
+                ? 'Glückwunsch! Du hast die simulierte IHK-Abschlussprüfung bestanden.'
+                : 'Knapp verfehlt. Nutze die detaillierte Themenanalyse unten zur gezielten Wiederholung.'}
+            </p>
+          </div>
 
-          <div className="grid grid-cols-3 gap-4 max-w-md mx-auto p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800 text-xs mb-6">
-            <div>
-              <div className="font-mono text-lg font-bold text-slate-900 dark:text-white tabular-nums">
-                {correctCount} / {EXAM_QUESTIONS.length}
-              </div>
-              <div className="text-slate-500 dark:text-slate-400">Richtig</div>
+          {/* Key Score Board */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs">
+            <div className="p-2">
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block">Gesamtpunkte:</span>
+              <span className="font-mono text-xl font-extrabold text-slate-900 dark:text-white">{totalEarned} / {totalMax}</span>
             </div>
-            <div>
-              <div className="font-mono text-lg font-bold text-indigo-600 dark:text-indigo-400 tabular-nums">
-                {percentage}%
-              </div>
-              <div className="text-slate-500 dark:text-slate-400">Erreicht</div>
+            <div className="p-2">
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block">Erreichte Quote:</span>
+              <span className={`font-mono text-xl font-extrabold ${gradeInfo.color}`}>{percentage}%</span>
             </div>
-            <div>
-              <div className="font-mono text-lg font-bold text-slate-900 dark:text-white tabular-nums">
-                {String(mins).padStart(2, '0')}:{String(secs).padStart(2, '0')}
-              </div>
-              <div className="text-slate-500 dark:text-slate-400">Dauer</div>
+            <div className="p-2">
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block">IHK-Notenschlüssel:</span>
+              <span className="font-mono text-sm font-bold text-slate-800 dark:text-slate-200">{gradeInfo.pointsRange}</span>
+            </div>
+            <div className="p-2">
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold block">Status:</span>
+              <span className={`font-bold text-xs ${gradeInfo.passed ? 'text-emerald-500' : 'text-rose-500'}`}>
+                {gradeInfo.passed ? '✓ BESTANDEN' : '✕ NICHT BESTANDEN'}
+              </span>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <button
-              onClick={onBack}
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-xs"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Zurück zur Kapitelübersicht
-            </button>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <button
               onClick={restartExam}
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+              className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-2"
             >
               <RotateCcw className="w-4 h-4" />
-              Simulation wiederholen
+              <span>Prüfung erneut simulieren</span>
+            </button>
+            <button
+              onClick={onBack}
+              className="px-6 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all cursor-pointer"
+            >
+              Zurück zum Hauptmenü
             </button>
           </div>
         </div>
 
-        {/* Detailed Question Review */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs space-y-4 transition-colors">
-          <h3 className="text-base font-bold text-slate-900 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-800">
-            Detaillierte Prüfungsauswertung
-          </h3>
+        {/* Detailed Topic Breakdown (10 Hauptaufgaben) */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-indigo-500" />
+              <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+                Ergebnisaufschlüsselung nach den 10 IHK-Hauptaufgaben:
+              </h3>
+            </div>
+          </div>
 
-          <div className="space-y-4">
-            {EXAM_QUESTIONS.map((q, idx) => {
-              const chosenId = userAnswers[q.id];
-              const chosenOpt = q.options.find(o => o.id === chosenId);
-              const correctOpt = q.options.find(o => o.isCorrect);
-              const isCorrect = chosenOpt?.isCorrect;
+          <div className="space-y-3">
+            {scenarioResults.map(({ scen, pts, maxPts, qList, correct }) => {
+              const scenPct = Math.round((pts / maxPts) * 100);
+              const isPass = scenPct >= 50;
 
               return (
                 <div
-                  key={q.id}
-                  className={`p-4 rounded-xl border text-xs ${
-                    isCorrect
-                      ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40 text-slate-800 dark:text-slate-200'
-                      : 'bg-rose-50/40 dark:bg-rose-950/20 border-rose-200 dark:border-rose-800/40 text-slate-800 dark:text-slate-200'
-                  }`}
+                  key={scen.id}
+                  className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2"
                 >
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-slate-500 dark:text-slate-400">#{idx + 1}</span>
-                      <span className="font-bold text-slate-900 dark:text-white">{q.question}</span>
-                    </div>
-                    {isCorrect ? (
-                      <span className="text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-1 shrink-0">
-                        <Check className="w-4 h-4" /> Richtig
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <span className="text-[10px] font-mono font-bold uppercase text-indigo-600 dark:text-indigo-400">
+                        {scen.title}
                       </span>
-                    ) : (
-                      <span className="text-rose-700 dark:text-rose-400 font-semibold flex items-center gap-1 shrink-0">
-                        <X className="w-4 h-4" /> Falsch
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="space-y-1 mt-2 text-slate-600 dark:text-slate-300">
-                    <p>
-                      <span className="font-semibold text-slate-500 dark:text-slate-400">Deine Antwort:</span> {chosenOpt?.text || 'Keine'}
-                    </p>
-                    {!isCorrect && (
-                      <p className="text-emerald-800 dark:text-emerald-300 font-medium">
-                        <span className="font-semibold text-emerald-900 dark:text-emerald-200">Richtige Antwort:</span> {correctOpt?.text}
+                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-0.5">
+                        {scen.subtitle}
                       </p>
-                    )}
-                    <p className="text-slate-500 dark:text-slate-400 text-[11px] pt-1">
-                      {correctOpt?.explanation}
-                    </p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="font-mono text-xs font-extrabold text-slate-900 dark:text-white">
+                        {pts} / {maxPts} Pkt. ({scenPct}%)
+                      </span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border ${
+                        isPass
+                          ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+                          : 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800'
+                      }`}>
+                        {isPass ? '✓ Erfüllt' : '✕ Nacharbeit'}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="mt-3 pt-2 border-t border-slate-200/60 dark:border-slate-800/60 flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400 uppercase font-semibold">
-                      Thema: {q.chapterId}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => {
-                          soundEffects.playClick();
-                          setDetailModalQuestion({ question: q, selectedOption: chosenOpt || null });
-                        }}
-                        className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
-                      >
-                        <BookOpen className="w-3 h-3" />
-                        <span>Ausführliche IHK-Infos</span>
-                      </button>
-                      <button
-                        onClick={() => onGoToChapter(q.chapterId)}
-                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 transition-colors cursor-pointer"
-                      >
-                        <span>Kapitel</span>
-                        <ArrowRight className="w-3 h-3" />
-                      </button>
-                    </div>
+                  {/* Progress Bar */}
+                  <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-500 ${isPass ? 'bg-emerald-500' : 'bg-rose-500'}`}
+                      style={{ width: `${scenPct}%` }}
+                    />
+                  </div>
+
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 italic">
+                    Firmenszenario: "{scen.companyContext}"
                   </div>
                 </div>
               );
@@ -351,202 +436,287 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
     );
   }
 
-  // Active Exam Runner
-  const mins = Math.floor(secondsElapsed / 60);
-  const secs = secondsElapsed % 60;
+  // Render 2: Active Exam Runner Interface (Real Exam & Practice Mode)
+  const formatTimer = (totalSeconds: number) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
+  const isTimeWarning = secondsRemaining < 15 * 60;
+  const isTimeDanger = secondsRemaining < 5 * 60;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4">
-      {/* Exit Confirmation Dialog */}
-      {showExitConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 max-w-md w-full shadow-xl space-y-4">
-            <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400">
-              <AlertTriangle className="w-6 h-6 shrink-0" />
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                Prüfungssimulation abbrechen?
-              </h3>
+    <div className="max-w-4xl mx-auto space-y-5 animate-fade-in">
+      {/* Sticky Exam Top Bar */}
+      <div className="sticky top-2 z-40 bg-slate-900/95 backdrop-blur-md border border-slate-800 rounded-2xl p-3 shadow-xl flex flex-wrap items-center justify-between gap-3 text-white">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowExitConfirm(true)}
+            className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Prüfung abbrechen"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-400 block">
+              IHK SIMULATOR · HAUPTAUFGABE {currentScenarioIndex + 1} / {activeScenarios.length}
+            </span>
+            <span className="text-xs font-bold text-white line-clamp-1">
+              {currentScenario?.title}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {/* Real 90-Min Timer */}
+          {mode === 'real_exam' && (
+            <div className={`px-3 py-1.5 rounded-xl border text-xs font-mono font-bold flex items-center gap-1.5 transition-colors ${
+              isTimeDanger
+                ? 'bg-rose-950 text-rose-300 border-rose-600 animate-pulse'
+                : isTimeWarning
+                ? 'bg-amber-950 text-amber-300 border-amber-600'
+                : 'bg-slate-800 text-slate-200 border-slate-700'
+            }`}>
+              <Clock className="w-4 h-4 text-indigo-400" />
+              <span>{formatTimer(secondsRemaining)}</span>
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              Möchtest du die Simulation wirklich beenden und zur Übersicht zurückkehren? Dein aktueller Fortschritt dieser Runde (Frage {currentIndex + 1} von {EXAM_QUESTIONS.length}) wird nicht gewertet.
+          )}
+
+          {/* Flag Question Button */}
+          <button
+            onClick={() => toggleFlag(currentQuestion?.id || '')}
+            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              flaggedQuestions[currentQuestion?.id || '']
+                ? 'bg-amber-500 text-slate-950 border-amber-400 font-bold'
+                : 'bg-slate-800 text-slate-300 border-slate-700 hover:text-white'
+            }`}
+          >
+            <Flag className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Später prüfen</span>
+          </button>
+
+          {/* Submit Exam Button */}
+          <button
+            onClick={() => setShowSubmitModal(true)}
+            className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
+          >
+            Prüfung abgeben
+          </button>
+        </div>
+
+        {/* Quick Navigation Grid Bar (1 to 10 Hauptaufgaben) */}
+        <div className="w-full pt-2 border-t border-slate-800 flex items-center justify-between gap-1.5 overflow-x-auto">
+          {activeScenarios.map((scen: IhkExamScenario, idx: number) => {
+            const scenQuestions = EXAM_QUESTIONS.filter((q: QuizQuestion) => scen.questionIds.includes(q.id));
+            const answeredCount = scenQuestions.filter((q: QuizQuestion) => !!userAnswers[q.id]).length;
+            const isAllAnswered = answeredCount === scenQuestions.length && scenQuestions.length > 0;
+            const hasFlag = scenQuestions.some((q: QuizQuestion) => flaggedQuestions[q.id]);
+            const isCurrent = idx === currentScenarioIndex;
+
+            return (
+              <button
+                key={scen.id}
+                onClick={() => {
+                  soundEffects.playClick();
+                  setCurrentScenarioIndex(idx);
+                  setCurrentQuestionInScenarioIndex(0);
+                }}
+                className={`px-2.5 py-1.5 rounded-lg border text-[10px] font-mono font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1 ${
+                  isCurrent
+                    ? 'bg-indigo-600 text-white border-indigo-400 ring-2 ring-indigo-400/50'
+                    : isAllAnswered
+                    ? 'bg-emerald-950/80 text-emerald-300 border-emerald-800'
+                    : hasFlag
+                    ? 'bg-amber-950/80 text-amber-300 border-amber-800'
+                    : 'bg-slate-800/80 text-slate-400 border-slate-700 hover:text-white'
+                }`}
+              >
+                <span>H{scen.scenarioNumber}</span>
+                {hasFlag && <Flag className="w-3 h-3 text-amber-400 fill-amber-400" />}
+                {isAllAnswered && <Check className="w-3 h-3 text-emerald-400" />}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Firmen-Ausgangssituation Briefing Card */}
+      {currentScenario && (
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 text-white space-y-2 shadow-lg">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+              <Building2 className="w-4 h-4 text-amber-400" />
+              <span>IHK-Firmenausgangssituation:</span>
+            </span>
+            <span className="text-xs font-mono font-bold bg-indigo-950 text-indigo-300 px-2.5 py-0.5 rounded-lg border border-indigo-800">
+              {currentScenario.points} Punkte
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed bg-slate-950/80 p-3.5 rounded-xl border border-slate-800">
+            "{currentScenario.companyContext}"
+          </p>
+        </div>
+      )}
+
+      {/* Main Question Card */}
+      {currentQuestion && (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-7 shadow-xl space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+            <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
+              Teilaufgabe {currentQuestionInScenarioIndex + 1} von {scenarioQuestions.length}
+            </span>
+            {flaggedQuestions[currentQuestion.id] && (
+              <span className="text-xs font-bold text-amber-500 flex items-center gap-1 bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-800">
+                <Flag className="w-3.5 h-3.5 fill-amber-500" />
+                <span>Markiert für Überprüfung</span>
+              </span>
+            )}
+          </div>
+
+          <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-relaxed">
+            <BionicText text={currentQuestion.question} enabled={bionic} />
+          </h3>
+
+          {/* Asset Rendering if Question has Asset */}
+          {currentQuestion.asset && (
+            <div className="my-2">
+              <QuestionAssetWidget asset={currentQuestion.asset} />
+            </div>
+          )}
+
+          {/* Options */}
+          <div className="space-y-3">
+            {currentQuestion.options.map((opt: QuizOption) => {
+              const isSelected = userAnswers[currentQuestion.id] === opt.id;
+              const isPracticeMode = mode === 'topic_practice';
+
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => handleSelectAnswer(opt.id)}
+                  className={`w-full p-4 rounded-2xl border text-left text-xs sm:text-sm transition-all cursor-pointer flex items-start gap-3 ${
+                    isSelected
+                      ? isPracticeMode
+                        ? opt.isCorrect
+                          ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 text-emerald-950 dark:text-emerald-100 ring-2 ring-emerald-500/40 font-semibold'
+                          : 'bg-rose-50 dark:bg-rose-950/60 border-rose-500 text-rose-950 dark:text-rose-100 ring-2 ring-rose-500/40 font-semibold'
+                        : 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-500 text-indigo-950 dark:text-indigo-100 ring-2 ring-indigo-500/40 font-semibold'
+                      : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200'
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${
+                    isSelected
+                      ? isPracticeMode && opt.isCorrect
+                        ? 'border-emerald-500 bg-emerald-500 text-white'
+                        : isPracticeMode && !opt.isCorrect
+                        ? 'border-rose-500 bg-rose-500 text-white'
+                        : 'border-indigo-500 bg-indigo-500 text-white'
+                      : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900'
+                  }`}>
+                    {isSelected && <Check className="w-3.5 h-3.5" />}
+                  </div>
+
+                  <div className="space-y-1">
+                    <span className="block font-medium">
+                      <BionicText text={opt.text} enabled={bionic} />
+                    </span>
+
+                    {/* Instant Feedback in Practice Mode */}
+                    {isPracticeMode && isSelected && (
+                      <p className={`text-xs mt-2 p-2.5 rounded-lg border font-medium ${
+                        opt.isCorrect
+                          ? 'bg-emerald-100/70 dark:bg-emerald-900/40 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200'
+                          : 'bg-rose-100/70 dark:bg-rose-900/40 border-rose-300 dark:border-rose-800 text-rose-900 dark:text-rose-200'
+                      }`}>
+                        💡 <strong>Erklärung:</strong> {opt.explanation}
+                      </p>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Bottom Navigation Buttons */}
+          <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-800">
+            <button
+              onClick={handlePrevSubquestion}
+              disabled={currentScenarioIndex === 0 && currentQuestionInScenarioIndex === 0}
+              className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-40 cursor-pointer flex items-center gap-1.5"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Zurück</span>
+            </button>
+
+            <button
+              onClick={handleNextSubquestion}
+              className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+            >
+              <span>Nächste Aufgabe</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Exit Confirmation Modal */}
+      {showExitConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+              Prüfung wirklich abbrechen?
+            </h3>
+            <p className="text-xs text-slate-600 dark:text-slate-300">
+              Dein bisheriger Prüfungsfortschritt und Timer werden zurückgesetzt.
             </p>
-            <div className="flex items-center justify-end gap-2.5 pt-2">
+            <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 onClick={() => setShowExitConfirm(false)}
-                className="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold"
               >
                 Weiterprüfen
               </button>
               <button
-                onClick={() => {
-                  setShowExitConfirm(false);
-                  onBack();
-                }}
-                className="px-4 py-2 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white transition-colors cursor-pointer"
+                onClick={restartExam}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold"
               >
-                Ja, abbrechen & zurück
+                Ja, Abbrechen
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Main Exam Card */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-xs transition-colors">
-        {/* Top Header */}
-        <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-100 dark:border-slate-800 text-xs">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowExitConfirm(true)}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-slate-600 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-medium transition-colors cursor-pointer"
-              title="Prüfungssimulation abbrechen und zur Übersicht zurückkehren"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Abbrechen & Zurück</span>
-            </button>
-            <span className="text-slate-300 dark:text-slate-700">|</span>
-            <span className="font-mono font-bold text-slate-900 dark:text-white">
-              FRAGE {currentIndex + 1} / {EXAM_QUESTIONS.length}
-            </span>
-            <span className="text-slate-400">·</span>
-            <span className="text-slate-500 dark:text-slate-400 uppercase font-semibold">{currentQ.chapterId}</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-mono">
-            <Clock className="w-3.5 h-3.5" />
-            <span>{String(mins).padStart(2, '0')}:{String(secs).padStart(2, '0')}</span>
-          </div>
-        </div>
-
-        {/* Question */}
-        <div className="mb-6">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-snug">
-            <BionicText text={currentQ.question} enabled={bionic} />
-          </h3>
-          {currentQ.scenario && (
-            <p className="text-xs text-slate-600 dark:text-slate-300 mt-2.5 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-800 leading-relaxed">
-              {currentQ.scenario}
+      {/* Submit Confirmation Modal */}
+      {showSubmitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 text-center">
+            <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+              Prüfungssimulation jetzt abgeben?
+            </h3>
+            <p className="text-xs text-slate-600 dark:text-slate-300">
+              Du hast alle 10 IHK-Hauptaufgaben bearbeitet. Deine Antworten werden ausgewertet und mit dem IHK-Notenschlüssel verrechnet.
             </p>
-          )}
-          {currentQ.asset && (
-            <QuestionAssetWidget asset={currentQ.asset} />
-          )}
-        </div>
-
-        {/* Options */}
-        <div className="space-y-3 mb-6">
-          {currentQ.options.map((opt, idx) => {
-            const isSelected = selectedInCurrent === opt.id;
-            const isRevealed = selectedInCurrent !== null;
-
-            let btnClass = 'bg-white dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500 text-slate-800 dark:text-slate-200';
-
-            if (isRevealed) {
-              if (opt.isCorrect) {
-                btnClass = 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-950 dark:text-emerald-200 font-semibold';
-              } else if (isSelected && !opt.isCorrect) {
-                btnClass = 'bg-rose-50 dark:bg-rose-950/40 border-rose-400 text-rose-950 dark:text-rose-200';
-              } else {
-                btnClass = 'bg-slate-50/60 dark:bg-slate-800/20 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 opacity-60';
-              }
-            }
-
-            return (
+            <div className="flex items-center justify-center gap-3 pt-2">
               <button
-                key={opt.id}
-                onClick={() => handleSelect(opt)}
-                disabled={isRevealed}
-                className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between cursor-pointer ${btnClass}`}
+                onClick={() => setShowSubmitModal(false)}
+                className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold"
               >
-                <div className="flex items-center gap-3 pr-2">
-                  <span className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-mono font-bold transition-colors ${
-                    isRevealed && opt.isCorrect
-                      ? 'bg-emerald-600 text-white'
-                      : isRevealed && isSelected && !opt.isCorrect
-                      ? 'bg-rose-600 text-white'
-                      : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-                  }`}>
-                    {idx + 1}
-                  </span>
-                  <span className="text-sm">
-                    <BionicText text={opt.text} enabled={bionic} />
-                  </span>
-                </div>
-
-                {isRevealed && opt.isCorrect && (
-                  <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                )}
-                {isRevealed && isSelected && !opt.isCorrect && (
-                  <X className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" />
-                )}
+                Nochmal kontrollieren
               </button>
-            );
-          })}
-        </div>
-
-        {/* Immediate feedback & explanation */}
-        {selectedInCurrent && (
-          <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-800 mb-6 text-xs text-slate-700 dark:text-slate-300">
-            <div className="font-bold text-slate-900 dark:text-white mb-1">
-              {currentQ.options.find(o => o.id === selectedInCurrent)?.isCorrect ? '✓ Richtig beantwortet!' : '✗ Leider falsch.'}
-            </div>
-            <p>{currentQ.options.find(o => o.isCorrect)?.explanation}</p>
-            {currentQ.merksatz && (
-              <p className="mt-2 text-indigo-700 dark:text-indigo-400 font-semibold italic text-[11px]">
-                "{currentQ.merksatz}"
-              </p>
-            )}
-
-            <div className="pt-2.5 mt-2.5 border-t border-slate-200 dark:border-slate-700/60 flex items-center justify-between">
-              <span className="text-[11px] text-slate-500">IHK-Prüfungsdossier & Praxisfall</span>
               <button
-                type="button"
-                onClick={() => {
-                  soundEffects.playClick();
-                  setDetailModalQuestion({
-                    question: currentQ,
-                    selectedOption: currentQ.options.find(o => o.id === selectedInCurrent) || null,
-                  });
-                }}
-                className="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
+                onClick={finishExam}
+                className="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs"
               >
-                <BookOpen className="w-3.5 h-3.5" />
-                <span>Ausführliche IHK-Infos öffnen</span>
+                Jetzt Abgeben & Auswerten ➔
               </button>
             </div>
           </div>
-        )}
-
-        {/* Footer Navigation */}
-        <div className="flex items-center justify-between pt-2">
-          <button
-            onClick={() => setShowExitConfirm(true)}
-            className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-colors cursor-pointer"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Zurück zur Übersicht</span>
-          </button>
-
-          {selectedInCurrent && (
-            <button
-              onClick={handleNext}
-              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer ml-auto"
-            >
-              <span>{currentIndex + 1 < EXAM_QUESTIONS.length ? 'Nächste Frage' : 'Prüfung abschließen'}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          )}
         </div>
-      </div>
-
-      {/* Detailed Question Dossier Modal */}
-      {detailModalQuestion && (
-        <QuestionDetailModal
-          question={detailModalQuestion.question}
-          selectedOption={detailModalQuestion.selectedOption}
-          bionic={bionic}
-          onClose={() => setDetailModalQuestion(null)}
-        />
       )}
     </div>
   );

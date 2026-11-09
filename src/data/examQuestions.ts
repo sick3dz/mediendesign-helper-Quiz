@@ -556,11 +556,133 @@ export const EXAM_QUESTIONS: QuizQuestion[] = [
   ...ihkOriginalExamQuestions,
 ];
 
-export function calculateIhkGrade(percentage: number): { grade: string; text: string; passed: boolean } {
-  if (percentage >= 92) return { grade: '1', text: 'Sehr gut', passed: true };
-  if (percentage >= 81) return { grade: '2', text: 'Gut', passed: true };
-  if (percentage >= 67) return { grade: '3', text: 'Befriedigend', passed: true };
-  if (percentage >= 50) return { grade: '4', text: 'Ausreichend', passed: true };
-  if (percentage >= 30) return { grade: '5', text: 'Mangelhaft', passed: false };
-  return { grade: '6', text: 'Ungenügend', passed: false };
+export interface IhkGradeInfo {
+  grade: string;
+  text: string;
+  pointsRange: string;
+  passed: boolean;
+  color: string;
 }
+
+export function calculateIhkGrade(percentage: number): IhkGradeInfo {
+  if (percentage >= 92) return { grade: '1', text: 'Sehr gut', pointsRange: '100 – 92 Punkte', passed: true, color: 'text-emerald-500' };
+  if (percentage >= 81) return { grade: '2', text: 'Gut', pointsRange: '91 – 81 Punkte', passed: true, color: 'text-sky-500' };
+  if (percentage >= 67) return { grade: '3', text: 'Befriedigend', pointsRange: '80 – 67 Punkte', passed: true, color: 'text-indigo-500' };
+  if (percentage >= 50) return { grade: '4', text: 'Ausreichend', pointsRange: '66 – 50 Punkte', passed: true, color: 'text-amber-500' };
+  if (percentage >= 30) return { grade: '5', text: 'Mangelhaft', pointsRange: '49 – 30 Punkte', passed: false, color: 'text-rose-500' };
+  return { grade: '6', text: 'Ungenügend', pointsRange: '29 – 0 Punkte', passed: false, color: 'text-rose-700' };
+}
+
+export interface IhkExamScenario {
+  id: string;
+  scenarioNumber: number; // 1 to 10
+  title: string;
+  subtitle: string;
+  companyContext: string;
+  points: number; // 10 points per Hauptaufgabe
+  chapterIds: string[];
+  questionIds: string[];
+}
+
+export const IHK_EXAM_SCENARIOS: IhkExamScenario[] = [
+  {
+    id: 'scen-1',
+    scenarioNumber: 1,
+    title: 'Hauptaufgabe 1: Digital-Strategie & Medienkonzeption',
+    subtitle: 'Interaktionsdesign, Wireframing & Prototyping (Kapitel 1 & 2)',
+    companyContext: 'Die Digitalagentur "NordMedia GmbH" entwickelt für ein kommunales Nahverkehrsunternehmen eine neue mobile Fahrplan-App. Das Team soll die Nutzerführung und das Verhalten der Anwendung vor der Programmierung konzipieren.',
+    points: 10,
+    chapterIds: ['ixd', 'wireframe', 'prototype'],
+    questionIds: ['exam-1', 'exam-2', 'exam-4', 'exam-6'],
+  },
+  {
+    id: 'scen-2',
+    scenarioNumber: 2,
+    title: 'Hauptaufgabe 2: Farbmanagement & Druckvorstufe',
+    subtitle: 'Color Management, ICC-Profile & TAC Gesamtfarbauftrag (Kapitel 3)',
+    companyContext: 'Die "OffsetPro Druckmedien GmbH" bereitet den Druck eines hochwertigen Kunstkatalogs im Bogenoffset (ISO Coated v2) sowie von Werbebeilagen im Zeitungsdruck (PSO SNP) vor.',
+    points: 10,
+    chapterIds: ['color-management'],
+    questionIds: ['exam-16', 'exam-17', 'exam-22'],
+  },
+  {
+    id: 'scen-3',
+    scenarioNumber: 3,
+    title: 'Hauptaufgabe 3: Bildverarbeitung & Tonwertkontrolle',
+    subtitle: 'Rasterfrequenz, PPI-Auflösungsberechnung & Gradationskurven (Kapitel 4)',
+    companyContext: 'Der Kunde "AutoPark GmbH" liefert Bilddaten für eine Magazin-Doppelseite im A4-Format. Vor dem Druck müssen die Tonwerte in den Tiefen angehoben und die Bildauflösung auf Eignung geprüft werden.',
+    points: 10,
+    chapterIds: ['raster-resolution'],
+    questionIds: ['exam-18', 'exam-19', 'exam-24'],
+  },
+  {
+    id: 'scen-4',
+    scenarioNumber: 4,
+    title: 'Hauptaufgabe 4: Barrierefreiheit & Usability (WCAG 2.1)',
+    subtitle: 'WCAG POUR-Prinzipien, Kontrastverhältnisse & Semantik (Kapitel 5)',
+    companyContext: 'Im Rahmen des Barrierefreiheitsstärkungsgesetzes (BFSG) baut die "Stadt Nordstadt" ihr Bürgerportal barrierefrei um. Screenreader und Tastaturnavigation müssen uneingeschränkt funktionieren.',
+    points: 10,
+    chapterIds: ['a11y'],
+    questionIds: ['exam-11', 'exam-12', 'exam-25'],
+  },
+  {
+    id: 'scen-5',
+    scenarioNumber: 5,
+    title: 'Hauptaufgabe 5: IT-Sicherheit & Datenschutz (DSGVO)',
+    subtitle: 'Verschlüsselung, Phishing-Schutz, Impressum & DSGVO (Kapitel 6)',
+    companyContext: 'Der E-Commerce-Betreiber "SecuStore Shop GmbH" erlitt Versuche von Phishing-Angriffen und muss seine Systeme sowie Nutzerformulare rechtssicher nach DSGVO schützen.',
+    points: 10,
+    chapterIds: ['security'],
+    questionIds: ['exam-8', 'exam-9', 'exam-10'],
+  },
+  {
+    id: 'scen-6',
+    scenarioNumber: 6,
+    title: 'Hauptaufgabe 6: Modernes Responsive Webdesign & Datenbanken',
+    subtitle: 'CSS Grid, Flexbox, SQL-Abfragen & JSON-Formate (Kapitel 7)',
+    companyContext: 'Das Modelabel "Fashion Vibe" fordert einen responsive Online-Lookbook-Catalog mit dynamischer Filtermöglichkeit und optimierter SQL-Datenbankanbindung.',
+    points: 10,
+    chapterIds: ['web-tech'],
+    questionIds: ['exam-20', 'exam-21', 'exam-23'],
+  },
+  {
+    id: 'scen-7',
+    scenarioNumber: 7,
+    title: 'Hauptaufgabe 7: Medienneutrale Daten & Ausgabepfade',
+    subtitle: 'PDF/X-Standards, Transparenzen & Vektor/Raster-Transformation (Kapitel 8)',
+    companyContext: 'Ein Medienhaus publiziert Inhalte zeitgleich für Digital-Publishing (Tablets), Online-Portal und High-End Offsetdruck (PDF/X-4). Der Daten-Workflow muss medienneutral aufgesetzt werden.',
+    points: 10,
+    chapterIds: ['data-sandbox'],
+    questionIds: ['exam-14', 'exam-15', 'exam-26'],
+  },
+  {
+    id: 'scen-8',
+    scenarioNumber: 8,
+    title: 'Hauptaufgabe 8: Agiles Projektmanagement & Scrum',
+    subtitle: 'Product Backlog, Sprints, Scrum Master & Pflichtenheft (Kapitel 9)',
+    companyContext: 'Ein Software-Startup wendet Scrum an, um ein SaaS-Dashboard in 2-wöchigen Sprints zu entwickeln. Der Product Owner priorisiert die User Stories gegen das Lastenheft.',
+    points: 10,
+    chapterIds: ['project'],
+    questionIds: ['exam-13', 'exam-27', 'exam-28'],
+  },
+  {
+    id: 'scen-9',
+    scenarioNumber: 9,
+    title: 'Hauptaufgabe 9: Wirtschafts- & Sozialkunde (WiSo)',
+    subtitle: 'Vertragsarten, Fristen, Kündigungsschutz & Jugendarbeitsschutz (Kapitel 10 & 11)',
+    companyContext: 'Ein frisch ausgebildeter Mediengestalter prüft seinen ersten Arbeitsvertrag, Arbeitszeitregelungen und Kündigungsfristen im gewerblichen Betrieb.',
+    points: 10,
+    chapterIds: ['wiso-fristen', 'wiso-basis'],
+    questionIds: ['exam-29', 'exam-30', 'exam-31', 'exam-34'],
+  },
+  {
+    id: 'scen-10',
+    scenarioNumber: 10,
+    title: 'Hauptaufgabe 10: DIN 69901-2 PM-Kreislauf & Tuckman-Modell',
+    subtitle: 'Die 5 PM-Phasen, Scope-Schutz & Teamentwicklungs-Führungsstile (Kapitel 12)',
+    companyContext: 'Die Agenturleitung analysiert ein Großprojekt: Von der Initialisierung über die Definitionsphase (Nicht-Ziele) bis zum geordneten Abschluss und Tuckman-Teamphasen.',
+    points: 10,
+    chapterIds: ['project-phases'],
+    questionIds: ['exam-35', 'exam-36', 'exam-37', 'exam-40', 'exam-41', 'exam-42', 'exam-44'],
+  },
+];
