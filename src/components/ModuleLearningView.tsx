@@ -22,6 +22,7 @@ import { SqlBuilderWidget } from './SqlBuilderWidget';
 import { JsonInspectorWidget } from './JsonInspectorWidget';
 import { CrossmediaPublishingWidget } from './CrossmediaPublishingWidget';
 import { XmlInspectorWidget } from './XmlInspectorWidget';
+import { TuckmanLeadershipMatrixWidget } from './TuckmanLeadershipMatrixWidget';
 import { ModuleSummaryModal } from './ModuleSummaryModal';
 import { ArrowLeft, ArrowRight, CheckCircle2, Star, Sparkles, HelpCircle, Gamepad2, Lightbulb, Zap, BookOpen } from 'lucide-react';
 
@@ -438,6 +439,7 @@ export const ModuleLearningView: React.FC<Props> = ({
               {module.id === 'db-4' && <JsonInspectorWidget />}
               {module.id === 'med-2' && <CrossmediaPublishingWidget />}
               {module.id === 'med-4' && <XmlInspectorWidget />}
+              {(module.id === 'projphase-2' || module.id === 'projphase-4' || module.id === 'projphase-7') && <TuckmanLeadershipMatrixWidget />}
             </div>
           )}
 

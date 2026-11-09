@@ -83,7 +83,7 @@ export const QuestionAssetWidget: React.FC<Props> = ({ asset }) => {
                 {asset.description}
               </div>
             )}
-            {(asset.type === 'image' || asset.imageUrl) && (
+            {(asset.type === 'image' || (asset.imageUrl && asset.type !== 'pm_cycle')) && (
               <img
                 src={asset.imageUrl}
                 alt={asset.title}

@@ -1,6 +1,6 @@
 {
-  "summary":  "Umsetzungsplan zur lückenlosen Erweiterung von Kapitel 12 im Digital-Leitfaden um alle 7 Skriptseiten von Christoph Schulze inklusive Tuckman-Führungsmatrix und DIN 69901-2 Übersichtstabelle.",
-  "updatedAt":  "2026-11-09T18:45:57.308336685Z",
+  "summary":  "Plan to fix the mobile layout overflow in QuestionAssetWidget and optimize AssetViewerModal for full-width responsive display of the PM cycle SVG graphic.",
+  "updatedAt":  "2026-11-09T19:10:13.358253060Z",
   "requestFeedback":  true,
   "userFacing":  true
 }
