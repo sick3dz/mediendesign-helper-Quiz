@@ -810,5 +810,58 @@ export const FREETEXT_QUESTIONS: FreetextQuestion[] = [
         modelAnswer: '1. Alt-Texte für Bilder für Screenreader, 2. Untertitel/Transkripte für Videos, 3. Ausreichender Textkontrast von mind. 4.5:1.'
       }
     ]
+  },
+
+  {
+    id: 'ihk-pm-aufgabe-12',
+    series: 'ihk-teil-1',
+    topic: 'prozess',
+    isOriginalSheet: true,
+    diagramType: 'media-neutral-workflow',
+    category: 'Kapitel 12: Projektphasen & Projektmanagement',
+    title: 'Aufgabe 12: DIN 69901 Projektmerkmale, PM-Phasen & Scope Creep Schutz',
+    scenario: 'Eine Medienagentur wird beauftragt, den Relaunch einer digitalen Verlagsplattform als Projekt durchzuführen. Das Management verlangt eine saubere Phasenabgrenzung nach DIN 69901-2 und Schutz vor unkontrollierten Leistungsaufblähungen.',
+    question: 'Bearbeiten Sie die Teilaufgaben a) bis c) zum professionellen Projektmanagement nach DIN 69901:',
+    maxPoints: 10,
+    hint: 'Gliedere deine Antwort in a), b) und c). Denke bei a) an Projektmerkmale (Neuartigkeit, Einmaligkeit, Ressourcen) vs. Routine, bei b) an die 5 PM-Phasen und die Zuordnung der Abnahme zur Steuerung, und bei c) an Nicht-Ziele und Change Requests.',
+    requiredKeywords: ['din 69901', 'einmalig', 'neuartig', 'ressourcen', 'initialisierung', 'definition', 'planung', 'steuerung', 'abschluss', 'abnahme', 'nicht-ziele', 'scope creep', 'change request'],
+    modelAnswer: 'a) Projektmerkmale: Zielvorgabe, Einmaligkeit, Neuartigkeit, Komplexität, Befristung, begrenzte Ressourcen (Personal, Budget, Technik), Risiko. Abgrenzung: Ein Projekt ist neuartig und einmalig (z. B. Relaunch/Sonderfalzung), während Routine eine ständige, wiederkehrende Daueraufgabe ohne Neuartigkeit ist (z. B. regelmäßiger Nachdruck).\nb) Die 5 PM-Phasen nach DIN 69901-2: 1. Initialisierung, 2. Definition, 3. Planung, 4. Steuerung, 5. Abschluss. Wichtige Zuordnung: Die formale Abnahme des Projektergebnisses gehört im DIN-Prozessmodell zur Phase Steuerung!\nc) Scope Creep ist das schleichende, unbemerkte Ausufern des Projektumfangs durch Kundenwünsche ohne Budget-/Terminanpassung. Wichtigste Maßnahme in Phase 2 (Definition): Schriftliches Fixieren von Nicht-Zielen (explizit festlegen, was NICHT geliefert wird) sowie spätere formelle Change-Request-Verfahren.',
+    subTasks: [
+      {
+        id: 'a',
+        label: 'a) Nennen Sie drei Projektmerkmale nach DIN 69901 und grenzen Sie ein Projekt von einer Routineaufgabe ab. (3 Punkte)',
+        points: 3,
+        keywordGroups: [
+          ['einmalig', 'einmaligkeit', 'neuartig', 'neuartigkeit', 'komplex', 'komplexität', 'befristet', 'zielvorgabe'],
+          ['begrenzte ressourcen', 'budget', 'personal', 'risiko', 'unsicherheit'],
+          ['routine', 'daueraufgabe', 'wiederkehrend', 'nachdruck', 'standardprozess']
+        ],
+        modelAnswer: 'Projektmerkmale: Zielvorgabe, Einmaligkeit, Neuartigkeit, Komplexität, Befristung, begrenzte Ressourcen, Risiko. Routine ist demgegenüber eine wiederkehrende Daueraufgabe ohne Neuartigkeit.'
+      },
+      {
+        id: 'b',
+        label: 'b) Nennen Sie die 5 Projektmanagementphasen nach DIN 69901-2 in korrekter Reihenfolge und ordnen Sie die formale Ergebnisabnahme zu. (4 Punkte)',
+        points: 4,
+        keywordGroups: [
+          ['initialisierung', 'projektidee', 'go/no-go', 'ob'],
+          ['definition', 'ziele', 'rahmenbedingungen'],
+          ['planung', 'psp', 'projektstrukturplan', 'termine', 'kosten'],
+          ['steuerung', 'controlling', 'soll-ist', 'abnahme', 'ergebnisabnahme'],
+          ['abschluss', 'lessons learned', 'nachkalkulation', 'archivierung', 'entlastung']
+        ],
+        modelAnswer: 'Die 5 PM-Phasen: 1. Initialisierung → 2. Definition → 3. Planung → 4. Steuerung → 5. Abschluss. Die formale Ergebnisabnahme ist prozessual der Phase Steuerung zugeordnet!'
+      },
+      {
+        id: 'c',
+        label: 'c) Erläutern Sie das Phänomen „Scope Creep“ und nennen Sie die wichtigste Maßnahme in Phase 2 (Definition) zu dessen Vermeidung. (3 Punkte)',
+        points: 3,
+        keywordGroups: [
+          ['scope creep', 'schleichend', 'ausuferung', 'ausweitung', 'zusatzwünsche'],
+          ['nicht-ziele', 'nicht-ziel', 'abgrenzung', 'pflichtenheft'],
+          ['change request', 'änderungsverfahren', 'mehrkosten', 'terminverschiebung']
+        ],
+        modelAnswer: 'Scope Creep ist die unbemerkte Ausweitung des Projektumfangs. Schutzmaßnahme in Phase 2: Schriftliches Fixieren von Nicht-Zielen sowie geordnete Change Requests bei neuen Anforderungen.'
+      }
+    ]
   }
 ];

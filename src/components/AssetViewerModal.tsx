@@ -60,8 +60,9 @@ export const AssetViewerModal: React.FC<Props> = ({ asset, onClose }) => {
             {asset.type === 'histogram' && <HistogramGraphic />}
             {asset.type === 'tac_chart' && <TacChartGraphic />}
             {asset.type === 'ppi_blueprint' && <PpiBlueprintGraphic />}
+            {asset.type === 'pm_cycle' && <PmCycleGraphic imageUrl={asset.imageUrl} />}
             {asset.type === 'table' && asset.tableData && <TableGraphic tableData={asset.tableData} />}
-            {(asset.type === 'image' || asset.imageUrl) && (
+            {(asset.type === 'image' || asset.imageUrl) && asset.type !== 'pm_cycle' && (
               <img
                 src={asset.imageUrl}
                 alt={asset.title}
@@ -302,3 +303,144 @@ export const TableGraphic: React.FC<{ tableData: { headers: string[]; rows: (str
     </table>
   </div>
 );
+
+/* Vector & Multimodal Graphic Component: DIN 69901-2 PM-Cycle */
+export const PmCycleGraphic: React.FC<{ imageUrl?: string; isInline?: boolean }> = ({ imageUrl, isInline = false }) => {
+  const [viewMode, setViewMode] = React.useState<'vector' | 'clean' | 'photo'>('clean');
+
+  const cleanGraphicUrl = '/src/assets/images/din69901_pm_cycle_1794249501102.jpg';
+  const photoUrl = imageUrl || '/assets/aistudio/IMG_3246_0e617e58.jpeg';
+
+  if (isInline) {
+    return (
+      <div className="w-full flex items-center justify-center p-1">
+        <img
+          src={cleanGraphicUrl}
+          alt="DIN 69901-2 Projektmanagement Kreislauf Grafik"
+          className="max-h-[175px] w-auto max-w-full object-contain rounded-lg shadow-md border border-slate-700/60 bg-white p-1"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-xl flex flex-col items-center space-y-4 relative z-10">
+      {/* Mode Selector Pills */}
+      <div className="flex items-center gap-1.5 p-1 bg-slate-900/90 rounded-xl border border-slate-800 text-xs font-semibold">
+        <button
+          onClick={() => setViewMode('clean')}
+          className={`px-3 py-1.5 rounded-lg transition-all ${
+            viewMode === 'clean'
+              ? 'bg-sky-600 text-white shadow-sm font-bold'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          🎨 Vektor-Grafik
+        </button>
+        <button
+          onClick={() => setViewMode('vector')}
+          className={`px-3 py-1.5 rounded-lg transition-all ${
+            viewMode === 'vector'
+              ? 'bg-indigo-600 text-white shadow-sm font-bold'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          📐 Interaktives Modell
+        </button>
+        <button
+          onClick={() => setViewMode('photo')}
+          className={`px-3 py-1.5 rounded-lg transition-all ${
+            viewMode === 'photo'
+              ? 'bg-rose-600 text-white shadow-sm font-bold'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          📷 Original-Skript
+        </button>
+      </div>
+
+      {/* Clean Generated Graphic */}
+      {viewMode === 'clean' && (
+        <div className="bg-white p-3 rounded-2xl border border-slate-700/80 shadow-2xl flex flex-col items-center space-y-2 animate-in fade-in duration-300">
+          <img
+            src={cleanGraphicUrl}
+            alt="DIN 69901-2 Projektmanagement Kreislauf Grafik"
+            className="max-h-[360px] w-auto object-contain rounded-xl"
+          />
+          <span className="text-[11px] text-slate-600 font-mono font-bold">
+            Hochauflösende DIN 69901-2 Infografik
+          </span>
+        </div>
+      )}
+
+      {/* Interactive Vector Graphic */}
+      {viewMode === 'vector' && (
+        <div className="w-full bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-2xl animate-in fade-in duration-300 space-y-4">
+          <div className="text-center">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-400">
+              Prozessmodell DIN 69901-2
+            </span>
+            <h4 className="text-base font-extrabold text-white">
+              Der 5-Phasen Projekt-Zyklus
+            </h4>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-2 text-center text-xs">
+            <div className="p-2.5 rounded-xl bg-sky-950/80 border border-sky-500/50 space-y-1">
+              <span className="text-[10px] font-mono font-bold text-sky-400 block">1. Initialisierung</span>
+              <p className="text-[11px] font-semibold text-white">Projektidee klären</p>
+              <span className="text-[9px] text-sky-300 block">Entscheidung über das OB</span>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-orange-950/80 border border-orange-500/50 space-y-1">
+              <span className="text-[10px] font-mono font-bold text-orange-400 block">2. Definition</span>
+              <p className="text-[11px] font-semibold text-white">Ziele & Rahmen</p>
+              <span className="text-[9px] text-orange-300 block">Nicht-Ziele Schutz</span>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-cyan-950/80 border border-cyan-500/50 space-y-1">
+              <span className="text-[10px] font-mono font-bold text-cyan-400 block">3. Planung</span>
+              <p className="text-[11px] font-semibold text-white">Vorgehen strukturieren</p>
+              <span className="text-[9px] text-cyan-300 block">PSP & Messbasis</span>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-indigo-950/80 border border-indigo-500/50 space-y-1">
+              <span className="text-[10px] font-mono font-bold text-indigo-400 block">4. Steuerung</span>
+              <p className="text-[11px] font-semibold text-white">Fortschritt steuern</p>
+              <span className="text-[9px] text-indigo-300 block">Soll-Ist & Abnahme</span>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-rose-950/80 border border-rose-500/50 space-y-1">
+              <span className="text-[10px] font-mono font-bold text-rose-400 block">5. Abschluss</span>
+              <p className="text-[11px] font-semibold text-white">Erfahrungen sichern</p>
+              <span className="text-[9px] text-rose-300 block">Lessons Learned</span>
+            </div>
+          </div>
+
+          <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-center">
+            <span className="text-xs font-extrabold text-amber-400 block mb-1">
+              🔄 Der geschlossene Lernkreislauf:
+            </span>
+            <p className="text-[11px] text-slate-300 font-medium leading-relaxed">
+              Die im <strong className="text-rose-400">Abschluss (Phase 5)</strong> gesicherten Erfahrungen fließen direkt als Qualitäts- & Schätzstandards in die <strong className="text-sky-400">Initialisierung (Phase 1)</strong> künftiger Projekte ein.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Original Photo View */}
+      {viewMode === 'photo' && (
+        <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800 shadow-2xl flex flex-col items-center space-y-2 animate-in fade-in duration-300">
+          <img
+            src={photoUrl}
+            alt="Original Lehrskript Foto Seite 7"
+            className="max-h-[380px] w-auto object-contain rounded-xl"
+          />
+          <span className="text-[11px] text-slate-400 font-mono">
+            Skript Christoph Schulze · Seite 7
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};

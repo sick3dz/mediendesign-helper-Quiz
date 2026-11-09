@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { QuestionAsset } from '../types/quiz';
-import { AssetViewerModal, GradationskurveGraphic, HistogramGraphic, TacChartGraphic, PpiBlueprintGraphic, TableGraphic } from './AssetViewerModal';
+import { AssetViewerModal, GradationskurveGraphic, HistogramGraphic, TacChartGraphic, PpiBlueprintGraphic, TableGraphic, PmCycleGraphic } from './AssetViewerModal';
 import { ZoomIn, TrendingUp, BarChart2, Layers, Grid, FileText, Maximize2 } from 'lucide-react';
 
 interface Props {
@@ -75,6 +75,7 @@ export const QuestionAssetWidget: React.FC<Props> = ({ asset }) => {
             {asset.type === 'histogram' && <HistogramGraphic />}
             {asset.type === 'tac_chart' && <TacChartGraphic />}
             {asset.type === 'ppi_blueprint' && <PpiBlueprintGraphic />}
+            {asset.type === 'pm_cycle' && <PmCycleGraphic imageUrl={asset.imageUrl} isInline={true} />}
             {asset.type === 'table' && asset.tableData && <TableGraphic tableData={asset.tableData} />}
             {asset.type === 'diagram' && !asset.imageUrl && (
               <div className="p-3 text-xs font-mono text-indigo-200 bg-slate-950 rounded-lg border border-slate-800 text-center w-full">

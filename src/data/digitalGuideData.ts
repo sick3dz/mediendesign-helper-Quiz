@@ -328,11 +328,11 @@ export const DIGITAL_GUIDE_TOPICS: DigitalTopic[] = [
     whatFailsAway: 'Reine intuitive "Bauchgefühl"-Projektarbeit ohne Phasenabgrenzung und ohne Risikopuffer.',
     whatIsNewAndTested: 'Projekt vs. Routine, 5 PM-Phasen (Initialisierung, Definition, Planung, Steuerung, Abschluss), Scope Creep Schutz (Nicht-Ziele), PSP & Soll-Ist-Controlling, Tuckman (Forming, Storming, Norming, Performing, Adjourning 1977).',
     asset: {
-      type: 'image',
+      type: 'pm_cycle',
       title: 'IHK Leitfaden-Asset: Der DIN 69901-2 Projektmanagement-Kreislauf',
       subtitle: 'Original-Prozessmodell nach Christoph Schulze: Von der Initialisierung bis zum Erfahrungstransfer.',
       description: 'Projektmanagement ist ein geschlossenes, iteratives System: 1. Initialisierung (Projektidee & Nutzen klären), 2. Definition (Ziele, Nicht-Ziele & Stakeholder), 3. Planung (PSP, Termine, Kosten & Puffer), 4. Steuerung (Controlling, Soll-Ist & formale Abnahme), 5. Abschluss (Erfahrungen sichern, Nachkalkulation & Entlastung). Die gesicherten Lessons Learned fließen direkt in die Initialisierung zukünftiger Projekte ein.',
-      imageUrl: '/assets/aistudio/IMG_3246_0e617e58.jpeg',
+      imageUrl: '/src/assets/images/din69901_pm_cycle_1794249501102.jpg',
       highlights: [
         'DIN 69901: 7 konstitutive Projektmerkmale & 3 limitierte Ressourcen',
         'Tuckman 4+1: Forming, Storming, Norming, Performing & Adjourning (1977)',
@@ -343,29 +343,44 @@ export const DIGITAL_GUIDE_TOPICS: DigitalTopic[] = [
     },
     keyConcepts: [
       {
-        term: 'Projektdefinition nach DIN 69901 (Die 7 Merkmale)',
-        explanation: 'Ein Projekt ist ein zielgerichtetes, einmaliges, neuartiges, komplexes und zeitlich befristetes Vorhaben unter Einsatz begrenzter Ressourcen (Personal, Budget, Sachmittel) mit inhärentem Risiko.',
-        examTip: 'IHK-Klassiker: Grenzt Entwicklung eines Standbogens/Sonderfalzung (Projekt) von Seriennachdrucken bestehender Broschüren (Routine) ab!'
+        term: 'Seite 1: DIN 69901 Projektdefinition & Abgrenzung zur Routine',
+        explanation: 'Ein Projekt ist ein zielgerichtetes, einmaliges, neuartiges, komplexes und zeitlich befristetes Vorhaben unter Einsatz begrenzter Ressourcen (Personal, Budget, Sachmittel) mit inhärentem Risiko (7 Merkmale). Abgrenzung: Ein Projekt ist neuartig (z. B. Entwicklung eines Sonder-Standbogens/Falzung), während Routine eine wiederkehrende Daueraufgabe ist (z. B. periodischer Nachdruck).',
+        examTip: 'IHK-Aufgabe: Unterscheide stets nach Neuartigkeit & Einmaligkeit. Nachdrucke bestehender Vorlagen sind NIEMALS ein Projekt!'
       },
       {
-        term: 'Tuckman-Teamentwicklungsmodell (4+1 Phasen)',
-        explanation: '1. Forming (Abtasten, Scheinharmonie -> Führung bietet Orientierung & Rollenklarheit), 2. Storming (Rollenkonflikte, Reibung -> Führung moderiert), 3. Norming (Wir-Gefühl, Spielregeln -> Führung lässt los & vertraut), 4. Performing (Flow, Synergie -> Servant Leadership), 5. Adjourning (Tuckman & Jensen 1977: bewusster Abschluss, Lessons Learned & Würdigung).',
-        examTip: 'Prüfungsfalle: Performing ist kein statischer Dauerzustand; personelle Wechsel werfen das Team zur Neujustierung zurück!'
+        term: 'Seite 2: Tuckman Phase 1: Forming (Orientierung & Scheinharmonie)',
+        explanation: 'Erstes Kennenlernen, Abtasten, Höflichkeit, Unsicherheit und Fixierung auf die Führungskraft. Gefahr: "Scheinharmonie" – Konflikte werden verdrängt, weil niemand anecken will. Führungsaufgabe: Orientierung bieten, klare Ziele & Rollen setzen, Erwartungen klären und gegenseitiges Kennenlernen ermöglichen.',
+        examTip: 'Häufige Prüfungsfalle: Scheinharmonie im Forming ist keine echte Teamreife, sondern Orientierungssuche!'
       },
       {
-        term: 'Die 5 PM-Phasen nach DIN 69901-2',
-        explanation: '1. Initialisierung (Klären der Projektidee, Nutzen & Go/No-Go-Entscheidung), 2. Definition (Ziele präzisieren, Nicht-Ziele fixieren, Kernteam benennen), 3. Planung (PSP erstellen, Termine, Kosten & Puffer planen; Plan als Messbasis), 4. Steuerung (fachliche Umsetzung begleiten, Soll-Ist-Controlling & formale Abnahme), 5. Abschluss (Erfahrungen sichern, Nachkalkulation, Archivierung & Entlastung).',
-        examTip: 'Super-Prüfungsfalle: Fachliche Umsetzung ist KEINE eigene PM-Phase (wird durch Steuerung geführt) und die formale Abnahme gehört zur Steuerung!'
+        term: 'Seite 3: Tuckman Phase 2: Storming & Phase 3: Norming',
+        explanation: 'Storming: Erste Meinungsverschiedenheiten, Machtkämpfe, verdeckte Konflikte & Hinterfragen von Aufgaben. Führungsaufgabe Storming: Moderieren statt Urteilen, Konflikte ansprechbar machen, fairen Streitrahmen sichern. Norming: Entwicklung ungeschriebener Spielregeln, Wir-Gefühl, kollegiale Konfliktlösung. Führungsaufgabe Norming: Loslassen, Verantwortung abgeben, Micromanagement vermeiden.',
+        examTip: 'Führungsstil-Regel: Im Storming sachlich moderieren, im Norming Vertrauen schenken und Verantwortung abgeben!'
       },
       {
-        term: 'Scope Creep & Nicht-Ziele',
-        explanation: 'Scope Creep ist die schleichende, unbemerkte Ausweitung des Projektumfangs durch Kundenwünsche ohne Budget-/Terminanpassung. Der wirksamste Schutz sind explizit formulierte Nicht-Ziele in Phase 2 und ein geordnetes Change-Request-Verfahren in Phase 4.',
-        examTip: 'IHK-Aufgabe: Bei neuen Kundenanforderungen immer formelles Change Request mit Zusatzkosten und Terminauswirkung vorlegen!'
+        term: 'Seite 4: Tuckman Phase 4: Performing & Phase 5: Adjourning (1977)',
+        explanation: 'Performing: Selbstständige Hochleistung, Flow, Synergie & konstruktive Streitkultur. Führungsaufgabe: Servant Leadership, Hindernisse aus dem Weg räumen. Achtung Rückfall-Falle: Personelle Wechsel werfen das Team zur Neujustierung zurück! Adjourning (Erweiterung 1977 von Tuckman & Jensen): Auflösungsphase mit emotionaler Ambivalenz. Führungsaufgabe: Bewusster Abschluss, Retrospektive & Würdigung.',
+        examTip: 'IHK-Merksatz: Adjourning wurde 1977 von Tuckman & Jensen ergänzt; ein fehlender Abschluss beschädigt den Neustart im nächsten Team!'
       },
       {
-        term: 'Nachhaltige Lessons Learned (Erfahrungssicherung)',
-        explanation: 'Nach Projektabschluss droht Wissen durch den vorschnellen "Blick nach vorn" verloren zu gehen. Lessons Learned dürfen kein Datenfriedhof sein: Sie müssen auffindbar, strukturiert und operativ in Standard-Checklisten, Schätzstandards und Briefing-Vorlagen für künftige Projekte nutzbar sein.',
-        examTip: 'Merksatz: Dokumentieren allein reicht nicht – Erfahrungen müssen in Folgeprozessen wirksam angewendet werden!'
+        term: 'Seite 5: DIN 69901-2 Die 5 PM-Phasen & Phase 1 Initialisierung',
+        explanation: 'Die 5 PM-Phasen nach DIN 69901-2: 1. Initialisierung, 2. Definition, 3. Planung, 4. Steuerung, 5. Abschluss. PM-Phasen steuern das Vorhaben; fachliche Phasen erstellen das Produkt. Hauptfehler: Die fachliche Arbeit beginnt zu früh (Design/Code vor Zielklärung)! Initialisierung klärt die Projektidee, Machbarkeit, ersten Nutzen und die Entscheidung über das OB (Go/No-Go des Auftraggebers).',
+        examTip: 'Prüfungsfalle: Nenne bei PM-Phasen niemals operative Tätigkeiten wie "Drucken" – das sind rein fachliche Phasen!'
+      },
+      {
+        term: 'Seite 6: DIN 69901-2 Phasen 2–4 (Definition, Planung & Steuerung)',
+        explanation: 'Phase 2 (Definition): WAS soll erreicht werden? Stakeholder-Analyse, Kernteam & explizite Nicht-Ziele (Schutz vor Scope Creep). Phase 3 (Planung): Projektstrukturplan (PSP) als zerlegendes Fundament & Messbasis für Abweichungen. Phase 4 (Steuerung): Fachliche Umsetzung begleiten, Soll-Ist-Controlling. Wichtige IHK-Prüfungsfalle: Die formale Ergebnisabnahme gehört zur Phase Steuerung!',
+        examTip: '70% Prüfungsfehler: Die Abnahme des Projektergebnisses gehört im DIN-Prozessmodell zur Steuerung, NICHT zum Abschluss!'
+      },
+      {
+        term: 'Seite 7: DIN 69901-2 Phase 5 Abschluss & der geschlossene Kreislauf',
+        explanation: 'Phase 5 (Abschluss): Nach der Abnahme folgen Projektabschlussbericht, Nachkalkulation, revisionssichere Archivierung und Entlastung der Projektleitung. Erfahrungssicherung (Lessons Learned): Erkenntnisse dürfen kein "Datenfriedhof" sein; sie müssen auffindbar und operativ für künftige Projekte nutzbar gemacht werden. Der DIN-Kreislauf speist dieses Wissen direkt zurück in die Initialisierung neuer Vorhaben.',
+        examTip: 'Merksatz: Dokumentieren allein reicht nicht – Lessons Learned müssen in Folgeprojekten tatsächlich nutzbar sein!'
+      },
+      {
+        term: 'IHK-Übersichtstabelle: Tuckman Teamentwicklung & Führungsmatrix',
+        explanation: 'Forming -> Führung: Direktive Orientierung, Rollen klären. Storming -> Führung: Neutrale Moderation, Konflikte klären. Norming -> Führung: Loslassen, Spielregeln vertrauen. Performing -> Führung: Servant Leadership, Hindernisse aus dem Weg räumen. Adjourning -> Führung: Bewusster Abschluss, Lessons Learned & Würdigung.',
+        examTip: 'IHK-Synthese: DIN 69901-2 steuert die Hard Skills (Prozesse/Zahlen), Tuckman steuert die Soft Skills (Teamreife/Führung).'
       }
     ]
   }

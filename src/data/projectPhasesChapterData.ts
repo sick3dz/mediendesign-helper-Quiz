@@ -2034,11 +2034,11 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           moduleId: 'projphase-7',
           question: 'Warum stellt das Schaubild der DIN 69901-2 die fünf Phasen als geschlossenen Kreis dar (siehe Original-Schaubild)?',
           asset: {
-            type: 'image',
+            type: 'pm_cycle',
             title: 'Projektmanagement-Kreislauf (DIN 69901-2)',
-            subtitle: 'Original-Diagramm aus dem Lehrskript von Christoph Schulze (Seite 7)',
+            subtitle: 'Infografik & Original-Diagramm aus dem Lehrskript von Christoph Schulze (Seite 7)',
             description: 'Der geschlossene Kreislauf zeigt die fünf Projektmanagement-Phasen: Initialisierung (Projektidee klären) → Definition (Ziele und Rahmenbedingungen klären) → Planung (Vorgehen strukturieren) → Steuerung (Fortschritt steuern) → Abschluss (Erfahrungen sichern). Im Zentrum steht das Projektmanagement.',
-            imageUrl: '/assets/aistudio/IMG_3246_0e617e58.jpeg'
+            imageUrl: '/src/assets/images/din69901_pm_cycle_1794249501102.jpg'
           },
           options: [
             {

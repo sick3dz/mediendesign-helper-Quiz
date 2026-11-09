@@ -9,7 +9,7 @@ export interface QuizOption {
 }
 
 export interface QuestionAsset {
-  type: 'histogram' | 'gradationskurve' | 'ppi_blueprint' | 'tac_chart' | 'table' | 'diagram' | 'image';
+  type: 'histogram' | 'gradationskurve' | 'ppi_blueprint' | 'tac_chart' | 'table' | 'diagram' | 'image' | 'pm_cycle';
   title: string;
   subtitle?: string;
   description: string;

@@ -535,11 +535,11 @@ const BASE_EXAM_QUESTIONS: QuizQuestion[] = [
     chapterId: 'project-phases',
     question: 'Aufgabe 44 (Der DIN 69901-2 Gesamt-Kreislauf): Warum stellt das Prozessmodell der DIN 69901-2 die fünf Projektphasen als in sich geschlossenen Kreislauf dar?',
     asset: {
-      type: 'image',
+      type: 'pm_cycle',
       title: 'DIN 69901-2 Prozesskreislauf',
       subtitle: 'Original-Diagramm aus dem Lehrskript von Christoph Schulze (Seite 7)',
       description: 'Zirkulärer Projektlebenszyklus: 1. Initialisierung → 2. Definition → 3. Planung → 4. Steuerung → 5. Abschluss. Vom Abschluss fließt Erfahrungswissen zurück in die Initialisierung.',
-      imageUrl: '/assets/aistudio/IMG_3246_0e617e58.jpeg'
+      imageUrl: '/src/assets/images/din69901_pm_cycle_1794249501102.jpg'
     },
     options: [
       { id: 'a', text: 'Weil das Projektmanagement ein lernendes System ist, bei dem die gesicherten Erfahrungen und Nachkalkulationen aus dem Abschluss direkt als Qualitäts- und Schätzstandards in die Initialisierung zukünftiger Projekte zurückfließen', isCorrect: true, explanation: 'Volltreffer! Der Pfeil von Phase 5 (Abschluss) zurück zu Phase 1 (Initialisierung) schließt den Kreis: Kein Projekt steht isoliert im Raum, sondern jede Erfahrung macht das nächste Vorhaben reifer und risikoärmer.' },
