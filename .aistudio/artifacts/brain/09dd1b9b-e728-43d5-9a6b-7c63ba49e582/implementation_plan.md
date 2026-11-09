@@ -1,63 +1,40 @@
-# NEU-Badges (✦ IHK-Original Update) & Erhalt des Erledigt-Status
+# Implementation Plan: Kapitel 12 "Projektphasen & Projektmanagement" – Vollständig abgeschlossen inklusive IHK-Leitfaden
 
-Sicherstellen, dass bereits abgeschlossene Module und Kapitel ihren "Erledigt"-Status behalten (auch wenn neue Fragen oder Kapitel wie Kapitel 11 hinzugefügt werden) und gleichzeitig neu hinzugefügte Inhalte mit einem auffälligen **"✦ IHK-Original Update"**-Badge gekennzeichnet werden.
-
-## User Review & Critical Decisions
-
-> [!IMPORTANT]
-> Bestätigte Entscheidungen aus der Nutzerbefragung (Phase 1):
-> - **Kennzeichnung von Neuem**: Neu hinzugefügte Kapitel (z.B. Kapitel 11) und Module erhalten ein auffälliges **"✦ IHK-Original Update"**-Badge in der Navigation und Modulliste.
-> - **Erhalt des Erledigt-Status**: `stats.completedModules` speichert abgeschlossene IDs. Das Hinzufügen neuer Unterfragen oder Kapitel beeinträchtigt den bestehenden Abschlussstatus bereits absolvierter Module nicht.
-
-- **Bestätigte Entscheidung 1**: Markierung von Kapitel 11 und den zugehörigen Modulen mit dem `✦ IHK-Original Update` Badge.
-- **Bestätigte Entscheidung 2**: Anzeige von neuen Fragen innerhalb von Modulen mit einem dezenten "Neu"-Indikator im Quiz-Fortschritt.
+Alle 7 Seiten des Original-Lehrskripts von Christoph Schulze wurden erfolgreich und didaktisch lückenlos in **Kapitel 12** der Lernplattform und in den **IHK Digital-Leitfaden & Prüfungs-Spickzettel** integriert.
 
 ---
 
-## 1. Overview & Core Concept
+## 1. Modulübersicht von Kapitel 12 (Alle 7 Module)
 
-- **What It Does**:
-  1. Ergänzt ein klares **"✦ IHK-Original Update"** Badge für Kapitel 11 und spezifische Originalmodule.
-  2. Garantiert, dass der grüne Häkchen-Status (`✓ Lvl 1 erledigt`) für alle zuvor gelösten Module intakt bleibt, selbst wenn neue Level-1 oder Level-2 Fragen dazukommen.
-  3. Ermöglicht Nutzern, gezielt zu erkennen, welche Inhalte frisch hinzugekommen sind.
-- **Target Audience**: IHK-Prüflinge, die ihren Lernstand genau verfolgen und sofort sehen möchten, wo neue Originalprüfungsaufgaben bereitstehen.
-
----
-
-## 2. User Experience & Visual Design
-
-- **Badge Styling**:
-  - `bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full shadow-xs flex items-center gap-1 animate-pulse`: Verwendet für das "✦ IHK-Original Update" Badge bei Kapitel 11.
-  - Subtiler `✦ Neu`-Indikator an Fragen oder Modulen, die kürzlich erweitert wurden.
-- **Erledigt-Status Schutz**:
-  - Ein Modul gilt als abgeschlossen, wenn seine ID in `stats.completedModules` verzeichnet ist. Zusätzliche Fragen (z.B. in Kapitel 11 oder Erweiterungen) erlauben das erneute Durchlaufen für Bonuspunkte und EXP, ohne den erreichten Haken zu löschen.
+| Modul-ID | Titel / Skript-Seite | Interaktives Element | Fragenset | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| `projphase-1` | **Seite 1: Projektmerkmale & Routine** (DIN 69901, 7 Merkmale) | `ProjectVsRoutineGame` (Klassifikationsspiel) | 4 L1 / 3 L2 | Vollständig |
+| `projphase-2` | **Seite 2: Teamentwicklung & Phase 1 Forming** (Tuckman, Scheinharmonie) | `FormingLeadershipGame` (Führungs-Simulator) | 4 L1 / 3 L2 | Vollständig |
+| `projphase-3` | **Seite 3: Storming & Norming** (Reibung, Streitkultur, Wir-Gefühl, Loslassen) | `StormingNormingGame` (Radar & Dilemma-Simulator) | 4 L1 / 3 L2 | Vollständig |
+| `projphase-4` | **Seite 4: Performing & Adjourning** (Flow, Rückfall-Dynamik, Auflösung 1977) | `PerformingAdjourningGame` (Flow- & Phasen-Navigator) | 4 L1 / 3 L2 | Vollständig |
+| `projphase-5` | **Seite 5: Die 5 PM-Phasen (DIN 69901-2) & Initialisierung** (Struktur vs. Facharbeit) | `PmPhasesSorterGame` (Phasen- & Architektur-Explorer) | 4 L1 / 3 L2 | Vollständig |
+| `projphase-6` | **Seite 6: Phasen 2–4 (Definition, Planung & Steuerung)** (PSP, Scope Creep & Abnahme) | `PmLifecycleSimGame` (Phasen- & Dilemma-Simulator) | 4 L1 / 3 L2 | Vollständig |
+| `projphase-7` | **Seite 7: Phase 5 Abschluss & der DIN 69901-2 Kreislauf** (Lessons Learned & Original-Asset) | `PmCycleFinalGame` (Abschluss-Auditor & Kreislauf-Rechner) | 4 L1 / 3 L2 | Vollständig |
 
 ---
 
-## 3. Key Product Decisions & Trade-Offs
+## 2. Integration in den IHK Digital-Leitfaden (`digitalGuideData.ts`)
 
-- **Decision 1: Explizites Update-Badge für Kapitel 11**:
-  - *Chosen Approach*: Hinzufügen des `isNewUpdate: true` Flags oder Erkennung über `chapter.number === 11` zur Anzeige des violetten "✦ IHK-Original Update" Badges.
-  - *Why*: Macht sofort transparent, dass dieses Kapitel auf den echten IHK-Prüfungsbogen-Seiten 1–5 basiert.
-- **Decision 2: Trennung von Abschluss und Fragen-Pool**:
-  - *Chosen Approach*: `stats.completedModules` ist idempotent; das Hinzufügen neuer Fragen ändert den Status von `completedModules` nicht, sodass Lernfortschritte nie verloren gehen.
-
----
-
-## 4. Technical Architecture & Data Strategy
-
-- **Updated Files**:
-  1. `src/data/chaptersData.ts` & `src/data/ihkOriginalChapterData.ts`: Kennzeichnung von Kapitel 11 als Original-Update.
-  2. `src/components/ChapterListView.tsx`: Rendering des "✦ IHK-Original Update" Badges in der Kapitel-Grid-Ansicht und Modulliste.
-  3. `src/components/QuizCard.tsx`: Anzeige des Updates bei frisch hinzugefügten Fragen.
+In den **Digital-Leitfaden** (`DIGITAL_GUIDE_TOPICS`) wurde **Thema 12: ★ Projektphasen & Projektmanagement (DIN 69901 & Tuckman)** eingepflegt:
+- **Kategorie**: Projektmanagement & Organisation
+- **IHK-Fokus**: DIN 69901 (7 konstitutive Merkmale & 3 limitierte Ressourcen), die 5 PM-Phasen nach DIN 69901-2, Tuckman-Teamentwicklung (Forming, Storming, Norming, Performing, Adjourning 1977), Schutz vor Scope Creep (Nicht-Ziele) & nachhaltige Lessons Learned.
+- **Wandel**: Weg von unstrukturierter „Bauchgefühl“-Projektarbeit hin zu messbaren Phasen, PSP-Arbeitspaketen und Soll-Ist-Controlling.
+- **Original-Asset**: Direkt eingebundenes Schaubild des DIN 69901-2 Kreislaufs (`/assets/aistudio/IMG_3246_0e617e58.jpeg`) mit Prüfungs-Highlights.
+- **5 Kernbegriffe**:
+  1. *Projektdefinition nach DIN 69901 (7 Merkmale)*
+  2. *Tuckman-Teamentwicklungsmodell (4+1 Phasen & Führungsstile)*
+  3. *Die 5 PM-Phasen nach DIN 69901-2 (Management- vs. Facharbeit)*
+  4. *Scope Creep & Nicht-Ziele (Vertraglicher Schutz & Change Requests)*
+  5. *Nachhaltige Lessons Learned & Erfahrungssicherung (Auffindbarkeit statt Datenfriedhof)*
 
 ---
 
-## 5. Implementation Roadmap
-
-1. **Phase 1: Update-Flag & Kapitel-Badge**:
-   - Ergänzung des Badges in `ChapterListView.tsx` für Kapitel 11 und neuere Module.
-2. **Phase 2: Status-Integrität verifizieren**:
-   - Sicherstellen, dass `stats.completedModules` beim Hinzufügen von Fragen unverändert bleibt.
-3. **Phase 3: Compilation & Build**:
-   - Ausführen von `compile_applet` & `lint_applet`.
+## 3. Technische Verifikation
+- Build (`compile_applet`): Erfolgreich kompiliert.
+- Typ- & Linter-Prüfung (`tsc --noEmit`): 0 Fehler.
+- Dev-Server: Läuft stabil auf Port 3000 (HTTP 200).

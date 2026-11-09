@@ -76,11 +76,18 @@ export const QuestionAssetWidget: React.FC<Props> = ({ asset }) => {
             {asset.type === 'tac_chart' && <TacChartGraphic />}
             {asset.type === 'ppi_blueprint' && <PpiBlueprintGraphic />}
             {asset.type === 'table' && asset.tableData && <TableGraphic tableData={asset.tableData} />}
-            {asset.type === 'diagram' && (
+            {asset.type === 'diagram' && !asset.imageUrl && (
               <div className="p-3 text-xs font-mono text-indigo-200 bg-slate-950 rounded-lg border border-slate-800 text-center w-full">
                 <span className="font-bold text-amber-400 block mb-1">📐 IHK-Veranschaulichung:</span>
                 {asset.description}
               </div>
+            )}
+            {(asset.type === 'image' || asset.imageUrl) && (
+              <img
+                src={asset.imageUrl}
+                alt={asset.title}
+                className="max-h-[200px] w-auto object-contain rounded-lg border border-slate-700/80 shadow-md"
+              />
             )}
           </div>
         </div>

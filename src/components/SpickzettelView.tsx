@@ -24,6 +24,8 @@ import {
   Star,
   Image,
   Scale,
+  Workflow,
+  Award,
 } from 'lucide-react';
 import { soundEffects } from '../services/audioService';
 import { QuestionAssetWidget } from './QuestionAssetWidget';
@@ -68,6 +70,8 @@ export const SpickzettelView: React.FC<Props> = ({ bionic, onBack }) => {
     Database: <Database className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />,
     Image: <Image className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />,
     Scale: <Scale className="w-5 h-5 text-blue-500 dark:text-blue-400" />,
+    Award: <Award className="w-5 h-5 text-amber-500" />,
+    Workflow: <Workflow className="w-5 h-5 text-teal-500 dark:text-teal-400" />,
   };
 
   // Categories list

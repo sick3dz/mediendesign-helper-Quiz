@@ -307,6 +307,10 @@ export default function App() {
     const ihkOriginalDone = ihkOriginalChapter && ihkOriginalChapter.modules.length > 0 && ihkOriginalChapter.modules.every(m => currentStats.completedModules.includes(m.id));
     if (ihkOriginalDone && !newlyEarned.includes('ihk_original_master')) newlyEarned.push('ihk_original_master');
 
+    const projectPhasesChapter = CHAPTERS.find(c => c.id === 'project-phases');
+    const projectPhasesDone = projectPhasesChapter && projectPhasesChapter.modules.length > 0 && projectPhasesChapter.modules.every(m => currentStats.completedModules.includes(m.id));
+    if (projectPhasesDone && !newlyEarned.includes('project_phases_master')) newlyEarned.push('project_phases_master');
+
     // Level 2 Mastery Badges
     const lvl2List = currentStats.completedModulesLevel2 || [];
     if (lvl2List.length >= 1 && !newlyEarned.includes('master_first')) {

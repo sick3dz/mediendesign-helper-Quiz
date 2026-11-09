@@ -318,6 +318,56 @@ export const DIGITAL_GUIDE_TOPICS: DigitalTopic[] = [
         examTip: 'IHK-Aufgabe 11: So bleiben sonnige Fachwerkhäuser im Hintergrund geschützt und zeichnen nicht aus!'
       }
     ]
+  },
+  {
+    id: 'projektphasen-management-leitfaden',
+    title: '12. ★ Projektphasen & Projektmanagement (DIN 69901 & Tuckman)',
+    category: 'Projektmanagement & Organisation',
+    iconName: 'Workflow',
+    ihkFocusSummary: 'DIN 69901 (7 Merkmale), 5 Phasen DIN 69901-2, Tuckman Teamentwicklung (Forming bis Adjourning) & nachhaltige Lessons Learned.',
+    whatFailsAway: 'Reine intuitive "Bauchgefühl"-Projektarbeit ohne Phasenabgrenzung und ohne Risikopuffer.',
+    whatIsNewAndTested: 'Projekt vs. Routine, 5 PM-Phasen (Initialisierung, Definition, Planung, Steuerung, Abschluss), Scope Creep Schutz (Nicht-Ziele), PSP & Soll-Ist-Controlling, Tuckman (Forming, Storming, Norming, Performing, Adjourning 1977).',
+    asset: {
+      type: 'image',
+      title: 'IHK Leitfaden-Asset: Der DIN 69901-2 Projektmanagement-Kreislauf',
+      subtitle: 'Original-Prozessmodell nach Christoph Schulze: Von der Initialisierung bis zum Erfahrungstransfer.',
+      description: 'Projektmanagement ist ein geschlossenes, iteratives System: 1. Initialisierung (Projektidee & Nutzen klären), 2. Definition (Ziele, Nicht-Ziele & Stakeholder), 3. Planung (PSP, Termine, Kosten & Puffer), 4. Steuerung (Controlling, Soll-Ist & formale Abnahme), 5. Abschluss (Erfahrungen sichern, Nachkalkulation & Entlastung). Die gesicherten Lessons Learned fließen direkt in die Initialisierung zukünftiger Projekte ein.',
+      imageUrl: '/assets/aistudio/IMG_3246_0e617e58.jpeg',
+      highlights: [
+        'DIN 69901: 7 konstitutive Projektmerkmale & 3 limitierte Ressourcen',
+        'Tuckman 4+1: Forming, Storming, Norming, Performing & Adjourning (1977)',
+        'Scope Creep Schutz: Nicht-Ziele in der Definition verbindlich fixieren',
+        'Prüfungsfalle: Formale Ergebnisabnahme gehört zur Phase Steuerung!',
+        'Erfahrungssicherung: Lessons Learned müssen auffindbar & nutzbar sein'
+      ]
+    },
+    keyConcepts: [
+      {
+        term: 'Projektdefinition nach DIN 69901 (Die 7 Merkmale)',
+        explanation: 'Ein Projekt ist ein zielgerichtetes, einmaliges, neuartiges, komplexes und zeitlich befristetes Vorhaben unter Einsatz begrenzter Ressourcen (Personal, Budget, Sachmittel) mit inhärentem Risiko.',
+        examTip: 'IHK-Klassiker: Grenzt Entwicklung eines Standbogens/Sonderfalzung (Projekt) von Seriennachdrucken bestehender Broschüren (Routine) ab!'
+      },
+      {
+        term: 'Tuckman-Teamentwicklungsmodell (4+1 Phasen)',
+        explanation: '1. Forming (Abtasten, Scheinharmonie -> Führung bietet Orientierung & Rollenklarheit), 2. Storming (Rollenkonflikte, Reibung -> Führung moderiert), 3. Norming (Wir-Gefühl, Spielregeln -> Führung lässt los & vertraut), 4. Performing (Flow, Synergie -> Servant Leadership), 5. Adjourning (Tuckman & Jensen 1977: bewusster Abschluss, Lessons Learned & Würdigung).',
+        examTip: 'Prüfungsfalle: Performing ist kein statischer Dauerzustand; personelle Wechsel werfen das Team zur Neujustierung zurück!'
+      },
+      {
+        term: 'Die 5 PM-Phasen nach DIN 69901-2',
+        explanation: '1. Initialisierung (Klären der Projektidee, Nutzen & Go/No-Go-Entscheidung), 2. Definition (Ziele präzisieren, Nicht-Ziele fixieren, Kernteam benennen), 3. Planung (PSP erstellen, Termine, Kosten & Puffer planen; Plan als Messbasis), 4. Steuerung (fachliche Umsetzung begleiten, Soll-Ist-Controlling & formale Abnahme), 5. Abschluss (Erfahrungen sichern, Nachkalkulation, Archivierung & Entlastung).',
+        examTip: 'Super-Prüfungsfalle: Fachliche Umsetzung ist KEINE eigene PM-Phase (wird durch Steuerung geführt) und die formale Abnahme gehört zur Steuerung!'
+      },
+      {
+        term: 'Scope Creep & Nicht-Ziele',
+        explanation: 'Scope Creep ist die schleichende, unbemerkte Ausweitung des Projektumfangs durch Kundenwünsche ohne Budget-/Terminanpassung. Der wirksamste Schutz sind explizit formulierte Nicht-Ziele in Phase 2 und ein geordnetes Change-Request-Verfahren in Phase 4.',
+        examTip: 'IHK-Aufgabe: Bei neuen Kundenanforderungen immer formelles Change Request mit Zusatzkosten und Terminauswirkung vorlegen!'
+      },
+      {
+        term: 'Nachhaltige Lessons Learned (Erfahrungssicherung)',
+        explanation: 'Nach Projektabschluss droht Wissen durch den vorschnellen "Blick nach vorn" verloren zu gehen. Lessons Learned dürfen kein Datenfriedhof sein: Sie müssen auffindbar, strukturiert und operativ in Standard-Checklisten, Schätzstandards und Briefing-Vorlagen für künftige Projekte nutzbar sein.',
+        examTip: 'Merksatz: Dokumentieren allein reicht nicht – Erfahrungen müssen in Folgeprozessen wirksam angewendet werden!'
+      }
+    ]
   }
 ];
 

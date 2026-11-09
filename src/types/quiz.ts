@@ -9,10 +9,11 @@ export interface QuizOption {
 }
 
 export interface QuestionAsset {
-  type: 'histogram' | 'gradationskurve' | 'ppi_blueprint' | 'tac_chart' | 'table' | 'diagram';
+  type: 'histogram' | 'gradationskurve' | 'ppi_blueprint' | 'tac_chart' | 'table' | 'diagram' | 'image';
   title: string;
   subtitle?: string;
   description: string;
+  imageUrl?: string;
   tableData?: { headers: string[]; rows: (string | number)[][] };
   labels?: { x: string; y: string };
   dataValues?: number[];
@@ -37,6 +38,8 @@ export interface LearningNugget {
   coreConcept: string;
   bulletPoints: string[];
   example?: string;
+  imageUrl?: string;
+  imageCaption?: string;
   examFavorite?: boolean;
   merksatz?: string;
 }
@@ -50,7 +53,7 @@ export interface LearningModule {
   nuggets: LearningNugget[];
   quizQuestions: QuizQuestion[];
   level2QuizQuestions?: QuizQuestion[]; // IHK-Transfer & Praxisfälle für Meisterstufe (Level 2)
-  miniGameType?: 'affordance' | 'phishing' | 'process_order' | 'wcag_match' | 'wiso_case_match' | 'graphics_format_match' | 'wiso_fristen_dragdrop';
+  miniGameType?: 'affordance' | 'phishing' | 'process_order' | 'wcag_match' | 'wiso_case_match' | 'graphics_format_match' | 'wiso_fristen_dragdrop' | 'project_vs_routine' | 'forming_leadership' | 'storming_norming_match' | 'performing_adjourning_flow' | 'pm_phases_sorter' | 'pm_lifecycle_sim' | 'pm_cycle_final';
   hasNewContent?: boolean; // Kennzeichnet Module mit neu hinzugefügten Fragen/Inhalten trotz vorherigem Abschluss
 }
 

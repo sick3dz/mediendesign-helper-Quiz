@@ -247,6 +247,12 @@ export const ALL_BADGES: Badge[] = [
     icon: '🏅',
   },
   {
+    id: 'project_phases_master',
+    title: 'Projekt-Stratege',
+    description: 'Kapitel 12 Projektphasen & Projektmerkmale (DIN 69901) gemeistert',
+    icon: '📊',
+  },
+  {
     id: 'exam_ready',
     title: 'Prüfungsbereit',
     description: 'Abschlussprüfungs-Simulator mit Note 1 oder 2 bestanden',

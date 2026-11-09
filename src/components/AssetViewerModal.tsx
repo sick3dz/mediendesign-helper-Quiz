@@ -61,6 +61,13 @@ export const AssetViewerModal: React.FC<Props> = ({ asset, onClose }) => {
             {asset.type === 'tac_chart' && <TacChartGraphic />}
             {asset.type === 'ppi_blueprint' && <PpiBlueprintGraphic />}
             {asset.type === 'table' && asset.tableData && <TableGraphic tableData={asset.tableData} />}
+            {(asset.type === 'image' || asset.imageUrl) && (
+              <img
+                src={asset.imageUrl}
+                alt={asset.title}
+                className="max-h-[500px] w-auto max-w-full object-contain rounded-xl border border-slate-700/80 shadow-2xl relative z-10"
+              />
+            )}
           </div>
 
           {/* Description & Technical Points */}

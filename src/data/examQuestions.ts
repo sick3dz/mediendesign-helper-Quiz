@@ -385,6 +385,169 @@ const BASE_EXAM_QUESTIONS: QuizQuestion[] = [
       { id: 'd', text: 'Komplementär einer KG', isCorrect: false, explanation: 'Falsch: Der Komplementär haftet als Vollhafter mit Privatvermögen.' }
     ],
     merksatz: 'GmbH = Kapitalgesellschaft mit Haftungsbeschränkung auf das Gesellschaftsvermögen!'
+  },
+  {
+    id: 'exam-32',
+    chapterId: 'project-phases',
+    question: 'Aufgabe 32 (Projektphasen - DIN 69901): Welche Kombination nennt ausschließlich konstitutive Merkmale eines Projekts?',
+    options: [
+      { id: 'a', text: 'Zielvorgabe, Neuartigkeit, Einmaligkeit, Komplexität, zeitliche Befristung, begrenzte Ressourcen, Risiko', isCorrect: true, explanation: 'Original aus DIN 69901 und IHK-Lehrplan: Die 7 konstitutiven Merkmale eines Projekts.' },
+      { id: 'b', text: 'Dauerhafte Wiederholung, unbegrenztes Budget, risikolose Ausführung, Verzicht auf Planung', isCorrect: false, explanation: 'Falsch: Das widerspricht der Definition eines Projekts.' },
+      { id: 'c', text: 'Tägliche Standard-Wartung, keine Zielvereinbarung, unbegrenzte Personalressourcen', isCorrect: false, explanation: 'Falsch: Das ist Linienroutine.' },
+      { id: 'd', text: 'Ausschließlich Software-Programmierung ohne Hardware-Bezug', isCorrect: false, explanation: 'Falsch: Projekte existieren in allen Branchen (Print, Bau, Digital).' }
+    ],
+    merksatz: 'Projekte sind einmalig, neuartig, zielgerichtet, befristet, ressourcenlimitiert und risikobehaftet!'
+  },
+  {
+    id: 'exam-33',
+    chapterId: 'project-phases',
+    question: 'Aufgabe 33 (Projekt vs. Routine): Welche der folgenden Tätigkeiten ist nach IHK-Standard ein echtes PROJEKT und keine Routineaufgabe?',
+    options: [
+      { id: 'a', text: 'Die Entwicklung eines Standbogens einer besonderen Falzung für eine neue Flyerserie inklusive Stanzkontur', isCorrect: true, explanation: 'Richtig! Einmalige, neuartige Konstruktion mit Planung und Zielergebnis.' },
+      { id: 'b', text: 'Der vierteljährliche Nachdruck weiterer 10.000 Flyer aus der bestehenden Flyerserie', isCorrect: false, explanation: 'Falsch: Periodischer Nachdruck ist eine wiederkehrende Routineaufgabe.' },
+      { id: 'c', text: 'Das tägliche Reinigen der Gummitücher der Druckmaschine', isCorrect: false, explanation: 'Falsch: Standard-Wartung ist Routine.' },
+      { id: 'd', text: 'Das wöchentliche Bezahlen von Eingangsrechnungen in der Buchhaltung', isCorrect: false, explanation: 'Falsch: Verwaltungstätigkeit des Regelbetriebs.' }
+    ],
+    merksatz: 'Neuentwicklung von Falzung/Standbogen = Projekt! Wiederholter Nachdruck = Routine!'
+  },
+  {
+    id: 'exam-34',
+    chapterId: 'project-phases',
+    question: 'Aufgabe 34 (Teamentwicklung nach Tuckman): Welches Verhalten ist in der Forming-Phase (Phase 1) für die Projektleitung am wichtigsten, um das Team vor späteren Fehlentwicklungen zu schützen?',
+    options: [
+      { id: 'a', text: 'Klare Orientierung geben: Ziele, Erwartungen und Rollen eindeutig klären, statt die oberflächliche Scheinharmonie mit echter Teamreife zu verwechseln', isCorrect: true, explanation: 'Richtig! Aus dem IHK-Leitfaden von Christoph Schulze: Forming braucht Orientierung, klare Rollen und Spielregeln, bevor es im Storming hakt.' },
+      { id: 'b', text: 'Sich komplett heraushalten (Laissez-faire), da gute Fachkräfte grundsätzlich keine Führung oder Rollenabsprachen benötigen', isCorrect: false, explanation: 'Falsch: Ein häufiger Irrtum, der im späteren Storming zu schweren Reibungsverlusten führt.' },
+      { id: 'c', text: 'Sofort offene Streitgespräche und persönliche Kritik anordnen', isCorrect: false, explanation: 'Falsch: Das zerstört die psychologische Sicherheit in der Kennenlernphase.' },
+      { id: 'd', text: 'Das Team nach der ersten Woche aufzulösen, weil noch keine Höchstleistung erbracht wurde', isCorrect: false, explanation: 'Falsch: Jedes Team braucht Zeit, um die Reifegrade zu durchlaufen.' }
+    ],
+    merksatz: 'Forming verlangt Orientierung und Rollenklarheit – nicht voreiligen Laissez-faire-Stil!'
+  },
+  {
+    id: 'exam-35',
+    chapterId: 'project-phases',
+    question: 'Aufgabe 35 (Storming - Wenn es zum ersten Mal knirscht): Ein Team streitet über die Aufgabenverteilung; Frust richtet sich gegen „die da oben“. Welche Reaktion der Führungskraft ist nach den Grundsätzen von Christoph Schulze richtig?',
+    options: [
+      { id: 'a', text: 'Moderieren statt urteilen: Reibungspunkte ansprechbar machen, Rollen/Schnittstellen klären und einen fairen Rahmen schaffen, statt den Konflikt mit Scheinharmonie zuzudecken', isCorrect: true, explanation: 'Richtig! Wer Konflikte zudeckt, presst Spannungen unter die Oberfläche. Führung im Storming moderiert die Streitkultur und klärt Rollen, ohne ein autoritäres Sachurteil zu fällen.' },
+      { id: 'b', text: 'Den Streit mit Abmahnungen sofort beenden und befehlen, dass alle ab sofort wieder harmonisch zusammenarbeiten', isCorrect: false, explanation: 'Falsch: Das zwingt das Team in eine Lähmung durch Scheinharmonie.' },
+      { id: 'c', text: 'Sich heraushalten und hoffen, dass sich das Problem von alleine legt', isCorrect: false, explanation: 'Falsch: Konflikte im Storming legen sich fast nie von selbst; Fronten verhärten sich.' },
+      { id: 'd', text: 'Das Projekt sofort abbrechen und alle Beteiligten auf andere Abteilungen verteilen', isCorrect: false, explanation: 'Falsch: Reibung ist ein normaler und notwendiger Entwicklungsschritt.' }
+    ],
+    merksatz: 'Führung im Storming: Moderieren statt urteilen – Konflikte konstruktiv austragen lassen!'
+  },
+  {
+    id: 'exam-36',
+    chapterId: 'project-phases',
+    question: 'Aufgabe 36 (Norming - Die gemeinsamen Regeln entstehen): Was ist der schwerwiegendste Führungsfehler, wenn ein Team die Norming-Phase erreicht und beginnt, eigenverantwortlich Spielregeln zu leben?',
+    options: [
+      { id: 'a', text: 'Zu viel Kontrolle (Micromanagement): Das Beibehalten des engen Steuerungsmodus, wodurch die aufkeimende Eigenverantwortung und Selbstorganisation erstickt wird', isCorrect: true, explanation: 'Richtig! In der Norming-Phase muss die Führungskraft lernen loszulassen und Verantwortung an das Team abzugeben. Wer weiter alles micromanagt, bremst das Team aus.' },
+      { id: 'b', text: 'Dem Team zu viel Vertrauen schenken und operative Entscheidungen ins Team verlagern', isCorrect: false, explanation: 'Falsch: Genau das ist die geforderte Führungsaufgabe im Norming.' },
+      { id: 'c', text: 'Entstehende ungeschriebene Regeln sichtbar zu machen und positiv zu bestärken', isCorrect: false, explanation: 'Falsch: Das festigt die Teamkultur.' },
+      { id: 'd', text: 'Gemeinsame Erfolge im Team zu feiern', isCorrect: false, explanation: 'Falsch: Das stärkt das Wir-Gefühl.' }
+    ],
+    merksatz: 'Norming ist die Phase, in der Führung Verantwortung abgeben und vertrauen muss!'
+  },
+  {
+    id: 'exam-37',
+    chapterId: 'project-phases',
+    question: 'Aufgabe 37 (Performing & Rückfall-Dynamik): Was passiert nach dem Modell von Bruce Tuckman, wenn in ein eingespieltes Hochleistungsteam (Performing) ein neues Mitglied aufgenommen wird oder sich die Projektziele drastisch ändern?',
+    options: [
+      { id: 'a', text: 'Das Team fällt zur Neu-Justierung in eine frühere Phase zurück (oft bis ins Storming), weil Rollen, Status und Schnittstellen neu ausgehandelt werden müssen', isCorrect: true, explanation: 'Richtig! Performing ist kein unveränderlicher Dauerzustand. Personelle Wechsel erfordern eine Neu-Orientierung und Neu-Justierung des Teams – das ist kein Versagen, sondern ein normaler Reifeprozess.' },
+      { id: 'b', text: 'Das Team bleibt dauerhaft im Performing, da Teamentwicklung eine unumkehrbare Einbahnstraße ist', isCorrect: false, explanation: 'Falsch: Teamentwicklung verläuft dynamisch und zyklisch.' },
+      { id: 'c', text: 'Das Team muss laut DIN 69901 sofort durch die Personalabteilung aufgelöst werden', isCorrect: false, explanation: 'Falsch: DIN 69901 regelt Projektmerkmale, keine Kündigungen.' },
+      { id: 'd', text: 'Der Neuzugang übernimmt automatisch die Projektleitung ohne Einarbeitung', isCorrect: false, explanation: 'Falsch.' }
+    ],
+    merksatz: 'Veränderungen werfen ein Team zurück – Teamentwicklung ist dynamisch und zyklisch!'
+  },
+  {
+    id: 'exam-38',
+    chapterId: 'project-phases',
+    question: 'Aufgabe 38 (Adjourning - Die 5. Phase nach Tuckman & Jensen): Warum schadet ein liebloser Projektabschluss („Meeting fällt aus, niemand sagt danke“) nicht nur dem aktuellen Projekt, sondern auch zukünftigen Projekten?',
+    options: [
+      { id: 'a', text: 'Weil wertvolle Lessons Learned verpuffen und Mitarbeiter, die einen lieblosen Abschluss erleben, im nächsten Projekt deutlich vorsichtiger, reservierter und misstrauischer ins Forming starten', isCorrect: true, explanation: 'Exakt nach Christoph Schulze: Ein fehlender, liebloser Abschluss nimmt die Motivation, verhindert organisatorisches Lernen und erschwert den Vertrauensaufbau im Folgeprojekt.' },
+      { id: 'b', text: 'Weil der Kunde das fertige Druckerzeugnis ohne Abschlussmeeting rechtlich nicht bezahlen muss', isCorrect: false, explanation: 'Falsch: Zahlungsverpflichtungen richten sich nach Werkvertrag und BGB, nicht nach internen Team-Meetings.' },
+      { id: 'c', text: 'Weil Tuckman 1977 festgelegt hat, dass ohne Abschlussmeeting das Projektbudget verfällt', isCorrect: false, explanation: 'Falsch: Tuckmans Modell ist ein psychologisches Phasenmodell.' },
+      { id: 'd', text: 'Weil Mediengestalter ohne Abschlussmeeting ihre IHK-Urkunde abgeben müssen', isCorrect: false, explanation: 'Falsch: Völlig abwegig.' }
+    ],
+    merksatz: 'Ein liebloser Abschluss im Adjourning beschädigt das nächste Projekt-Forming!'
+  },
+  {
+    id: 'exam-39',
+    chapterId: 'project-phases',
+    question: 'Aufgabe 39 (DIN 69901-2 - Die 5 Projektmanagementphasen): Welche Reihe nennt die fünf genormten Phasen des Projektmanagements in korrekter Reihenfolge und grenzt sie von fachlichen Phasen ab?',
+    options: [
+      { id: 'a', text: '1. Initialisierung → 2. Definition → 3. Planung → 4. Steuerung → 5. Abschluss (dienen der Führung/Organisation, während fachliche Phasen wie Satz und Druck das Produkt herstellen)', isCorrect: true, explanation: 'Richtig! Die DIN 69901-2 normiert diese fünf Phasen für das Projektmanagement. Fachliche Schritte erzeugen das Produkt, PM-Phasen steuern das Projekt.' },
+      { id: 'b', text: '1. Entwurf → 2. Reinzeichnung → 3. Belichtung → 4. Druck → 5. Weiterverarbeitung', isCorrect: false, explanation: 'Falsch: Das sind fachliche Produktionsphasen der Drucktechnik.' },
+      { id: 'c', text: '1. Forming → 2. Storming → 3. Norming → 4. Performing → 5. Adjourning', isCorrect: false, explanation: 'Falsch: Das ist das Phasenmodell der Teamentwicklung nach Tuckman.' },
+      { id: 'd', text: '1. Planung → 2. Initialisierung → 3. Steuerung → 4. Definition → 5. Abschluss', isCorrect: false, explanation: 'Falsch: Die Reihenfolge ist unlogisch; Initialisierung und Definition müssen vor der Planung liegen.' }
+    ],
+    merksatz: 'DIN 69901-2: Initialisierung → Definition → Planung → Steuerung → Abschluss!'
+  },
+  {
+    id: 'exam-40',
+    chapterId: 'project-phases',
+    question: 'Aufgabe 40 (Initialisierung & Phasenlogik): Was ist der laut Christoph Schulze gravierendste Fehler, wenn Projekte ohne saubere Initialisierung und Phasenstruktur gestartet werden?',
+    options: [
+      { id: 'a', text: 'Die fachliche Arbeit beginnt zu früh: Das Team entwickelt bereits Gestaltungslösungen oder Code, obwohl Ziele, Nutzen und Verantwortlichkeiten noch ungeklärt sind', isCorrect: true, explanation: 'Volltreffer! Wer die Initialisierung überspringt, erzeugt Fehlentwicklungen, da ungeklärte Rahmenbedingungen später zu massiven Korrekturschleifen und Reibungen führen.' },
+      { id: 'b', text: 'Es können keine Pantone-Sonderfarben mehr auf der Druckmaschine gedruckt werden', isCorrect: false, explanation: 'Falsch: Technische Sonderfarben haben nichts mit der Initialisierung zu tun.' },
+      { id: 'c', text: 'Der Kunde muss laut BGB automatisch das doppelte Honorar zahlen', isCorrect: false, explanation: 'Falsch: Rechtlich unzutreffend.' },
+      { id: 'd', text: 'Das Team überspringt automatisch die Performing-Phase', isCorrect: false, explanation: 'Falsch: Das betrifft Tuckman, nicht den Startfehler der Facharbeit.' }
+    ],
+    merksatz: 'Initialisierung klärt das OB – wer zu früh mit der Facharbeit beginnt, zahlt später drauf!'
+  },
+  {
+    id: 'exam-41',
+    chapterId: 'project-phases',
+    question: 'Aufgabe 41 (Phase 2: Definition & Nicht-Ziele): Warum ist die explizite Definition von „Nicht-Zielen“ in der Definitionsphase ein unverzichtbarer Bestandteil professionellen Projektmanagements?',
+    options: [
+      { id: 'a', text: 'Sie schützt das Projekt vor „Scope Creep“ (schleichender Leistungsausweitung), indem vertraglich und inhaltlich glasklar abgegrenzt wird, welche Leistungen nicht zum vereinbarten Projektumfang gehören', isCorrect: true, explanation: 'Korrekt! Ohne klar definierte Nicht-Ziele ufern Kundenwünsche und Anforderungen während des Projekts fast zwangsläufig aus, was zu Termin- und Budgetkrisen führt.' },
+      { id: 'b', text: 'Sie verbietet es den Mediengestaltern, während der Arbeitszeit Pausen einzulegen', isCorrect: false, explanation: 'Falsch: Nicht-Ziele betreffen den Projektumfang, keine arbeitszeitlichen Pausen.' },
+      { id: 'c', text: 'Sie ersetzt den Projektstrukturplan (PSP) in der Planungsphase vollständig', isCorrect: false, explanation: 'Falsch: Der PSP ist das zentrale Instrument von Phase 3 (Planung) und kann nicht ersetzt werden.' },
+      { id: 'd', text: 'Sie legt fest, welche Projektmitarbeiter im Falle eines Scheiterns fristlos gekündigt werden', isCorrect: false, explanation: 'Falsch: Projektmanagement dient der erfolgreichen Steuerung, nicht arbeitsrechtlichen Sanktionen.' }
+    ],
+    merksatz: 'Nicht-Ziele in der Definition sind der beste Schutz vor unkontrolliertem Scope Creep!'
+  },
+  {
+    id: 'exam-42',
+    chapterId: 'project-phases',
+    question: 'Aufgabe 42 (Phase 4: Steuerung nach DIN 69901-2): Welche Aussage zur Phase „Steuerung“ und der formalen Abnahme des Projektergebnisses entspricht der DIN 69901-2?',
+    options: [
+      { id: 'a', text: 'Die Steuerung begleitet die fachliche Umsetzung durch Soll-Ist-Vergleiche von Terminen und Kosten; die formale Abnahme des Projektergebnisses durch den Auftraggeber wird nach DIN 69901-2 noch der Phase Steuerung zugeordnet', isCorrect: true, explanation: 'Exakt! Die fachliche Umsetzung ist nach DIN 69901-2 keine eigene PM-Phase, sondern wird durch Steuerung geführt. Und die formale Abnahme des Ergebnisses schließt die Steuerung ab, bevor die Phase Abschluss (Lessons Learned, Entlastung) beginnt.' },
+      { id: 'b', text: 'Die Abnahme des Projektergebnisses findet ausschließlich in der Initialisierungsphase statt', isCorrect: false, explanation: 'Falsch: In der Initialisierung gibt es noch kein Ergebnis.' },
+      { id: 'c', text: 'In der Steuerung darf der Projektplan unter keinen Umständen angepasst werden, selbst wenn unvorhergesehene Risiken eintreten', isCorrect: false, explanation: 'Falsch: Der Plan ist Messbasis; bei Abweichungen wird in der Steuerung aktiv nachgesteuert.' },
+      { id: 'd', text: 'Die Steuerung ersetzt die Notwendigkeit von Meilensteinen und Projektcontrolling', isCorrect: false, explanation: 'Falsch: Meilensteine und Controlling sind die Kerninstrumente der Steuerung.' }
+    ],
+    merksatz: 'DIN 69901-2 Prüfungsfalle: Die formale Ergebnisabnahme gehört zur Phase Steuerung!'
+  },
+  {
+    id: 'exam-43',
+    chapterId: 'project-phases',
+    question: 'Aufgabe 43 (Phase 5: Abschluss & Lessons Learned): Welche Anforderung muss nach Christoph Schulze erfüllt sein, damit die Erfahrungssicherung („Lessons Learned“) für das Unternehmen einen messbaren Mehrwert stiftet?',
+    options: [
+      { id: 'a', text: 'Die gewonnenen Erkenntnisse dürfen nicht ausschließlich in einem statischen Bericht dokumentiert werden, sondern müssen für zukünftige Projekte auffindbar und operativ nutzbar sein (z. B. in Checklisten und Schätzstandards)', isCorrect: true, explanation: 'Richtig! Ein Dokumentenfriedhof bringt keinen Nutzen. Nur auffindbare, in künftige Prozesse integrierte Erfahrungen verhindern Wiederholungsfehler.' },
+      { id: 'b', text: 'Die Lessons Learned müssen alle negativen Kritikpunkte verheimlichen, um den Kunden nicht zu verunsichern', isCorrect: false, explanation: 'Falsch: Konstruktive und ehrliche Fehleranalyse ist die Kernvoraussetzung für Lernerfolg.' },
+      { id: 'c', text: 'Sie müssen vor dem ersten Kick-off-Meeting in der Initialisierung fertiggestellt sein', isCorrect: false, explanation: 'Falsch: Lessons Learned entstehen nach der Abnahme im Projektabschluss.' },
+      { id: 'd', text: 'Sie ersetzen die kaufmännische Nachkalkulation vollständig', isCorrect: false, explanation: 'Falsch: Nachkalkulation und Lessons Learned sind beides eigenständige Säulen des Abschlusses.' }
+    ],
+    merksatz: 'Lessons Learned haben nur Wert, wenn sie für Folgeprojekte auffindbar und nutzbar sind!'
+  },
+  {
+    id: 'exam-44',
+    chapterId: 'project-phases',
+    question: 'Aufgabe 44 (Der DIN 69901-2 Gesamt-Kreislauf): Warum stellt das Prozessmodell der DIN 69901-2 die fünf Projektphasen als in sich geschlossenen Kreislauf dar?',
+    asset: {
+      type: 'image',
+      title: 'DIN 69901-2 Prozesskreislauf',
+      subtitle: 'Original-Diagramm aus dem Lehrskript von Christoph Schulze (Seite 7)',
+      description: 'Zirkulärer Projektlebenszyklus: 1. Initialisierung → 2. Definition → 3. Planung → 4. Steuerung → 5. Abschluss. Vom Abschluss fließt Erfahrungswissen zurück in die Initialisierung.',
+      imageUrl: '/assets/aistudio/IMG_3246_0e617e58.jpeg'
+    },
+    options: [
+      { id: 'a', text: 'Weil das Projektmanagement ein lernendes System ist, bei dem die gesicherten Erfahrungen und Nachkalkulationen aus dem Abschluss direkt als Qualitäts- und Schätzstandards in die Initialisierung zukünftiger Projekte zurückfließen', isCorrect: true, explanation: 'Volltreffer! Der Pfeil von Phase 5 (Abschluss) zurück zu Phase 1 (Initialisierung) schließt den Kreis: Kein Projekt steht isoliert im Raum, sondern jede Erfahrung macht das nächste Vorhaben reifer und risikoärmer.' },
+      { id: 'b', text: 'Weil Projekte laut DIN-Standard niemals beendet werden dürfen, sondern unbegrenzt weiterlaufen', isCorrect: false, explanation: 'Falsch: Projekte sind per Definition zeitlich befristet.' },
+      { id: 'c', text: 'Weil ein Projektleiter in allen fünf Phasen zeitgleich denselben Arbeitsplatz besetzen muss', isCorrect: false, explanation: 'Falsch: Völlig unzutreffend.' },
+      { id: 'd', text: 'Weil in der Mitte immer zwingend eine Werbeagentur sitzen muss', isCorrect: false, explanation: 'Falsch: Die DIN 69901-2 ist branchenunabhängig.' }
+    ],
+    merksatz: 'Der DIN-Kreislauf zeigt: Nach dem Abschluss ist vor der nächsten, reiferen Initialisierung!'
   }
 ];
 

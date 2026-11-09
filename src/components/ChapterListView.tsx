@@ -151,7 +151,7 @@ export const ChapterListView: React.FC<Props> = ({
 
       {/* Chapter Cards Overview Grid */}
       <section aria-label="Kapitel-Auswahl">
-        <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-1.5 sm:gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-1.5 sm:gap-2">
           {chapters.map((chapter) => {
             const isSelected = chapter.id === currentChapter.id;
             const { completed, total, isFullyCompleted, isFullyMastered } = getChapterCompletion(chapter);

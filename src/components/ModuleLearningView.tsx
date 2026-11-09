@@ -11,6 +11,13 @@ import { WcagMatchGame } from './InteractiveMinigames/WcagMatchGame';
 import { WisoDuelGame } from './InteractiveMinigames/WisoDuelGame';
 import { GraphicsFormatGame } from './InteractiveMinigames/GraphicsFormatGame';
 import { WisoFristenDragDropGame } from './InteractiveMinigames/WisoFristenDragDropGame';
+import { ProjectVsRoutineGame } from './InteractiveMinigames/ProjectVsRoutineGame';
+import { FormingLeadershipGame } from './InteractiveMinigames/FormingLeadershipGame';
+import { StormingNormingGame } from './InteractiveMinigames/StormingNormingGame';
+import { PerformingAdjourningGame } from './InteractiveMinigames/PerformingAdjourningGame';
+import { PmPhasesSorterGame } from './InteractiveMinigames/PmPhasesSorterGame';
+import { PmLifecycleSimGame } from './InteractiveMinigames/PmLifecycleSimGame';
+import { PmCycleFinalGame } from './InteractiveMinigames/PmCycleFinalGame';
 import { SqlBuilderWidget } from './SqlBuilderWidget';
 import { JsonInspectorWidget } from './JsonInspectorWidget';
 import { CrossmediaPublishingWidget } from './CrossmediaPublishingWidget';
@@ -385,6 +392,32 @@ export const ModuleLearningView: React.FC<Props> = ({
             </div>
           )}
 
+          {/* Step Image: Original Script Asset */}
+          {currentNugget.imageUrl && (
+            <div className="p-4 bg-slate-900/90 rounded-2xl border border-slate-700/80 text-center space-y-2.5 animate-in fade-in slide-in-from-bottom-2 duration-300 shadow-xl">
+              <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono px-1">
+                <span className="font-bold text-sky-400 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-sky-400" /> Original-Lehrskript & Prozessmodell
+                </span>
+                <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">
+                  DIN 69901-2
+                </span>
+              </div>
+              <div className="rounded-xl overflow-hidden border border-slate-800 bg-slate-950 flex items-center justify-center p-2">
+                <img
+                  src={currentNugget.imageUrl}
+                  alt={currentNugget.imageCaption || currentNugget.title}
+                  className="max-h-[380px] w-auto max-w-full object-contain rounded-lg shadow-lg hover:scale-102 transition-transform duration-300"
+                />
+              </div>
+              {currentNugget.imageCaption && (
+                <p className="text-xs text-slate-300 italic pt-1 font-medium leading-relaxed">
+                  {currentNugget.imageCaption}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Step N+2: Merksatz */}
           {currentNugget.merksatz && stepIndex >= (totalSteps - 1) && (
             <div className="p-4 bg-amber-50/90 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-100 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -511,6 +544,90 @@ export const ModuleLearningView: React.FC<Props> = ({
 
           {module.miniGameType === 'wiso_fristen_dragdrop' && (
             <WisoFristenDragDropGame
+              onComplete={score => {
+                const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
+                setAccumulatedXp(prev => prev + finalXp);
+                onMiniGameCompleted?.(module.id);
+                setViewState('quiz');
+              }}
+            />
+          )}
+
+          {module.miniGameType === 'project_vs_routine' && (
+            <ProjectVsRoutineGame
+              isLevel2={currentLevel === 2}
+              onComplete={score => {
+                const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
+                setAccumulatedXp(prev => prev + finalXp);
+                onMiniGameCompleted?.(module.id);
+                setViewState('quiz');
+              }}
+            />
+          )}
+
+          {module.miniGameType === 'forming_leadership' && (
+            <FormingLeadershipGame
+              isLevel2={currentLevel === 2}
+              onComplete={score => {
+                const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
+                setAccumulatedXp(prev => prev + finalXp);
+                onMiniGameCompleted?.(module.id);
+                setViewState('quiz');
+              }}
+            />
+          )}
+
+          {module.miniGameType === 'storming_norming_match' && (
+            <StormingNormingGame
+              isLevel2={currentLevel === 2}
+              onComplete={score => {
+                const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
+                setAccumulatedXp(prev => prev + finalXp);
+                onMiniGameCompleted?.(module.id);
+                setViewState('quiz');
+              }}
+            />
+          )}
+
+          {module.miniGameType === 'performing_adjourning_flow' && (
+            <PerformingAdjourningGame
+              isLevel2={currentLevel === 2}
+              onComplete={score => {
+                const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
+                setAccumulatedXp(prev => prev + finalXp);
+                onMiniGameCompleted?.(module.id);
+                setViewState('quiz');
+              }}
+            />
+          )}
+
+          {module.miniGameType === 'pm_phases_sorter' && (
+            <PmPhasesSorterGame
+              isLevel2={currentLevel === 2}
+              onComplete={score => {
+                const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
+                setAccumulatedXp(prev => prev + finalXp);
+                onMiniGameCompleted?.(module.id);
+                setViewState('quiz');
+              }}
+            />
+          )}
+
+          {module.miniGameType === 'pm_lifecycle_sim' && (
+            <PmLifecycleSimGame
+              isLevel2={currentLevel === 2}
+              onComplete={score => {
+                const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
+                setAccumulatedXp(prev => prev + finalXp);
+                onMiniGameCompleted?.(module.id);
+                setViewState('quiz');
+              }}
+            />
+          )}
+
+          {module.miniGameType === 'pm_cycle_final' && (
+            <PmCycleFinalGame
+              isLevel2={currentLevel === 2}
               onComplete={score => {
                 const finalXp = currentLevel === 2 ? Math.round(score * 1.5) : score;
                 setAccumulatedXp(prev => prev + finalXp);
