@@ -18,6 +18,7 @@ import { PerformingAdjourningGame } from './InteractiveMinigames/PerformingAdjou
 import { PmPhasesSorterGame } from './InteractiveMinigames/PmPhasesSorterGame';
 import { PmLifecycleSimGame } from './InteractiveMinigames/PmLifecycleSimGame';
 import { PmCycleFinalGame } from './InteractiveMinigames/PmCycleFinalGame';
+import { PmCycleGraphic } from './InteractiveMinigames/PmCycleGraphic';
 import { SqlBuilderWidget } from './SqlBuilderWidget';
 import { JsonInspectorWidget } from './JsonInspectorWidget';
 import { CrossmediaPublishingWidget } from './CrossmediaPublishingWidget';
@@ -393,24 +394,31 @@ export const ModuleLearningView: React.FC<Props> = ({
             </div>
           )}
 
-          {/* Step Image: Original Script Asset */}
+          {/* Step Image: Interactive PM Cycle or Original Script Asset */}
           {currentNugget.imageUrl && (
             <div className="p-4 bg-slate-900/90 rounded-2xl border border-slate-700/80 text-center space-y-2.5 animate-in fade-in slide-in-from-bottom-2 duration-300 shadow-xl">
               <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono px-1">
                 <span className="font-bold text-sky-400 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-sky-400" /> Original-Lehrskript & Prozessmodell
+                  <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+                  {currentNugget.imageUrl.includes('IMG_3246') || currentNugget.imageUrl.includes('din69901') ? 'Interaktives Prozessmodell' : 'Original-Lehrskript & Prozessmodell'}
                 </span>
                 <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">
                   DIN 69901-2
                 </span>
               </div>
-              <div className="rounded-xl overflow-hidden border border-slate-800 bg-slate-950 flex items-center justify-center p-2">
-                <img
-                  src={currentNugget.imageUrl}
-                  alt={currentNugget.imageCaption || currentNugget.title}
-                  className="max-h-[380px] w-auto max-w-full object-contain rounded-lg shadow-lg hover:scale-102 transition-transform duration-300"
-                />
-              </div>
+
+              {currentNugget.imageUrl.includes('IMG_3246') || currentNugget.imageUrl.includes('din69901') ? (
+                <PmCycleGraphic imageUrl={currentNugget.imageUrl} />
+              ) : (
+                <div className="rounded-xl overflow-hidden border border-slate-800 bg-slate-950 flex items-center justify-center p-2">
+                  <img
+                    src={currentNugget.imageUrl}
+                    alt={currentNugget.imageCaption || currentNugget.title}
+                    className="max-h-[380px] w-auto max-w-full object-contain rounded-lg shadow-lg hover:scale-102 transition-transform duration-300"
+                  />
+                </div>
+              )}
+
               {currentNugget.imageCaption && (
                 <p className="text-xs text-slate-300 italic pt-1 font-medium leading-relaxed">
                   {currentNugget.imageCaption}

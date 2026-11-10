@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { soundEffects } from '../../services/audioService';
 import confetti from 'canvas-confetti';
 import { Check, X, RotateCcw, Award, ArrowRight, Eye, RefreshCw, Sparkles, CheckCircle2, AlertTriangle, FileText, Calculator, Archive, BookOpen, Layers } from 'lucide-react';
+import { PmCycleGraphic } from './PmCycleGraphic';
 
 interface ClosureItem {
   id: string;
@@ -236,28 +237,23 @@ export const PmCycleFinalGame: React.FC<PmCycleFinalGameProps> = ({
       </div>
 
       {/* Embedded Original Script Asset from Christoph Schulze */}
+      {/* Embedded Interaktives 5-Phasen-SVG Schaubild */}
       {showOriginalImage && (
-        <div className="mt-5 p-4 bg-slate-950/80 rounded-2xl border border-slate-800/80 space-y-2 animate-in fade-in duration-300">
-          <div className="flex items-center justify-between text-xs text-slate-400">
-            <span className="font-semibold text-slate-300 flex items-center gap-1.5">
+        <div className="mt-5 p-2 sm:p-4 bg-slate-950/90 rounded-2xl border border-slate-800 space-y-3 animate-in fade-in duration-300">
+          <div className="flex items-center justify-between text-xs text-slate-400 px-1">
+            <span className="font-semibold text-slate-200 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-rose-400" />
-              Original-Schaubild: Projektmanagement-Kreislauf (DIN 69901-2)
+              Interaktives Schaubild: Projektmanagement-Kreislauf (DIN 69901-2)
             </span>
-            <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">
+            <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-300 font-mono">
               Skript Christoph Schulze · Seite 7
             </span>
           </div>
 
-          <div className="flex items-center justify-center p-2 bg-slate-900/60 rounded-xl border border-slate-800 overflow-hidden">
-            <img
-              src="/assets/aistudio/IMG_3246_0e617e58.jpeg"
-              alt="Original Skript Seite 7 - DIN 69901-2 Projektmanagement Kreislauf"
-              className="max-h-[320px] w-auto max-w-full object-contain rounded-lg shadow-lg hover:scale-102 transition-transform duration-300"
-            />
-          </div>
+          <PmCycleGraphic imageUrl="/assets/aistudio/IMG_3246_0e617e58.jpeg" />
 
           <p className="text-[11px] text-slate-400 text-center italic">
-            Der Kreislauf verbindet Initialisierung, Definition, Planung, Steuerung und Abschluss. Mit den gesicherten Erfahrungen (Lessons Learned) startet das nächste Vorhaben mit höherer Reife!
+            Klicke auf die einzelnen Phasen im SVG-Modell, um IHK-Kernziele, Artefakte und Tuckman-Führungsstile einzusehen.
           </p>
         </div>
       )}

@@ -1,6 +1,6 @@
 {
-  "summary":  "Architekturplan für den realistischen IHK-Prüfungssimulator mit 90-Minuten-Zeitmodus, 100-Punkte-Skalierung, 10 strukturierten Szenario-Hauptaufgaben über alle 12 Kapitel, Aufgaben-Flagging und Notenspiegel.",
-  "updatedAt":  "2026-11-09T19:19:58.031052149Z",
+  "summary":  "Plan to integrate the interactive DIN 69901-2 PM cycle SVG element across Minigame 7 and Learning Modules to replace all static script photos.",
+  "updatedAt":  "2026-11-10T07:41:11.832401105Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

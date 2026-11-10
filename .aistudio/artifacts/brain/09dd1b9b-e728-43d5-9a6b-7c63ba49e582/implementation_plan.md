@@ -1,96 +1,53 @@
-# Realistischer IHK-Prüfungssimulator (100 Punkte & 90-Minuten-Modus)
+# Einbettung des interaktiven DIN 69901-2 Kreislauf-SVG-Elements (Minispiel 7 & Lernmodule)
 
-Umsetzungsplan für den Umbau des Prüfungssimulators in eine prüfungsnahe IHK-Abschlussprüfung mit strukturierten Szenario-Aufgabenblöcken (Themen-Happen), Auslands- & Firmensituationen, Aufgaben-Flagging und offiziellem IHK-Notenschlüssel.
+Umsetzungsplan zur Ersetzung der starren Lehrskript-Fotografik (`IMG_3246`) durch das interaktive 5-Phasen-SVG-Kreislauf-Modell in Minispiel 7 (`PmCycleFinalGame.tsx`) und den Lern-Häppchen (`ModuleLearningView.tsx`).
 
 ## User Review & Critical Decisions
 
 > [!IMPORTANT]
-> Der Nutzer hat im Klärungsschritt folgende Optionen gewählt:
-> - **Prüfungsmodi**:
->   1. *Echte IHK-Abschlussprüfung*: 90 Minuten Zeitlimit, 100 Gesamtpunkte, 10 strukturierte Szenario-Hauptaufgaben, erst am Ende Notenauswertung.
->   2. *Freies Themen-Üben*: Gezielte Auswahl einzelner Aufgabenblöcke (Themen-Happen) ohne Zeitdruck mit sofortigem Feedback.
-> - **Aufgabenstruktur**: Reale IHK-Ausgangssituationen (z. B. *„NordMedia Agentur GmbH“*) mit aufbauenden Teilaufgaben.
+> Der Nutzer hat im Klärungsschritt folgende Option bestätigt:
+> - **Standard-Einbettung**: Das interaktive 5-Phasen-SVG-Modell mit anklickbaren Knoten, Live-Detailkarten und integriertem Umschalter soll als Standard-Visualisierung anstelle des statischen Skript-Fotos eingebunden werden.
 
 ---
 
-## 1. Overview & Core Concept
+## 1. Overview & Problem Definition
 
-- **Ziel**: Der Prüfungssimulator bildet die reale IHK-Abschlussprüfung (Fachrichtung Designkonzeption & Digitalmedien) exakt nach.
-- **Aufbau der 10 Hauptaufgaben (100 Punkte Gesamt)**:
-  - **Aufgabe 1 (10 Pkt)**: Digital-Strategie & Zielgruppenanalyse (Kapitel 1 & 2)
-  - **Aufgabe 2 (10 Pkt)**: Farbmanagement, ICC-Profile & TAC 240%/300% (Kapitel 3)
-  - **Aufgabe 3 (10 Pkt)**: Bildauflösung, PPI-Berechnung & Raster (Kapitel 4)
-  - **Aufgabe 4 (10 Pkt)**: Barrierefreiheit WCAG 2.1 AA & Kontraste (Kapitel 5)
-  - **Aufgabe 5 (10 Pkt)**: IT-Sicherheit, Datenschutz DSGVO & HTTPS (Kapitel 6)
-  - **Aufgabe 6 (10 Pkt)**: Responsive Webdesign, CSS Grid & Assets (Kapitel 7)
-  - **Aufgabe 7 (10 Pkt)**: Medienneutrale Daten & PDF/X-Standards (Kapitel 8)
-  - **Aufgabe 8 (10 Pkt)**: Agiles Projektmanagement Scrum & Sprints (Kapitel 9)
-  - **Aufgabe 9 (10 Pkt)**: WiSo – Verträge, Fristen & Kündigungsschutz (Kapitel 10 & 11)
-  - **Aufgabe 10 (10 Pkt)**: DIN 69901-2 PM-Kreislauf & Tuckman-Modell (Kapitel 12)
+- **Problem**: In Minispiel 7 (*"Phase 5: Abschluss & der geschlossene PM-Kreislauf"*) sowie in den Lern-Häppchen wurde beim Aufklappen des Schaubilds bisher ein statisches Skript-Foto (`IMG_3246_0e617e58.jpeg`) angezeigt (siehe Nutzer-Screenshot `IMG_3250`).
+- **Lösung**: Ersetzung des starren `<img>`-Elements durch die interaktive `<PmCycleGraphic />`-Komponente in `PmCycleFinalGame.tsx` und `ModuleLearningView.tsx`. Dadurch erhalten Lernende direkten Zugriff auf den anklickbaren 5-Phasen-SVG-Kreislauf mit IHK-Deliverables, Tuckman-Phasen und Führungsstilen.
 
 ---
 
-## 2. User Experience & Visual Design
+## 2. User Experience & Integration Architecture
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│  OFFIZIELLE IHK-PRÜFUNGSSIMULATION · MEDIENGESTALTER DIGITAL           │
-│  ⏱️ Restzeit: 84:12 Min   |   Punkte: 0 / 100   |   Markiert: 🚩 2/10    │
+│  MINISPIEL 7: PHASE 5 ABSCHLUSS & GESCHLOSSENER KREISLAUF             │
 ├────────────────────────────────────────────────────────────────────────┤
-│  AUFGABEN-NAVIGATOR:                                                   │
-│  [A1 ✓] [A2 ✓] [A3 🚩] [A4 ⚪] [A5 ⚪] [A6 ⚪] [A7 ⚪] [A8 ⚪] [A9 ⚪] [A10 ⚪]│
+│  [ Mode Switcher: ⚡ Interaktiv | 🖼️ HD Grafik | 📄 Skript-Foto ]       │
+│                                                                        │
+│                       1. INITIALISIERUNG                               │
+│                      ╭──────────────────╮                              │
+│         5. ABSCHLUSS │                  │  2. DEFINITION               │
+│                      │  PROJEKTMANAGEMENT│                              │
+│                      │    DIN 69901-2   │                              │
+│          4. STEUERUNG╰──────────────────╯  3. PLANUNG                  │
+│                                                                        │
+│  [ Live Phase Detail Card on Click / Hover ]                           │
 ├────────────────────────────────────────────────────────────────────────┤
-│  HAUPTAUFGABE 3 (10 PUNKTE): BILD- & RASTERBERECHNUNG                  │
-│                                                                        │
-│  🏢 Ausgangssituation:                                                 │
-│  Die Kundin "AutoPark GmbH" benötigt einen 4-farbigen Imagekatalog.    │
-│  Für den Druck auf ISO Coated v2 liegt ein Titelbild mit 1800x1200 px. │
-│                                                                        │
-│  Teilaufgabe 3a (4 Punkte):                                            │
-│  Berechne die effektive Auflösung in ppi bei 18 cm Druckbreite.        │
-│  ◯ A) 254 ppi – reicht nicht für geforderte 300 ppi                    │
-│  ◯ B) 300 ppi – exakt ausreichend                                     │
-│                                                                        │
-│  [ 🚩 Aufgabe markieren ]                 [ ⬅️ Zurück ]  [ Weiter ➡️ ]  │
+│  SÄULE #1 VON 4: PROJEKTABSCHLUSSBERICHT                               │
+│  Zu welcher Abschlussaufgabe gehört das?                               │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Prüfungs-Header**:
-  - Live 90-Minuten-Countdown mit farblicher Warnung (< 15 Min Amber, < 5 Min Red).
-  - Aufgaben-Grid (1 bis 10) mit Sofort-Status (Beantwortet, Markiert für spätere Kontrolle, Offen).
-- **Prüfungsergebnis & Zertifikat**:
-  - IHK-Notenschlüssel (100–92% Note 1, 91–81% Note 2, 80–67% Note 3, 66–50% Note 4, <50% Note 5/6).
-  - Ausführlicher Themen-Radarchart mit Stärken/Schwächen-Analyse pro Kapitel.
-
 ---
 
-## 3. Key Product Decisions & Technical Architecture
+## 3. Technical Architecture & File Edits
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                          ExamSimulatorView                             │
-│                  (src/components/ExamSimulatorView.tsx)                 │
-│                                                                        │
-│   ├── ModeSelectionScreen (IHK 90-Min Real vs. Freies Themen-Üben)     │
-│   ├── ExamHeaderToolbar (Timer, Navigation Grid, Flagging)            │
-│   ├── ScenarioCard (Firmen-Ausgangssituation & IHK-Asset)              │
-│   ├── QuestionBlock (Teilaufgaben mit Punktegewichtung)                │
-│   └── ExamResultDashboard (IHK Notenschlüssel, Radar & Musterlösung)   │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
-- **Erweiterung von `src/data/examQuestions.ts` & `src/types/quiz.ts`**:
-  - Verknüpfung von Fragen zu 10 zusammenhängenden Szenario-Hauptaufgaben.
-  - Hinzufügen von `points` (Punkte pro Aufgabe) und `scenarioTitle`.
-
----
-
-## 4. Implementation Steps
-
-1. Aktualisiere `src/types/quiz.ts` um Prüfungs-Szenario-Typen und Punktegewichtungen.
-2. Überarbeite `src/components/ExamSimulatorView.tsx`:
-   - Startbildschirm mit Modusauswahl (*Reale 90-Minuten-Prüfung* vs. *Themen-Happen Üben*).
-   - Aufgaben-Navigator-Leiste mit Flag-Funktion (*Später überprüfen*).
-   - Realer 90-Minuten-Timer.
-   - Auswertung nach dem IHK-Notenschlüssel mit detaillierter Kapitel-Analyse.
-3. Führe `compile_applet` und `lint_applet` aus.
+1. **`src/components/InteractiveMinigames/PmCycleFinalGame.tsx`**:
+   - Import `PmCycleGraphic` from `./PmCycleGraphic`.
+   - Replace static `<img>` container in lines 240-262 with `<PmCycleGraphic imageUrl="/assets/aistudio/IMG_3246_0e617e58.jpeg" />`.
+2. **`src/components/ModuleLearningView.tsx`**:
+   - Import `PmCycleGraphic` from `./InteractiveMinigames/PmCycleGraphic`.
+   - Update nugget image rendering so that PM cycle nuggets automatically render `<PmCycleGraphic imageUrl={currentNugget.imageUrl} />`.
+3. **Verification**:
+   - Co-execute `compile_applet` and `lint_applet` to confirm build succeeds without errors.
