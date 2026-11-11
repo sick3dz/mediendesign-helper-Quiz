@@ -4271,9 +4271,9 @@ export const CHAPTERS: Chapter[] = [
             question: 'Eine Druckerei liefert 5.000 Kundenflyer, die erhebliche Fehldrucke und Farbstreifen aufweisen (Sachmangel). Welches vorrangige Recht hat der Käufer nach BGB gegenüber der Druckerei?',
             options: [
               { id: 'a', text: 'Recht auf Nacherfüllung (Neulieferung mangelfreier Flyer oder Nachbesserung)', isCorrect: true, explanation: 'Richtig! Nach § 439 BGB gilt der Vorrang der Nacherfüllung. Erst wenn die Nacherfüllung fehlschlägt oder verweigert wird, darf der Käufer mindern oder vom Vertrag zurücktreten.' },
-              { id: 'b', text: 'Sofortige fristlose Kündigung aller Verträge und Strafanzeige bei der Polizei', isCorrect: false, explanation: 'Falsch: Das BGB gibt dem Verkäufer zunächst das Recht zur zweiten Andienung (Nacherfüllung).' },
-              { id: 'c', text: 'Sofortige 100%ige Preisminderung ohne Rücksprache mit der Druckerei', isCorrect: false, explanation: 'Falsch: Minderung ist erst nach erfolglosem Nacherfüllungsverlangen zulässig.' },
-              { id: 'd', text: 'Der Käufer hat keinerlei Rechte, wenn die Ware bereits bezahlt wurde', isCorrect: false, explanation: 'Falsch: Gewährleistungsrechte bestehen 2 Jahre ab Ablieferung der Ware.' }
+              { id: 'b', text: 'Sofortiger Rücktritt vom Kaufvertrag und Rückforderung des Kaufpreises ohne Fristsetzung', isCorrect: false, explanation: 'Falsch: Das BGB gibt dem Verkäufer zunächst das Recht zur zweiten Andienung (Nacherfüllung nach § 439 BGB).' },
+              { id: 'c', text: 'Sofortige Minderung des Kaufpreises um 50 % ohne vorherige Frist zur Nacherfüllung', isCorrect: false, explanation: 'Falsch: Minderung ist erst nach erfolglosem Ablauf einer angemessenen Nacherfüllungsfrist zulässig.' },
+              { id: 'd', text: 'Schadensersatz statt der Leistung ohne vorheriges Recht der zweiten Andienung', isCorrect: false, explanation: 'Falsch: Auch Schadensersatz statt der Leistung setzt grundsätzlich ein erfolgloses Nacherfüllungsverlangen voraus.' }
             ],
             merksatz: 'Recht der zweiten Andienung: Bei Sachmängeln zuerst immer Nacherfüllung verlangen!'
           },
@@ -4310,81 +4310,43 @@ export const CHAPTERS: Chapter[] = [
   IHK_ORIGINAL_CHAPTER,
   PROJECT_PHASES_CHAPTER
 ];
-
 /**
  * Returns Level 2 (Mastery / IHK-Transfer) questions for a module.
  * If explicitly defined in level2QuizQuestions, returns those;
- * otherwise transforms base questions into scenario-rich IHK transfer questions
- * with balanced option lengths and detailed trap explanations.
- */
-/**
- * Returns Level 2 (Mastery / IHK-Transfer) questions for a module.
- * If explicitly defined in level2QuizQuestions, returns those;
- * otherwise transforms base questions into scenario-rich IHK transfer questions
- * with balanced option lengths, shuffled order, and detailed trap explanations.
+ * otherwise transforms base questions into clean, challenging IHK transfer questions
+ * with authentic option texts, deterministic shuffling, and detailed trap explanations.
  */
 export function getModuleLevel2Questions(module: LearningModule): QuizQuestion[] {
-  const scenarioPrefixes = [
-    `IHK-Abschlussprüfung (Digital): In einem komplexen Kundenprojekt zur "${module.title}" stehst du vor folgender Herausforderung:`,
-    `Transfer-Szenario: Als Mediengestalter im 3. Lehrjahr sollst du für eine Fachabteilung folgende Entscheidung fachlich begründen:`,
-    `IHK-Meisterfall: Ein Kunde bemängelt die Umsetzung im Modul "${module.title}". Analysiere die Situation nach geltenden Qualitätsstandards:`,
-    `Prüfungsrelevante Fallstudie: In der mündlichen IHK-Prüfung wirst du mit folgendem Szenario konfrontiert:`,
-    `Situationsaufgabe (Gesellenstück-Niveau): Für ein Portfolio-Projekt im Bereich "${module.title}" musst du folgende Fachfrage präzise beantworten:`
-  ];
-
   const sourceQuestions = module.level2QuizQuestions && module.level2QuizQuestions.length > 0
     ? module.level2QuizQuestions
     : module.quizQuestions;
 
-  return sourceQuestions.map((q, index) => {
-    // Find target length from correct option so distractors are balanced
-    const correctOpt = q.options.find(o => o.isCorrect);
-    const targetWords = correctOpt ? correctOpt.text.split(/\s+/).length : 18;
+  return sourceQuestions.map((q) => {
+    // Preserve authentic option text without appending synthetic meta-phrases
+    const cleanOptions = q.options.map(opt => ({
+      ...opt,
+      text: opt.text.trim(),
+      trapExplanation:
+        opt.trapExplanation ||
+        (opt.isCorrect
+          ? undefined
+          : `Klassische Prüfungsfalle: ${opt.explanation}`)
+    }));
 
-    const balancedOptions = q.options.map(opt => {
-      if (opt.isCorrect) {
-        return opt;
-      }
-
-      const words = opt.text.trim().split(/\s+/);
-      let enhancedText = opt.text.trim();
-
-      // Even more sophisticated expansion for Level 2 difficulty
-      if (words.length < Math.max(14, Math.round(targetWords * 0.85))) {
-        if (enhancedText.toLowerCase().startsWith('ausschließlich') || enhancedText.toLowerCase().startsWith('nur')) {
-          enhancedText = `${enhancedText}, da dies nach oberflächlicher Betrachtung den geringsten initialen Gestaltungsaufwand erfordert und oft als pragmatische Abkürzung missverstanden wird.`;
-        } else if (enhancedText.toLowerCase().includes('zufall') || enhancedText.toLowerCase().includes('irrelevant')) {
-          enhancedText = `${enhancedText}, da in der Praxis oft auf empirische Belege verzichtet wird und man sich auf das rein subjektive ästhetische Empfinden verlässt.`;
-        } else if (enhancedText.endsWith('.')) {
-          enhancedText = `${enhancedText.slice(0, -1)}, was zwar eine gängige (aber fachlich falsche) Annahme in vielen Junior-Teams darstellt und gegen IHK-Kernkompetenzen verstößt.`;
-        } else {
-          enhancedText = `${enhancedText} – eine verlockende Fehleinschätzung, die zwar plausibel klingt, jedoch die tiefergehenden fachlichen Anforderungen der Prüfungsordnung ignoriert.`;
-        }
-      }
-
-      return {
-        ...opt,
-        text: enhancedText,
-        trapExplanation:
-          opt.trapExplanation ||
-          `Klassische Prüfungsfalle: ${opt.explanation} In IHK-Prüfungen wird diese Option oft gewählt, da sie wie eine effiziente Lösung wirkt, aber die notwendige fachliche Tiefe oder rechtliche Rahmenbedingungen vernachlässigt.`
-      };
-    });
-
-    // Shuffle options for Level 2 difficulty (but keep it deterministic per session if possible)
-    // Here we use a simple pseudo-shuffle that is consistent for the current question
-    const shuffledOptions = [...balancedOptions].sort((a, b) => {
-      // Use the first character of the ID and text to create a stable but shuffled-looking order
-      const seed = (a.id.charCodeAt(0) + a.text.charCodeAt(0)) - (b.id.charCodeAt(0) + b.text.charCodeAt(0));
-      return seed;
+    // Deterministic pseudo-shuffle per question so correct answer isn't always at index 0
+    const shuffledOptions = [...cleanOptions].sort((a, b) => {
+      const valA = (q.id + a.id + a.text).split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+      const valB = (q.id + b.id + b.text).split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+      return valA - valB;
     });
 
     return {
       ...q,
-      id: `l2-${q.id}`,
-      question: q.question.startsWith('[IHK-') ? q.question : `[Meister-Niveau] ${q.question}`,
-      scenario:
-        q.scenario || scenarioPrefixes[index % scenarioPrefixes.length],
+      id: q.id.startsWith('l2-') ? q.id : `l2-${q.id}`,
+      // Keep question text natural and clean without artificial prefixes
+      question: q.question,
+      // Only keep scenario if explicitly defined for this question (no generic mad-libs)
+      scenario: q.scenario || undefined,
       options: shuffledOptions,
       examTip:
         q.examTip ||
@@ -4392,5 +4354,6 @@ export function getModuleLevel2Questions(module: LearningModule): QuizQuestion[]
     };
   });
 }
+
 
 
