@@ -184,6 +184,15 @@ export const NOTEBOOKS_CATALOG: NotebookDocument[] = [
     pdfUrl: `${ASSET_BASE}/Fragen_Antworten_5a87d4d6.pdf`,
     totalPages: 62,
   },
+  {
+    id: 'blatt-blanko-notizblock',
+    title: 'Blatt Blanko · Freie Zeichenfläche',
+    subtitle: 'Leere weiße DIN-A4-Blätter für freie Skizzen, eingefügte Bilder, Texte & Notizen',
+    category: 'Notizblatt',
+    sourceType: 'blatt-blanko',
+    coverColor: 'from-slate-500 to-slate-700',
+    totalPages: 5,
+  },
 ];
 
 export const HIGHLIGHTER_COLORS = [

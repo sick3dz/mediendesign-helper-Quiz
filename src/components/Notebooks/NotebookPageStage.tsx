@@ -1,7 +1,16 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { GripHorizontal, Minimize2, Maximize2, X, Loader2, AlertCircle } from 'lucide-react';
+import {
+  GripHorizontal,
+  Minimize2,
+  Maximize2,
+  X,
+  Loader2,
+  AlertCircle,
+  RotateCw,
+} from 'lucide-react';
 import {
   NotebookDocument,
+  NotebookImageElement,
   NotebookSticker,
   NotebookStickerType,
   NotebookStickyNote,
@@ -33,9 +42,12 @@ interface Props {
   textHasBackground: boolean;
   stickyColor: StickyColor;
   selectedStickerType: NotebookStickerType;
+  stickerScale: number;
+  stickerOpacity: number;
   zoom: number;
   fitWidth: number;
   pencilOnlyMode: boolean;
+  selectedImageSignal?: { id: string; seq: number };
   onStylusDetected?: () => void;
   onCommitAnnotations: (next: PageAnnotations, recordHistory?: boolean) => void;
   onDetectedPdfTotalPages?: (totalPages: number) => void;
@@ -310,6 +322,233 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
   );
 };
 
+interface EmbeddedImageItemProps {
+  item: NotebookImageElement;
+  isInteractive: boolean;
+  isSelected: boolean;
+  onSelect: () => void;
+  onStartDrag: (e: React.PointerEvent<HTMLElement>) => void;
+  onStartResize: (e: React.PointerEvent<HTMLElement>) => void;
+  onUpdate: (patch: Partial<Pick<NotebookImageElement, 'widthPct' | 'opacity' | 'rotation'>>) => void;
+  onDelete: () => void;
+}
+
+const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
+  item,
+  isInteractive,
+  isSelected,
+  onSelect,
+  onStartDrag,
+  onStartResize,
+  onUpdate,
+  onDelete,
+}) => {
+  const [rawUrl, setRawUrl] = useState<string>('');
+  const [rotatedUrl, setRotatedUrl] = useState<string>('');
+  const rot = (((item.rotation ?? 0) % 360) + 360) % 360;
+
+  useEffect(() => {
+    let active = true;
+    getMediaObjectUrl(item.mediaId).then((url) => {
+      if (active && url) setRawUrl(url);
+    });
+    return () => {
+      active = false;
+    };
+  }, [item.mediaId]);
+
+  useEffect(() => {
+    if (!rawUrl || rot === 0) {
+      setRotatedUrl('');
+      return;
+    }
+    let cancelled = false;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      if (cancelled) return;
+      const w = img.naturalWidth || 800;
+      const h = img.naturalHeight || 600;
+      const isQuarter = rot === 90 || rot === 270;
+      const cw = isQuarter ? h : w;
+      const ch = isQuarter ? w : h;
+      const canvas = document.createElement('canvas');
+      canvas.width = cw;
+      canvas.height = ch;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.translate(cw / 2, ch / 2);
+      ctx.rotate((rot * Math.PI) / 180);
+      ctx.drawImage(img, -w / 2, -h / 2, w, h);
+      setRotatedUrl(canvas.toDataURL('image/png'));
+    };
+    img.src = rawUrl;
+    return () => {
+      cancelled = true;
+    };
+  }, [rawUrl, rot]);
+
+  const displaySrc = rot !== 0 && rotatedUrl ? rotatedUrl : rawUrl;
+  const opacity = item.opacity ?? 1;
+  const transparencyPct = Math.round((1 - opacity) * 100);
+  const showToolbarBelow = item.y < 18;
+  const toolbarHorizClass =
+    item.x < 24 ? 'left-0' : item.x > 76 ? 'right-0' : 'left-1/2 -translate-x-1/2';
+
+  return (
+    <div
+      style={{
+        left: `${item.x}%`,
+        top: `${item.y}%`,
+        width: `${item.widthPct}%`,
+      }}
+      onPointerDown={(e) => {
+        if (!isInteractive) return;
+        e.stopPropagation();
+        onSelect();
+        onStartDrag(e);
+      }}
+      className={`absolute -translate-x-1/2 -translate-y-1/2 group select-none ${
+        isSelected ? 'z-[8]' : 'z-[5]'
+      } ${
+        isInteractive
+          ? 'pointer-events-auto cursor-grab active:cursor-grabbing'
+          : 'pointer-events-none'
+      }`}
+    >
+      {/* Floating Mini Controls for Selected Image */}
+      {isSelected && isInteractive && (
+        <div
+          onPointerDown={(e) => e.stopPropagation()}
+          className={`absolute ${toolbarHorizClass} ${
+            showToolbarBelow ? 'top-full mt-2' : 'bottom-full mb-2'
+          } flex items-center gap-1.5 px-2 py-1 rounded-xl bg-slate-900/95 text-white shadow-lg border border-slate-700/80 text-[10px] font-bold whitespace-nowrap z-20 cursor-default`}
+        >
+          <span className="text-slate-400">Breite</span>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onUpdate({ widthPct: Math.max(12, Math.round(item.widthPct - 6)) });
+            }}
+            title="Bild verkleinern"
+            className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer"
+          >
+            −
+          </button>
+          <span className="tabular-nums min-w-[28px] text-center">
+            {Math.round(item.widthPct)}%
+          </span>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onUpdate({ widthPct: Math.min(95, Math.round(item.widthPct + 6)) });
+            }}
+            title="Bild vergrößern"
+            className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer"
+          >
+            +
+          </button>
+
+          <span className="text-slate-600">|</span>
+
+          <span className="text-slate-400">Transp.</span>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onUpdate({ opacity: +Math.min(1, opacity + 0.1).toFixed(2) });
+            }}
+            title="Weniger transparent"
+            className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer"
+          >
+            −
+          </button>
+          <span className="tabular-nums min-w-[28px] text-center">
+            {transparencyPct}%
+          </span>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onUpdate({ opacity: +Math.max(0.2, opacity - 0.1).toFixed(2) });
+            }}
+            title="Transparenter machen"
+            className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer"
+          >
+            +
+          </button>
+
+          <span className="text-slate-600">|</span>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onUpdate({ rotation: (rot + 90) % 360 });
+            }}
+            title="Bild um 90° drehen"
+            aria-label="Bild drehen"
+            className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer"
+          >
+            <RotateCw className="w-3 h-3" />
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            title="Bild entfernen"
+            aria-label="Bild entfernen"
+            className="w-5 h-5 rounded bg-rose-500/80 hover:bg-rose-500 text-white flex items-center justify-center cursor-pointer"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      )}
+
+      <div
+        style={{ opacity }}
+        className={`relative rounded-md overflow-hidden transition-shadow ${
+          isSelected && isInteractive
+            ? 'ring-2 ring-indigo-500 shadow-md'
+            : isInteractive
+            ? 'group-hover:ring-2 group-hover:ring-indigo-300'
+            : ''
+        }`}
+      >
+        {displaySrc ? (
+          <img
+            src={displaySrc}
+            alt="Eingefügtes Bild"
+            draggable={false}
+            className="w-full h-auto block pointer-events-none"
+          />
+        ) : (
+          <div className="w-full aspect-4/3 bg-slate-100 flex items-center justify-center text-slate-400">
+            <Loader2 className="w-5 h-5 animate-spin" />
+          </div>
+        )}
+      </div>
+
+      {/* Bottom-Right Corner Drag Resize Handle */}
+      {isSelected && isInteractive && (
+        <div
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            onStartResize(e);
+          }}
+          title="Ziehen zum Skalieren"
+          className="absolute -bottom-2 -right-2 w-5 h-5 rounded-full bg-indigo-600 border-2 border-white shadow-md cursor-nwse-resize flex items-center justify-center z-20"
+        />
+      )}
+    </div>
+  );
+};
+
 export const NotebookPageStage: React.FC<Props> = ({
   notebook,
   pageNumber,
@@ -324,9 +563,12 @@ export const NotebookPageStage: React.FC<Props> = ({
   textHasBackground,
   stickyColor,
   selectedStickerType,
+  stickerScale,
+  stickerOpacity,
   zoom,
   fitWidth,
   pencilOnlyMode,
+  selectedImageSignal,
   onStylusDetected,
   onCommitAnnotations,
   onDetectedPdfTotalPages,
@@ -352,15 +594,28 @@ export const NotebookPageStage: React.FC<Props> = ({
   const [autoFocusTextId, setAutoFocusTextId] = useState<string | null>(null);
   const [selectedStickerId, setSelectedStickerId] = useState<string | null>(null);
   const [selectedTextId, setSelectedTextId] = useState<string | null>(null);
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
 
-  // Dragging state for Sticky Notes, Stickers & Text Boxes
+  useEffect(() => {
+    if (selectedImageSignal?.id) {
+      setSelectedImageId(selectedImageSignal.id);
+    }
+  }, [selectedImageSignal]);
+
+  // Dragging state for Sticky Notes, Stickers, Text Boxes & Embedded Images
   const dragItemRef = useRef<{
-    kind: 'sticky' | 'sticker' | 'text';
+    kind: 'sticky' | 'sticker' | 'text' | 'image';
     id: string;
     startClientX: number;
     startClientY: number;
     origX: number;
     origY: number;
+  } | null>(null);
+
+  const resizeImageRef = useRef<{
+    id: string;
+    startClientX: number;
+    origWidthPct: number;
   } | null>(null);
 
   const imagePageMeta =
@@ -369,7 +624,7 @@ export const NotebookPageStage: React.FC<Props> = ({
       : undefined;
 
   const customPage =
-    notebook.sourceType === 'eigenes-heft'
+    notebook.sourceType === 'eigenes-heft' || notebook.sourceType === 'blatt-blanko'
       ? notebook.customPages?.[pageNumber - 1]
       : undefined;
 
@@ -473,7 +728,10 @@ export const NotebookPageStage: React.FC<Props> = ({
           setLoadError('PDF-Seite konnte nicht gerendert werden.');
           setIsLoading(false);
         });
-    } else if (notebook.sourceType === 'eigenes-heft' && customPage) {
+    } else if (
+      (notebook.sourceType === 'eigenes-heft' || notebook.sourceType === 'blatt-blanko') &&
+      customPage
+    ) {
       if (customPage.kind === 'blank') {
         const res = renderBlankTemplateToDataUrl(customPage.template, effectiveRotation, 1240);
         setSurface({
@@ -525,6 +783,14 @@ export const NotebookPageStage: React.FC<Props> = ({
             setIsLoading(false);
           });
       }
+    } else if (notebook.sourceType === 'blatt-blanko') {
+      const res = renderBlankTemplateToDataUrl('blank', effectiveRotation, 1240);
+      setSurface({
+        dataUrl: res.dataUrl,
+        width: res.width,
+        height: res.height,
+      });
+      setIsLoading(false);
     } else {
       setLoadError('Keine gültige Seitenquelle definiert.');
       setIsLoading(false);
@@ -541,6 +807,7 @@ export const NotebookPageStage: React.FC<Props> = ({
     imagePageMeta?.preferPortrait,
     customPage?.id,
     customPage?.kind,
+    customPage?.kind === 'blank' ? customPage.template : undefined,
     pageNumber,
     effectiveRotation,
     annotations.rotationOverride,
@@ -604,9 +871,10 @@ export const NotebookPageStage: React.FC<Props> = ({
       return;
     }
 
-    // Clear sticker and text selection on background tap
+    // Clear sticker, text, and image selection on background tap
     setSelectedStickerId(null);
     setSelectedTextId(null);
+    setSelectedImageId(null);
 
     const effectiveTool: NotebookTool = isStylusEraser ? 'eraser' : activeTool;
 
@@ -726,6 +994,8 @@ export const NotebookPageStage: React.FC<Props> = ({
         type: selectedStickerType,
         x: clampedX,
         y: clampedY,
+        scale: stickerScale,
+        opacity: stickerOpacity,
       };
       setSelectedStickerId(id);
       onCommitAnnotations(
@@ -739,15 +1009,38 @@ export const NotebookPageStage: React.FC<Props> = ({
   };
 
   const handleStagePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    // Handle dragging of Sticky Notes, Stickers, or Text Boxes first
+    // Handle resizing of embedded page image first
+    if (resizeImageRef.current && stageRef.current) {
+      e.preventDefault();
+      const rect = stageRef.current.getBoundingClientRect();
+      if (rect.width <= 0) return;
+      const dxPct = ((e.clientX - resizeImageRef.current.startClientX) / rect.width) * 100;
+      const nextWidth = Math.max(
+        12,
+        Math.min(95, +(resizeImageRef.current.origWidthPct + dxPct * 2).toFixed(1))
+      );
+      const targetId = resizeImageRef.current.id;
+      onCommitAnnotations(
+        {
+          ...latestAnnotationsRef.current,
+          images: (latestAnnotationsRef.current.images || []).map((img) =>
+            img.id === targetId ? { ...img, widthPct: nextWidth } : img
+          ),
+        },
+        false
+      );
+      return;
+    }
+
+    // Handle dragging of Sticky Notes, Stickers, Text Boxes, or Embedded Images
     if (dragItemRef.current && stageRef.current) {
       e.preventDefault();
       const rect = stageRef.current.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
       const dxPct = ((e.clientX - dragItemRef.current.startClientX) / rect.width) * 100;
       const dyPct = ((e.clientY - dragItemRef.current.startClientY) / rect.height) * 100;
-      const nextX = Math.max(2, Math.min(90, dragItemRef.current.origX + dxPct));
-      const nextY = Math.max(2, Math.min(92, dragItemRef.current.origY + dyPct));
+      const nextX = Math.max(2, Math.min(95, dragItemRef.current.origX + dxPct));
+      const nextY = Math.max(2, Math.min(95, dragItemRef.current.origY + dyPct));
 
       if (dragItemRef.current.kind === 'sticky') {
         const targetId = dragItemRef.current.id;
@@ -767,6 +1060,17 @@ export const NotebookPageStage: React.FC<Props> = ({
             ...latestAnnotationsRef.current,
             textBoxes: (latestAnnotationsRef.current.textBoxes || []).map((t) =>
               t.id === targetId ? { ...t, x: nextX, y: nextY } : t
+            ),
+          },
+          false
+        );
+      } else if (dragItemRef.current.kind === 'image') {
+        const targetId = dragItemRef.current.id;
+        onCommitAnnotations(
+          {
+            ...latestAnnotationsRef.current,
+            images: (latestAnnotationsRef.current.images || []).map((img) =>
+              img.id === targetId ? { ...img, x: nextX, y: nextY } : img
             ),
           },
           false
@@ -845,6 +1149,12 @@ export const NotebookPageStage: React.FC<Props> = ({
   };
 
   const handleStagePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (resizeImageRef.current) {
+      resizeImageRef.current = null;
+      onCommitAnnotations(latestAnnotationsRef.current, true);
+      return;
+    }
+
     if (dragItemRef.current) {
       dragItemRef.current = null;
       // Save final position with history record
@@ -933,6 +1243,47 @@ export const NotebookPageStage: React.FC<Props> = ({
       true
     );
     if (selectedStickerId === id) setSelectedStickerId(null);
+  };
+
+  const handleUpdateSticker = (
+    id: string,
+    patch: Partial<Pick<NotebookSticker, 'scale' | 'opacity'>>
+  ) => {
+    onCommitAnnotations(
+      {
+        ...annotations,
+        stickers: annotations.stickers.map((s) =>
+          s.id === id ? { ...s, ...patch } : s
+        ),
+      },
+      true
+    );
+  };
+
+  const handleUpdateEmbeddedImage = (
+    id: string,
+    patch: Partial<Pick<NotebookImageElement, 'widthPct' | 'opacity' | 'rotation'>>
+  ) => {
+    onCommitAnnotations(
+      {
+        ...annotations,
+        images: (annotations.images || []).map((img) =>
+          img.id === id ? { ...img, ...patch } : img
+        ),
+      },
+      true
+    );
+  };
+
+  const handleDeleteEmbeddedImage = (id: string) => {
+    onCommitAnnotations(
+      {
+        ...annotations,
+        images: (annotations.images || []).filter((img) => img.id !== id),
+      },
+      true
+    );
+    if (selectedImageId === id) setSelectedImageId(null);
   };
 
   const handleTextBoxChange = (id: string, text: string) => {
@@ -1055,6 +1406,38 @@ export const NotebookPageStage: React.FC<Props> = ({
           />
         ) : null}
 
+        {/* Layer 1.5: Interactive Embedded Images (on custom & existing pages) */}
+        <div className="absolute inset-0 z-[5] pointer-events-none">
+          {(annotations.images || []).map((imgEl) => (
+            <EmbeddedImageOverlayItem
+              key={imgEl.id}
+              item={imgEl}
+              isInteractive={activeTool === 'hand'}
+              isSelected={selectedImageId === imgEl.id}
+              onSelect={() => setSelectedImageId(imgEl.id)}
+              onStartDrag={(e) => {
+                dragItemRef.current = {
+                  kind: 'image',
+                  id: imgEl.id,
+                  startClientX: e.clientX,
+                  startClientY: e.clientY,
+                  origX: imgEl.x,
+                  origY: imgEl.y,
+                };
+              }}
+              onStartResize={(e) => {
+                resizeImageRef.current = {
+                  id: imgEl.id,
+                  startClientX: e.clientX,
+                  origWidthPct: imgEl.widthPct,
+                };
+              }}
+              onUpdate={(patch) => handleUpdateEmbeddedImage(imgEl.id, patch)}
+              onDelete={() => handleDeleteEmbeddedImage(imgEl.id)}
+            />
+          ))}
+        </div>
+
         {/* Layer 2: Smooth Vector Ink SVG (Highlighters beneath Pen) */}
         <svg
           viewBox="0 0 100 100"
@@ -1114,6 +1497,16 @@ export const NotebookPageStage: React.FC<Props> = ({
             const preset = NOTEBOOK_STICKERS.find((p) => p.type === sticker.type);
             if (!preset) return null;
             const isSelected = selectedStickerId === sticker.id;
+            const currentScale = sticker.scale ?? 1;
+            const currentOpacity = sticker.opacity ?? 1;
+            const transparencyPct = Math.round((1 - currentOpacity) * 100);
+            const showToolbarBelow = sticker.y < 14;
+            const toolbarHorizClass =
+              sticker.x < 22
+                ? 'left-0'
+                : sticker.x > 78
+                ? 'right-0'
+                : 'left-1/2 -translate-x-1/2';
 
             return (
               <div
@@ -1133,14 +1526,115 @@ export const NotebookPageStage: React.FC<Props> = ({
                   };
                 }}
                 className={`absolute pointer-events-auto -translate-x-1/2 -translate-y-1/2 group select-none ${
-                  isDrawTool ? 'pointer-events-none opacity-90' : 'cursor-grab active:cursor-grabbing'
+                  isSelected ? 'z-30' : ''
+                } ${
+                  isDrawTool
+                    ? 'pointer-events-none opacity-90'
+                    : 'cursor-grab active:cursor-grabbing'
                 }`}
               >
+                {/* Unscaled Floating Controls for Selected Sticker */}
+                {isSelected && !isDrawTool && (
+                  <div
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className={`absolute ${toolbarHorizClass} ${
+                      showToolbarBelow ? 'top-full mt-2.5' : 'bottom-full mb-2.5'
+                    } flex items-center gap-1.5 px-2 py-1 rounded-xl bg-slate-900/95 text-white shadow-lg border border-slate-700/80 text-[10px] font-bold whitespace-nowrap z-40 cursor-default`}
+                  >
+                    <span className="text-slate-400">Größe</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUpdateSticker(sticker.id, {
+                          scale: +Math.max(0.5, currentScale - 0.15).toFixed(2),
+                        });
+                      }}
+                      title="Sticker verkleinern"
+                      aria-label="Sticker verkleinern"
+                      className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer"
+                    >
+                      −
+                    </button>
+                    <span className="tabular-nums min-w-[30px] text-center">
+                      {Math.round(currentScale * 100)}%
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUpdateSticker(sticker.id, {
+                          scale: +Math.min(2.0, currentScale + 0.15).toFixed(2),
+                        });
+                      }}
+                      title="Sticker vergrößern"
+                      aria-label="Sticker vergrößern"
+                      className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer"
+                    >
+                      +
+                    </button>
+
+                    <span className="text-slate-600">|</span>
+
+                    <span className="text-slate-400">Transp.</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUpdateSticker(sticker.id, {
+                          opacity: +Math.min(1, currentOpacity + 0.1).toFixed(2),
+                        });
+                      }}
+                      title="Weniger transparent (deckender)"
+                      aria-label="Transparenz verringern"
+                      className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer"
+                    >
+                      −
+                    </button>
+                    <span className="tabular-nums min-w-[28px] text-center">
+                      {transparencyPct}%
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUpdateSticker(sticker.id, {
+                          opacity: +Math.max(0.2, currentOpacity - 0.1).toFixed(2),
+                        });
+                      }}
+                      title="Transparenter machen"
+                      aria-label="Transparenz erhöhen"
+                      className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer"
+                    >
+                      +
+                    </button>
+
+                    <span className="text-slate-600">|</span>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteSticker(sticker.id);
+                      }}
+                      title="Sticker entfernen"
+                      aria-label="Sticker entfernen"
+                      className="w-5 h-5 rounded bg-rose-500/80 hover:bg-rose-500 text-white flex items-center justify-center cursor-pointer"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+
                 <div
-                  className={`relative inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border-2 shadow-sm -rotate-2 transition-transform ${
+                  style={{
+                    transform: `rotate(-2deg) scale(${currentScale})`,
+                    opacity: currentOpacity,
+                  }}
+                  className={`relative inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border-2 shadow-sm transition-shadow ${
                     preset.bgClass
                   } ${preset.borderClass} ${preset.textClass} ${
-                    isSelected ? 'ring-2 ring-indigo-500 scale-105' : 'hover:scale-105'
+                    isSelected ? 'ring-2 ring-indigo-500' : 'hover:ring-2 hover:ring-indigo-300'
                   }`}
                 >
                   <span className="text-sm leading-none">{preset.symbol}</span>
@@ -1148,21 +1642,21 @@ export const NotebookPageStage: React.FC<Props> = ({
                     {preset.shortLabel}
                   </span>
 
-                  <button
-                    type="button"
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteSticker(sticker.id);
-                    }}
-                    title="Sticker entfernen"
-                    aria-label="Sticker entfernen"
-                    className={`-mr-1 -my-1 ml-0.5 w-5 h-5 rounded-full bg-slate-900/85 text-white flex items-center justify-center transition-opacity cursor-pointer ${
-                      isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                    }`}
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
+                  {!isSelected && !isDrawTool && (
+                    <button
+                      type="button"
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteSticker(sticker.id);
+                      }}
+                      title="Sticker entfernen"
+                      aria-label="Sticker entfernen"
+                      className="-mr-1 -my-1 ml-0.5 w-5 h-5 rounded-full bg-slate-900/85 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
                 </div>
               </div>
             );

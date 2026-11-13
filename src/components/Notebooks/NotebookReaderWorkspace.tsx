@@ -24,10 +24,12 @@ import {
   Pencil,
   FilePlus2,
   Type,
+  ImagePlus,
 } from 'lucide-react';
 import {
   CustomNotebookPage,
   NotebookDocument,
+  NotebookImageElement,
   NotebookStickerType,
   NotebookStore,
   NotebookTool,
@@ -45,6 +47,7 @@ import { getPdfThumbnailDataUrl } from '../../services/pdfRenderService';
 import {
   getMediaObjectUrl,
   renderBlankTemplateToDataUrl,
+  saveEmbeddedImageMedia,
 } from '../../services/customNotebookDbService';
 import { NotebookPageStage } from './NotebookPageStage';
 
@@ -211,6 +214,8 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const [stickyColor, setStickyColor] = useState<StickyColor>('yellow');
   const [selectedStickerType, setSelectedStickerType] =
     useState<NotebookStickerType>('merksatz');
+  const [stickerScale, setStickerScale] = useState<number>(1);
+  const [stickerOpacity, setStickerOpacity] = useState<number>(1);
 
   // View controls
   const [zoom, setZoom] = useState<number>(1);
@@ -222,6 +227,11 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const [isToolbarCollapsed, setIsToolbarCollapsed] = useState<boolean>(false);
   const [pencilOnlyMode, setPencilOnlyMode] = useState<boolean>(false);
   const userToggledPencilRef = useRef<boolean>(false);
+  const insertImageInputRef = useRef<HTMLInputElement>(null);
+  const [selectedImageSignal, setSelectedImageSignal] = useState<{
+    id: string;
+    seq: number;
+  } | undefined>(undefined);
 
   // Measure viewport stage width cleanly
   const stageContainerRef = useRef<HTMLDivElement>(null);
@@ -310,7 +320,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
         ? notebook.imagePages?.[currentPage - 1]
         : undefined;
     const customMeta =
-      notebook.sourceType === 'eigenes-heft'
+      notebook.sourceType === 'eigenes-heft' || notebook.sourceType === 'blatt-blanko'
         ? notebook.customPages?.[currentPage - 1]
         : undefined;
     const currentRot =
@@ -331,12 +341,88 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
         stickyNotes: [],
         stickers: [],
         textBoxes: [],
+        images: [],
         rotationOverride: currentAnnotations.rotationOverride,
       },
       true
     );
     setConfirmClearPage(false);
   };
+
+  const insertImageFilesToCurrentPage = useCallback(
+    async (files: File[]) => {
+      const imageFiles = files.filter((f) => f.type.startsWith('image/'));
+      if (imageFiles.length === 0) return;
+
+      const added: NotebookImageElement[] = [];
+      for (let idx = 0; idx < imageFiles.length; idx++) {
+        const file = imageFiles[idx];
+        try {
+          const { mediaId, aspectRatio } = await saveEmbeddedImageMedia(
+            file,
+            file.name
+          );
+          const offset = (idx % 4) * 4;
+          added.push({
+            id: `pimg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            mediaId,
+            x: Math.min(75, 48 + offset),
+            y: Math.min(75, 44 + offset),
+            widthPct: 46,
+            aspectRatio,
+            opacity: 1,
+            rotation: 0,
+            createdAt: Date.now(),
+          });
+        } catch (err) {
+          console.error('Bild konnte nicht eingefügt werden:', err);
+        }
+      }
+
+      if (added.length > 0) {
+        const latest = getPageAnnotations(store, notebook.id, currentPage);
+        handleCommitAnnotations(
+          {
+            ...latest,
+            images: [...(latest.images || []), ...added],
+          },
+          true
+        );
+        setActiveTool('hand');
+        setOpenToolPopover(null);
+        const lastAdded = added[added.length - 1];
+        setSelectedImageSignal((prev) => ({
+          id: lastAdded.id,
+          seq: (prev?.seq ?? 0) + 1,
+        }));
+      }
+    },
+    [currentPage, handleCommitAnnotations, notebook.id, store]
+  );
+
+  // Clipboard image paste support (Ctrl+V / Cmd+V)
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT')) {
+        return;
+      }
+      const items = Array.from(e.clipboardData?.items ?? []);
+      const files: File[] = [];
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          const f = item.getAsFile();
+          if (f) files.push(f);
+        }
+      }
+      if (files.length > 0) {
+        e.preventDefault();
+        insertImageFilesToCurrentPage(files);
+      }
+    };
+    window.addEventListener('paste', onPaste);
+    return () => window.removeEventListener('paste', onPaste);
+  }, [insertImageFilesToCurrentPage]);
 
   const goToPage = (pageNum: number) => {
     const clamped = Math.max(1, Math.min(pageNum, totalPages));
@@ -390,7 +476,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const currentPageTitle =
     notebook.sourceType === 'foto-skript'
       ? notebook.imagePages?.[currentPage - 1]?.title
-      : notebook.sourceType === 'eigenes-heft'
+      : notebook.sourceType === 'eigenes-heft' || notebook.sourceType === 'blatt-blanko'
       ? notebook.customPages?.[currentPage - 1]?.title || `Seite ${currentPage} von ${totalPages}`
       : `Seite ${currentPage} von ${totalPages}`;
 
@@ -398,7 +484,8 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     currentAnnotations.strokes.length +
     currentAnnotations.stickyNotes.length +
     currentAnnotations.stickers.length +
-    (currentAnnotations.textBoxes?.length || 0);
+    (currentAnnotations.textBoxes?.length || 0) +
+    (currentAnnotations.images?.length || 0);
 
   const bookStickerPages = Array.from({ length: totalPages }, (_, idx) => idx + 1)
     .map((pageNum) => {
@@ -600,6 +687,30 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                 style={{ backgroundColor: textColor }}
               />
               <span className="hidden md:inline">Text</span>
+            </button>
+
+            <input
+              ref={insertImageInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) => {
+                const files = Array.from(e.target.files ?? []);
+                e.target.value = '';
+                if (files.length > 0) {
+                  insertImageFilesToCurrentPage(files);
+                }
+              }}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => insertImageInputRef.current?.click()}
+              className="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-900 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer min-h-[38px] whitespace-nowrap shrink-0"
+              title="Bild oder Foto auf diese Seite einfügen (auch per Strg+V / Cmd+V)"
+            >
+              <ImagePlus className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+              <span className="hidden sm:inline">Bild</span>
             </button>
 
             <button
@@ -919,24 +1030,67 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             )}
 
             {openToolPopover === 'sticker' && (
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                <span className="font-semibold text-slate-600 dark:text-slate-300 mr-1">
-                  Sticker wählen & auf Seite tippen:
-                </span>
-                {NOTEBOOK_STICKERS.map((stk) => (
-                  <button
-                    key={stk.type}
-                    onClick={() => setSelectedStickerType(stk.type)}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border-2 font-bold cursor-pointer transition-all ${stk.bgClass} ${stk.borderClass} ${stk.textClass} ${
-                      selectedStickerType === stk.type
-                        ? 'ring-2 ring-indigo-500 scale-105'
-                        : 'opacity-80 hover:opacity-100'
-                    }`}
-                  >
-                    <span>{stk.symbol}</span>
-                    <span>{stk.label}</span>
-                  </button>
-                ))}
+              <div className="flex flex-wrap items-center gap-3 text-xs">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-semibold text-slate-600 dark:text-slate-300 mr-1">
+                    Sticker wählen & auf Seite tippen:
+                  </span>
+                  {NOTEBOOK_STICKERS.map((stk) => (
+                    <button
+                      key={stk.type}
+                      onClick={() => setSelectedStickerType(stk.type)}
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border-2 font-bold cursor-pointer transition-all ${stk.bgClass} ${stk.borderClass} ${stk.textClass} ${
+                        selectedStickerType === stk.type
+                          ? 'ring-2 ring-indigo-500 scale-105'
+                          : 'opacity-80 hover:opacity-100'
+                      }`}
+                    >
+                      <span>{stk.symbol}</span>
+                      <span>{stk.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <span className="hidden sm:inline text-slate-300 dark:text-slate-700">|</span>
+
+                {/* Sticker Size & Transparency Controls */}
+                <div className="flex flex-wrap items-center gap-4">
+                  <label className="flex items-center gap-2 font-semibold text-slate-600 dark:text-slate-300">
+                    <span>Größe:</span>
+                    <input
+                      type="range"
+                      min={60}
+                      max={180}
+                      step={5}
+                      value={Math.round(stickerScale * 100)}
+                      onChange={(e) => setStickerScale(Number(e.target.value) / 100)}
+                      className="w-20 sm:w-24 accent-indigo-600 cursor-pointer"
+                      aria-label="Sticker-Größe"
+                    />
+                    <span className="tabular-nums font-bold text-slate-800 dark:text-slate-100 w-9 text-right">
+                      {Math.round(stickerScale * 100)}%
+                    </span>
+                  </label>
+
+                  <label className="flex items-center gap-2 font-semibold text-slate-600 dark:text-slate-300">
+                    <span>Transparenz:</span>
+                    <input
+                      type="range"
+                      min={0}
+                      max={80}
+                      step={5}
+                      value={Math.round((1 - stickerOpacity) * 100)}
+                      onChange={(e) =>
+                        setStickerOpacity(+(1 - Number(e.target.value) / 100).toFixed(2))
+                      }
+                      className="w-20 sm:w-24 accent-indigo-600 cursor-pointer"
+                      aria-label="Sticker-Transparenz"
+                    />
+                    <span className="tabular-nums font-bold text-slate-800 dark:text-slate-100 w-8 text-right">
+                      {Math.round((1 - stickerOpacity) * 100)}%
+                    </span>
+                  </label>
+                </div>
               </div>
             )}
 
@@ -1057,13 +1211,14 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                     pageAnn.strokes.length > 0 ||
                     pageAnn.stickyNotes.length > 0 ||
                     pageAnn.stickers.length > 0 ||
-                    (pageAnn.textBoxes?.length || 0) > 0;
+                    (pageAnn.textBoxes?.length || 0) > 0 ||
+                    (pageAnn.images?.length || 0) > 0;
                   const imgMeta =
                     notebook.sourceType === 'foto-skript'
                       ? notebook.imagePages?.[pageNum - 1]
                       : undefined;
                   const customMeta =
-                    notebook.sourceType === 'eigenes-heft'
+                    notebook.sourceType === 'eigenes-heft' || notebook.sourceType === 'blatt-blanko'
                       ? notebook.customPages?.[pageNum - 1]
                       : undefined;
 
@@ -1101,7 +1256,9 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                               />
                             );
                           })()
-                        ) : notebook.sourceType === 'eigenes-heft' && customMeta ? (
+                        ) : (notebook.sourceType === 'eigenes-heft' ||
+                            notebook.sourceType === 'blatt-blanko') &&
+                          customMeta ? (
                           <CustomPageThumbnail
                             page={customMeta}
                             rotation={
@@ -1109,6 +1266,18 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                                 ? pageAnn.rotationOverride
                                 : customMeta.defaultRotation ?? 0
                             }
+                          />
+                        ) : notebook.sourceType === 'blatt-blanko' ? (
+                          <img
+                            src={
+                              renderBlankTemplateToDataUrl(
+                                'blank',
+                                pageAnn.rotationOverride ?? 0,
+                                220
+                              ).dataUrl
+                            }
+                            alt={`Blatt Blanko ${pageNum}`}
+                            className="w-full h-full object-cover object-top"
                           />
                         ) : notebook.pdfUrl ? (
                           <PdfPageThumbnail
@@ -1279,9 +1448,12 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             textHasBackground={textHasBackground}
             stickyColor={stickyColor}
             selectedStickerType={selectedStickerType}
+            stickerScale={stickerScale}
+            stickerOpacity={stickerOpacity}
             zoom={zoom}
             fitWidth={fitWidth}
             pencilOnlyMode={pencilOnlyMode}
+            selectedImageSignal={selectedImageSignal}
             onStylusDetected={() => {
               if (!userToggledPencilRef.current) {
                 setPencilOnlyMode(true);
@@ -1305,7 +1477,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
               ? 'Apple Pencil Schutz aktiv: Nur der Stift zeichnet – Finger scrollen & zoomen ohne Fehlstriche.'
               : (
                 <>
-                  {activeTool === 'hand' && 'Hand-Modus: Textfelder, Klebezettel & Sticker per Ziehen verschieben oder antippen.'}
+                  {activeTool === 'hand' && 'Hand-Modus: Bilder, Textfelder, Klebezettel & Sticker verschieben, skalieren oder antippen.'}
                   {activeTool === 'highlighter' && 'Textmarker aktiv: Direkt über wichtige Textstellen streichen.'}
                   {activeTool === 'pen' && 'Stift aktiv: Handschriftliche Notizen oder Unterstreichungen zeichnen.'}
                   {activeTool === 'eraser' && 'Radierer aktiv: Über unerwünschte Stift- oder Markerzüge fahren.'}

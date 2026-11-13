@@ -90,7 +90,10 @@ export async function listCustomNotebooks(): Promise<NotebookDocument[]> {
       .map((doc) => ({
         ...doc,
         isCustom: true,
-        sourceType: 'eigenes-heft' as const,
+        sourceType:
+          doc.sourceType === 'blatt-blanko'
+            ? ('blatt-blanko' as const)
+            : ('eigenes-heft' as const),
         totalPages: doc.customPages?.length ?? doc.totalPages ?? 0,
       }))
       .sort((a, b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
@@ -222,6 +225,7 @@ export async function createCustomNotebook(input: {
   subtitle?: string;
   category: string;
   coverColor: string;
+  sourceType?: 'eigenes-heft' | 'blatt-blanko';
   stagedItems: StagedCustomItem[];
 }): Promise<NotebookDocument> {
   const { pages, mediaRecords } = await materializeStagedItems(input.stagedItems, 1);
@@ -239,14 +243,18 @@ export async function createCustomNotebook(input: {
   if (imgCount > 0) autoParts.push(`${imgCount} ${imgCount === 1 ? 'Foto' : 'Fotos'}`);
   if (blankCount > 0) autoParts.push(`${blankCount} ${blankCount === 1 ? 'Notizseite' : 'Notizseiten'}`);
 
+  const resolvedSourceType = input.sourceType ?? 'eigenes-heft';
+
   const notebook: NotebookDocument = {
     id: `custom-${now}-${Math.random().toString(36).slice(2, 7)}`,
     title: input.title.trim(),
     subtitle:
       input.subtitle?.trim() ||
-      `Eigenes Heft (${autoParts.join(' · ') || `${pages.length} Seiten`})`,
+      (resolvedSourceType === 'blatt-blanko'
+        ? `Blatt Blanko (${pages.length} ${pages.length === 1 ? 'Seite' : 'Seiten'})`
+        : `Eigenes Heft (${autoParts.join(' · ') || `${pages.length} Seiten`})`),
     category: input.category.trim() || 'Eigene Mitschriften',
-    sourceType: 'eigenes-heft',
+    sourceType: resolvedSourceType,
     coverColor: input.coverColor,
     isCustom: true,
     customPages: pages,
@@ -266,6 +274,75 @@ export async function createCustomNotebook(input: {
   db.close();
 
   return notebook;
+}
+
+export async function createQuickBlankNotebook(
+  customTitle?: string
+): Promise<NotebookDocument> {
+  const existing = await listCustomNotebooks();
+  const blankCount = existing.filter((b) => b.sourceType === 'blatt-blanko').length;
+  const title = customTitle?.trim() || `Blatt Blanko ${blankCount + 1}`;
+  return createCustomNotebook({
+    title,
+    subtitle: 'Leeres DIN-A4-Blatt für freie Notizen, Bilder & Skizzen',
+    category: 'Notizblatt',
+    coverColor: 'from-slate-700 to-slate-900',
+    sourceType: 'blatt-blanko',
+    stagedItems: [
+      {
+        tempId: `quick-blank-${Date.now()}`,
+        kind: 'blank',
+        template: 'blank',
+        count: 1,
+      },
+    ],
+  });
+}
+
+function measureBlobImageAspectRatio(blob: Blob): Promise<number> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      const ratio =
+        img.naturalWidth > 0 && img.naturalHeight > 0
+          ? img.naturalWidth / img.naturalHeight
+          : 1.333;
+      URL.revokeObjectURL(url);
+      resolve(ratio);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(1.333);
+    };
+    img.src = url;
+  });
+}
+
+export async function saveEmbeddedImageMedia(
+  file: File | Blob,
+  fileName?: string
+): Promise<{ mediaId: string; aspectRatio: number }> {
+  const mediaId = `med-embed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const aspectRatio = await measureBlobImageAspectRatio(file);
+  const record: MediaRecord = {
+    id: mediaId,
+    mimeType: file.type || 'image/png',
+    name: fileName || (file instanceof File ? file.name : 'eingefuegtes-bild.png'),
+    blob: file,
+    createdAt: Date.now(),
+  };
+
+  const db = await openDatabase();
+  const tx = db.transaction(STORE_MEDIA, 'readwrite');
+  tx.objectStore(STORE_MEDIA).put(record);
+  await transactionDone(tx);
+  db.close();
+
+  const objectUrl = URL.createObjectURL(file);
+  mediaUrlCache.set(mediaId, objectUrl);
+
+  return { mediaId, aspectRatio };
 }
 
 export async function updateCustomNotebookMeta(
@@ -518,7 +595,10 @@ export async function exportAllCustomNotebooksWithMedia(): Promise<{
   const notebooks = (rawNotebooks || []).map((doc) => ({
     ...doc,
     isCustom: true,
-    sourceType: 'eigenes-heft' as const,
+    sourceType:
+      doc.sourceType === 'blatt-blanko'
+        ? ('blatt-blanko' as const)
+        : ('eigenes-heft' as const),
     totalPages: doc.customPages?.length ?? doc.totalPages ?? 0,
   }));
 
@@ -558,7 +638,10 @@ export async function importCustomNotebooksWithMedia(
     notebookStore.put({
       ...doc,
       isCustom: true,
-      sourceType: 'eigenes-heft' as const,
+      sourceType:
+        doc.sourceType === 'blatt-blanko'
+          ? ('blatt-blanko' as const)
+          : ('eigenes-heft' as const),
       totalPages: doc.customPages?.length ?? doc.totalPages ?? 0,
     });
     importedNotebooks += 1;

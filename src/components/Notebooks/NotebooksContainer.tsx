@@ -7,6 +7,7 @@ import {
   savePageAnnotations,
 } from '../../services/notebookStorageService';
 import {
+  createQuickBlankNotebook,
   deleteCustomNotebook,
   listCustomNotebooks,
 } from '../../services/customNotebookDbService';
@@ -76,6 +77,13 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
     setCustomNotebooks((prev) => prev.filter((b) => b.id !== notebookId));
     setStore((prev) => deleteNotebookAnnotations(prev, notebookId));
     setSelection((prev) => (prev && prev.notebook.id === notebookId ? null : prev));
+  };
+
+  const handleCreateBlankNotebook = async () => {
+    const created = await createQuickBlankNotebook();
+    setCustomNotebooks((prev) => [created, ...prev]);
+    setJumpSignal(undefined);
+    setSelection({ notebook: created, page: 1 });
   };
 
   const handleModalCompleted = ({
@@ -148,6 +156,7 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
             setSelection({ notebook, page });
           }}
           onCreateCustomNotebook={() => setModalState({ mode: 'create' })}
+          onCreateBlankNotebook={handleCreateBlankNotebook}
           onEditCustomNotebook={(notebook) =>
             setModalState({ mode: 'edit-meta', targetNotebook: notebook })
           }

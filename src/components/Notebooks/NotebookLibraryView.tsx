@@ -12,6 +12,7 @@ import {
   FilePlus2,
   Pencil,
   Trash2,
+  File,
 } from 'lucide-react';
 import { NOTEBOOK_STICKERS, NOTEBOOKS_CATALOG } from '../../data/notebooksData';
 import {
@@ -35,6 +36,7 @@ interface Props {
   customNotebooks: NotebookDocument[];
   onSelectNotebook: (notebook: NotebookDocument, pageNumber?: number) => void;
   onCreateCustomNotebook: () => void;
+  onCreateBlankNotebook: () => void;
   onEditCustomNotebook: (notebook: NotebookDocument) => void;
   onAppendPagesToNotebook: (notebook: NotebookDocument) => void;
   onDeleteCustomNotebook: (notebookId: string) => void;
@@ -44,6 +46,7 @@ interface Props {
 type FilterMode =
   | 'all'
   | 'eigenes-heft'
+  | 'blatt-blanko'
   | 'foto-skript'
   | 'pdf-dokument'
   | 'annotated'
@@ -155,6 +158,7 @@ export const NotebookLibraryView: React.FC<Props> = ({
   customNotebooks,
   onSelectNotebook,
   onCreateCustomNotebook,
+  onCreateBlankNotebook,
   onEditCustomNotebook,
   onAppendPagesToNotebook,
   onDeleteCustomNotebook,
@@ -177,6 +181,7 @@ export const NotebookLibraryView: React.FC<Props> = ({
       const hasNotes = summary.annotatedPages > 0;
 
       if (filter === 'eigenes-heft' && !doc.isCustom) return false;
+      if (filter === 'blatt-blanko' && doc.sourceType !== 'blatt-blanko') return false;
       if (filter === 'foto-skript' && doc.sourceType !== 'foto-skript') return false;
       if (filter === 'pdf-dokument' && doc.sourceType !== 'pdf-dokument') return false;
       if (filter === 'annotated' && !hasNotes) return false;
@@ -293,6 +298,16 @@ export const NotebookLibraryView: React.FC<Props> = ({
 
           <button
             type="button"
+            onClick={onCreateBlankNotebook}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 text-xs font-bold shadow-xs transition-colors cursor-pointer min-h-[44px] whitespace-nowrap"
+            title="Neues leeres DIN-A4-Blatt (Blatt Blanko) direkt anlegen"
+          >
+            <File className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+            <span>+ Blatt Blanko</span>
+          </button>
+
+          <button
+            type="button"
             onClick={onCreateCustomNotebook}
             className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer min-h-[44px] whitespace-nowrap"
           >
@@ -315,6 +330,7 @@ export const NotebookLibraryView: React.FC<Props> = ({
                     ? `Eigene (${customNotebooks.length})`
                     : 'Eigene Hefte',
               },
+              { id: 'blatt-blanko', label: 'Blatt Blanko' },
               { id: 'foto-skript', label: 'Foto-Skripte' },
               { id: 'pdf-dokument', label: 'Original-PDFs' },
               { id: 'annotated', label: 'Mit Notizen' },
@@ -490,7 +506,8 @@ export const NotebookLibraryView: React.FC<Props> = ({
               summary.stickyCount > 0 ||
               summary.stickerCount > 0 ||
               summary.strokeCount > 0 ||
-              summary.textCount > 0;
+              summary.textCount > 0 ||
+              summary.imageCount > 0;
             const isDeleting = confirmDeleteId === doc.id;
 
             const sourceTypeLabel =
@@ -498,6 +515,8 @@ export const NotebookLibraryView: React.FC<Props> = ({
                 ? 'Foto-Skript'
                 : doc.sourceType === 'pdf-dokument'
                 ? 'Original-PDF'
+                : doc.sourceType === 'blatt-blanko'
+                ? 'Blatt Blanko'
                 : 'Eigenes Heft';
 
             return (
@@ -526,9 +545,17 @@ export const NotebookLibraryView: React.FC<Props> = ({
                           doc.coverRotation === 90 ? 'rotate-90 scale-125' : ''
                         }`}
                       />
-                    ) : doc.sourceType === 'eigenes-heft' ? (
+                    ) : doc.sourceType === 'eigenes-heft' || doc.sourceType === 'blatt-blanko' ? (
                       <CustomCoverThumb
-                        firstPage={doc.customPages?.[0]}
+                        firstPage={
+                          doc.customPages?.[0] ?? {
+                            id: 'blank-cover',
+                            pageNumber: 1,
+                            kind: 'blank',
+                            template: 'blank',
+                            title: 'Blatt Blanko',
+                          }
+                        }
                         title={doc.title}
                       />
                     ) : doc.pdfUrl ? (
@@ -548,7 +575,7 @@ export const NotebookLibraryView: React.FC<Props> = ({
                         <span aria-hidden="true">·</span>
                         <span
                           className={
-                            doc.isCustom
+                            doc.isCustom || doc.sourceType === 'blatt-blanko'
                               ? 'text-indigo-600 dark:text-indigo-400 font-semibold shrink-0'
                               : 'shrink-0'
                           }
@@ -580,7 +607,8 @@ export const NotebookLibraryView: React.FC<Props> = ({
                                 {summary.stickyCount +
                                   summary.stickerCount +
                                   summary.strokeCount +
-                                  summary.textCount}
+                                  summary.textCount +
+                                  summary.imageCount}
                               </span>
                             </span>
                           </>

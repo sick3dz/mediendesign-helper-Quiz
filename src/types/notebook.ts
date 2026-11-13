@@ -1,4 +1,8 @@
-export type NotebookSourceType = 'foto-skript' | 'pdf-dokument' | 'eigenes-heft';
+export type NotebookSourceType =
+  | 'foto-skript'
+  | 'pdf-dokument'
+  | 'eigenes-heft'
+  | 'blatt-blanko';
 
 export type BlankPageTemplate = 'blank' | 'lined' | 'grid' | 'dotted';
 
@@ -8,6 +12,7 @@ export type NotebookTool =
   | 'pen'
   | 'eraser'
   | 'text'
+  | 'image'
   | 'sticky'
   | 'sticker';
 
@@ -56,11 +61,25 @@ export interface NotebookTextBox {
   createdAt: number;
 }
 
+export interface NotebookImageElement {
+  id: string;
+  mediaId: string; // Blob stored in IndexedDB STORE_MEDIA
+  x: number; // 0..100 (% of page width, center)
+  y: number; // 0..100 (% of page height, center)
+  widthPct: number; // 10..95 (% of page width)
+  aspectRatio: number; // natural width / height
+  opacity?: number; // 0.2..1.0 (default 1)
+  rotation?: number; // 0 | 90 | 180 | 270
+  createdAt: number;
+}
+
 export interface NotebookSticker {
   id: string;
   type: NotebookStickerType;
   x: number; // 0..100 (% of page width)
   y: number; // 0..100 (% of page height)
+  scale?: number; // 0.5..2.0 (default 1)
+  opacity?: number; // 0.2..1.0 (default 1)
 }
 
 export interface PageAnnotations {
@@ -68,6 +87,7 @@ export interface PageAnnotations {
   stickyNotes: NotebookStickyNote[];
   stickers: NotebookSticker[];
   textBoxes?: NotebookTextBox[];
+  images?: NotebookImageElement[];
   rotationOverride?: number; // 0 | 90 | 180 | 270
 }
 
