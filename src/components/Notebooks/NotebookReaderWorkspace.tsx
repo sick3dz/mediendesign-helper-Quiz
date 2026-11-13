@@ -283,7 +283,10 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     const previous = undoStack[undoStack.length - 1];
     setRedoStack((prev) => [...prev, currentAnnotations]);
     setUndoStack((prev) => prev.slice(0, -1));
-    onUpdatePageAnnotations(notebook.id, currentPage, previous);
+    onUpdatePageAnnotations(notebook.id, currentPage, {
+      ...previous,
+      rotationOverride: currentAnnotations.rotationOverride,
+    });
   };
 
   const handleRedo = () => {
@@ -291,7 +294,10 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     const next = redoStack[redoStack.length - 1];
     setUndoStack((prev) => [...prev, currentAnnotations]);
     setRedoStack((prev) => prev.slice(0, -1));
-    onUpdatePageAnnotations(notebook.id, currentPage, next);
+    onUpdatePageAnnotations(notebook.id, currentPage, {
+      ...next,
+      rotationOverride: currentAnnotations.rotationOverride,
+    });
   };
 
   const handleRotatePage = () => {
@@ -310,7 +316,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     const nextRot = (currentRot + 90) % 360;
     handleCommitAnnotations(
       { ...currentAnnotations, rotationOverride: nextRot },
-      true
+      false
     );
   };
 
