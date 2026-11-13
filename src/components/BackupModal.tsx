@@ -1,6 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Download, Upload, Copy, Check, AlertCircle, X, HardDrive, RefreshCw, Trash2, RotateCcw } from 'lucide-react';
-import { downloadBackupFile, generateBackupJson, restoreBackupJson, resetUserStatsToDefault, UserSettings } from '../services/storageService';
+import {
+  Download,
+  Upload,
+  Copy,
+  Check,
+  AlertCircle,
+  X,
+  HardDrive,
+  RefreshCw,
+  Trash2,
+  RotateCcw,
+  FolderArchive,
+  Loader2,
+} from 'lucide-react';
+import {
+  downloadBackupFile,
+  downloadFullZipBackupFile,
+  generateBackupJson,
+  restoreBackupJson,
+  restoreFullZipBackupFile,
+  resetUserStatsToDefault,
+  UserSettings,
+} from '../services/storageService';
+import { getCustomNotebooksBackupStats } from '../services/customNotebookDbService';
 import { UserStats } from '../types/quiz';
 import { soundEffects } from '../services/audioService';
 
@@ -10,12 +32,41 @@ interface Props {
   onBackupRestored: (stats: UserStats, settings?: UserSettings) => void;
 }
 
+function formatBytes(bytes: number): string {
+  if (bytes <= 0) return '0 KB';
+  if (bytes < 1024 * 1024) {
+    return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(1).replace('.', ',')} MB`;
+}
+
 export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored }) => {
   const [copied, setCopied] = useState(false);
   const [pasteText, setPasteText] = useState('');
-  const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [importStatus, setImportStatus] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [isExportingZip, setIsExportingZip] = useState(false);
+  const [isImportingZip, setIsImportingZip] = useState(false);
+  const [customStats, setCustomStats] = useState<{
+    notebookCount: number;
+    mediaCount: number;
+    totalBytes: number;
+  }>({ notebookCount: 0, mediaCount: 0, totalBytes: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    let active = true;
+    getCustomNotebooksBackupStats().then((res) => {
+      if (active) setCustomStats(res);
+    });
+    return () => {
+      active = false;
+    };
+  }, [isOpen]);
 
   // Close on Escape key
   useEffect(() => {
@@ -35,6 +86,33 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
     downloadBackupFile();
   };
 
+  const handleExportZipDownload = async () => {
+    soundEffects.playClick();
+    setImportStatus(null);
+    setIsExportingZip(true);
+    try {
+      const res = await downloadFullZipBackupFile();
+      setImportStatus({
+        type: 'success',
+        message:
+          res.notebookCount > 0
+            ? `Voll-Backup (.zip) erstellt: ${res.notebookCount} eigene Hefte & ${res.mediaCount} Dateien enthalten.`
+            : 'Voll-Backup (.zip) erfolgreich heruntergeladen.',
+      });
+    } catch (err) {
+      soundEffects.playWrong();
+      setImportStatus({
+        type: 'error',
+        message:
+          err instanceof Error
+            ? err.message
+            : 'ZIP-Backup konnte nicht erstellt werden.',
+      });
+    } finally {
+      setIsExportingZip(false);
+    }
+  };
+
   const handleCopyClipboard = () => {
     soundEffects.playClick();
     const json = generateBackupJson();
@@ -48,7 +126,10 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
     const result = restoreBackupJson(jsonStr);
     if (result.success && result.stats) {
       soundEffects.playLevelUp();
-      setImportStatus({ type: 'success', message: 'Fortschritt erfolgreich wiederhergestellt!' });
+      setImportStatus({
+        type: 'success',
+        message: 'Fortschritt erfolgreich wiederhergestellt!',
+      });
       setTimeout(() => {
         onBackupRestored(result.stats!, result.settings);
         onClose();
@@ -57,13 +138,76 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
       }, 1200);
     } else {
       soundEffects.playWrong();
-      setImportStatus({ type: 'error', message: result.error || 'Fehler beim Laden des Backups.' });
+      setImportStatus({
+        type: 'error',
+        message: result.error || 'Fehler beim Laden des Backups.',
+      });
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    if (e.target) e.target.value = '';
     if (!file) return;
+
+    setImportStatus(null);
+
+    const isZipByExt = file.name.toLowerCase().endsWith('.zip');
+    let isZipByHeader = false;
+    if (!isZipByExt && file.size >= 4) {
+      try {
+        const header = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+        isZipByHeader = header[0] === 0x50 && header[1] === 0x4b;
+      } catch {
+        isZipByHeader = false;
+      }
+    }
+
+    if (isZipByExt || isZipByHeader || file.type === 'application/zip') {
+      setIsImportingZip(true);
+      try {
+        const result = await restoreFullZipBackupFile(file);
+        if (result.success && result.stats) {
+          soundEffects.playLevelUp();
+          const detailParts: string[] = [];
+          if (result.restoredCustomNotebooks > 0) {
+            detailParts.push(
+              `${result.restoredCustomNotebooks} ${
+                result.restoredCustomNotebooks === 1 ? 'eigenes Heft' : 'eigene Hefte'
+              }`
+            );
+          }
+          if (result.restoredMedia > 0) {
+            detailParts.push(
+              `${result.restoredMedia} ${
+                result.restoredMedia === 1 ? 'Datei' : 'Dateien'
+              }`
+            );
+          }
+          const suffix =
+            detailParts.length > 0 ? ` (${detailParts.join(' · ')} geladen)` : '';
+          setImportStatus({
+            type: 'success',
+            message: `Backup mit eigenen Inhalten wiederhergestellt${suffix}!`,
+          });
+          setTimeout(() => {
+            onBackupRestored(result.stats!, result.settings);
+            onClose();
+            setImportStatus(null);
+            setPasteText('');
+          }, 1300);
+        } else {
+          soundEffects.playWrong();
+          setImportStatus({
+            type: 'error',
+            message: result.error || 'ZIP-Backup konnte nicht geladen werden.',
+          });
+        }
+      } finally {
+        setIsImportingZip(false);
+      }
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -73,7 +217,6 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
       }
     };
     reader.readAsText(file);
-    if (e.target) e.target.value = '';
   };
 
   const handlePasteSubmit = () => {
@@ -84,7 +227,10 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
   const handleResetToZero = () => {
     soundEffects.playClick();
     const fresh = resetUserStatsToDefault();
-    setImportStatus({ type: 'success', message: 'Spielstand erfolgreich auf 0 EXP zurückgesetzt!' });
+    setImportStatus({
+      type: 'success',
+      message: 'Spielstand erfolgreich auf 0 EXP zurückgesetzt!',
+    });
     setTimeout(() => {
       onBackupRestored(fresh);
       setShowResetConfirm(false);
@@ -109,10 +255,10 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">
-                Fortschritt sichern & wiederherstellen
+                Fortschritt sichern &amp; wiederherstellen
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Sichere dein Level, XP, Abzeichen, Haustier &amp; Skript-Notizen.
+                Sichere Level, XP, Haustier, Notizen &amp; eigene Hefte (PDF/Bilder).
               </p>
             </div>
           </div>
@@ -147,42 +293,96 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
           )}
 
           {/* Section 1: Export / Download */}
-          <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-3">
+          <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-3.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                 <Download className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                 1. Extern Speichern (Backup Export)
               </span>
-              <span className="text-[10px] text-slate-500 font-mono">.json Datei</span>
+              <span className="text-[10px] text-slate-500 font-mono">.json / .zip</span>
             </div>
 
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              Lade deinen aktuellen Spielstand lokal herunter, um ihn auf anderen Geräten oder bei Browser-Bereinigung sicher zu nutzen.
-            </p>
+            {/* Option A: Standard Backup (.json) */}
+            <div className="p-3 bg-white dark:bg-slate-900/70 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-100">
+                  Backup
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">.json Datei</span>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                Kompakte Sicherung für Spielstand, Einstellungen und alle Skript-Markierungen (ohne eigene hochgeladene Dateien).
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={handleExportDownload}
+                  className="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Backup herunterladen</span>
+                </button>
 
-            <div className="flex flex-col sm:flex-row gap-2 pt-1">
-              <button
-                onClick={handleExportDownload}
-                className="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
-              >
-                <Download className="w-4 h-4" />
-                <span>Backup-Datei herunterladen</span>
-              </button>
+                <button
+                  onClick={handleCopyClipboard}
+                  className="py-2.5 px-3.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  title="Backup-Text in Zwischenablage kopieren"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4 text-emerald-500" />
+                      <span className="text-emerald-600 dark:text-emerald-400">Kopiert!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                      <span>Text kopieren</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
 
+            {/* Option B: Full Backup with Custom Booklets & Media (.zip) */}
+            <div className="p-3 bg-white dark:bg-slate-900/70 rounded-xl border border-indigo-200/80 dark:border-indigo-900/70 space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-bold text-slate-900 dark:text-white">
+                  Backup mit eigenen Inhalten
+                </span>
+                <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-mono font-semibold">
+                  .zip Archiv
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                Vollständige Sicherung inklusive aller in IndexedDB gespeicherten eigenen Hefte (Metadaten, Bilder &amp; PDFs) sowie dem kompletten Lernfortschritt.
+              </p>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium tabular-nums">
+                {customStats.notebookCount > 0 ? (
+                  <span>
+                    Aktuell gespeichert: {customStats.notebookCount}{' '}
+                    {customStats.notebookCount === 1 ? 'eigenes Heft' : 'eigene Hefte'} ·{' '}
+                    {customStats.mediaCount}{' '}
+                    {customStats.mediaCount === 1 ? 'Datei' : 'Dateien'} (
+                    {formatBytes(customStats.totalBytes)})
+                  </span>
+                ) : (
+                  <span>Aktuell keine eigenen Hefte angelegt – exportiert komplettes .zip Archiv</span>
+                )}
+              </div>
               <button
-                onClick={handleCopyClipboard}
-                className="py-2.5 px-3.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                title="Backup-Text in Zwischenablage kopieren"
+                type="button"
+                onClick={handleExportZipDownload}
+                disabled={isExportingZip || isImportingZip}
+                className="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 disabled:opacity-60 text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
               >
-                {copied ? (
+                {isExportingZip ? (
                   <>
-                    <Check className="w-4 h-4 text-emerald-500" />
-                    <span className="text-emerald-600 dark:text-emerald-400">Kopiert!</span>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>ZIP-Archiv wird erstellt...</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                    <span>Text kopieren</span>
+                    <FolderArchive className="w-4 h-4" />
+                    <span>Backup mit eigenen Inhalten (.zip)</span>
                   </>
                 )}
               </button>
@@ -194,29 +394,41 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                 <Upload className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
-                2. Backup Importieren & Laden
+                2. Backup Importieren &amp; Laden
               </span>
               <span className="text-[10px] text-slate-500 font-mono">Wiederherstellung</span>
             </div>
 
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              Wähle eine zuvor gespeicherte `.json`-Backup-Datei aus oder füge den Backup-Code unten ein:
+              Wähle eine gespeicherte <span className="font-mono">.json</span>- oder{' '}
+              <span className="font-mono">.zip</span>-Backup-Datei aus (eigene Hefte und Bilder werden automatisch mit importiert) oder füge den JSON-Code ein:
             </p>
 
             <input
               ref={fileInputRef}
               type="file"
-              accept=".json,application/json"
+              accept=".json,application/json,.zip,application/zip"
               onChange={handleFileUpload}
               className="hidden"
             />
 
             <button
+              type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="w-full py-2.5 px-4 bg-white dark:bg-slate-800 hover:bg-teal-50 dark:hover:bg-teal-950/30 text-teal-700 dark:text-teal-300 border border-dashed border-teal-300 dark:border-teal-700/80 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              disabled={isImportingZip || isExportingZip}
+              className="w-full py-2.5 px-4 bg-white dark:bg-slate-800 hover:bg-teal-50 dark:hover:bg-teal-950/30 disabled:opacity-60 text-teal-700 dark:text-teal-300 border border-dashed border-teal-300 dark:border-teal-700/80 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Upload className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-              <span>.json Backup-Datei auswählen</span>
+              {isImportingZip ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-teal-600 dark:text-teal-400" />
+                  <span>ZIP-Backup &amp; eigene Hefte werden wiederhergestellt...</span>
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                  <span>Backup-Datei (.json oder .zip) auswählen</span>
+                </>
+              )}
             </button>
 
             {/* Alternative: Text Paste */}
@@ -227,7 +439,7 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
               <div className="flex gap-2">
                 <textarea
                   value={pasteText}
-                  onChange={e => setPasteText(e.target.value)}
+                  onChange={(e) => setPasteText(e.target.value)}
                   placeholder='Füge den Backup JSON-Code hier ein... {"app": "DesignKonzept.prep", ...}'
                   className="w-full p-2.5 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl text-xs font-mono text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-2 focus:ring-teal-500 resize-none h-20"
                 />

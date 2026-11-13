@@ -7,6 +7,7 @@ export type NotebookTool =
   | 'highlighter'
   | 'pen'
   | 'eraser'
+  | 'text'
   | 'sticky'
   | 'sticker';
 
@@ -44,6 +45,17 @@ export interface NotebookStickyNote {
   createdAt: number;
 }
 
+export interface NotebookTextBox {
+  id: string;
+  x: number; // 0..100 (% of page width)
+  y: number; // 0..100 (% of page height)
+  color: string;
+  fontSize: number; // % of page width (e.g., 1.5, 2.0, 2.8)
+  text: string;
+  hasBackground?: boolean;
+  createdAt: number;
+}
+
 export interface NotebookSticker {
   id: string;
   type: NotebookStickerType;
@@ -55,6 +67,7 @@ export interface PageAnnotations {
   strokes: NotebookStroke[];
   stickyNotes: NotebookStickyNote[];
   stickers: NotebookSticker[];
+  textBoxes?: NotebookTextBox[];
   rotationOverride?: number; // 0 | 90 | 180 | 270
 }
 

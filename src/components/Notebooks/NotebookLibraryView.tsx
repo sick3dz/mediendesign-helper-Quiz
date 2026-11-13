@@ -487,7 +487,10 @@ export const NotebookLibraryView: React.FC<Props> = ({
             const summary = getNotebookAnnotationSummary(store, doc.id);
             const lastPage = store.lastPageByBook[doc.id] || 1;
             const hasSavedNotes =
-              summary.stickyCount > 0 || summary.stickerCount > 0 || summary.strokeCount > 0;
+              summary.stickyCount > 0 ||
+              summary.stickerCount > 0 ||
+              summary.strokeCount > 0 ||
+              summary.textCount > 0;
             const isDeleting = confirmDeleteId === doc.id;
 
             const sourceTypeLabel =
@@ -574,7 +577,10 @@ export const NotebookLibraryView: React.FC<Props> = ({
                             <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-400 font-semibold">
                               <StickyNote className="w-3.5 h-3.5 shrink-0" />
                               <span>
-                                {summary.stickyCount + summary.stickerCount + summary.strokeCount}
+                                {summary.stickyCount +
+                                  summary.stickerCount +
+                                  summary.strokeCount +
+                                  summary.textCount}
                               </span>
                             </span>
                           </>

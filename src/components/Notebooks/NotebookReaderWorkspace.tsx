@@ -23,6 +23,7 @@ import {
   ChevronDown,
   Pencil,
   FilePlus2,
+  Type,
 } from 'lucide-react';
 import {
   CustomNotebookPage,
@@ -197,13 +198,16 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   // Active Tool & Sub-options (Classic GoodNotes)
   const [activeTool, setActiveTool] = useState<NotebookTool>('highlighter');
   const [openToolPopover, setOpenToolPopover] = useState<
-    'highlighter' | 'pen' | 'sticky' | 'sticker' | null
+    'highlighter' | 'pen' | 'text' | 'sticky' | 'sticker' | null
   >(null);
 
   const [penColor, setPenColor] = useState<string>(PEN_COLORS[0].color);
   const [penWidth, setPenWidth] = useState<number>(0.42);
   const [highlighterColor, setHighlighterColor] = useState<string>(HIGHLIGHTER_COLORS[0].color);
   const [highlighterWidth, setHighlighterWidth] = useState<number>(2.4);
+  const [textColor, setTextColor] = useState<string>(PEN_COLORS[1].color);
+  const [textSize, setTextSize] = useState<number>(2.0);
+  const [textHasBackground, setTextHasBackground] = useState<boolean>(true);
   const [stickyColor, setStickyColor] = useState<StickyColor>('yellow');
   const [selectedStickerType, setSelectedStickerType] =
     useState<NotebookStickerType>('merksatz');
@@ -326,6 +330,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
         strokes: [],
         stickyNotes: [],
         stickers: [],
+        textBoxes: [],
         rotationOverride: currentAnnotations.rotationOverride,
       },
       true
@@ -342,7 +347,13 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
 
   const selectTool = (tool: NotebookTool) => {
     setConfirmClearPage(false);
-    if (tool === 'highlighter' || tool === 'pen' || tool === 'sticky' || tool === 'sticker') {
+    if (
+      tool === 'highlighter' ||
+      tool === 'pen' ||
+      tool === 'text' ||
+      tool === 'sticky' ||
+      tool === 'sticker'
+    ) {
       if (activeTool === tool) {
         setOpenToolPopover((prev) => (prev === tool ? null : tool));
       } else {
@@ -386,7 +397,8 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const pageAnnotationCount =
     currentAnnotations.strokes.length +
     currentAnnotations.stickyNotes.length +
-    currentAnnotations.stickers.length;
+    currentAnnotations.stickers.length +
+    (currentAnnotations.textBoxes?.length || 0);
 
   const bookStickerPages = Array.from({ length: totalPages }, (_, idx) => idx + 1)
     .map((pageNum) => {
@@ -571,6 +583,23 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             >
               <Eraser className="w-4 h-4" />
               <span className="hidden md:inline">Radierer</span>
+            </button>
+
+            <button
+              onClick={() => selectTool('text')}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[38px] whitespace-nowrap shrink-0 ${
+                activeTool === 'text'
+                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+              }`}
+              title="Textfeld einfügen & tippen (nochmal tippen für Farbe & Größe)"
+            >
+              <Type className="w-4 h-4" />
+              <span
+                className="w-2.5 h-2.5 rounded-full border border-slate-300 shrink-0"
+                style={{ backgroundColor: textColor }}
+              />
+              <span className="hidden md:inline">Text</span>
             </button>
 
             <button
@@ -806,6 +835,63 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
               </div>
             )}
 
+            {openToolPopover === 'text' && (
+              <div className="flex flex-wrap items-center gap-3 text-xs">
+                <span className="font-semibold text-slate-600 dark:text-slate-300">
+                  Textfarbe:
+                </span>
+                <div className="flex items-center gap-1.5">
+                  {PEN_COLORS.map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => setTextColor(c.color)}
+                      className={`w-7 h-7 rounded-full border-2 transition-transform cursor-pointer ${
+                        textColor === c.color
+                          ? 'border-indigo-500 ring-2 ring-indigo-300 scale-110'
+                          : 'border-slate-300 dark:border-slate-600'
+                      }`}
+                      style={{ backgroundColor: c.color }}
+                      title={c.label}
+                      aria-label={c.label}
+                    />
+                  ))}
+                </div>
+                <span className="text-slate-300 dark:text-slate-700">|</span>
+                <div className="flex items-center gap-1">
+                  {[
+                    { label: 'Klein', s: 1.5 },
+                    { label: 'Normal', s: 2.0 },
+                    { label: 'Groß', s: 2.8 },
+                  ].map((opt) => (
+                    <button
+                      key={opt.label}
+                      onClick={() => setTextSize(opt.s)}
+                      className={`px-2.5 py-1 rounded-lg font-semibold cursor-pointer transition-colors ${
+                        textSize === opt.s
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                <span className="text-slate-300 dark:text-slate-700">|</span>
+                <button
+                  type="button"
+                  onClick={() => setTextHasBackground((prev) => !prev)}
+                  className={`px-2.5 py-1 rounded-lg font-semibold border transition-colors cursor-pointer ${
+                    textHasBackground
+                      ? 'bg-white text-slate-900 border-slate-300 shadow-2xs'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent'
+                  }`}
+                  title="Zwischen weißem Texthintergrund und transparent wechseln"
+                >
+                  {textHasBackground ? 'Hintergrund: Weiß' : 'Hintergrund: Transparent'}
+                </button>
+              </div>
+            )}
+
             {openToolPopover === 'sticky' && (
               <div className="flex flex-wrap items-center gap-3 text-xs">
                 <span className="font-semibold text-slate-600 dark:text-slate-300">
@@ -970,7 +1056,8 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                   const hasAny =
                     pageAnn.strokes.length > 0 ||
                     pageAnn.stickyNotes.length > 0 ||
-                    pageAnn.stickers.length > 0;
+                    pageAnn.stickers.length > 0 ||
+                    (pageAnn.textBoxes?.length || 0) > 0;
                   const imgMeta =
                     notebook.sourceType === 'foto-skript'
                       ? notebook.imagePages?.[pageNum - 1]
@@ -1187,6 +1274,9 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             penWidth={penWidth}
             highlighterColor={highlighterColor}
             highlighterWidth={highlighterWidth}
+            textColor={textColor}
+            textSize={textSize}
+            textHasBackground={textHasBackground}
             stickyColor={stickyColor}
             selectedStickerType={selectedStickerType}
             zoom={zoom}
@@ -1215,10 +1305,11 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
               ? 'Apple Pencil Schutz aktiv: Nur der Stift zeichnet – Finger scrollen & zoomen ohne Fehlstriche.'
               : (
                 <>
-                  {activeTool === 'hand' && 'Hand-Modus: Klebezettel & Sticker per Ziehen verschieben oder antippen.'}
+                  {activeTool === 'hand' && 'Hand-Modus: Textfelder, Klebezettel & Sticker per Ziehen verschieben oder antippen.'}
                   {activeTool === 'highlighter' && 'Textmarker aktiv: Direkt über wichtige Textstellen streichen.'}
                   {activeTool === 'pen' && 'Stift aktiv: Handschriftliche Notizen oder Unterstreichungen zeichnen.'}
                   {activeTool === 'eraser' && 'Radierer aktiv: Über unerwünschte Stift- oder Markerzüge fahren.'}
+                  {activeTool === 'text' && 'Text-Werkzeug aktiv: Auf die gewünschte Stelle tippen, um direkt Text einzugeben.'}
                   {activeTool === 'sticky' && 'Klebezettel aktiv: Tippe auf eine Textstelle, um ein Post-it anzuheften.'}
                   {activeTool === 'sticker' && 'Sticker aktiv: Tippe auf die gewünschte Stelle zum Aufkleben.'}
                 </>

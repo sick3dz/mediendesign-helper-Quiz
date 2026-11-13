@@ -10,7 +10,7 @@ const DB_VERSION = 1;
 const STORE_NOTEBOOKS = 'notebooks';
 const STORE_MEDIA = 'media';
 
-interface MediaRecord {
+export interface MediaRecord {
   id: string;
   mimeType: string;
   name: string;
@@ -475,3 +475,97 @@ export function renderBlankTemplateToDataUrl(
   blankSurfaceCache.set(cacheKey, dataUrl);
   return { dataUrl, width: outW, height: outH };
 }
+
+export async function getCustomNotebooksBackupStats(): Promise<{
+  notebookCount: number;
+  mediaCount: number;
+  totalBytes: number;
+}> {
+  try {
+    const db = await openDatabase();
+    const tx = db.transaction([STORE_NOTEBOOKS, STORE_MEDIA], 'readonly');
+    const [notebooks, media] = await Promise.all([
+      txPromise<NotebookDocument[]>(tx.objectStore(STORE_NOTEBOOKS).getAll()),
+      txPromise<MediaRecord[]>(tx.objectStore(STORE_MEDIA).getAll()),
+    ]);
+    db.close();
+    const totalBytes = (media || []).reduce(
+      (sum, item) => sum + (item.blob?.size || 0),
+      0
+    );
+    return {
+      notebookCount: (notebooks || []).length,
+      mediaCount: (media || []).length,
+      totalBytes,
+    };
+  } catch {
+    return { notebookCount: 0, mediaCount: 0, totalBytes: 0 };
+  }
+}
+
+export async function exportAllCustomNotebooksWithMedia(): Promise<{
+  notebooks: NotebookDocument[];
+  media: MediaRecord[];
+}> {
+  const db = await openDatabase();
+  const tx = db.transaction([STORE_NOTEBOOKS, STORE_MEDIA], 'readonly');
+  const [rawNotebooks, rawMedia] = await Promise.all([
+    txPromise<NotebookDocument[]>(tx.objectStore(STORE_NOTEBOOKS).getAll()),
+    txPromise<MediaRecord[]>(tx.objectStore(STORE_MEDIA).getAll()),
+  ]);
+  db.close();
+
+  const notebooks = (rawNotebooks || []).map((doc) => ({
+    ...doc,
+    isCustom: true,
+    sourceType: 'eigenes-heft' as const,
+    totalPages: doc.customPages?.length ?? doc.totalPages ?? 0,
+  }));
+
+  return {
+    notebooks,
+    media: rawMedia || [],
+  };
+}
+
+export async function importCustomNotebooksWithMedia(
+  notebooks: NotebookDocument[],
+  media: MediaRecord[]
+): Promise<{ importedNotebooks: number; importedMedia: number }> {
+  if (notebooks.length === 0 && media.length === 0) {
+    return { importedNotebooks: 0, importedMedia: 0 };
+  }
+
+  for (const m of media) {
+    if (m?.id) revokeMediaObjectUrl(m.id);
+  }
+
+  const db = await openDatabase();
+  const tx = db.transaction([STORE_MEDIA, STORE_NOTEBOOKS], 'readwrite');
+  const mediaStore = tx.objectStore(STORE_MEDIA);
+  const notebookStore = tx.objectStore(STORE_NOTEBOOKS);
+
+  let importedMedia = 0;
+  for (const m of media) {
+    if (!m?.id || !m.blob) continue;
+    mediaStore.put(m);
+    importedMedia += 1;
+  }
+
+  let importedNotebooks = 0;
+  for (const doc of notebooks) {
+    if (!doc?.id) continue;
+    notebookStore.put({
+      ...doc,
+      isCustom: true,
+      sourceType: 'eigenes-heft' as const,
+      totalPages: doc.customPages?.length ?? doc.totalPages ?? 0,
+    });
+    importedNotebooks += 1;
+  }
+
+  await transactionDone(tx);
+  db.close();
+  return { importedNotebooks, importedMedia };
+}
+

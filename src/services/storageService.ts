@@ -1,7 +1,13 @@
+import JSZip from 'jszip';
 import { UserStats, Badge, DailyMission } from '../types/quiz';
-import { NotebookStore } from '../types/notebook';
+import { NotebookDocument, NotebookStore } from '../types/notebook';
 import { DEFAULT_PET_STATE, calculatePetDecay } from '../data/petData';
 import { loadNotebookStore, restoreNotebookStoreFromBackup } from './notebookStorageService';
+import {
+  exportAllCustomNotebooksWithMedia,
+  importCustomNotebooksWithMedia,
+  MediaRecord,
+} from './customNotebookDbService';
 
 const STORAGE_KEY = 'mediengestalter_adhd_trainer_stats_v2';
 const SETTINGS_KEY = 'mediengestalter_adhd_trainer_settings_v2';
@@ -611,4 +617,193 @@ export function resetUserStatsToDefault(): UserStats {
   saveUserStats(freshStats);
   return freshStats;
 }
+
+export interface CustomZipMediaMeta {
+  id: string;
+  name: string;
+  mimeType: string;
+  createdAt: number;
+  zipPath: string;
+}
+
+export interface CustomZipBackupManifest {
+  version: number;
+  exportDate: string;
+  notebooks: NotebookDocument[];
+  media: CustomZipMediaMeta[];
+}
+
+function inferExtensionFromMedia(name: string, mimeType: string): string {
+  const match = name.match(/(\.[a-zA-Z0-9]{1,8})$/);
+  if (match) return match[1].toLowerCase();
+  const mime = mimeType.toLowerCase();
+  if (mime.includes('pdf')) return '.pdf';
+  if (mime.includes('png')) return '.png';
+  if (mime.includes('webp')) return '.webp';
+  if (mime.includes('gif')) return '.gif';
+  if (mime.includes('svg')) return '.svg';
+  return '.jpg';
+}
+
+export async function generateFullZipBackupBlob(): Promise<{
+  blob: Blob;
+  notebookCount: number;
+  mediaCount: number;
+}> {
+  const zip = new JSZip();
+  const exportDate = new Date().toISOString();
+
+  // 1. Standard JSON progress & annotations backup
+  zip.file('backup.json', generateBackupJson(), {
+    compression: 'DEFLATE',
+    compressionOptions: { level: 6 },
+  });
+
+  // 2. IndexedDB custom notebooks & media blobs (images + PDFs)
+  const { notebooks, media } = await exportAllCustomNotebooksWithMedia();
+  const mediaManifest: CustomZipMediaMeta[] = [];
+
+  for (const record of media) {
+    const ext = inferExtensionFromMedia(record.name || '', record.mimeType || '');
+    const safeId = record.id.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const zipPath = `media/${safeId}${ext}`;
+    zip.file(zipPath, record.blob, { compression: 'STORE' });
+    mediaManifest.push({
+      id: record.id,
+      name: record.name || `${safeId}${ext}`,
+      mimeType: record.mimeType || 'application/octet-stream',
+      createdAt: record.createdAt || Date.now(),
+      zipPath,
+    });
+  }
+
+  const customManifest: CustomZipBackupManifest = {
+    version: 1,
+    exportDate,
+    notebooks,
+    media: mediaManifest,
+  };
+
+  zip.file('custom-notebooks.json', JSON.stringify(customManifest, null, 2), {
+    compression: 'DEFLATE',
+    compressionOptions: { level: 6 },
+  });
+
+  const blob = await zip.generateAsync({ type: 'blob' });
+  return {
+    blob,
+    notebookCount: notebooks.length,
+    mediaCount: mediaManifest.length,
+  };
+}
+
+export async function downloadFullZipBackupFile(): Promise<{
+  notebookCount: number;
+  mediaCount: number;
+}> {
+  const { blob, notebookCount, mediaCount } = await generateFullZipBackupBlob();
+  const dateStr = new Date().toISOString().split('T')[0];
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `designkonzept-vollbackup-${dateStr}.zip`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return { notebookCount, mediaCount };
+}
+
+export async function restoreFullZipBackupFile(file: File | Blob): Promise<{
+  success: boolean;
+  stats?: UserStats;
+  settings?: UserSettings;
+  restoredCustomNotebooks: number;
+  restoredMedia: number;
+  error?: string;
+}> {
+  try {
+    const zip = await JSZip.loadAsync(file);
+
+    let restoredStats: UserStats | undefined;
+    let restoredSettings: UserSettings | undefined;
+    let restoredCustomNotebooks = 0;
+    let restoredMedia = 0;
+
+    // 1. Restore standard JSON backup if included
+    const backupJsonEntry = zip.file('backup.json');
+    if (backupJsonEntry) {
+      const jsonText = await backupJsonEntry.async('string');
+      const res = restoreBackupJson(jsonText);
+      if (!res.success || !res.stats) {
+        return {
+          success: false,
+          restoredCustomNotebooks: 0,
+          restoredMedia: 0,
+          error: res.error || 'Die enthaltene backup.json ist ungültig.',
+        };
+      }
+      restoredStats = res.stats;
+      restoredSettings = res.settings;
+    }
+
+    // 2. Restore IndexedDB custom notebooks & media blobs if included
+    const customJsonEntry = zip.file('custom-notebooks.json');
+    if (customJsonEntry) {
+      const manifestRaw = await customJsonEntry.async('string');
+      const manifest = JSON.parse(manifestRaw) as Partial<CustomZipBackupManifest>;
+      const notebooksList = Array.isArray(manifest.notebooks) ? manifest.notebooks : [];
+      const mediaMetaList = Array.isArray(manifest.media) ? manifest.media : [];
+
+      const mediaRecords: MediaRecord[] = [];
+      for (const meta of mediaMetaList) {
+        if (!meta?.id || !meta.zipPath) continue;
+        const zipEntry = zip.file(meta.zipPath);
+        if (!zipEntry) continue;
+        const rawBlob = await zipEntry.async('blob');
+        const typedBlob =
+          meta.mimeType && rawBlob.type !== meta.mimeType
+            ? new Blob([rawBlob], { type: meta.mimeType })
+            : rawBlob;
+        mediaRecords.push({
+          id: meta.id,
+          name: meta.name || meta.id,
+          mimeType: meta.mimeType || typedBlob.type || 'application/octet-stream',
+          blob: typedBlob,
+          createdAt: meta.createdAt || Date.now(),
+        });
+      }
+
+      const importResult = await importCustomNotebooksWithMedia(notebooksList, mediaRecords);
+      restoredCustomNotebooks = importResult.importedNotebooks;
+      restoredMedia = importResult.importedMedia;
+    }
+
+    if (!backupJsonEntry && !customJsonEntry) {
+      return {
+        success: false,
+        restoredCustomNotebooks: 0,
+        restoredMedia: 0,
+        error: 'Die ZIP-Datei enthält weder backup.json noch custom-notebooks.json.',
+      };
+    }
+
+    return {
+      success: true,
+      stats: restoredStats ?? loadUserStats(),
+      settings: restoredSettings,
+      restoredCustomNotebooks,
+      restoredMedia,
+    };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'ZIP-Archiv konnte nicht entpackt werden.';
+    return {
+      success: false,
+      restoredCustomNotebooks: 0,
+      restoredMedia: 0,
+      error: msg,
+    };
+  }
+}
+
 

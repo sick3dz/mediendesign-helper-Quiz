@@ -6,6 +6,7 @@ import {
   NotebookStickerType,
   NotebookStickyNote,
   NotebookStroke,
+  NotebookTextBox,
   NotebookTool,
   PageAnnotations,
   StickyColor,
@@ -27,6 +28,9 @@ interface Props {
   penWidth: number;
   highlighterColor: string;
   highlighterWidth: number;
+  textColor: string;
+  textSize: number;
+  textHasBackground: boolean;
   stickyColor: StickyColor;
   selectedStickerType: NotebookStickerType;
   zoom: number;
@@ -163,6 +167,149 @@ function isPointNearStroke(pt: StrokePoint, stroke: NotebookStroke, radius: numb
   return false;
 }
 
+interface AutoTextItemProps {
+  box: NotebookTextBox;
+  fontSizePx: number;
+  isDrawTool: boolean;
+  isSelected: boolean;
+  autoFocus: boolean;
+  onSelect: () => void;
+  onClearAutoFocus: () => void;
+  onStartDrag: (e: React.PointerEvent<HTMLElement>) => void;
+  onChangeText: (text: string) => void;
+  onToggleBackground: () => void;
+  onDelete: () => void;
+  onBlurBox: () => void;
+}
+
+const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
+  box,
+  fontSizePx,
+  isDrawTool,
+  isSelected,
+  autoFocus,
+  onSelect,
+  onClearAutoFocus,
+  onStartDrag,
+  onChangeText,
+  onToggleBackground,
+  onDelete,
+  onBlurBox,
+}) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.max(fontSizePx + 10, el.scrollHeight)}px`;
+  }, [box.text, fontSizePx]);
+
+  useEffect(() => {
+    if (autoFocus && textareaRef.current) {
+      textareaRef.current.focus();
+      onClearAutoFocus();
+    }
+  }, [autoFocus, onClearAutoFocus]);
+
+  const hasBg = box.hasBackground ?? true;
+
+  return (
+    <div
+      style={{ left: `${box.x}%`, top: `${box.y}%` }}
+      onPointerDown={(e) => {
+        if (isDrawTool) return;
+        e.stopPropagation();
+        onSelect();
+      }}
+      className={`absolute group max-w-[78%] ${
+        isDrawTool ? 'pointer-events-none opacity-95' : 'pointer-events-auto'
+      }`}
+    >
+      {/* Floating Mini Toolbar on select/hover */}
+      {!isDrawTool && (
+        <div
+          className={`absolute -top-6 left-0 flex items-center gap-0.5 px-1.5 py-0.5 rounded-t-lg bg-slate-900/90 text-white shadow-sm transition-opacity z-10 ${
+            isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'
+          }`}
+        >
+          <button
+            type="button"
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              onStartDrag(e);
+            }}
+            title="Textfeld verschieben"
+            aria-label="Textfeld verschieben"
+            className="p-0.5 rounded hover:bg-white/15 cursor-grab active:cursor-grabbing flex items-center gap-1 text-[10px] font-semibold"
+          >
+            <GripHorizontal className="w-3 h-3" />
+          </button>
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleBackground();
+            }}
+            title={hasBg ? 'Hintergrund transparent machen' : 'Weißen Hintergrund aktivieren'}
+            className="px-1.5 py-0.5 rounded hover:bg-white/15 text-[10px] font-bold cursor-pointer whitespace-nowrap"
+          >
+            {hasBg ? 'Weiß' : 'Transp.'}
+          </button>
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            title="Textfeld löschen"
+            aria-label="Textfeld löschen"
+            className="p-0.5 rounded hover:bg-rose-500/80 text-white cursor-pointer"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      )}
+
+      <textarea
+        ref={textareaRef}
+        value={box.text}
+        readOnly={isDrawTool}
+        rows={1}
+        onFocus={onSelect}
+        onPointerDown={(e) => {
+          if (isDrawTool) return;
+          e.stopPropagation();
+        }}
+        onChange={(e) => onChangeText(e.target.value)}
+        onBlur={onBlurBox}
+        placeholder="Text tippen..."
+        style={{
+          color: box.color,
+          fontSize: `${fontSizePx}px`,
+          lineHeight: 1.35,
+          minWidth: `${Math.max(110, fontSizePx * 7)}px`,
+        }}
+        className={`w-44 sm:w-60 px-2 py-1 rounded-md font-medium resize focus:outline-hidden transition-shadow ${
+          hasBg
+            ? 'bg-white/95 shadow-sm border border-slate-200/90'
+            : 'bg-transparent border border-transparent'
+        } ${
+          isSelected && !isDrawTool
+            ? 'ring-2 ring-indigo-500/80 border-indigo-400'
+            : !isDrawTool
+            ? 'group-hover:border-indigo-300/80'
+            : ''
+        } placeholder:text-slate-400/75`}
+      />
+    </div>
+  );
+};
+
 export const NotebookPageStage: React.FC<Props> = ({
   notebook,
   pageNumber,
@@ -172,6 +319,9 @@ export const NotebookPageStage: React.FC<Props> = ({
   penWidth,
   highlighterColor,
   highlighterWidth,
+  textColor,
+  textSize,
+  textHasBackground,
   stickyColor,
   selectedStickerType,
   zoom,
@@ -197,13 +347,15 @@ export const NotebookPageStage: React.FC<Props> = ({
   const latestAnnotationsRef = useRef<PageAnnotations>(annotations);
   latestAnnotationsRef.current = annotations;
 
-  // Newly created sticky note to autofocus
+  // Newly created sticky notes & text boxes to autofocus
   const [autoFocusStickyId, setAutoFocusStickyId] = useState<string | null>(null);
+  const [autoFocusTextId, setAutoFocusTextId] = useState<string | null>(null);
   const [selectedStickerId, setSelectedStickerId] = useState<string | null>(null);
+  const [selectedTextId, setSelectedTextId] = useState<string | null>(null);
 
-  // Dragging state for Sticky Notes & Stickers
+  // Dragging state for Sticky Notes, Stickers & Text Boxes
   const dragItemRef = useRef<{
-    kind: 'sticky' | 'sticker';
+    kind: 'sticky' | 'sticker' | 'text';
     id: string;
     startClientX: number;
     startClientY: number;
@@ -452,8 +604,9 @@ export const NotebookPageStage: React.FC<Props> = ({
       return;
     }
 
-    // Clear sticker selection on background tap
+    // Clear sticker and text selection on background tap
     setSelectedStickerId(null);
+    setSelectedTextId(null);
 
     const effectiveTool: NotebookTool = isStylusEraser ? 'eraser' : activeTool;
 
@@ -511,6 +664,33 @@ export const NotebookPageStage: React.FC<Props> = ({
       return;
     }
 
+    if (effectiveTool === 'text') {
+      e.preventDefault();
+      const id = `txt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const clampedX = Math.max(3, Math.min(76, pt.x));
+      const clampedY = Math.max(3, Math.min(88, pt.y));
+      const newTextBox: NotebookTextBox = {
+        id,
+        x: clampedX,
+        y: clampedY,
+        color: textColor,
+        fontSize: textSize,
+        text: '',
+        hasBackground: textHasBackground,
+        createdAt: Date.now(),
+      };
+      setAutoFocusTextId(id);
+      setSelectedTextId(id);
+      onCommitAnnotations(
+        {
+          ...latestAnnotationsRef.current,
+          textBoxes: [...(latestAnnotationsRef.current.textBoxes || []), newTextBox],
+        },
+        true
+      );
+      return;
+    }
+
     if (effectiveTool === 'sticky') {
       e.preventDefault();
       const id = `sticky-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -559,7 +739,7 @@ export const NotebookPageStage: React.FC<Props> = ({
   };
 
   const handleStagePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    // Handle dragging of Sticky Notes or Stickers first
+    // Handle dragging of Sticky Notes, Stickers, or Text Boxes first
     if (dragItemRef.current && stageRef.current) {
       e.preventDefault();
       const rect = stageRef.current.getBoundingClientRect();
@@ -576,6 +756,17 @@ export const NotebookPageStage: React.FC<Props> = ({
             ...latestAnnotationsRef.current,
             stickyNotes: latestAnnotationsRef.current.stickyNotes.map((n) =>
               n.id === targetId ? { ...n, x: nextX, y: nextY } : n
+            ),
+          },
+          false
+        );
+      } else if (dragItemRef.current.kind === 'text') {
+        const targetId = dragItemRef.current.id;
+        onCommitAnnotations(
+          {
+            ...latestAnnotationsRef.current,
+            textBoxes: (latestAnnotationsRef.current.textBoxes || []).map((t) =>
+              t.id === targetId ? { ...t, x: nextX, y: nextY } : t
             ),
           },
           false
@@ -744,6 +935,58 @@ export const NotebookPageStage: React.FC<Props> = ({
     if (selectedStickerId === id) setSelectedStickerId(null);
   };
 
+  const handleTextBoxChange = (id: string, text: string) => {
+    onCommitAnnotations(
+      {
+        ...annotations,
+        textBoxes: (annotations.textBoxes || []).map((t) =>
+          t.id === id ? { ...t, text } : t
+        ),
+      },
+      false
+    );
+  };
+
+  const handleToggleTextBoxBg = (id: string) => {
+    onCommitAnnotations(
+      {
+        ...annotations,
+        textBoxes: (annotations.textBoxes || []).map((t) =>
+          t.id === id ? { ...t, hasBackground: !(t.hasBackground ?? true) } : t
+        ),
+      },
+      true
+    );
+  };
+
+  const handleDeleteTextBox = (id: string) => {
+    onCommitAnnotations(
+      {
+        ...annotations,
+        textBoxes: (annotations.textBoxes || []).filter((t) => t.id !== id),
+      },
+      true
+    );
+    if (selectedTextId === id) setSelectedTextId(null);
+  };
+
+  const handleTextBoxBlur = (id: string) => {
+    const currentBoxes = latestAnnotationsRef.current.textBoxes || [];
+    const target = currentBoxes.find((t) => t.id === id);
+    if (target && !target.text.trim()) {
+      onCommitAnnotations(
+        {
+          ...latestAnnotationsRef.current,
+          textBoxes: currentBoxes.filter((t) => t.id !== id),
+        },
+        false
+      );
+      if (selectedTextId === id) setSelectedTextId(null);
+      return;
+    }
+    onCommitAnnotations(latestAnnotationsRef.current, false);
+  };
+
   const aspectRatio = surface ? surface.width / surface.height : 0.707;
   const displayWidth = Math.max(260, Math.round(fitWidth * zoom));
   const displayHeight = Math.round(displayWidth / aspectRatio);
@@ -760,6 +1003,8 @@ export const NotebookPageStage: React.FC<Props> = ({
       ? 'cursor-crosshair'
       : activeTool === 'eraser'
       ? 'cursor-cell'
+      : activeTool === 'text'
+      ? 'cursor-text'
       : activeTool === 'sticky' || activeTool === 'sticker'
       ? 'cursor-copy'
       : 'cursor-default';
@@ -920,6 +1165,41 @@ export const NotebookPageStage: React.FC<Props> = ({
                   </button>
                 </div>
               </div>
+            );
+          })}
+        </div>
+
+        {/* Layer 3.5: Interactive Typed Text Boxes */}
+        <div className="absolute inset-0 z-[25] pointer-events-none">
+          {(annotations.textBoxes || []).map((box) => {
+            const fontSizePx = Math.max(11, Math.round((displayWidth * box.fontSize) / 100));
+            return (
+              <TextBoxOverlayItem
+                key={box.id}
+                box={box}
+                fontSizePx={fontSizePx}
+                isDrawTool={isDrawTool}
+                isSelected={selectedTextId === box.id}
+                autoFocus={autoFocusTextId === box.id}
+                onSelect={() => setSelectedTextId(box.id)}
+                onClearAutoFocus={() => {
+                  if (autoFocusTextId === box.id) setAutoFocusTextId(null);
+                }}
+                onStartDrag={(e) => {
+                  dragItemRef.current = {
+                    kind: 'text',
+                    id: box.id,
+                    startClientX: e.clientX,
+                    startClientY: e.clientY,
+                    origX: box.x,
+                    origY: box.y,
+                  };
+                }}
+                onChangeText={(text) => handleTextBoxChange(box.id, text)}
+                onToggleBackground={() => handleToggleTextBoxBg(box.id)}
+                onDelete={() => handleDeleteTextBox(box.id)}
+                onBlurBox={() => handleTextBoxBlur(box.id)}
+              />
             );
           })}
         </div>

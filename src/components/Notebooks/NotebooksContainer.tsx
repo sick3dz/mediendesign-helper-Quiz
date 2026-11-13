@@ -41,17 +41,20 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
 
   useEffect(() => {
     setStore(loadNotebookStore());
-  }, [backupVersion]);
-
-  useEffect(() => {
     let active = true;
     listCustomNotebooks().then((books) => {
-      if (active) setCustomNotebooks(books);
+      if (!active) return;
+      setCustomNotebooks(books);
+      setSelection((prev) => {
+        if (!prev || !prev.notebook.isCustom) return prev;
+        const updated = books.find((b) => b.id === prev.notebook.id);
+        return updated ? { ...prev, notebook: updated } : prev;
+      });
     });
     return () => {
       active = false;
     };
-  }, []);
+  }, [backupVersion]);
 
   const handleUpdatePageAnnotations = (
     notebookId: string,
