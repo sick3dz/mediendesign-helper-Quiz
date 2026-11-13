@@ -13,7 +13,9 @@ import {
   Pencil,
   Trash2,
   File,
+  Loader2,
 } from 'lucide-react';
+import { exportNotebookAsPdf } from '../../services/pdfExportService';
 import { NOTEBOOK_STICKERS, NOTEBOOKS_CATALOG } from '../../data/notebooksData';
 import {
   CustomNotebookPage,
@@ -168,6 +170,7 @@ export const NotebookLibraryView: React.FC<Props> = ({
   const [stickerTypeFilter, setStickerTypeFilter] = useState<NotebookStickerType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [exportingNotebookId, setExportingNotebookId] = useState<string | null>(null);
 
   const allNotebooks = useMemo(
     () => [...customNotebooks, ...NOTEBOOKS_CATALOG],
@@ -296,15 +299,6 @@ export const NotebookLibraryView: React.FC<Props> = ({
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={onCreateBlankNotebook}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 text-xs font-bold shadow-xs transition-colors cursor-pointer min-h-[44px] whitespace-nowrap"
-            title="Neues leeres DIN-A4-Blatt (Blatt Blanko) direkt anlegen"
-          >
-            <File className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-            <span>+ Blatt Blanko</span>
-          </button>
 
           <button
             type="button"
@@ -615,10 +609,37 @@ export const NotebookLibraryView: React.FC<Props> = ({
                         )}
                       </div>
 
-                      <span className="inline-flex items-center gap-0.5 text-indigo-600 dark:text-indigo-400 font-bold shrink-0 whitespace-nowrap">
-                        <span>{lastPage > 1 ? `S. ${lastPage}` : 'Öffnen'}</span>
-                        <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            setExportingNotebookId(doc.id);
+                            try {
+                              await exportNotebookAsPdf(doc, store);
+                            } catch (err) {
+                              console.error('PDF-Export fehlgeschlagen:', err);
+                            } finally {
+                              setExportingNotebookId(null);
+                            }
+                          }}
+                          disabled={exportingNotebookId === doc.id}
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold transition-colors cursor-pointer disabled:opacity-50"
+                          title="Gesamtes Heft mit allen Markierungen & Notizen als PDF exportieren"
+                        >
+                          {exportingNotebookId === doc.id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <FileText className="w-3 h-3" />
+                          )}
+                          <span>PDF</span>
+                        </button>
+
+                        <span className="inline-flex items-center gap-0.5 text-indigo-600 dark:text-indigo-400 font-bold shrink-0 whitespace-nowrap">
+                          <span>{lastPage > 1 ? `S. ${lastPage}` : 'Öffnen'}</span>
+                          <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </button>

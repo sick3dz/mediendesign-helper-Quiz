@@ -25,7 +25,10 @@ import {
   FilePlus2,
   Type,
   ImagePlus,
+  FileText,
+  Loader2,
 } from 'lucide-react';
+import { exportNotebookAsPdf } from '../../services/pdfExportService';
 import {
   CustomNotebookPage,
   NotebookDocument,
@@ -227,6 +230,8 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const [sidebarStickerFilter, setSidebarStickerFilter] = useState<NotebookStickerType | 'all'>('all');
   const [confirmClearPage, setConfirmClearPage] = useState<boolean>(false);
   const [imageInsertError, setImageInsertError] = useState<string | null>(null);
+  const [isExportingPdf, setIsExportingPdf] = useState<boolean>(false);
+  const [pdfProgress, setPdfProgress] = useState<{ current: number; total: number } | null>(null);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [isToolbarCollapsed, setIsToolbarCollapsed] = useState<boolean>(false);
   const [pencilOnlyMode, setPencilOnlyMode] = useState<boolean>(false);
@@ -648,6 +653,40 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                 <span className="hidden sm:inline">+ Seiten</span>
               </button>
             )}
+
+            <button
+              type="button"
+              onClick={async () => {
+                setIsExportingPdf(true);
+                try {
+                  await exportNotebookAsPdf(notebook, store, (cur, tot) => {
+                    setPdfProgress({ current: cur, total: tot });
+                  });
+                } catch (err) {
+                  console.error('PDF-Export fehlgeschlagen:', err);
+                } finally {
+                  setIsExportingPdf(false);
+                  setPdfProgress(null);
+                }
+              }}
+              disabled={isExportingPdf}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs font-bold transition-colors cursor-pointer min-h-[36px] whitespace-nowrap shrink-0 disabled:opacity-50"
+              title="Gesamtes Heft mit allen Markierungen & Notizen als PDF exportieren"
+            >
+              {isExportingPdf ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span className="hidden sm:inline">
+                    {pdfProgress ? `S. ${pdfProgress.current}/${pdfProgress.total}` : 'PDF...'}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <FileText className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Als PDF</span>
+                </>
+              )}
+            </button>
           </div>
 
           {/* Center Group: Classic GoodNotes Annotation Tools */}
