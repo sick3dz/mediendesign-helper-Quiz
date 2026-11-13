@@ -6,6 +6,8 @@ export type NotebookSourceType =
 
 export type BlankPageTemplate = 'blank' | 'lined' | 'grid' | 'dotted';
 
+export type BlankPaperColor = 'white' | 'cream' | 'yellow' | 'pink' | 'mint' | 'blue';
+
 export type NotebookTool =
   | 'hand'
   | 'highlighter'
@@ -16,7 +18,9 @@ export type NotebookTool =
   | 'sticky'
   | 'sticker';
 
-export type StickyColor = 'yellow' | 'pink' | 'mint' | 'blue';
+export type StickyColor = 'yellow' | 'pink' | 'mint' | 'blue' | 'cream' | 'lavender';
+
+export type TextBoxBackgroundStyle = 'white' | 'paper' | 'transparent';
 
 export type NotebookStickerType =
   | 'merksatz'
@@ -80,6 +84,7 @@ export interface NotebookTextBox {
   underline?: boolean;
   strikethrough?: boolean;
   hasBackground?: boolean;
+  backgroundStyle?: TextBoxBackgroundStyle;
   createdAt: number;
 }
 
@@ -112,6 +117,8 @@ export interface PageAnnotations {
   images?: NotebookImageElement[];
   rotationOverride?: number; // 0 | 90 | 180 | 270
   templateOverride?: BlankPageTemplate;
+  paperColorOverride?: BlankPaperColor;
+  showDateHeader?: boolean;
 }
 
 export interface NotebookStore {
@@ -135,6 +142,8 @@ export type CustomNotebookPage =
       pageNumber: number;
       kind: 'blank';
       template: BlankPageTemplate;
+      paperColor?: BlankPaperColor;
+      showDateHeader?: boolean;
       title: string;
       defaultRotation?: 0 | 90 | 180 | 270;
     }

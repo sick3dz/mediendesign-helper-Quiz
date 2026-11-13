@@ -8,6 +8,18 @@ import {
   importCustomNotebooksWithMedia,
   MediaRecord,
 } from './customNotebookDbService';
+import {
+  loadMacDisplaySettings,
+  MacDisplaySettings,
+  saveMacDisplaySettings,
+} from './macDisplaySettingsService';
+import {
+  InkColorOption,
+  loadHighlighterColorPalette,
+  loadInkColorPalette,
+  saveHighlighterColorPalette,
+  saveInkColorPalette,
+} from './colorPaletteService';
 
 const STORAGE_KEY = 'mediengestalter_adhd_trainer_stats_v2';
 const SETTINGS_KEY = 'mediengestalter_adhd_trainer_settings_v2';
@@ -547,12 +559,18 @@ export interface BackupPayload {
   stats: UserStats;
   settings: UserSettings;
   notebooks?: NotebookStore;
+  macDisplaySettings?: MacDisplaySettings;
+  inkPalette?: InkColorOption[];
+  highlighterPalette?: InkColorOption[];
 }
 
 export function generateBackupJson(): string {
   const stats = loadUserStats();
   const settings = loadUserSettings();
   const notebooks = loadNotebookStore();
+  const macDisplaySettings = loadMacDisplaySettings();
+  const inkPalette = loadInkColorPalette();
+  const highlighterPalette = loadHighlighterColorPalette();
   const payload: BackupPayload = {
     app: 'DesignKonzept.prep',
     version: 1,
@@ -560,6 +578,9 @@ export function generateBackupJson(): string {
     stats,
     settings,
     notebooks,
+    macDisplaySettings,
+    inkPalette,
+    highlighterPalette,
   };
   return JSON.stringify(payload, null, 2);
 }
@@ -606,6 +627,18 @@ export function restoreBackupJson(jsonString: string): { success: boolean; stats
 
     if (parsed.notebooks && typeof parsed.notebooks === 'object') {
       restoreNotebookStoreFromBackup(parsed.notebooks);
+    }
+
+    if (parsed.macDisplaySettings && typeof parsed.macDisplaySettings === 'object') {
+      saveMacDisplaySettings(parsed.macDisplaySettings as MacDisplaySettings);
+    }
+
+    if (Array.isArray(parsed.inkPalette) && parsed.inkPalette.length > 0) {
+      saveInkColorPalette(parsed.inkPalette as InkColorOption[]);
+    }
+
+    if (Array.isArray(parsed.highlighterPalette) && parsed.highlighterPalette.length > 0) {
+      saveHighlighterColorPalette(parsed.highlighterPalette as InkColorOption[]);
     }
 
     if (importedSettings) {

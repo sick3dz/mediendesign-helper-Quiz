@@ -11,13 +11,17 @@ import {
   X,
   AlertCircle,
   Crop as CropIcon,
+  Minus,
+  Plus,
 } from 'lucide-react';
-import { BlankPageTemplate, NotebookDocument } from '../../types/notebook';
+import { BlankPageTemplate, BlankPaperColor, NotebookDocument } from '../../types/notebook';
 import { ImageCropModal } from './ImageCropModal';
 import {
   BLANK_PAGE_TEMPLATES,
+  BLANK_PAPER_COLORS,
   CUSTOM_COVER_COLORS,
   CUSTOM_NOTEBOOK_CATEGORIES,
+  getBlankPaperPalette,
 } from '../../data/notebooksData';
 import {
   appendPagesToCustomNotebook,
@@ -78,8 +82,25 @@ export const CustomNotebookModal: React.FC<Props> = ({
   );
 
   // Page Builder State
+  const lastBlankPageInTarget =
+    mode === 'append' && targetNotebook?.customPages
+      ? [...targetNotebook.customPages].reverse().find((pg) => pg.kind === 'blank')
+      : undefined;
   const [stagedItems, setStagedItems] = useState<StagedCustomItem[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<BlankPageTemplate>('lined');
+  const [selectedTemplate, setSelectedTemplate] = useState<BlankPageTemplate>(
+    lastBlankPageInTarget?.kind === 'blank' ? lastBlankPageInTarget.template : 'lined'
+  );
+  const [selectedPaperColor, setSelectedPaperColor] = useState<BlankPaperColor>(
+    lastBlankPageInTarget?.kind === 'blank'
+      ? lastBlankPageInTarget.paperColor ?? 'white'
+      : 'white'
+  );
+  const [showDateHeader, setShowDateHeader] = useState<boolean>(
+    lastBlankPageInTarget?.kind === 'blank'
+      ? Boolean(lastBlankPageInTarget.showDateHeader)
+      : false
+  );
+  const [blankCountInput, setBlankCountInput] = useState<string>('1');
   const [jumpToNewPage, setJumpToNewPage] = useState<boolean>(defaultJumpToNewPage);
   const [activeCropItem, setActiveCropItem] = useState<StagedCustomItem | null>(null);
 
@@ -90,6 +111,17 @@ export const CustomNotebookModal: React.FC<Props> = ({
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const previewUrlsRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !activeCropItem && !isSaving) {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeCropItem, isSaving, onClose]);
 
   useEffect(() => {
     return () => {
@@ -173,14 +205,31 @@ export const CustomNotebookModal: React.FC<Props> = ({
     }
   };
 
+  const parsedBlankCount = parseInt(blankCountInput, 10);
+  const resolvedBlankCount = Number.isFinite(parsedBlankCount)
+    ? Math.max(1, Math.min(50, parsedBlankCount))
+    : 1;
+
+  const stepBlankCount = (delta: -1 | 1) => {
+    const next = Math.max(1, Math.min(50, resolvedBlankCount + delta));
+    setBlankCountInput(String(next));
+  };
+
   const handleAddBlankPages = (count: number) => {
+    const safeCount = Math.max(1, Math.min(50, count));
     setErrorMsg(null);
     setStagedItems((prev) => {
       const last = prev[prev.length - 1];
-      if (last && last.kind === 'blank' && last.template === selectedTemplate) {
+      if (
+        last &&
+        last.kind === 'blank' &&
+        last.template === selectedTemplate &&
+        (last.paperColor ?? 'white') === selectedPaperColor &&
+        Boolean(last.showDateHeader) === showDateHeader
+      ) {
         return prev.map((item, idx) =>
           idx === prev.length - 1 && item.kind === 'blank'
-            ? { ...item, count: Math.min(50, item.count + count) }
+            ? { ...item, count: Math.min(50, item.count + safeCount) }
             : item
         );
       }
@@ -190,7 +239,9 @@ export const CustomNotebookModal: React.FC<Props> = ({
           tempId: `stg-blank-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
           kind: 'blank',
           template: selectedTemplate,
-          count,
+          paperColor: selectedPaperColor,
+          showDateHeader,
+          count: safeCount,
         },
       ];
     });
@@ -572,20 +623,137 @@ export const CustomNotebookModal: React.FC<Props> = ({
                   ))}
                 </div>
 
+                {/* Pastel Paper Color Picker */}
                 <div className="flex flex-wrap items-center gap-2 pt-0.5">
                   <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                    Anzahl anfügen:
+                    Papierfarbe:
                   </span>
-                  {[1, 3, 5, 10].map((qty) => (
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {BLANK_PAPER_COLORS.map((col) => {
+                      const active = selectedPaperColor === col.id;
+                      return (
+                        <button
+                          key={col.id}
+                          type="button"
+                          onClick={() => setSelectedPaperColor(col.id)}
+                          aria-pressed={active}
+                          title={`Papierfarbe: ${col.label}`}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer min-h-[32px] whitespace-nowrap ${
+                            active
+                              ? 'border-indigo-500 bg-indigo-50/80 dark:bg-indigo-950/50 text-slate-900 dark:text-white ring-2 ring-indigo-500/25'
+                              : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
+                          }`}
+                        >
+                          <span
+                            className="w-3.5 h-3.5 rounded-full border shrink-0 relative flex items-center justify-center"
+                            style={{
+                              backgroundColor: col.bgHex,
+                              borderColor: col.swatchBorder,
+                            }}
+                          >
+                            {col.id !== 'white' && (
+                              <span
+                                className="w-1.5 h-1.5 rounded-full"
+                                style={{ backgroundColor: col.marginHex }}
+                              />
+                            )}
+                          </span>
+                          <span>{col.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Optional Thema / Datum Header Toggle */}
+                <label className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-700 dark:text-slate-300 cursor-pointer pt-0.5">
+                  <input
+                    type="checkbox"
+                    checked={showDateHeader}
+                    onChange={(e) => setShowDateHeader(e.target.checked)}
+                    className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span>Kopfzeile („Thema / Datum“) einblenden</span>
+                </label>
+
+                <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
+                  <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                    Seitenzahl:
+                  </span>
+
+                  <div className="inline-flex items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden shadow-2xs">
                     <button
-                      key={qty}
                       type="button"
-                      onClick={() => handleAddBlankPages(qty)}
-                      className="px-3 py-1.5 rounded-lg bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/60 dark:hover:bg-amber-900/70 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-800 text-xs font-bold cursor-pointer transition-colors min-h-[36px]"
+                      onClick={() => stepBlankCount(-1)}
+                      disabled={resolvedBlankCount <= 1}
+                      aria-label="Seitenzahl verringern"
+                      title="Weniger Seiten"
+                      className="w-9 h-9 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-35 disabled:pointer-events-none transition-colors cursor-pointer"
                     >
-                      +{qty} {qty === 1 ? 'Seite' : 'Seiten'}
+                      <Minus className="w-3.5 h-3.5" />
                     </button>
-                  ))}
+
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={blankCountInput}
+                      onChange={(e) => {
+                        const digitsOnly = e.target.value.replace(/[^0-9]/g, '');
+                        if (!digitsOnly) {
+                          setBlankCountInput('');
+                          return;
+                        }
+                        const num = parseInt(digitsOnly, 10);
+                        setBlankCountInput(String(Math.min(50, num)));
+                      }}
+                      onBlur={() => {
+                        setBlankCountInput(String(resolvedBlankCount));
+                      }}
+                      onFocus={(e) => e.target.select()}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          setBlankCountInput(String(resolvedBlankCount));
+                          handleAddBlankPages(resolvedBlankCount);
+                        } else if (e.key === 'ArrowUp') {
+                          e.preventDefault();
+                          stepBlankCount(1);
+                        } else if (e.key === 'ArrowDown') {
+                          e.preventDefault();
+                          stepBlankCount(-1);
+                        }
+                      }}
+                      aria-label="Anzahl der leeren Notizseiten"
+                      className="w-14 h-9 text-center text-xs font-bold tabular-nums text-slate-900 dark:text-white bg-transparent border-x border-slate-200 dark:border-slate-700 focus:outline-hidden focus:bg-indigo-50/60 dark:focus:bg-indigo-950/40"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => stepBlankCount(1)}
+                      disabled={resolvedBlankCount >= 50}
+                      aria-label="Seitenzahl erhöhen"
+                      title="Mehr Seiten"
+                      className="w-9 h-9 flex items-center justify-center text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-35 disabled:pointer-events-none transition-colors cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBlankCountInput(String(resolvedBlankCount));
+                      handleAddBlankPages(resolvedBlankCount);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/60 dark:hover:bg-amber-900/70 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-800 text-xs font-bold cursor-pointer transition-colors min-h-[36px] whitespace-nowrap"
+                  >
+                    <Plus className="w-3.5 h-3.5 shrink-0" />
+                    <span>
+                      {resolvedBlankCount === 1
+                        ? '1 Seite anfügen'
+                        : `${resolvedBlankCount} Seiten anfügen`}
+                    </span>
+                  </button>
                 </div>
               </div>
 
@@ -613,7 +781,14 @@ export const CustomNotebookModal: React.FC<Props> = ({
                               <FileText className="w-4 h-4" />
                             </div>
                           ) : (
-                            <div className="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0">
+                            <div
+                              className="w-9 h-9 rounded-lg border flex items-center justify-center shrink-0"
+                              style={{
+                                backgroundColor: getBlankPaperPalette(item.paperColor).bgHex,
+                                borderColor: getBlankPaperPalette(item.paperColor).swatchBorder,
+                                color: getBlankPaperPalette(item.paperColor).marginHex,
+                              }}
+                            >
                               <NotebookPen className="w-4 h-4" />
                             </div>
                           )}
@@ -624,7 +799,9 @@ export const CustomNotebookModal: React.FC<Props> = ({
                                 ? `${
                                     BLANK_PAGE_TEMPLATES.find((t) => t.id === item.template)?.label ??
                                     'Notizseite'
-                                  } (Vorlage)`
+                                  } · ${getBlankPaperPalette(item.paperColor).label}${
+                                    item.showDateHeader ? ' · Kopfzeile' : ''
+                                  }`
                                 : item.fileName}
                             </div>
                             <div className="text-[11px] text-slate-500 dark:text-slate-400 tabular-nums">

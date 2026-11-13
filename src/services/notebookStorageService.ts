@@ -1,5 +1,6 @@
 import {
   BlankPageTemplate,
+  BlankPaperColor,
   NotebookSticker,
   NotebookStickyNote,
   NotebookStore,
@@ -76,6 +77,9 @@ export function getPageAnnotations(
     images: Array.isArray(entry.images) ? entry.images : [],
     rotationOverride: entry.rotationOverride,
     templateOverride: entry.templateOverride,
+    paperColorOverride: entry.paperColorOverride,
+    showDateHeader:
+      typeof entry.showDateHeader === 'boolean' ? entry.showDateHeader : undefined,
   };
 }
 
@@ -93,7 +97,9 @@ export function savePageAnnotations(
     (annotations.textBoxes?.length || 0) === 0 &&
     (annotations.images?.length || 0) === 0 &&
     annotations.rotationOverride === undefined &&
-    annotations.templateOverride === undefined;
+    annotations.templateOverride === undefined &&
+    annotations.paperColorOverride === undefined &&
+    annotations.showDateHeader === undefined;
 
   const nextPages = { ...store.pages };
   if (isEmpty) {
@@ -224,6 +230,20 @@ function normalizeBlankTemplate(val: unknown): BlankPageTemplate | undefined {
   return undefined;
 }
 
+function normalizeBlankPaperColor(val: unknown): BlankPaperColor | undefined {
+  if (
+    val === 'white' ||
+    val === 'cream' ||
+    val === 'yellow' ||
+    val === 'pink' ||
+    val === 'mint' ||
+    val === 'blue'
+  ) {
+    return val;
+  }
+  return undefined;
+}
+
 function normalizePageAnnotations(raw: unknown): PageAnnotations | null {
   if (!raw || typeof raw !== 'object') return null;
   const entry = raw as Partial<PageAnnotations>;
@@ -235,6 +255,7 @@ function normalizePageAnnotations(raw: unknown): PageAnnotations | null {
       ? entry.rotationOverride
       : undefined;
   const templateOverride = normalizeBlankTemplate(entry.templateOverride);
+  const paperColorOverride = normalizeBlankPaperColor(entry.paperColorOverride);
 
   return {
     strokes: Array.isArray(entry.strokes)
@@ -253,6 +274,12 @@ function normalizePageAnnotations(raw: unknown): PageAnnotations | null {
           .filter((t) => t && typeof t === 'object' && typeof t.id === 'string')
           .map((t) => ({
             ...t,
+            backgroundStyle:
+              t.backgroundStyle === 'white' ||
+              t.backgroundStyle === 'paper' ||
+              t.backgroundStyle === 'transparent'
+                ? t.backgroundStyle
+                : undefined,
             bold: typeof t.bold === 'boolean' ? t.bold : undefined,
             italic: typeof t.italic === 'boolean' ? t.italic : undefined,
             underline: typeof t.underline === 'boolean' ? t.underline : undefined,
@@ -281,6 +308,9 @@ function normalizePageAnnotations(raw: unknown): PageAnnotations | null {
       : [],
     rotationOverride: rot,
     templateOverride,
+    paperColorOverride,
+    showDateHeader:
+      typeof entry.showDateHeader === 'boolean' ? entry.showDateHeader : undefined,
   };
 }
 
@@ -462,4 +492,56 @@ export function reorderNotebookPageAnnotations(
   };
   saveNotebookStore(nextStore);
   return nextStore;
+}
+
+export interface NotebookNoteSearchHit {
+  notebookId: string;
+  pageNumber: number;
+  kind: 'sticky' | 'text';
+  id: string;
+  text: string;
+}
+
+export function searchNotebookNotes(
+  store: NotebookStore,
+  notebookId: string,
+  totalPages: number,
+  query: string
+): NotebookNoteSearchHit[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  const hits: NotebookNoteSearchHit[] = [];
+
+  for (let p = 1; p <= totalPages; p++) {
+    const page = store.pages[makePageKey(notebookId, p)];
+    if (!page) continue;
+
+    for (const sticky of page.stickyNotes || []) {
+      const txt = (sticky.text || '').trim();
+      if (txt && txt.toLowerCase().includes(q)) {
+        hits.push({
+          notebookId,
+          pageNumber: p,
+          kind: 'sticky',
+          id: sticky.id,
+          text: txt,
+        });
+      }
+    }
+
+    for (const box of page.textBoxes || []) {
+      const txt = (box.text || '').replace(/\u200B/g, '').trim();
+      if (txt && txt.toLowerCase().includes(q)) {
+        hits.push({
+          notebookId,
+          pageNumber: p,
+          kind: 'text',
+          id: box.id,
+          text: txt,
+        });
+      }
+    }
+  }
+
+  return hits;
 }

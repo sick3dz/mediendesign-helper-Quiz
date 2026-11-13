@@ -27,8 +27,13 @@ import {
   PageAnnotations,
   StickyColor,
   StrokePoint,
+  TextBoxBackgroundStyle,
 } from '../../types/notebook';
-import { NOTEBOOK_STICKERS, STICKY_NOTE_STYLES } from '../../data/notebooksData';
+import {
+  BlankPaperPalette,
+  NOTEBOOK_STICKERS,
+  STICKY_NOTE_STYLES,
+} from '../../data/notebooksData';
 import {
   applyStyleToRange,
   extractRunsFromElement,
@@ -62,7 +67,8 @@ interface Props {
   highlighterWidth: number;
   textColor: string;
   textSize: number;
-  textHasBackground: boolean;
+  textBackgroundStyle: TextBoxBackgroundStyle;
+  paperPalette: BlankPaperPalette;
   textBold: boolean;
   textItalic: boolean;
   textUnderline: boolean;
@@ -219,6 +225,7 @@ function isPointNearStroke(pt: StrokePoint, stroke: NotebookStroke, radius: numb
 interface AutoTextItemProps {
   box: NotebookTextBox;
   fontSizePx: number;
+  paperPalette: BlankPaperPalette;
   isDrawTool: boolean;
   isSelected: boolean;
   autoFocus: boolean;
@@ -243,6 +250,7 @@ interface AutoTextItemProps {
 const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
   box,
   fontSizePx,
+  paperPalette,
   isDrawTool,
   isSelected,
   autoFocus,
@@ -486,7 +494,8 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
     handleInput();
   };
 
-  const hasBg = box.hasBackground ?? true;
+  const bgStyle: TextBoxBackgroundStyle =
+    box.backgroundStyle ?? ((box.hasBackground ?? true) ? 'white' : 'transparent');
   const isNearTopEdge = box.y < 20;
   const hasAnyFormatting =
     activeTypingStyle.bold ||
@@ -662,10 +671,14 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
                     e.stopPropagation();
                     onToggleBackground();
                   }}
-                  title={hasBg ? 'Hintergrund transparent machen' : 'Weißen Hintergrund aktivieren'}
+                  title="Hintergrund wechseln (Weiß / Papier-Ton / Transparent)"
                   className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-100 cursor-pointer whitespace-nowrap"
                 >
-                  {hasBg ? 'Weiß' : 'Transp.'}
+                  {bgStyle === 'white'
+                    ? 'Weiß'
+                    : bgStyle === 'paper'
+                    ? 'Papier'
+                    : 'Transp.'}
                 </button>
               </div>
 
@@ -811,10 +824,18 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
             minHeight: `${Math.max(24, Math.round(fontSizePx * 1.35 + 8))}px`,
             WebkitUserSelect: isDrawTool ? 'none' : 'text',
             userSelect: isDrawTool ? 'none' : 'text',
+            ...(bgStyle === 'paper'
+              ? {
+                  backgroundColor: paperPalette.bgHex,
+                  borderColor: paperPalette.lineHex,
+                }
+              : {}),
           }}
           className={`min-w-[11rem] max-w-full px-2 py-1 rounded-md font-medium whitespace-pre-wrap break-words focus:outline-hidden transition-shadow ${
-            hasBg
+            bgStyle === 'white'
               ? 'bg-white/95 shadow-sm border border-slate-200/90'
+              : bgStyle === 'paper'
+              ? 'shadow-sm border'
               : 'bg-transparent border border-transparent'
           } ${
             isSelected && !isDrawTool
@@ -1130,7 +1151,8 @@ export const NotebookPageStage: React.FC<Props> = ({
   highlighterWidth,
   textColor,
   textSize,
-  textHasBackground,
+  textBackgroundStyle,
+  paperPalette,
   textBold,
   textItalic,
   textUnderline,
@@ -1175,6 +1197,7 @@ export const NotebookPageStage: React.FC<Props> = ({
   const [selectedStickerId, setSelectedStickerId] = useState<string | null>(null);
   const [selectedTextId, setSelectedTextId] = useState<string | null>(null);
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
+  const [selectedStickyId, setSelectedStickyId] = useState<string | null>(null);
   const [activeCropImage, setActiveCropImage] = useState<{
     id: string;
     url: string;
@@ -1184,6 +1207,9 @@ export const NotebookPageStage: React.FC<Props> = ({
   useEffect(() => {
     if (selectedImageSignal?.id) {
       setSelectedImageId(selectedImageSignal.id);
+      setSelectedStickerId(null);
+      setSelectedTextId(null);
+      setSelectedStickyId(null);
     }
   }, [selectedImageSignal]);
 
@@ -1191,11 +1217,14 @@ export const NotebookPageStage: React.FC<Props> = ({
     setSelectedStickerId(null);
     setSelectedTextId(null);
     setSelectedImageId(null);
+    setSelectedStickyId(null);
   }, [notebook.id, pageNumber]);
 
   useEffect(() => {
-    onSelectionChange?.(Boolean(selectedImageId || selectedTextId || selectedStickerId));
-  }, [selectedImageId, selectedTextId, selectedStickerId, onSelectionChange]);
+    onSelectionChange?.(
+      Boolean(selectedImageId || selectedTextId || selectedStickerId || selectedStickyId)
+    );
+  }, [selectedImageId, selectedTextId, selectedStickerId, selectedStickyId, onSelectionChange]);
 
   useEffect(() => {
     onCropModalOpenChange?.(Boolean(activeCropImage));
@@ -1234,8 +1263,24 @@ export const NotebookPageStage: React.FC<Props> = ({
         true
       );
       setSelectedStickerId(null);
+    } else if (selectedStickyId) {
+      onCommitAnnotations(
+        {
+          ...latest,
+          stickyNotes: latest.stickyNotes.filter((n) => n.id !== selectedStickyId),
+        },
+        true
+      );
+      setSelectedStickyId(null);
     }
-  }, [deleteSelectionSignal, selectedImageId, selectedTextId, selectedStickerId, onCommitAnnotations]);
+  }, [
+    deleteSelectionSignal,
+    selectedImageId,
+    selectedTextId,
+    selectedStickerId,
+    selectedStickyId,
+    onCommitAnnotations,
+  ]);
 
   const lastClearSignalRef = useRef<number>(clearSelectionSignal ?? 0);
   useEffect(() => {
@@ -1245,6 +1290,7 @@ export const NotebookPageStage: React.FC<Props> = ({
     setSelectedImageId(null);
     setSelectedTextId(null);
     setSelectedStickerId(null);
+    setSelectedStickyId(null);
   }, [clearSelectionSignal]);
 
   // Dragging state for Sticky Notes, Stickers, Text Boxes & Embedded Images
@@ -1400,10 +1446,16 @@ export const NotebookPageStage: React.FC<Props> = ({
     ) {
       if (customPage.kind === 'blank') {
         const blankW = retinaMode === 'ultra' ? 1680 : 1240;
+        const effectivePaperColor =
+          annotations.paperColorOverride ?? customPage.paperColor ?? 'white';
+        const effectiveShowHeader =
+          annotations.showDateHeader ?? Boolean(customPage.showDateHeader);
         const res = renderBlankTemplateToDataUrl(
           annotations.templateOverride ?? customPage.template,
           effectiveRotation,
-          blankW
+          blankW,
+          effectivePaperColor,
+          effectiveShowHeader
         );
         setSurface({
           dataUrl: res.dataUrl,
@@ -1462,7 +1514,9 @@ export const NotebookPageStage: React.FC<Props> = ({
       const res = renderBlankTemplateToDataUrl(
         annotations.templateOverride ?? 'blank',
         effectiveRotation,
-        blankW
+        blankW,
+        annotations.paperColorOverride ?? 'white',
+        Boolean(annotations.showDateHeader)
       );
       setSurface({
         dataUrl: res.dataUrl,
@@ -1487,7 +1541,11 @@ export const NotebookPageStage: React.FC<Props> = ({
     customPage?.id,
     customPage?.kind,
     customPage?.kind === 'blank' ? customPage.template : undefined,
+    customPage?.kind === 'blank' ? customPage.paperColor : undefined,
+    customPage?.kind === 'blank' ? customPage.showDateHeader : undefined,
     annotations.templateOverride,
+    annotations.paperColorOverride,
+    annotations.showDateHeader,
     pageNumber,
     effectiveRotation,
     annotations.rotationOverride,
@@ -1560,10 +1618,11 @@ export const NotebookPageStage: React.FC<Props> = ({
       return;
     }
 
-    // Clear sticker, text, and image selection on background tap
+    // Clear sticker, text, image, and sticky selection on background tap
     setSelectedStickerId(null);
     setSelectedTextId(null);
     setSelectedImageId(null);
+    setSelectedStickyId(null);
 
     const effectiveTool: NotebookTool = isStylusEraser ? 'eraser' : activeTool;
 
@@ -1638,7 +1697,8 @@ export const NotebookPageStage: React.FC<Props> = ({
         italic: textItalic,
         underline: textUnderline,
         strikethrough: textStrikethrough,
-        hasBackground: textHasBackground,
+        hasBackground: textBackgroundStyle !== 'transparent',
+        backgroundStyle: textBackgroundStyle,
         createdAt: Date.now(),
       };
       pendingNewTextBoxBaseRef.current = {
@@ -1672,6 +1732,7 @@ export const NotebookPageStage: React.FC<Props> = ({
         createdAt: Date.now(),
       };
       setAutoFocusStickyId(id);
+      setSelectedStickyId(id);
       onCommitAnnotations(
         {
           ...latestAnnotationsRef.current,
@@ -1807,13 +1868,55 @@ export const NotebookPageStage: React.FC<Props> = ({
 
     if (isDrawingRef.current && draftStrokeRef.current) {
       e.preventDefault();
+
+      // Shift-hold straight line mode (with subtle 0° / 45° / 90° snap)
+      if (e.shiftKey) {
+        const rawStart = draftStrokeRef.current.points[0];
+        const rawEnd = toNormalizedPoint(e.clientX, e.clientY, e.pressure, e.pointerType);
+        if (rawStart && rawEnd) {
+          let endX = rawEnd.x;
+          let endY = rawEnd.y;
+          const rect = stageRef.current?.getBoundingClientRect();
+          if (rect && rect.width > 0 && rect.height > 0) {
+            const dxPx = ((rawEnd.x - rawStart.x) / 100) * rect.width;
+            const dyPx = ((rawEnd.y - rawStart.y) / 100) * rect.height;
+            const distPx = Math.hypot(dxPx, dyPx);
+            if (distPx > 4) {
+              const angleDeg = (Math.atan2(dyPx, dxPx) * 180) / Math.PI;
+              const nearest45 = Math.round(angleDeg / 45) * 45;
+              if (Math.abs(angleDeg - nearest45) <= 5.5) {
+                const rad = (nearest45 * Math.PI) / 180;
+                endX = Math.max(
+                  0,
+                  Math.min(100, rawStart.x + ((Math.cos(rad) * distPx) / rect.width) * 100)
+                );
+                endY = Math.max(
+                  0,
+                  Math.min(100, rawStart.y + ((Math.sin(rad) * distPx) / rect.height) * 100)
+                );
+              }
+            }
+          }
+          const updatedStroke: NotebookStroke = {
+            ...draftStrokeRef.current,
+            points: [
+              { x: rawStart.x, y: rawStart.y },
+              { x: endX, y: endY },
+            ],
+          };
+          draftStrokeRef.current = updatedStroke;
+          setDraftStroke(updatedStroke);
+        }
+        return;
+      }
+
       const nativeEvt = e.nativeEvent as PointerEvent;
       const coalesced =
         typeof nativeEvt.getCoalescedEvents === 'function'
           ? nativeEvt.getCoalescedEvents()
           : [];
       const samples = coalesced.length > 0 ? coalesced : [nativeEvt];
-      const minStep = e.pointerType === 'pen' ? 0.12 : 0.22;
+      const minStep = (e.pointerType === 'pen' ? 0.12 : 0.22) / Math.max(1, zoom);
 
       const currentPoints = [...draftStrokeRef.current.points];
       let added = false;
@@ -1970,6 +2073,7 @@ export const NotebookPageStage: React.FC<Props> = ({
       },
       true
     );
+    if (selectedStickyId === id) setSelectedStickyId(null);
   };
 
   const handleDeleteSticker = (id: string) => {
@@ -2075,9 +2179,22 @@ export const NotebookPageStage: React.FC<Props> = ({
     onCommitAnnotations(
       {
         ...latest,
-        textBoxes: (latest.textBoxes || []).map((t) =>
-          t.id === id ? { ...t, hasBackground: !(t.hasBackground ?? true) } : t
-        ),
+        textBoxes: (latest.textBoxes || []).map((t) => {
+          if (t.id !== id) return t;
+          const current: TextBoxBackgroundStyle =
+            t.backgroundStyle ?? ((t.hasBackground ?? true) ? 'white' : 'transparent');
+          const next: TextBoxBackgroundStyle =
+            current === 'white'
+              ? 'paper'
+              : current === 'paper'
+              ? 'transparent'
+              : 'white';
+          return {
+            ...t,
+            backgroundStyle: next,
+            hasBackground: next !== 'transparent',
+          };
+        }),
       },
       true
     );
@@ -2259,7 +2376,12 @@ export const NotebookPageStage: React.FC<Props> = ({
               item={imgEl}
               isInteractive={activeTool === 'hand'}
               isSelected={selectedImageId === imgEl.id}
-              onSelect={() => setSelectedImageId(imgEl.id)}
+              onSelect={() => {
+                setSelectedImageId(imgEl.id);
+                setSelectedTextId(null);
+                setSelectedStickerId(null);
+                setSelectedStickyId(null);
+              }}
               onStartDrag={(e) => {
                 try {
                   stageRef.current?.setPointerCapture(e.pointerId);
@@ -2400,6 +2522,9 @@ export const NotebookPageStage: React.FC<Props> = ({
                   if (isDrawTool) return;
                   e.stopPropagation();
                   setSelectedStickerId(sticker.id);
+                  setSelectedImageId(null);
+                  setSelectedTextId(null);
+                  setSelectedStickyId(null);
                   try {
                     stageRef.current?.setPointerCapture(e.pointerId);
                   } catch {}
@@ -2561,10 +2686,16 @@ export const NotebookPageStage: React.FC<Props> = ({
                 key={box.id}
                 box={box}
                 fontSizePx={fontSizePx}
+                paperPalette={paperPalette}
                 isDrawTool={isDrawTool}
                 isSelected={selectedTextId === box.id}
                 autoFocus={autoFocusTextId === box.id}
-                onSelect={() => setSelectedTextId(box.id)}
+                onSelect={() => {
+                  setSelectedTextId(box.id);
+                  setSelectedImageId(null);
+                  setSelectedStickerId(null);
+                  setSelectedStickyId(null);
+                }}
                 onFocusBox={() => handleTextBoxFocus(box.id)}
                 onClearAutoFocus={() => {
                   if (autoFocusTextId === box.id) setAutoFocusTextId(null);
@@ -2620,9 +2751,16 @@ export const NotebookPageStage: React.FC<Props> = ({
         <div className="absolute inset-0 z-30 pointer-events-none">
           {annotations.stickyNotes.map((note, idx) => {
             const theme = STICKY_NOTE_STYLES[note.color] || STICKY_NOTE_STYLES.yellow;
+            const isStickySelected = selectedStickyId === note.id;
             const previewSnippet = note.text.trim()
               ? note.text.trim().slice(0, 14) + (note.text.trim().length > 14 ? '…' : '')
               : `Notiz ${idx + 1}`;
+            const selectThisSticky = () => {
+              setSelectedStickyId(note.id);
+              setSelectedImageId(null);
+              setSelectedTextId(null);
+              setSelectedStickerId(null);
+            };
 
             return (
               <div
@@ -2631,6 +2769,7 @@ export const NotebookPageStage: React.FC<Props> = ({
                 onPointerDown={(e) => {
                   if (isDrawTool) return;
                   e.stopPropagation();
+                  selectThisSticky();
                 }}
                 className={`absolute ${
                   isDrawTool ? 'pointer-events-none opacity-85' : 'pointer-events-auto'
@@ -2642,6 +2781,7 @@ export const NotebookPageStage: React.FC<Props> = ({
                   onPointerDown={(e) => {
                     if (isDrawTool) return;
                     e.stopPropagation();
+                    selectThisSticky();
                     try {
                       stageRef.current?.setPointerCapture(e.pointerId);
                     } catch {}
@@ -2661,11 +2801,16 @@ export const NotebookPageStage: React.FC<Props> = ({
 
                 {note.isCollapsed ? (
                   /* Collapsed Compact Sticky Flag so underlying script text remains readable */
-                  <div className="mt-0.5 inline-flex items-center gap-1 rounded-lg border shadow-sm overflow-hidden bg-white">
+                  <div
+                    className={`mt-0.5 inline-flex items-center gap-1 rounded-lg border shadow-sm overflow-hidden bg-white ${
+                      isStickySelected && !isDrawTool ? 'ring-2 ring-indigo-500' : ''
+                    }`}
+                  >
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
+                        selectThisSticky();
                         handleToggleStickyCollapse(note.id);
                       }}
                       className={`px-2 py-1 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer ${theme.bg} ${theme.border} ${theme.textColor}`}
@@ -2678,13 +2823,16 @@ export const NotebookPageStage: React.FC<Props> = ({
                 ) : (
                   /* Expanded Post-it Note */
                   <div
-                    className={`mt-0.5 w-48 sm:w-56 rounded-xl border ${theme.bg} ${theme.border} ${theme.textColor} shadow-lg overflow-hidden`}
+                    className={`mt-0.5 w-48 sm:w-56 rounded-xl border ${theme.bg} ${theme.border} ${theme.textColor} shadow-lg overflow-hidden transition-shadow ${
+                      isStickySelected && !isDrawTool ? 'ring-2 ring-indigo-500' : ''
+                    }`}
                   >
                     {/* Header Drag Bar */}
                     <div
                       onPointerDown={(e) => {
                         if (isDrawTool) return;
                         e.stopPropagation();
+                        selectThisSticky();
                         try {
                           stageRef.current?.setPointerCapture(e.pointerId);
                         } catch {}
@@ -2740,6 +2888,7 @@ export const NotebookPageStage: React.FC<Props> = ({
                       value={note.text}
                       onFocus={() => {
                         if (autoFocusStickyId === note.id) setAutoFocusStickyId(null);
+                        selectThisSticky();
                         handleStickyFocus(note.id);
                       }}
                       onPointerDown={(e) => e.stopPropagation()}

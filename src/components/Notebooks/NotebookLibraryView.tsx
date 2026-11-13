@@ -26,6 +26,8 @@ import {
 import {
   getAllAnnotatedPages,
   getNotebookAnnotationSummary,
+  NotebookNoteSearchHit,
+  searchNotebookNotes,
 } from '../../services/notebookStorageService';
 import { getPdfThumbnailDataUrl } from '../../services/pdfRenderService';
 import {
@@ -117,7 +119,13 @@ const CustomCoverThumb: React.FC<{
   }
 
   if (firstPage.kind === 'blank') {
-    const { dataUrl } = renderBlankTemplateToDataUrl(firstPage.template, 0, 220);
+    const { dataUrl } = renderBlankTemplateToDataUrl(
+      firstPage.template,
+      0,
+      220,
+      firstPage.paperColor ?? 'white',
+      Boolean(firstPage.showDateHeader)
+    );
     return (
       <img
         src={dataUrl}
@@ -178,6 +186,23 @@ export const NotebookLibraryView: React.FC<Props> = ({
     [customNotebooks]
   );
 
+  const noteHitsByBook = useMemo(() => {
+    const map = new Map<string, NotebookNoteSearchHit[]>();
+    const q = searchQuery.trim();
+    if (!q) return map;
+    for (const doc of allNotebooks) {
+      const effectiveTotal =
+        !doc.isCustom && doc.sourceType === 'blatt-blanko'
+          ? store.blankPageCountByBook?.[doc.id] ?? doc.totalPages
+          : doc.totalPages;
+      const hits = searchNotebookNotes(store, doc.id, effectiveTotal, q);
+      if (hits.length > 0) {
+        map.set(doc.id, hits);
+      }
+    }
+    return map;
+  }, [allNotebooks, searchQuery, store]);
+
   const filteredNotebooks = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return allNotebooks.filter((doc) => {
@@ -190,13 +215,15 @@ export const NotebookLibraryView: React.FC<Props> = ({
       if (filter === 'annotated' && !hasNotes) return false;
 
       if (!q) return true;
+      const hasNoteMatch = (noteHitsByBook.get(doc.id)?.length ?? 0) > 0;
       return (
+        hasNoteMatch ||
         doc.title.toLowerCase().includes(q) ||
         doc.subtitle.toLowerCase().includes(q) ||
         doc.category.toLowerCase().includes(q)
       );
     });
-  }, [allNotebooks, filter, searchQuery, store]);
+  }, [allNotebooks, filter, noteHitsByBook, searchQuery, store]);
 
   const stickerOverviewItems = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -302,6 +329,16 @@ export const NotebookLibraryView: React.FC<Props> = ({
 
           <button
             type="button"
+            onClick={onCreateBlankNotebook}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-2xs transition-colors cursor-pointer min-h-[44px] whitespace-nowrap"
+            title="Schnellstart: neues leeres DIN-A4-Notizheft öffnen"
+          >
+            <File className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+            <span>Blanko-Heft</span>
+          </button>
+
+          <button
+            type="button"
             onClick={onCreateCustomNotebook}
             className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer min-h-[44px] whitespace-nowrap"
           >
@@ -371,7 +408,9 @@ export const NotebookLibraryView: React.FC<Props> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={
-              filter === 'stickers' ? 'Sticker oder Thema suchen...' : 'Heft oder Thema suchen...'
+              filter === 'stickers'
+                ? 'Sticker oder Thema suchen...'
+                : 'Heft, Thema oder Notiz suchen...'
             }
             className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 min-h-[40px]"
           />
@@ -532,6 +571,12 @@ export const NotebookLibraryView: React.FC<Props> = ({
                 : doc.totalPages;
             const firstPageTemplate =
               store.pages[`${doc.id}::1`]?.templateOverride ?? 'blank';
+            const firstPagePaperColor =
+              store.pages[`${doc.id}::1`]?.paperColorOverride ?? 'white';
+            const firstPageShowHeader =
+              store.pages[`${doc.id}::1`]?.showDateHeader ?? false;
+            const noteHits = noteHitsByBook.get(doc.id) ?? [];
+            const targetOpenPage = noteHits.length > 0 ? noteHits[0].pageNumber : undefined;
 
             return (
               <div
@@ -539,14 +584,14 @@ export const NotebookLibraryView: React.FC<Props> = ({
                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 rounded-2xl p-4 transition-all hover:shadow-md flex flex-col justify-between gap-3"
               >
                 <div
-                  onClick={() => onSelectNotebook(doc)}
+                  onClick={() => onSelectNotebook(doc, targetOpenPage)}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
                     if (e.target !== e.currentTarget) return;
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      onSelectNotebook(doc);
+                      onSelectNotebook(doc, targetOpenPage);
                     }
                   }}
                   className="group text-left cursor-pointer flex gap-4 items-stretch w-full"
@@ -575,6 +620,8 @@ export const NotebookLibraryView: React.FC<Props> = ({
                             pageNumber: 1,
                             kind: 'blank',
                             template: firstPageTemplate,
+                            paperColor: firstPagePaperColor,
+                            showDateHeader: firstPageShowHeader,
                             title: 'Blatt Blanko',
                           }
                         }
@@ -613,6 +660,13 @@ export const NotebookLibraryView: React.FC<Props> = ({
                       <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
                         {doc.subtitle}
                       </p>
+
+                      {noteHits.length > 0 && (
+                        <p className="text-[11px] font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-50/80 dark:bg-indigo-950/50 border border-indigo-200/70 dark:border-indigo-800/60 rounded-lg px-2 py-1 truncate">
+                          S. {noteHits[0].pageNumber}: „{noteHits[0].text}“
+                          {noteHits.length > 1 ? ` (+${noteHits.length - 1})` : ''}
+                        </p>
+                      )}
                     </div>
 
                     <div className="pt-3 mt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 text-xs">

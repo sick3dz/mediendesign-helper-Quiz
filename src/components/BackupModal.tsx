@@ -629,7 +629,7 @@ export const BackupModal: React.FC<Props> = ({
                 <span className="text-[10px] text-slate-500 font-mono">.json Datei</span>
               </div>
               <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                Kompakte Sicherung für Spielstand, Einstellungen und alle Markierungen, Textfelder, Sticker-Werte &amp; Blatt-Drehungen (ohne lokale Bild-/PDF-Dateien).
+                Kompakte Sicherung für Spielstand, Einstellungen, Mac-Anzeige-Präferenzen, eigene Stift-/Marker-Farbpaletten sowie alle Markierungen, Textfelder, Sticker &amp; Blatt-Drehungen (ohne lokale Bild-/PDF-Dateien).
               </p>
               {(customStats.notebookCount > 0 || customStats.mediaCount > 0) && (
                 <p className="text-[11px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 rounded-lg px-2.5 py-1.5 leading-snug">

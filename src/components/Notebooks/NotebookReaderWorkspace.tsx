@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   ArrowLeft,
   ChevronLeft,
@@ -35,10 +35,14 @@ import {
   Check,
   GripVertical,
   Laptop,
+  Search,
+  Calendar,
+  Plus,
 } from 'lucide-react';
 import { exportNotebookAsPdf } from '../../services/pdfExportService';
 import {
   BlankPageTemplate,
+  BlankPaperColor,
   CustomNotebookPage,
   NotebookDocument,
   NotebookImageElement,
@@ -47,17 +51,21 @@ import {
   NotebookTool,
   PageAnnotations,
   StickyColor,
+  TextBoxBackgroundStyle,
 } from '../../types/notebook';
 import {
   BLANK_PAGE_TEMPLATES,
+  BLANK_PAPER_COLORS,
   HIGHLIGHTER_COLORS,
   NOTEBOOK_STICKERS,
   PEN_COLORS,
   STICKY_NOTE_STYLES,
+  getBlankPaperPalette,
 } from '../../data/notebooksData';
 import {
   getPageAnnotations,
   loadNotebookStore,
+  searchNotebookNotes,
 } from '../../services/notebookStorageService';
 import { getPdfThumbnailDataUrl } from '../../services/pdfRenderService';
 import {
@@ -99,7 +107,17 @@ interface Props {
     notebook: NotebookDocument,
     pageNumber: number,
     template: BlankPageTemplate,
-    applyToAllBlank?: boolean
+    applyToAllBlank?: boolean,
+    paperColor?: BlankPaperColor,
+    showDateHeader?: boolean
+  ) => Promise<void> | void;
+  onQuickAddBlankPage?: (
+    notebook: NotebookDocument,
+    options: {
+      template: BlankPageTemplate;
+      paperColor: BlankPaperColor;
+      showDateHeader: boolean;
+    }
   ) => Promise<void> | void;
   onOpenAppendPages?: () => void;
   onBackToLibrary: () => void;
@@ -145,7 +163,9 @@ const CustomPageThumbnail: React.FC<{
   page: CustomNotebookPage;
   rotation: number;
   templateOverride?: BlankPageTemplate;
-}> = ({ page, rotation, templateOverride }) => {
+  paperColorOverride?: BlankPaperColor;
+  showDateHeaderOverride?: boolean;
+}> = ({ page, rotation, templateOverride, paperColorOverride, showDateHeaderOverride }) => {
   const [mediaUrl, setMediaUrl] = useState<string>('');
 
   const pageMediaId = page.kind === 'blank' ? '' : page.mediaId;
@@ -164,7 +184,9 @@ const CustomPageThumbnail: React.FC<{
     const { dataUrl } = renderBlankTemplateToDataUrl(
       templateOverride ?? page.template,
       rotation,
-      220
+      220,
+      paperColorOverride ?? page.paperColor ?? 'white',
+      showDateHeaderOverride ?? page.showDateHeader ?? false
     );
     return (
       <img
@@ -223,6 +245,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   onDeletePage,
   onMovePage,
   onChangePageLayout,
+  onQuickAddBlankPage,
   onOpenAppendPages,
   onBackToLibrary,
 }) => {
@@ -266,7 +289,8 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const [highlighterWidth, setHighlighterWidth] = useState<number>(2.4);
   const [textColor, setTextColor] = useState<string>(PEN_COLORS[1].color);
   const [textSize, setTextSize] = useState<number>(2.0);
-  const [textHasBackground, setTextHasBackground] = useState<boolean>(true);
+  const [textBackgroundStyle, setTextBackgroundStyle] =
+    useState<TextBoxBackgroundStyle>('white');
   const [textBold, setTextBold] = useState<boolean>(false);
   const [textItalic, setTextItalic] = useState<boolean>(false);
   const [textUnderline, setTextUnderline] = useState<boolean>(false);
@@ -284,7 +308,11 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   // View controls
   const [zoom, setZoom] = useState<number>(() => macSettings.defaultNotebookZoom);
   const [showThumbnails, setShowThumbnails] = useState<boolean>(false);
-  const [sidebarTab, setSidebarTab] = useState<'pages' | 'stickers'>('pages');
+  const [sidebarTab, setSidebarTab] = useState<'pages' | 'stickers' | 'notes'>('pages');
+  const [noteSearchQuery, setNoteSearchQuery] = useState<string>('');
+  const [isEditingPageNum, setIsEditingPageNum] = useState<boolean>(false);
+  const [pageJumpInput, setPageJumpInput] = useState<string>('');
+  const pageJumpInputRef = useRef<HTMLInputElement>(null);
   const [sidebarStickerFilter, setSidebarStickerFilter] = useState<NotebookStickerType | 'all'>('all');
   const [confirmClearPage, setConfirmClearPage] = useState<boolean>(false);
   const [isEditPagesOpen, setIsEditPagesOpen] = useState<boolean>(false);
@@ -401,12 +429,14 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     setDragOverPageNum(null);
     setImageInsertError(null);
     setPdfExportError(null);
+    setIsEditingPageNum(false);
     onPageChange(notebook.id, currentPage);
   }, [notebook.id, currentPage]);
 
   useEffect(() => {
     setIsEditPagesOpen(false);
     setIsLayoutPanelOpen(false);
+    setNoteSearchQuery('');
   }, [notebook.id]);
 
   const currentAnnotations = getPageAnnotations(store, notebook.id, currentPage);
@@ -432,11 +462,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     const previous = undoStack[undoStack.length - 1];
     setRedoStack((prev) => [...prev, currentAnnotations]);
     setUndoStack((prev) => prev.slice(0, -1));
-    onUpdatePageAnnotations(notebook.id, currentPage, {
-      ...previous,
-      rotationOverride: currentAnnotations.rotationOverride,
-      templateOverride: currentAnnotations.templateOverride,
-    });
+    onUpdatePageAnnotations(notebook.id, currentPage, previous);
   };
 
   const handleRedo = () => {
@@ -444,11 +470,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     const next = redoStack[redoStack.length - 1];
     setUndoStack((prev) => [...prev, currentAnnotations]);
     setRedoStack((prev) => prev.slice(0, -1));
-    onUpdatePageAnnotations(notebook.id, currentPage, {
-      ...next,
-      rotationOverride: currentAnnotations.rotationOverride,
-      templateOverride: currentAnnotations.templateOverride,
-    });
+    onUpdatePageAnnotations(notebook.id, currentPage, next);
   };
 
   const handleRotatePage = () => {
@@ -467,7 +489,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     const nextRot = (currentRot + 90) % 360;
     handleCommitAnnotations(
       { ...currentAnnotations, rotationOverride: nextRot },
-      false
+      true
     );
   };
 
@@ -481,6 +503,8 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
         images: [],
         rotationOverride: currentAnnotations.rotationOverride,
         templateOverride: currentAnnotations.templateOverride,
+        paperColorOverride: currentAnnotations.paperColorOverride,
+        showDateHeader: currentAnnotations.showDateHeader,
       },
       true
     );
@@ -928,6 +952,41 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     currentAnnotations.templateOverride ??
     (currentCustomPage?.kind === 'blank' ? currentCustomPage.template : 'blank');
 
+  const currentPaperColor: BlankPaperColor =
+    currentAnnotations.paperColorOverride ??
+    (currentCustomPage?.kind === 'blank' ? currentCustomPage.paperColor : undefined) ??
+    'white';
+
+  const currentShowDateHeader: boolean =
+    currentAnnotations.showDateHeader !== undefined
+      ? currentAnnotations.showDateHeader
+      : currentCustomPage?.kind === 'blank'
+      ? Boolean(currentCustomPage.showDateHeader)
+      : false;
+
+  const currentPaperPalette = getBlankPaperPalette(currentPaperColor);
+
+  const applySinglePageLayoutChange = (
+    nextTpl: BlankPageTemplate,
+    nextCol: BlankPaperColor,
+    nextHeader: boolean
+  ) => {
+    setLayoutAppliedAllNotice(false);
+    if (isBuiltInBlankPad) {
+      handleCommitAnnotations(
+        {
+          ...currentAnnotations,
+          templateOverride: nextTpl === 'blank' ? undefined : nextTpl,
+          paperColorOverride: nextCol === 'white' ? undefined : nextCol,
+          showDateHeader: nextHeader ? true : undefined,
+        },
+        true
+      );
+      return;
+    }
+    onChangePageLayout?.(notebook, currentPage, nextTpl, false, nextCol, nextHeader);
+  };
+
   const blankPageCountInBook = isBuiltInBlankPad
     ? totalPages
     : (notebook.customPages ?? []).filter((pg) => pg.kind === 'blank').length;
@@ -970,6 +1029,47 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     .filter((entry) => entry.stickers.length > 0);
 
   const totalBookStickers = bookStickerPages.reduce((sum, p) => sum + p.stickers.length, 0);
+
+  const allBookNotes = useMemo(() => {
+    const items: {
+      notebookId: string;
+      pageNumber: number;
+      kind: 'sticky' | 'text';
+      id: string;
+      text: string;
+    }[] = [];
+    for (let p = 1; p <= totalPages; p++) {
+      const ann = getPageAnnotations(store, notebook.id, p);
+      for (const sticky of ann.stickyNotes) {
+        const txt = (sticky.text || '').trim();
+        items.push({
+          notebookId: notebook.id,
+          pageNumber: p,
+          kind: 'sticky',
+          id: sticky.id,
+          text: txt || '(Leerer Klebezettel)',
+        });
+      }
+      for (const box of ann.textBoxes || []) {
+        const txt = (box.text || '').replace(/\u200B/g, '').trim();
+        if (txt) {
+          items.push({
+            notebookId: notebook.id,
+            pageNumber: p,
+            kind: 'text',
+            id: box.id,
+            text: txt,
+          });
+        }
+      }
+    }
+    return items;
+  }, [store, notebook.id, totalPages]);
+
+  const filteredBookNotes = useMemo(() => {
+    if (!noteSearchQuery.trim()) return allBookNotes;
+    return searchNotebookNotes(store, notebook.id, totalPages, noteSearchQuery);
+  }, [allBookNotes, noteSearchQuery, store, notebook.id, totalPages]);
 
   return (
     <div
@@ -1037,6 +1137,29 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
               )}
             </button>
 
+            <button
+              onClick={() => {
+                if (showThumbnails && sidebarTab === 'notes') {
+                  setShowThumbnails(false);
+                } else {
+                  setSidebarTab('notes');
+                  setShowThumbnails(true);
+                }
+              }}
+              className={`inline-flex items-center gap-1 px-2 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer min-h-[40px] shrink-0 ${
+                showThumbnails && sidebarTab === 'notes'
+                  ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+              title="Haftnotizen & Freitexte in diesem Heft durchsuchen"
+              aria-label="Notiz-Suche"
+            >
+              <Search className="w-4 h-4 text-amber-500" />
+              {allBookNotes.length > 0 && (
+                <span className="text-[11px] font-bold tabular-nums">{allBookNotes.length}</span>
+              )}
+            </button>
+
             <div className="hidden lg:block min-w-0 max-w-[180px] pl-1">
               <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
                 {notebook.title}
@@ -1057,9 +1180,62 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <span className="px-2 text-xs font-semibold text-slate-800 dark:text-slate-200 tabular-nums whitespace-nowrap">
-                {currentPage} / {totalPages}
-              </span>
+              {isEditingPageNum ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const parsed = parseInt(pageJumpInput, 10);
+                    if (Number.isFinite(parsed) && parsed >= 1) {
+                      goToPage(parsed);
+                    }
+                    setIsEditingPageNum(false);
+                  }}
+                  className="flex items-center gap-1 px-1"
+                >
+                  <input
+                    ref={pageJumpInputRef}
+                    type="number"
+                    min={1}
+                    max={totalPages}
+                    value={pageJumpInput}
+                    onChange={(e) => setPageJumpInput(e.target.value)}
+                    onBlur={() => {
+                      const parsed = parseInt(pageJumpInput, 10);
+                      if (Number.isFinite(parsed) && parsed >= 1) {
+                        goToPage(parsed);
+                      }
+                      setIsEditingPageNum(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        e.stopPropagation();
+                        setIsEditingPageNum(false);
+                      }
+                    }}
+                    aria-label="Seitenzahl eingeben"
+                    className="w-12 px-1.5 py-0.5 text-center text-xs font-bold rounded-md bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-indigo-400 focus:outline-none tabular-nums"
+                  />
+                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 tabular-nums">
+                    / {totalPages}
+                  </span>
+                </form>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPageJumpInput(String(currentPage));
+                    setIsEditingPageNum(true);
+                    window.setTimeout(() => {
+                      pageJumpInputRef.current?.focus();
+                      pageJumpInputRef.current?.select();
+                    }, 0);
+                  }}
+                  className="px-2 py-1 rounded-md text-xs font-semibold text-slate-800 dark:text-slate-200 hover:bg-white/80 dark:hover:bg-slate-700/80 tabular-nums whitespace-nowrap cursor-text transition-colors"
+                  title="Klicken, um direkt zu einer Seite zu springen"
+                >
+                  {currentPage} / {totalPages}
+                </button>
+              )}
               <button
                 onClick={() => goToPage(currentPage + 1)}
                 disabled={currentPage >= totalPages}
@@ -1071,6 +1247,24 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
+
+            {(isBuiltInBlankPad || notebook.isCustom) && onQuickAddBlankPage && (
+              <button
+                type="button"
+                onClick={() =>
+                  onQuickAddBlankPage(notebook, {
+                    template: currentBlankTemplate,
+                    paperColor: currentPaperColor,
+                    showDateHeader: currentShowDateHeader,
+                  })
+                }
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-xs font-bold transition-colors cursor-pointer min-h-[36px] whitespace-nowrap shrink-0"
+                title={`Neue Notizseite (${currentTemplateLabel} · ${currentPaperPalette.label}) hinten anfügen`}
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Notizseite</span>
+              </button>
+            )}
 
             {notebook.isCustom && onOpenAppendPages && (
               <button
@@ -1402,22 +1596,12 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                 <span className="font-semibold text-slate-600 dark:text-slate-300">
                   Textmarker-Farbe:
                 </span>
-                <div className="flex items-center gap-1.5">
-                  {HIGHLIGHTER_COLORS.map((c) => (
-                    <button
-                      key={c.id}
-                      onClick={() => setHighlighterColor(c.color)}
-                      className={`w-7 h-7 rounded-full border-2 transition-transform cursor-pointer ${
-                        highlighterColor === c.color
-                          ? 'border-slate-900 dark:border-white scale-110'
-                          : 'border-slate-300 dark:border-slate-600'
-                      }`}
-                      style={{ backgroundColor: c.color }}
-                      title={c.label}
-                      aria-label={c.label}
-                    />
-                  ))}
-                </div>
+                <ScrollableColorStrip
+                  mode="highlighter"
+                  variant="toolbar"
+                  selectedColor={highlighterColor}
+                  onSelectColor={setHighlighterColor}
+                />
                 <span className="text-slate-300 dark:text-slate-700">|</span>
                 <div className="flex items-center gap-1">
                   {[
@@ -1517,7 +1701,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                       textItalic ||
                       textUnderline ||
                       textStrikethrough ||
-                      !textHasBackground
+                      textBackgroundStyle !== 'white'
                         ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-transparent hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
@@ -1528,7 +1712,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                       textItalic ||
                       textUnderline ||
                       textStrikethrough ||
-                      !textHasBackground) && (
+                      textBackgroundStyle !== 'white') && (
                       <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                     )}
                     <ChevronDown
@@ -1603,18 +1787,31 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                       </button>
                     </div>
                     <span className="text-slate-300 dark:text-slate-700">|</span>
-                    <button
-                      type="button"
-                      onClick={() => setTextHasBackground((prev) => !prev)}
-                      className={`px-2.5 py-1 rounded-lg font-semibold border transition-colors cursor-pointer ${
-                        textHasBackground
-                          ? 'bg-white text-slate-900 border-slate-300 shadow-2xs'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-transparent'
-                      }`}
-                      title="Zwischen weißem Texthintergrund und transparent wechseln"
-                    >
-                      {textHasBackground ? 'Hintergrund: Weiß' : 'Hintergrund: Transparent'}
-                    </button>
+                    <div className="flex items-center gap-1" role="group" aria-label="Texthintergrund">
+                      <span className="font-semibold text-slate-500 dark:text-slate-400 mr-0.5">
+                        Hintergrund:
+                      </span>
+                      {(
+                        [
+                          { id: 'white', label: 'Weiß' },
+                          { id: 'paper', label: 'Papier' },
+                          { id: 'transparent', label: 'Transp.' },
+                        ] as const
+                      ).map((opt) => (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => setTextBackgroundStyle(opt.id)}
+                          className={`px-2 py-1 rounded-lg font-semibold border transition-colors cursor-pointer ${
+                            textBackgroundStyle === opt.id
+                              ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-transparent hover:bg-slate-200 dark:hover:bg-slate-700'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -1807,10 +2004,10 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             }`}
           >
             <div className="flex items-center justify-between gap-1 pb-2 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg flex-1">
+              <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg flex-1 min-w-0">
                 <button
                   onClick={() => setSidebarTab('pages')}
-                  className={`flex-1 py-1 px-2 rounded-md text-[11px] font-bold transition-colors cursor-pointer ${
+                  className={`flex-1 py-1 px-1.5 rounded-md text-[11px] font-bold transition-colors cursor-pointer truncate ${
                     sidebarTab === 'pages'
                       ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
                       : 'text-slate-600 dark:text-slate-300'
@@ -1820,13 +2017,23 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                 </button>
                 <button
                   onClick={() => setSidebarTab('stickers')}
-                  className={`flex-1 py-1 px-2 rounded-md text-[11px] font-bold transition-colors cursor-pointer tabular-nums ${
+                  className={`flex-1 py-1 px-1.5 rounded-md text-[11px] font-bold transition-colors cursor-pointer tabular-nums truncate ${
                     sidebarTab === 'stickers'
                       ? 'bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300 shadow-2xs'
                       : 'text-slate-600 dark:text-slate-300'
                   }`}
                 >
                   Sticker ({totalBookStickers})
+                </button>
+                <button
+                  onClick={() => setSidebarTab('notes')}
+                  className={`flex-1 py-1 px-1.5 rounded-md text-[11px] font-bold transition-colors cursor-pointer tabular-nums truncate ${
+                    sidebarTab === 'notes'
+                      ? 'bg-white dark:bg-slate-900 text-amber-700 dark:text-amber-300 shadow-2xs'
+                      : 'text-slate-600 dark:text-slate-300'
+                  }`}
+                >
+                  Notizen ({allBookNotes.length})
                 </button>
               </div>
               <button
@@ -1920,13 +2127,25 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                             )}
                             <span className="text-[11px] font-bold truncate">Seitenlayout</span>
                           </span>
-                          <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 shrink-0 tabular-nums">
-                            {isCurrentPageBlankLayout ? currentTemplateLabel : 'Foto / PDF'}
+                          <span className="flex items-center gap-1.5 shrink-0">
+                            {isCurrentPageBlankLayout && currentPaperColor !== 'white' && (
+                              <span
+                                className="w-2.5 h-2.5 rounded-full border shrink-0"
+                                style={{
+                                  backgroundColor: currentPaperPalette.bgHex,
+                                  borderColor: currentPaperPalette.marginHex,
+                                }}
+                                title={`Papierfarbe: ${currentPaperPalette.label}`}
+                              />
+                            )}
+                            <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 tabular-nums">
+                              {isCurrentPageBlankLayout ? currentTemplateLabel : 'Foto / PDF'}
+                            </span>
                           </span>
                         </button>
 
                         {isLayoutPanelOpen && (
-                          <div className="px-2 pb-2 pt-1.5 border-t border-slate-200/70 dark:border-slate-700/70 bg-white/70 dark:bg-slate-900/50 space-y-1.5">
+                          <div className="px-2 pb-2 pt-1.5 border-t border-slate-200/70 dark:border-slate-700/70 bg-white/70 dark:bg-slate-900/50 space-y-2">
                             <div className="flex items-center justify-between gap-1 px-0.5">
                               <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
                                 Vorlage für Seite {currentPage}
@@ -1938,14 +2157,23 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                                 <div className="grid grid-cols-2 gap-1">
                                   {BLANK_PAGE_TEMPLATES.map((tpl) => {
                                     const active = currentBlankTemplate === tpl.id;
+                                    const previewLineColor = active
+                                      ? 'rgba(255,255,255,0.85)'
+                                      : currentPaperPalette.lineHex;
+                                    const previewDotColor = active
+                                      ? 'rgba(255,255,255,0.9)'
+                                      : currentPaperPalette.dotHex;
                                     return (
                                       <button
                                         key={tpl.id}
                                         type="button"
-                                        onClick={() => {
-                                          setLayoutAppliedAllNotice(false);
-                                          onChangePageLayout(notebook, currentPage, tpl.id, false);
-                                        }}
+                                        onClick={() =>
+                                          applySinglePageLayoutChange(
+                                            tpl.id,
+                                            currentPaperColor,
+                                            currentShowDateHeader
+                                          )
+                                        }
                                         title={tpl.description}
                                         className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg border text-[11px] font-semibold transition-colors cursor-pointer ${
                                           active
@@ -1955,26 +2183,39 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                                       >
                                         <span
                                           aria-hidden="true"
+                                          style={
+                                            !active
+                                              ? {
+                                                  backgroundColor: currentPaperPalette.bgHex,
+                                                  borderColor: currentPaperPalette.swatchBorder,
+                                                }
+                                              : undefined
+                                          }
                                           className={`w-3.5 h-4 rounded-[2px] border shrink-0 relative overflow-hidden ${
-                                            active
-                                              ? 'border-white/70 bg-white/15'
-                                              : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'
+                                            active ? 'border-white/70 bg-white/15' : ''
                                           }`}
                                         >
                                           {tpl.id === 'lined' && (
                                             <span className="absolute inset-x-0.5 top-1 flex flex-col gap-[2px]">
-                                              <span className={`h-[1px] w-full ${active ? 'bg-white/80' : 'bg-slate-400 dark:bg-slate-500'}`} />
-                                              <span className={`h-[1px] w-full ${active ? 'bg-white/80' : 'bg-slate-400 dark:bg-slate-500'}`} />
-                                              <span className={`h-[1px] w-full ${active ? 'bg-white/80' : 'bg-slate-400 dark:bg-slate-500'}`} />
+                                              <span
+                                                className="h-[1px] w-full"
+                                                style={{ backgroundColor: previewLineColor }}
+                                              />
+                                              <span
+                                                className="h-[1px] w-full"
+                                                style={{ backgroundColor: previewLineColor }}
+                                              />
+                                              <span
+                                                className="h-[1px] w-full"
+                                                style={{ backgroundColor: previewLineColor }}
+                                              />
                                             </span>
                                           )}
                                           {tpl.id === 'grid' && (
                                             <span
                                               className="absolute inset-0"
                                               style={{
-                                                backgroundImage: active
-                                                  ? 'linear-gradient(to right, rgba(255,255,255,0.55) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.55) 1px, transparent 1px)'
-                                                  : 'linear-gradient(to right, rgba(148,163,184,0.6) 1px, transparent 1px), linear-gradient(to bottom, rgba(148,163,184,0.6) 1px, transparent 1px)',
+                                                backgroundImage: `linear-gradient(to right, ${previewLineColor} 1px, transparent 1px), linear-gradient(to bottom, ${previewLineColor} 1px, transparent 1px)`,
                                                 backgroundSize: '4px 4px',
                                               }}
                                             />
@@ -1983,9 +2224,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                                             <span
                                               className="absolute inset-0"
                                               style={{
-                                                backgroundImage: active
-                                                  ? 'radial-gradient(rgba(255,255,255,0.9) 0.75px, transparent 0.75px)'
-                                                  : 'radial-gradient(rgba(100,116,139,0.85) 0.75px, transparent 0.75px)',
+                                                backgroundImage: `radial-gradient(${previewDotColor} 0.75px, transparent 0.75px)`,
                                                 backgroundSize: '3.5px 3.5px',
                                               }}
                                             />
@@ -1997,6 +2236,75 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                                   })}
                                 </div>
 
+                                {/* Harmonized Pastel Paper Color Picker */}
+                                <div className="space-y-1 pt-0.5 border-t border-slate-200/70 dark:border-slate-700/70">
+                                  <div className="flex items-center justify-between px-0.5">
+                                    <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                                      Papierfarbe
+                                    </span>
+                                    <span className="text-[10px] font-bold text-slate-700 dark:text-slate-200">
+                                      {currentPaperPalette.label}
+                                    </span>
+                                  </div>
+                                  <div className="grid grid-cols-6 gap-1">
+                                    {BLANK_PAPER_COLORS.map((col) => {
+                                      const active = currentPaperColor === col.id;
+                                      return (
+                                        <button
+                                          key={col.id}
+                                          type="button"
+                                          onClick={() =>
+                                            applySinglePageLayoutChange(
+                                              currentBlankTemplate,
+                                              col.id,
+                                              currentShowDateHeader
+                                            )
+                                          }
+                                          aria-pressed={active}
+                                          aria-label={`Papierfarbe ${col.label}`}
+                                          title={`Papierfarbe: ${col.label}`}
+                                          style={{
+                                            backgroundColor: col.bgHex,
+                                            borderColor: active ? '#4f46e5' : col.swatchBorder,
+                                          }}
+                                          className={`h-7 rounded-lg border-2 flex items-center justify-center transition-all cursor-pointer ${
+                                            active
+                                              ? 'ring-2 ring-indigo-500/40 scale-105 shadow-2xs'
+                                              : 'hover:scale-105'
+                                          }`}
+                                        >
+                                          <span
+                                            className="w-2 h-2 rounded-full"
+                                            style={{
+                                              backgroundColor:
+                                                col.id === 'white' ? '#cbd5e1' : col.marginHex,
+                                            }}
+                                          />
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+
+                                <label className="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-200/70 dark:border-slate-700/70 cursor-pointer">
+                                  <span className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-600 dark:text-slate-300">
+                                    <Calendar className="w-3 h-3 text-indigo-500 shrink-0" />
+                                    <span>Kopfzeile („Thema / Datum“)</span>
+                                  </span>
+                                  <input
+                                    type="checkbox"
+                                    checked={currentShowDateHeader}
+                                    onChange={(e) =>
+                                      applySinglePageLayoutChange(
+                                        currentBlankTemplate,
+                                        currentPaperColor,
+                                        e.target.checked
+                                      )
+                                    }
+                                    className="w-3.5 h-3.5 rounded accent-indigo-600 cursor-pointer"
+                                  />
+                                </label>
+
                                 {blankPageCountInBook > 1 && (
                                   <button
                                     type="button"
@@ -2005,7 +2313,9 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                                         notebook,
                                         currentPage,
                                         currentBlankTemplate,
-                                        true
+                                        true,
+                                        currentPaperColor,
+                                        currentShowDateHeader
                                       );
                                       setLayoutAppliedAllNotice(true);
                                       window.setTimeout(() => setLayoutAppliedAllNotice(false), 1800);
@@ -2018,7 +2328,9 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                                         <span>Auf alle Notizseiten übernommen</span>
                                       </>
                                     ) : (
-                                      <span>„{currentTemplateLabel}“ auf alle Notizseiten</span>
+                                      <span className="truncate">
+                                        „{currentTemplateLabel} · {currentPaperPalette.label}“ auf alle Notizseiten
+                                      </span>
                                     )}
                                   </button>
                                 )}
@@ -2183,6 +2495,8 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                               <CustomPageThumbnail
                                 page={customMeta}
                                 templateOverride={pageAnn.templateOverride}
+                                paperColorOverride={pageAnn.paperColorOverride}
+                                showDateHeaderOverride={pageAnn.showDateHeader}
                                 rotation={
                                   pageAnn.rotationOverride !== undefined
                                     ? pageAnn.rotationOverride
@@ -2195,7 +2509,9 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                                   renderBlankTemplateToDataUrl(
                                     pageAnn.templateOverride ?? 'blank',
                                     pageAnn.rotationOverride ?? 0,
-                                    220
+                                    220,
+                                    pageAnn.paperColorOverride ?? 'white',
+                                    Boolean(pageAnn.showDateHeader)
                                   ).dataUrl
                                 }
                                 alt={`Blatt Blanko ${pageNum}`}
@@ -2308,8 +2624,25 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                     );
                   })}
                 </div>
+
+                {(isBuiltInBlankPad || notebook.isCustom) && onQuickAddBlankPage && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onQuickAddBlankPage(notebook, {
+                        template: currentBlankTemplate,
+                        paperColor: currentPaperColor,
+                        showDateHeader: currentShowDateHeader,
+                      })
+                    }
+                    className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-dashed border-amber-300 dark:border-amber-700 bg-amber-50/70 dark:bg-amber-950/30 hover:bg-amber-100/80 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 text-[11px] font-bold transition-colors cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Notizseite anhängen</span>
+                  </button>
+                )}
               </div>
-            ) : (
+            ) : sidebarTab === 'stickers' ? (
               <div className="space-y-2.5">
                 {/* Quick Filter by Sticker Type inside Booklet */}
                 <div className="flex flex-wrap gap-1">
@@ -2414,6 +2747,76 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                   );
                 })()}
               </div>
+            ) : (
+              <div className="space-y-2.5">
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={noteSearchQuery}
+                    onChange={(e) => setNoteSearchQuery(e.target.value)}
+                    placeholder="Haftnotiz oder Text suchen..."
+                    className="w-full pl-7 pr-7 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                  />
+                  {noteSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setNoteSearchQuery('')}
+                      aria-label="Suche leeren"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {filteredBookNotes.length === 0 ? (
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-center space-y-1.5">
+                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                      {allBookNotes.length === 0
+                        ? 'Noch keine Notizen in diesem Heft'
+                        : 'Keine Treffer gefunden'}
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                      {allBookNotes.length === 0
+                        ? 'Erstelle ein Textfeld oder einen Klebezettel – alle Inhalte sind hier direkt durchsuchbar.'
+                        : 'Prüfe deinen Suchbegriff für Haftnotizen und Freitextfelder.'}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    {filteredBookNotes.map((hit) => (
+                      <button
+                        key={`${hit.kind}-${hit.pageNumber}-${hit.id}`}
+                        type="button"
+                        onClick={() => goToPage(hit.pageNumber)}
+                        className={`w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer space-y-1 ${
+                          currentPage === hit.pageNumber
+                            ? 'border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/40'
+                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600 dark:text-slate-300">
+                            {hit.kind === 'sticky' ? (
+                              <StickyNote className="w-3 h-3 text-amber-500" />
+                            ) : (
+                              <Type className="w-3 h-3 text-indigo-500" />
+                            )}
+                            <span>{hit.kind === 'sticky' ? 'Klebezettel' : 'Freitext'}</span>
+                          </span>
+                          <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">
+                            S. {hit.pageNumber}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-700 dark:text-slate-200 line-clamp-2 leading-snug">
+                          {hit.text}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </aside>
         )}
@@ -2438,7 +2841,8 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             highlighterWidth={highlighterWidth}
             textColor={textColor}
             textSize={textSize}
-            textHasBackground={textHasBackground}
+            textBackgroundStyle={textBackgroundStyle}
+            paperPalette={currentPaperPalette}
             textBold={textBold}
             textItalic={textItalic}
             textUnderline={textUnderline}
@@ -2481,8 +2885,8 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
               : (
                 <>
                   {activeTool === 'hand' && 'Hand-Modus: Bilder, Textfelder, Klebezettel & Sticker verschieben, skalieren oder antippen.'}
-                  {activeTool === 'highlighter' && 'Textmarker aktiv: Direkt über wichtige Textstellen streichen.'}
-                  {activeTool === 'pen' && 'Stift aktiv: Handschriftliche Notizen oder Unterstreichungen zeichnen.'}
+                  {activeTool === 'highlighter' && `Textmarker aktiv: Direkt über wichtige Textstellen streichen. Tipp: ${shiftLabel}gedrückt halten = gerade Linie.`}
+                  {activeTool === 'pen' && `Stift aktiv: Handschriftliche Notizen oder Unterstreichungen zeichnen. Tipp: ${shiftLabel}gedrückt halten = gerade Linie.`}
                   {activeTool === 'eraser' && 'Radierer aktiv: Über unerwünschte Stift- oder Markerzüge fahren.'}
                   {activeTool === 'text' && 'Text-Werkzeug aktiv: Auf die gewünschte Stelle tippen, um direkt Text einzugeben.'}
                   {activeTool === 'sticky' && 'Klebezettel aktiv: Tippe auf eine Textstelle, um ein Post-it anzuheften.'}

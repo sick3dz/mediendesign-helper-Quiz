@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { EXAM_QUESTIONS, IHK_EXAM_SCENARIOS, calculateIhkGrade, IhkExamScenario } from '../data/examQuestions';
 import { QuizOption, QuizQuestion } from '../types/quiz';
 import { BionicText } from '../utils/bionicReading';
@@ -11,15 +11,17 @@ import { QuestionAssetWidget } from './QuestionAssetWidget';
 interface Props {
   bionic: boolean;
   onExamCompleted: (result: { score: number; total: number; percentage: number; grade: string }) => void;
+  onCorrectAnswer?: () => void;
   onAnswer?: (questionId: string, isCorrect: boolean) => void;
   onGoToChapter: (chapterId: string) => void;
   onBack: () => void;
 }
 
-export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, onAnswer, onGoToChapter, onBack }) => {
+export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, onCorrectAnswer, onAnswer, onGoToChapter, onBack }) => {
   // Modes: 'selection' | 'real_exam' | 'topic_practice'
   const [mode, setMode] = useState<'selection' | 'real_exam' | 'topic_practice'>('selection');
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
+  const creditedQuestionIdsRef = useRef<Set<string>>(new Set());
 
   // Active Exam state
   const [currentScenarioIndex, setCurrentScenarioIndex] = useState(0);
@@ -77,6 +79,10 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
     const selectedOpt = currentQuestion.options.find((o) => o.id === optionId);
     if (selectedOpt?.isCorrect) {
       soundEffects.playCorrect();
+      if (!creditedQuestionIdsRef.current.has(currentQuestion.id)) {
+        creditedQuestionIdsRef.current.add(currentQuestion.id);
+        onCorrectAnswer?.();
+      }
     } else {
       soundEffects.playWrong();
     }
@@ -151,6 +157,7 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
   };
 
   const restartExam = () => {
+    creditedQuestionIdsRef.current.clear();
     setMode('selection');
     setCurrentScenarioIndex(0);
     setCurrentQuestionInScenarioIndex(0);
@@ -201,6 +208,7 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
             <div
               onClick={() => {
                 soundEffects.playClick();
+                creditedQuestionIdsRef.current.clear();
                 setMode('real_exam');
                 setSecondsRemaining(90 * 60);
               }}
@@ -258,6 +266,7 @@ export const ExamSimulatorView: React.FC<Props> = ({ bionic, onExamCompleted, on
                     key={scen.id}
                     onClick={() => {
                       soundEffects.playClick();
+                      creditedQuestionIdsRef.current.clear();
                       setSelectedTopicId(scen.id);
                       setMode('topic_practice');
                     }}

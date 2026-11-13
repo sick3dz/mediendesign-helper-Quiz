@@ -1,8 +1,10 @@
 import {
   BlankPageTemplate,
+  BlankPaperColor,
   CustomNotebookPage,
   NotebookDocument,
 } from '../types/notebook';
+import { getBlankPaperPalette } from '../data/notebooksData';
 import { evictPdfCache, inspectPdfBlob } from './pdfRenderService';
 
 const DB_NAME = 'mediengestalter_custom_notebooks_db';
@@ -37,6 +39,8 @@ export type StagedCustomItem =
       tempId: string;
       kind: 'blank';
       template: BlankPageTemplate;
+      paperColor?: BlankPaperColor;
+      showDateHeader?: boolean;
       count: number;
     };
 
@@ -170,6 +174,8 @@ async function materializeStagedItems(
           pageNumber: pageNum++,
           kind: 'blank',
           template: item.template,
+          paperColor: item.paperColor ?? 'white',
+          showDateHeader: Boolean(item.showDateHeader),
           title: `${makeTemplateLabel(item.template)}`,
           defaultRotation: 0,
         });
@@ -280,7 +286,12 @@ export async function createCustomNotebook(input: {
 }
 
 export async function createQuickBlankNotebook(
-  customTitle?: string
+  customTitle?: string,
+  options?: {
+    template?: BlankPageTemplate;
+    paperColor?: BlankPaperColor;
+    showDateHeader?: boolean;
+  }
 ): Promise<NotebookDocument> {
   const existing = await listCustomNotebooks();
   const blankCount = existing.filter((b) => b.sourceType === 'blatt-blanko').length;
@@ -295,11 +306,33 @@ export async function createQuickBlankNotebook(
       {
         tempId: `quick-blank-${Date.now()}`,
         kind: 'blank',
-        template: 'blank',
+        template: options?.template ?? 'blank',
+        paperColor: options?.paperColor ?? 'white',
+        showDateHeader: options?.showDateHeader ?? false,
         count: 1,
       },
     ],
   });
+}
+
+export async function appendQuickBlankPageToCustomNotebook(
+  notebookId: string,
+  options?: {
+    template?: BlankPageTemplate;
+    paperColor?: BlankPaperColor;
+    showDateHeader?: boolean;
+  }
+): Promise<{ notebook: NotebookDocument; firstNewPageNumber: number } | null> {
+  return appendPagesToCustomNotebook(notebookId, [
+    {
+      tempId: `quick-append-${Date.now()}`,
+      kind: 'blank',
+      template: options?.template ?? 'blank',
+      paperColor: options?.paperColor ?? 'white',
+      showDateHeader: options?.showDateHeader ?? false,
+      count: 1,
+    },
+  ]);
 }
 
 function measureBlobImageAspectRatio(blob: Blob): Promise<number> {
@@ -447,7 +480,9 @@ export async function updateCustomPageTemplate(
   notebookId: string,
   pageNumber: number,
   template: BlankPageTemplate,
-  applyToAllBlank: boolean = false
+  applyToAllBlank: boolean = false,
+  paperColor?: BlankPaperColor,
+  showDateHeader?: boolean
 ): Promise<NotebookDocument | null> {
   const db = await openDatabase();
   try {
@@ -467,6 +502,9 @@ export async function updateCustomPageTemplate(
       return {
         ...pg,
         template,
+        paperColor: paperColor ?? pg.paperColor ?? 'white',
+        showDateHeader:
+          showDateHeader !== undefined ? showDateHeader : Boolean(pg.showDateHeader),
         title: makeTemplateLabel(template),
       };
     });
@@ -670,8 +708,11 @@ export async function cleanupUnusedEmbeddedMedia(
 export function renderBlankTemplateToDataUrl(
   template: BlankPageTemplate,
   rotation: number = 0,
-  width: number = 1240
+  width: number = 1240,
+  paperColor: BlankPaperColor = 'white',
+  showDateHeader: boolean = false
 ): { dataUrl: string; width: number; height: number } {
+  const palette = getBlankPaperPalette(paperColor);
   const normalizedRot = ((rotation % 360) + 360) % 360;
   const isQuarter = normalizedRot === 90 || normalizedRot === 270;
   const baseW = width;
@@ -679,7 +720,7 @@ export function renderBlankTemplateToDataUrl(
   const outW = isQuarter ? baseH : baseW;
   const outH = isQuarter ? baseW : baseH;
 
-  const cacheKey = `${template}::${normalizedRot}::${outW}`;
+  const cacheKey = `${template}::${palette.id}::${showDateHeader ? 'hdr1' : 'hdr0'}::${normalizedRot}::${outW}`;
   const cached = blankSurfaceCache.get(cacheKey);
   if (cached) {
     return { dataUrl: cached, width: outW, height: outH };
@@ -693,7 +734,7 @@ export function renderBlankTemplateToDataUrl(
     return { dataUrl: '', width: outW, height: outH };
   }
 
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = palette.bgHex;
   ctx.fillRect(0, 0, outW, outH);
 
   ctx.save();
@@ -701,13 +742,67 @@ export function renderBlankTemplateToDataUrl(
   ctx.rotate((normalizedRot * Math.PI) / 180);
   ctx.translate(-baseW / 2, -baseH / 2);
 
-  if (template === 'lined') {
-    const step = Math.round(baseW / 26); // ~47px on 1240px A4
-    const topMargin = step * 2.2;
-    const bottomMargin = baseH - step * 1.4;
-    const leftMargin = Math.round(baseW * 0.115);
+  const linedStep = Math.round(baseW / 26); // ~47px on 1240px A4
+  const linedLeftMargin = Math.round(baseW * 0.115);
 
-    ctx.strokeStyle = '#cbd5e1';
+  if (showDateHeader) {
+    const headerFontPx = Math.max(11, Math.round(baseW * 0.016));
+    const headerTextY = Math.round(linedStep * 1.25);
+    const leftStart =
+      template === 'lined'
+        ? linedLeftMargin + Math.round(linedStep * 0.35)
+        : Math.round(baseW * 0.065);
+    const dateColX = Math.round(baseW * 0.7);
+    const rightEnd = Math.round(baseW * 0.935);
+
+    ctx.save();
+    ctx.font = `600 ${headerFontPx}px system-ui, -apple-system, sans-serif`;
+    ctx.fillStyle = palette.dotHex;
+    ctx.globalAlpha = 0.9;
+    ctx.textBaseline = 'alphabetic';
+
+    const themaLabel = 'Thema:';
+    const datumLabel = 'Datum:';
+    ctx.fillText(themaLabel, leftStart, headerTextY);
+    ctx.fillText(datumLabel, dateColX, headerTextY);
+
+    const themaW = ctx.measureText(themaLabel).width;
+    const datumW = ctx.measureText(datumLabel).width;
+
+    ctx.strokeStyle = palette.lineHex;
+    ctx.lineWidth = 1.4;
+    ctx.globalAlpha = 0.9;
+    ctx.beginPath();
+    ctx.moveTo(leftStart + themaW + Math.round(baseW * 0.012), headerTextY + 2);
+    ctx.lineTo(dateColX - Math.round(baseW * 0.028), headerTextY + 2);
+    ctx.moveTo(dateColX + datumW + Math.round(baseW * 0.012), headerTextY + 2);
+    ctx.lineTo(rightEnd, headerTextY + 2);
+    ctx.stroke();
+
+    const dividerY = Math.round(linedStep * 1.75) + 0.5;
+    ctx.strokeStyle = palette.marginHex;
+    ctx.lineWidth = 1.6;
+    ctx.globalAlpha = 0.65;
+    ctx.beginPath();
+    ctx.moveTo(
+      template === 'lined' ? 0 : Math.round(baseW * 0.055),
+      dividerY
+    );
+    ctx.lineTo(
+      template === 'lined' ? baseW : Math.round(baseW * 0.945),
+      dividerY
+    );
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  if (template === 'lined') {
+    const step = linedStep;
+    const topMargin = showDateHeader ? step * 2.65 : step * 2.2;
+    const bottomMargin = baseH - step * 1.4;
+    const leftMargin = linedLeftMargin;
+
+    ctx.strokeStyle = palette.lineHex;
     ctx.lineWidth = 1.5;
     for (let y = topMargin; y <= bottomMargin; y += step) {
       ctx.beginPath();
@@ -716,8 +811,8 @@ export function renderBlankTemplateToDataUrl(
       ctx.stroke();
     }
 
-    // Classic subtle coral-rose left margin rule
-    ctx.strokeStyle = '#fda4af';
+    // Classic or color-harmonized left margin rule
+    ctx.strokeStyle = palette.marginHex;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(leftMargin, 0);
@@ -726,16 +821,17 @@ export function renderBlankTemplateToDataUrl(
   } else if (template === 'grid') {
     const step = Math.round(baseW / 32); // crisp 5mm square feel
     const margin = step;
+    const topStart = showDateHeader ? step * 3 : margin;
 
-    ctx.strokeStyle = '#e2e8f0';
+    ctx.strokeStyle = palette.gridHex;
     ctx.lineWidth = 1.3;
     for (let x = margin; x <= baseW - margin; x += step) {
       ctx.beginPath();
-      ctx.moveTo(Math.round(x) + 0.5, margin);
+      ctx.moveTo(Math.round(x) + 0.5, topStart);
       ctx.lineTo(Math.round(x) + 0.5, baseH - margin);
       ctx.stroke();
     }
-    for (let y = margin; y <= baseH - margin; y += step) {
+    for (let y = topStart; y <= baseH - margin; y += step) {
       ctx.beginPath();
       ctx.moveTo(margin, Math.round(y) + 0.5);
       ctx.lineTo(baseW - margin, Math.round(y) + 0.5);
@@ -744,8 +840,9 @@ export function renderBlankTemplateToDataUrl(
   } else if (template === 'dotted') {
     const step = Math.round(baseW / 28);
     const margin = Math.round(step * 1.3);
-    ctx.fillStyle = '#94a3b8';
-    for (let y = margin; y <= baseH - margin; y += step) {
+    const topStart = showDateHeader ? margin + step * 2 : margin;
+    ctx.fillStyle = palette.dotHex;
+    for (let y = topStart; y <= baseH - margin; y += step) {
       for (let x = margin; x <= baseW - margin; x += step) {
         ctx.beginPath();
         ctx.arc(x, y, 1.8, 0, Math.PI * 2);

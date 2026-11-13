@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   BlankPageTemplate,
+  BlankPaperColor,
   NotebookDocument,
   NotebookStore,
   PageAnnotations,
@@ -15,6 +16,7 @@ import {
   savePageAnnotations,
 } from '../../services/notebookStorageService';
 import {
+  appendQuickBlankPageToCustomNotebook,
   cleanupUnusedEmbeddedMedia,
   createQuickBlankNotebook,
   deleteCustomNotebook,
@@ -156,7 +158,9 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
     notebook: NotebookDocument,
     pageNumber: number,
     template: BlankPageTemplate,
-    applyToAllBlank: boolean = false
+    applyToAllBlank: boolean = false,
+    paperColor?: BlankPaperColor,
+    showDateHeader?: boolean
   ) => {
     const latestStore = loadNotebookStore();
 
@@ -165,7 +169,9 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
         notebook.id,
         pageNumber,
         template,
-        applyToAllBlank
+        applyToAllBlank,
+        paperColor,
+        showDateHeader
       );
       if (updated) {
         setCustomNotebooks((prev) =>
@@ -176,7 +182,7 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
         );
       }
 
-      // Keep localStorage annotations in sync (clear any legacy templateOverride on affected blank pages)
+      // Keep localStorage annotations in sync (clear any legacy overrides on affected blank pages)
       let workingStore = latestStore;
       const pagesToClear = applyToAllBlank
         ? (updated?.customPages ?? notebook.customPages ?? [])
@@ -186,10 +192,16 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
 
       for (const pNum of pagesToClear) {
         const existingAnn = getPageAnnotations(workingStore, notebook.id, pNum);
-        if (existingAnn.templateOverride !== undefined) {
+        if (
+          existingAnn.templateOverride !== undefined ||
+          existingAnn.paperColorOverride !== undefined ||
+          existingAnn.showDateHeader !== undefined
+        ) {
           workingStore = savePageAnnotations(workingStore, notebook.id, pNum, {
             ...existingAnn,
             templateOverride: undefined,
+            paperColorOverride: undefined,
+            showDateHeader: undefined,
           });
         }
       }
@@ -207,15 +219,87 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
         : [pageNumber];
 
       let workingStore = latestStore;
+      const refAnn = getPageAnnotations(workingStore, notebook.id, pageNumber);
       const overrideVal = template === 'blank' ? undefined : template;
+      const nextColor = paperColor ?? refAnn.paperColorOverride;
+      const colorOverrideVal = !nextColor || nextColor === 'white' ? undefined : nextColor;
+      const nextHeader =
+        showDateHeader !== undefined ? showDateHeader : Boolean(refAnn.showDateHeader);
+      const headerOverrideVal = nextHeader ? true : undefined;
+
       for (const pNum of targetPages) {
         const existingAnn = getPageAnnotations(workingStore, notebook.id, pNum);
         workingStore = savePageAnnotations(workingStore, notebook.id, pNum, {
           ...existingAnn,
           templateOverride: overrideVal,
+          paperColorOverride: colorOverrideVal,
+          showDateHeader: headerOverrideVal,
         });
       }
       setStore(workingStore);
+    }
+  };
+
+  const handleQuickAddBlankPage = async (
+    notebook: NotebookDocument,
+    options: {
+      template: BlankPageTemplate;
+      paperColor: BlankPaperColor;
+      showDateHeader: boolean;
+    }
+  ) => {
+    const latestStore = loadNotebookStore();
+    if (!notebook.isCustom && notebook.sourceType === 'blatt-blanko') {
+      const currentTotal = Math.max(
+        1,
+        latestStore.blankPageCountByBook?.[notebook.id] ?? notebook.totalPages
+      );
+      const newPageNumber = currentTotal + 1;
+      const nextStoreWithCount: NotebookStore = {
+        ...latestStore,
+        blankPageCountByBook: {
+          ...(latestStore.blankPageCountByBook ?? {}),
+          [notebook.id]: newPageNumber,
+        },
+      };
+      const initialAnn: PageAnnotations = {
+        strokes: [],
+        stickyNotes: [],
+        stickers: [],
+        textBoxes: [],
+        images: [],
+        templateOverride: options.template === 'blank' ? undefined : options.template,
+        paperColorOverride:
+          options.paperColor === 'white' ? undefined : options.paperColor,
+        showDateHeader: options.showDateHeader ? true : undefined,
+      };
+      const savedStore = savePageAnnotations(
+        nextStoreWithCount,
+        notebook.id,
+        newPageNumber,
+        initialAnn
+      );
+      setStore(savedStore);
+      setJumpSignal((prev) => ({ page: newPageNumber, seq: (prev?.seq ?? 0) + 1 }));
+      return;
+    }
+
+    if (notebook.isCustom) {
+      const res = await appendQuickBlankPageToCustomNotebook(notebook.id, options);
+      if (res) {
+        setCustomNotebooks((prev) =>
+          prev.map((b) => (b.id === res.notebook.id ? res.notebook : b))
+        );
+        setSelection((prev) =>
+          prev && prev.notebook.id === res.notebook.id
+            ? { ...prev, notebook: res.notebook }
+            : prev
+        );
+        setJumpSignal((prev) => ({
+          page: res.firstNewPageNumber,
+          seq: (prev?.seq ?? 0) + 1,
+        }));
+      }
     }
   };
 
@@ -312,6 +396,7 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
           onDeletePage={handleDeletePage}
           onMovePage={handleMovePage}
           onChangePageLayout={handleChangePageLayout}
+          onQuickAddBlankPage={handleQuickAddBlankPage}
           onOpenAppendPages={
             selection.notebook.isCustom
               ? () =>

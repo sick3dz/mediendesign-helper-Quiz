@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { CHAPTERS } from './data/chaptersData';
+import { EXAM_QUESTIONS } from './data/examQuestions';
 import { UserStats, Badge, PetSpecies, PetState, EquippedCosmetics } from './types/quiz';
 import {
   loadUserStats,
@@ -332,7 +333,10 @@ export default function App() {
   const checkBadgeUnlocks = (currentStats: UserStats): string[] => {
     const newlyEarned = [...currentStats.earnedBadges];
 
-    if (currentStats.answeredQuestionsCount >= 3 && !newlyEarned.includes('streak_3')) {
+    if (
+      (currentStats.maxCombo >= 3 || currentStats.answeredQuestionsCount >= 3) &&
+      !newlyEarned.includes('streak_3')
+    ) {
       newlyEarned.push('streak_3');
     }
 
@@ -571,8 +575,10 @@ export default function App() {
       
       // Fallback to searching EXAM_QUESTIONS directly if not found in modules
       if (!chapterId) {
-        // EXAM_QUESTIONS is likely imported or available. Assuming it's available or we can find it.
-        // For simplicity, if we can't find the chapter, we just skip mastery update.
+        const examQuestion = EXAM_QUESTIONS.find(eq => eq.id === questionId);
+        if (examQuestion?.chapterId) {
+          chapterId = examQuestion.chapterId;
+        }
       }
 
       let updatedMastery = prev.topicMastery;
@@ -601,12 +607,22 @@ export default function App() {
         }
       }
 
-      const nextStats: UserStats = {
+      const nextCombo = isCorrect ? (prev.currentCombo || 0) + 1 : 0;
+      const nextMaxCombo = Math.max(prev.maxCombo || 0, nextCombo);
+
+      const prelimStats: UserStats = {
         ...prev,
         questionPerformance: updatedPerf,
         topicMastery: updatedMastery,
         answeredQuestionsCount: prev.answeredQuestionsCount + 1,
-        correctAnswersCount: isCorrect ? prev.correctAnswersCount + 1 : prev.correctAnswersCount
+        correctAnswersCount: isCorrect ? prev.correctAnswersCount + 1 : prev.correctAnswersCount,
+        currentCombo: nextCombo,
+        maxCombo: nextMaxCombo,
+      };
+
+      const nextStats: UserStats = {
+        ...prelimStats,
+        earnedBadges: checkBadgeUnlocks(prelimStats),
       };
       
       saveUserStats(nextStats);
@@ -1371,6 +1387,7 @@ export default function App() {
               <ExamSimulatorView
                 bionic={settings.bionicReading}
                 onExamCompleted={handleExamCompleted}
+                onCorrectAnswer={handleCorrectAnswer}
                 onAnswer={handleAnswer}
                 onGoToChapter={cId => {
                   setSelectedChapterId(cId);

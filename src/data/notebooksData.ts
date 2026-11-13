@@ -1,4 +1,9 @@
-import { NotebookDocument, NotebookStickerType, StickyColor } from '../types/notebook';
+import {
+  BlankPaperColor,
+  NotebookDocument,
+  NotebookStickerType,
+  StickyColor,
+} from '../types/notebook';
 
 const ASSET_BASE = `${import.meta.env.BASE_URL}assets/aistudio`;
 
@@ -258,6 +263,22 @@ export const STICKY_NOTE_STYLES: Record<
     pinColor: 'bg-sky-500',
     textColor: 'text-sky-950',
   },
+  cream: {
+    label: 'Creme',
+    bg: 'bg-[#fdf6dc]',
+    border: 'border-[#e6d5a3]',
+    headerBg: 'bg-[#f6e8b8]',
+    pinColor: 'bg-amber-500',
+    textColor: 'text-amber-950',
+  },
+  lavender: {
+    label: 'Lavendel',
+    bg: 'bg-purple-100',
+    border: 'border-purple-300',
+    headerBg: 'bg-purple-200/80',
+    pinColor: 'bg-purple-500',
+    textColor: 'text-purple-950',
+  },
 };
 
 export const NOTEBOOK_STICKERS: {
@@ -330,11 +351,89 @@ export const BLANK_PAGE_TEMPLATES: {
   label: string;
   description: string;
 }[] = [
-  { id: 'blank', label: 'Blanko', description: 'Weißes DIN-A4-Blatt' },
+  { id: 'blank', label: 'Blanko', description: 'Freies DIN-A4-Blatt' },
   { id: 'lined', label: 'Liniert', description: 'Mit Randlinie' },
   { id: 'grid', label: 'Kariert', description: '5-mm-Rechenkästchen' },
   { id: 'dotted', label: 'Punktkariert', description: 'Dezentes Punktraster' },
 ];
+
+export interface BlankPaperPalette {
+  id: BlankPaperColor;
+  label: string;
+  bgHex: string;
+  lineHex: string;
+  gridHex: string;
+  dotHex: string;
+  marginHex: string;
+  swatchBorder: string;
+}
+
+export const BLANK_PAPER_COLORS: BlankPaperPalette[] = [
+  {
+    id: 'white',
+    label: 'Weiß',
+    bgHex: '#ffffff',
+    lineHex: '#cbd5e1',
+    gridHex: '#e2e8f0',
+    dotHex: '#94a3b8',
+    marginHex: '#fda4af',
+    swatchBorder: '#cbd5e1',
+  },
+  {
+    id: 'cream',
+    label: 'Creme',
+    bgHex: '#fdf8eb',
+    lineHex: '#e6dcc2',
+    gridHex: '#ebe2cb',
+    dotHex: '#b8aa8c',
+    marginHex: '#e5a97c',
+    swatchBorder: '#dfd3b4',
+  },
+  {
+    id: 'yellow',
+    label: 'Gelb',
+    bgHex: '#fefce8',
+    lineHex: '#e9dfa4',
+    gridHex: '#ede5b5',
+    dotHex: '#bfa95e',
+    marginHex: '#ebb25e',
+    swatchBorder: '#e6da8c',
+  },
+  {
+    id: 'pink',
+    label: 'Pink',
+    bgHex: '#fdf2f8',
+    lineHex: '#d8b4fe',
+    gridHex: '#e4ccfd',
+    dotHex: '#b794f4',
+    marginHex: '#c084fc',
+    swatchBorder: '#f3bfd9',
+  },
+  {
+    id: 'mint',
+    label: 'Mint',
+    bgHex: '#f0fdf6',
+    lineHex: '#a7e3c5',
+    gridHex: '#bcead3',
+    dotHex: '#5ea986',
+    marginHex: '#52b79c',
+    swatchBorder: '#b2e6cc',
+  },
+  {
+    id: 'blue',
+    label: 'Blau',
+    bgHex: '#f0f7ff',
+    lineHex: '#bfdbfe',
+    gridHex: '#cde2fe',
+    dotHex: '#7aa7e0',
+    marginHex: '#818cf8',
+    swatchBorder: '#bdd8fb',
+  },
+];
+
+export function getBlankPaperPalette(color?: BlankPaperColor): BlankPaperPalette {
+  return BLANK_PAPER_COLORS.find((c) => c.id === color) ?? BLANK_PAPER_COLORS[0];
+}
 
 export const CUSTOM_COVER_COLORS: {
   id: string;

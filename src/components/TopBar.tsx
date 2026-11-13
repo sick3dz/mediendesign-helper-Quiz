@@ -54,15 +54,24 @@ export const TopBar: React.FC<Props> = ({
   const [isLernenMenuOpen, setIsLernenMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on click outside
+  // Close dropdown on click outside or Escape
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsLernenMenuOpen(false);
       }
     };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsLernenMenuOpen(false);
+      }
+    };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   const handleMenuSelect = (tab: ActiveTab) => {
@@ -185,7 +194,6 @@ export const TopBar: React.FC<Props> = ({
       subtitle: 'Foto-Skripte & PDFs blättern, markieren, Sticker & Klebezettel',
       icon: <BookMarked className="w-4 h-4 text-sky-500" />,
       iconBg: 'bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400',
-      badge: 'Neu',
     },
     {
       tab: 'spickzettel',
@@ -237,7 +245,6 @@ export const TopBar: React.FC<Props> = ({
       subtitle: 'Offene Prüfungsfragen mit Hybrid-Schlagwort-Auswertung',
       icon: <FileText className="w-4 h-4 text-emerald-500" />,
       iconBg: 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400',
-      badge: 'Neu',
     },
     {
       tab: 'rank',
@@ -306,7 +313,7 @@ export const TopBar: React.FC<Props> = ({
 
               <div className="max-h-[75vh] overflow-y-auto space-y-1">
                 {menuOptions.map(opt => {
-                  const isActive = activeTab === opt.tab && !currentViewTitle;
+                  const isActive = activeTab === opt.tab;
 
                   return (
                     <React.Fragment key={opt.tab}>

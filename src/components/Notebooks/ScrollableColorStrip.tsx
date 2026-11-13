@@ -10,13 +10,15 @@ import {
   X,
 } from 'lucide-react';
 import {
+  ColorPaletteMode,
   normalizeHexColor,
-  useInkColorPalette,
+  useColorPalette,
 } from '../../services/colorPaletteService';
 
 interface Props {
   selectedColor: string;
   onSelectColor: (color: string) => void;
+  mode?: ColorPaletteMode;
   variant?: 'toolbar' | 'floating';
   preserveTextFocus?: boolean;
   onBeforeNativeColorPicker?: () => void;
@@ -37,6 +39,7 @@ function tryParseHexInput(raw: string): string | null {
 export const ScrollableColorStrip: React.FC<Props> = ({
   selectedColor,
   onSelectColor,
+  mode = 'ink',
   variant = 'toolbar',
   preserveTextFocus = false,
   onBeforeNativeColorPicker,
@@ -45,11 +48,12 @@ export const ScrollableColorStrip: React.FC<Props> = ({
   const {
     palette,
     hiddenPresets,
+    defaultCount,
     addCustomColor,
     removeColor,
     restorePresetColor,
     resetPalette,
-  } = useInkColorPalette();
+  } = useColorPalette(mode);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -488,7 +492,7 @@ export const ScrollableColorStrip: React.FC<Props> = ({
                 ? 'bg-white/15 hover:bg-white/25 text-white'
                 : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
             }`}
-            title="Alle 10 Standardfarben wiederherstellen"
+            title={`Alle ${defaultCount} Standardfarben wiederherstellen`}
           >
             <RotateCcw className="w-2.5 h-2.5" />
             <span>Standard</span>

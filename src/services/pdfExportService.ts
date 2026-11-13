@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import {
+  BlankPaperColor,
   NotebookDocument,
   NotebookStore,
   NotebookTextBox,
@@ -11,7 +12,7 @@ import {
   getMediaObjectUrl,
   renderBlankTemplateToDataUrl,
 } from './customNotebookDbService';
-import { NOTEBOOK_STICKERS } from '../data/notebooksData';
+import { getBlankPaperPalette, NOTEBOOK_STICKERS } from '../data/notebooksData';
 import {
   getBoxBaseStyle,
   getEffectiveRuns,
@@ -136,6 +137,14 @@ export async function exportNotebookAsPdf(
     };
 
     let backgroundReady = false;
+    const effectivePaperColor: BlankPaperColor =
+      annotations.paperColorOverride ??
+      (customPage?.kind === 'blank' ? customPage.paperColor : undefined) ??
+      'white';
+    const effectiveShowHeader =
+      annotations.showDateHeader ??
+      (customPage?.kind === 'blank' ? customPage.showDateHeader : undefined) ??
+      false;
 
     try {
       if (notebook.sourceType === 'foto-skript' && imagePageMeta) {
@@ -160,7 +169,9 @@ export async function exportNotebookAsPdf(
           const res = renderBlankTemplateToDataUrl(
             annotations.templateOverride ?? customPage.template,
             effectiveRotation,
-            1240
+            1240,
+            effectivePaperColor,
+            effectiveShowHeader
           );
           backgroundReady = await renderFittedImage(res.dataUrl, 0);
         } else if (customPage.kind === 'image') {
@@ -171,20 +182,22 @@ export async function exportNotebookAsPdf(
         } else if (customPage.kind === 'pdf-page') {
           const url = await getMediaObjectUrl(customPage.mediaId);
           if (url) {
-            const res = await renderPdfPageToDataUrl(
+            const res = renderPdfPageToDataUrl(
               url,
               customPage.pdfPageNumber,
               effectiveRotation,
               1400
             );
-            backgroundReady = await renderFittedImage(res.dataUrl, 0);
+            backgroundReady = await renderFittedImage((await res).dataUrl, 0);
           }
         }
       } else {
         const res = renderBlankTemplateToDataUrl(
           annotations.templateOverride ?? 'blank',
           effectiveRotation,
-          1240
+          1240,
+          effectivePaperColor,
+          effectiveShowHeader
         );
         backgroundReady = await renderFittedImage(res.dataUrl, 0);
       }
@@ -197,7 +210,7 @@ export async function exportNotebookAsPdf(
       canvas.height = canvasH;
       const fallbackCtx = canvas.getContext('2d');
       if (fallbackCtx) {
-        fallbackCtx.fillStyle = '#ffffff';
+        fallbackCtx.fillStyle = getBlankPaperPalette(effectivePaperColor).bgHex;
         fallbackCtx.fillRect(0, 0, canvasW, canvasH);
       }
     }
@@ -245,7 +258,7 @@ export async function exportNotebookAsPdf(
 
     // 2d. Text Boxes
     for (const box of annotations.textBoxes || []) {
-      drawTextBoxToCanvas(ctx, box, canvasW, canvasH, uiScale);
+      drawTextBoxToCanvas(ctx, box, canvasW, canvasH, uiScale, effectivePaperColor);
     }
 
     // 2e. Highlighter strokes in foreground above Freitext, Fotos & Stickers (multiply blend)
@@ -450,14 +463,26 @@ function drawStickyNoteToCanvas(
     pink: { bg: '#fbcfe8', border: '#f472b6', header: '#f9a8d4' },
     mint: { bg: '#d1fae5', border: '#6ee7b7', header: '#a7f3d0' },
     blue: { bg: '#e0f2fe', border: '#7dd3fc', header: '#bae6fd' },
+    cream: { bg: '#fdf6dc', border: '#e6d5a3', header: '#f6e8b8' },
+    lavender: { bg: '#f3e8ff', border: '#c084fc', header: '#e9d5ff' },
   };
   const theme = colorMap[sticky.color] || colorMap.yellow;
   const xPx = (sticky.x / 100) * canvasW;
   const yPx = (sticky.y / 100) * canvasH;
   const boxW = Math.round(280 * uiScale);
-  const boxH = Math.round((sticky.isCollapsed ? 52 : 204) * uiScale);
 
   ctx.save();
+  const fontPx = Math.max(12, Math.round(20 * uiScale));
+  const lineStep = Math.round(fontPx * 1.35);
+  ctx.font = `600 ${fontPx}px system-ui, sans-serif`;
+  const lines =
+    sticky.text && !sticky.isCollapsed
+      ? wrapText(ctx, sticky.text, boxW - 32 * uiScale)
+      : [];
+  const boxH = sticky.isCollapsed
+    ? Math.round(52 * uiScale)
+    : Math.max(Math.round(204 * uiScale), Math.round(40 * uiScale + lines.length * lineStep));
+
   ctx.fillStyle = theme.bg;
   ctx.strokeStyle = theme.border;
   ctx.lineWidth = Math.max(2, 3 * uiScale);
@@ -468,20 +493,17 @@ function drawStickyNoteToCanvas(
 
   if (sticky.text && !sticky.isCollapsed) {
     ctx.fillStyle = '#1e293b';
-    const fontPx = Math.max(12, Math.round(20 * uiScale));
     ctx.font = `600 ${fontPx}px system-ui, sans-serif`;
     ctx.textBaseline = 'top';
-    const lines = wrapText(ctx, sticky.text, boxW - 32 * uiScale);
     let ty = yPx + 20 * uiScale;
-    const lineStep = Math.round(fontPx * 1.35);
-    for (const line of lines.slice(0, 7)) {
+    for (const line of lines) {
       ctx.fillText(line, xPx + 16 * uiScale, ty);
       ty += lineStep;
     }
   } else if (sticky.isCollapsed) {
     ctx.fillStyle = '#1e293b';
-    const fontPx = Math.max(11, Math.round(18 * uiScale));
-    ctx.font = `700 ${fontPx}px system-ui, sans-serif`;
+    const collapsedFontPx = Math.max(11, Math.round(18 * uiScale));
+    ctx.font = `700 ${collapsedFontPx}px system-ui, sans-serif`;
     ctx.textBaseline = 'middle';
     const snippet = sticky.text?.trim() ? sticky.text.trim().slice(0, 14) : 'Notiz';
     ctx.fillText(snippet, xPx + 16 * uiScale, yPx + boxH / 2);
@@ -616,7 +638,8 @@ function drawTextBoxToCanvas(
   box: NotebookTextBox,
   canvasW: number,
   canvasH: number,
-  uiScale: number
+  uiScale: number,
+  paperColor: BlankPaperColor = 'white'
 ): void {
   if (!box.text.trim()) return;
   const xPx = (box.x / 100) * canvasW;
@@ -643,9 +666,17 @@ function drawTextBoxToCanvas(
   const boxW = Math.min(maxBoxWidth, Math.max(110 * uiScale, maxLineW + padX * 2));
   const boxH = wrappedLines.length * lineHeight + padY * 2;
 
-  if (box.hasBackground ?? true) {
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.strokeStyle = 'rgba(226, 232, 240, 0.9)';
+  const bgStyle =
+    box.backgroundStyle ?? ((box.hasBackground ?? true) ? 'white' : 'transparent');
+  if (bgStyle !== 'transparent') {
+    if (bgStyle === 'paper') {
+      const pal = getBlankPaperPalette(paperColor);
+      ctx.fillStyle = pal.bgHex;
+      ctx.strokeStyle = pal.lineHex;
+    } else {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.strokeStyle = 'rgba(226, 232, 240, 0.9)';
+    }
     ctx.lineWidth = Math.max(1, 2 * uiScale);
     ctx.beginPath();
     ctx.roundRect(xPx, yPx, boxW, boxH, 8 * uiScale);
