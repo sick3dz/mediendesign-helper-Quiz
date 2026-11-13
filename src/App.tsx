@@ -58,6 +58,11 @@ import { MixUpConfigModal } from './components/MixUpConfigModal';
 import { DidacticMixUpView } from './components/DidacticMixUpView';
 import { buildCustomMixPool, BlitzItem } from './utils/blitzContent';
 import { NotebooksContainer } from './components/Notebooks/NotebooksContainer';
+import {
+  applyMacDisplayEffectsToDom,
+  getMainContainerMaxWidthClass,
+  useMacDisplaySettings,
+} from './services/macDisplaySettingsService';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('chapters');
@@ -111,6 +116,27 @@ export default function App() {
     cleanReloadQueryParamOnBoot();
     return getAppUpdateStatus();
   });
+  const [macDisplaySettings] = useMacDisplaySettings();
+
+  useEffect(() => {
+    applyMacDisplayEffectsToDom(macDisplaySettings);
+  }, [macDisplaySettings]);
+
+  useEffect(() => {
+    if (!macDisplaySettings.preventAppPinchZoom) return;
+    const handleGlobalPinchWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey) return;
+      const target = e.target as HTMLElement | null;
+      if (target?.closest?.('[data-notebook-stage-scroll="true"]')) {
+        return;
+      }
+      e.preventDefault();
+    };
+    window.addEventListener('wheel', handleGlobalPinchWheel, { passive: false });
+    return () => {
+      window.removeEventListener('wheel', handleGlobalPinchWheel);
+    };
+  }, [macDisplaySettings.preventAppPinchZoom]);
 
   // 12-hour WebApp update check scheduler + focus/online catch-up
   useEffect(() => {
@@ -1206,7 +1232,11 @@ export default function App() {
       />
 
       {/* Main Content Arena */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-8">
+      <main
+        className={`flex-1 ${getMainContainerMaxWidthClass(
+          macDisplaySettings.contentWidth
+        )} w-full mx-auto px-3 sm:px-6 py-4 sm:py-8 transition-[max-width] duration-200`}
+      >
         {reviewQuestions ? (
           <div className="max-w-3xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
@@ -1521,7 +1551,11 @@ export default function App() {
 
       {/* Quiet Footer */}
       <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 mt-12 text-xs text-slate-500 dark:text-slate-400 transition-colors">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div
+          className={`${getMainContainerMaxWidthClass(
+            macDisplaySettings.contentWidth
+          )} mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 transition-[max-width] duration-200`}
+        >
           <div className="flex items-center gap-2">
             <span className="font-semibold text-slate-800 dark:text-slate-200">DesignKonzept Trainer</span>
             <span aria-hidden="true">·</span>

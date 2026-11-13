@@ -12,6 +12,7 @@ import {
   RotateCcw,
   FolderArchive,
   Loader2,
+  Laptop,
 } from 'lucide-react';
 import {
   downloadBackupFile,
@@ -30,6 +31,7 @@ import {
 } from '../services/appUpdateService';
 import { UserStats } from '../types/quiz';
 import { soundEffects } from '../services/audioService';
+import { MacDisplaySettingsPanel } from './MacDisplaySettingsPanel';
 
 interface Props {
   isOpen: boolean;
@@ -56,6 +58,7 @@ export const BackupModal: React.FC<Props> = ({
   onCheckForUpdate,
   onReloadApp,
 }) => {
+  const [activeModalTab, setActiveModalTab] = useState<'backup' | 'display'>('backup');
   const [copied, setCopied] = useState(false);
   const [pasteText, setPasteText] = useState('');
   const [importStatus, setImportStatus] = useState<{
@@ -356,32 +359,74 @@ export const BackupModal: React.FC<Props> = ({
         className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl max-w-lg w-full my-auto flex flex-col max-h-[88vh] overflow-hidden relative transition-colors"
       >
         {/* Fixed Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-center shrink-0">
-              <HardDrive className="w-5 h-5" />
+        <div className="border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
+          <div className="flex items-center justify-between p-5 pb-3.5">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-center shrink-0">
+                {activeModalTab === 'display' ? (
+                  <Laptop className="w-5 h-5" />
+                ) : (
+                  <HardDrive className="w-5 h-5" />
+                )}
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">
+                  {activeModalTab === 'display'
+                    ? 'MacBook & Anzeige-Optimierung'
+                    : 'Fortschritt sichern & wiederherstellen'}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {activeModalTab === 'display'
+                    ? 'Auflösung, Seitenbreite, Retina-Schärfe & Trackpad-Sicherheit.'
+                    : 'Sichere Level, XP, Haustier, Notizen & eigene Hefte (PDF/Bilder).'}
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">
-                Fortschritt sichern &amp; wiederherstellen
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Sichere Level, XP, Haustier, Notizen &amp; eigene Hefte (PDF/Bilder).
-              </p>
-            </div>
+
+            <button
+              onClick={onClose}
+              className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer shrink-0"
+              aria-label="Schließen"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer shrink-0"
-            aria-label="Schließen"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {/* Modal Section Switch */}
+          <div className="px-5 pb-3 flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setActiveModalTab('backup')}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap ${
+                activeModalTab === 'backup'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              <HardDrive className="w-3.5 h-3.5 shrink-0" />
+              <span>Backup &amp; Update</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveModalTab('display')}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer whitespace-nowrap ${
+                activeModalTab === 'display'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              <Laptop className="w-3.5 h-3.5 shrink-0" />
+              <span>MacBook &amp; Anzeige</span>
+            </button>
+          </div>
         </div>
 
         {/* Scrollable Modal Body */}
         <div className="p-5 overflow-y-auto space-y-5 flex-1 custom-scrollbar">
+          {activeModalTab === 'display' ? (
+            <MacDisplaySettingsPanel />
+          ) : (
+            <>
           {/* Status Message */}
           {importStatus && (
             <div
@@ -782,6 +827,8 @@ export const BackupModal: React.FC<Props> = ({
               </div>
             )}
           </div>
+            </>
+          )}
         </div>
 
         {/* Fixed Footer */}

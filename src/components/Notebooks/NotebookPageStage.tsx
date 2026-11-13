@@ -74,6 +74,8 @@ interface Props {
   zoom: number;
   fitWidth: number;
   pencilOnlyMode: boolean;
+  retinaMode?: 'auto' | 'ultra';
+  blockCanvasContextMenu?: boolean;
   selectedImageSignal?: { id: string; seq: number };
   deleteSelectionSignal?: number;
   clearSelectionSignal?: number;
@@ -1140,6 +1142,8 @@ export const NotebookPageStage: React.FC<Props> = ({
   zoom,
   fitWidth,
   pencilOnlyMode,
+  retinaMode = 'auto',
+  blockCanvasContextMenu = true,
   selectedImageSignal,
   deleteSelectionSignal,
   clearSelectionSignal,
@@ -1370,7 +1374,9 @@ export const NotebookPageStage: React.FC<Props> = ({
         'Skript-Foto konnte nicht geladen werden.'
       );
     } else if (notebook.sourceType === 'pdf-dokument' && notebook.pdfUrl) {
-      renderPdfPageToDataUrl(notebook.pdfUrl, pageNumber, effectiveRotation, 1300)
+      const pdfTargetW = retinaMode === 'ultra' ? 1700 : 1300;
+      const pdfMaxDpr = retinaMode === 'ultra' ? 3 : 2;
+      renderPdfPageToDataUrl(notebook.pdfUrl, pageNumber, effectiveRotation, pdfTargetW, pdfMaxDpr)
         .then((res) => {
           if (cancelled) return;
           setSurface({
@@ -1393,10 +1399,11 @@ export const NotebookPageStage: React.FC<Props> = ({
       customPage
     ) {
       if (customPage.kind === 'blank') {
+        const blankW = retinaMode === 'ultra' ? 1680 : 1240;
         const res = renderBlankTemplateToDataUrl(
           annotations.templateOverride ?? customPage.template,
           effectiveRotation,
-          1240
+          blankW
         );
         setSurface({
           dataUrl: res.dataUrl,
@@ -1421,6 +1428,8 @@ export const NotebookPageStage: React.FC<Props> = ({
             setIsLoading(false);
           });
       } else if (customPage.kind === 'pdf-page') {
+        const pdfTargetW = retinaMode === 'ultra' ? 1700 : 1300;
+        const pdfMaxDpr = retinaMode === 'ultra' ? 3 : 2;
         getMediaObjectUrl(customPage.mediaId)
           .then((url) => {
             if (cancelled) return null;
@@ -1429,7 +1438,8 @@ export const NotebookPageStage: React.FC<Props> = ({
               url,
               customPage.pdfPageNumber,
               effectiveRotation,
-              1300
+              pdfTargetW,
+              pdfMaxDpr
             );
           })
           .then((res) => {
@@ -1448,10 +1458,11 @@ export const NotebookPageStage: React.FC<Props> = ({
           });
       }
     } else if (notebook.sourceType === 'blatt-blanko') {
+      const blankW = retinaMode === 'ultra' ? 1680 : 1240;
       const res = renderBlankTemplateToDataUrl(
         annotations.templateOverride ?? 'blank',
         effectiveRotation,
-        1240
+        blankW
       );
       setSurface({
         dataUrl: res.dataUrl,
@@ -1480,6 +1491,7 @@ export const NotebookPageStage: React.FC<Props> = ({
     pageNumber,
     effectiveRotation,
     annotations.rotationOverride,
+    retinaMode,
   ]);
 
   const isDrawTool =
@@ -2200,7 +2212,9 @@ export const NotebookPageStage: React.FC<Props> = ({
         onPointerUp={handleStagePointerUp}
         onPointerCancel={handleStagePointerUp}
         onContextMenu={(e) => {
-          if (isDrawTool || pencilOnlyMode) e.preventDefault();
+          if (isDrawTool || pencilOnlyMode || (blockCanvasContextMenu && activeTool !== 'hand')) {
+            e.preventDefault();
+          }
         }}
         style={{
           width: `${displayWidth}px`,

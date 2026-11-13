@@ -34,6 +34,7 @@ import {
   Strikethrough,
   Check,
   GripVertical,
+  Laptop,
 } from 'lucide-react';
 import { exportNotebookAsPdf } from '../../services/pdfExportService';
 import {
@@ -71,6 +72,11 @@ import {
   isMacLikePlatform,
   NotebookShortcutsModal,
 } from './NotebookShortcutsModal';
+import {
+  getNotebookMaxFitWidth,
+  useMacDisplaySettings,
+} from '../../services/macDisplaySettingsService';
+import { MacDisplaySettingsPanel } from '../MacDisplaySettingsPanel';
 
 interface Props {
   notebook: NotebookDocument;
@@ -272,8 +278,11 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const [stickerScale, setStickerScale] = useState<number>(1);
   const [stickerOpacity, setStickerOpacity] = useState<number>(1);
 
+  const [macSettings] = useMacDisplaySettings();
+  const [showDisplaySettingsModal, setShowDisplaySettingsModal] = useState<boolean>(false);
+
   // View controls
-  const [zoom, setZoom] = useState<number>(1);
+  const [zoom, setZoom] = useState<number>(() => macSettings.defaultNotebookZoom);
   const [showThumbnails, setShowThumbnails] = useState<boolean>(false);
   const [sidebarTab, setSidebarTab] = useState<'pages' | 'stickers'>('pages');
   const [sidebarStickerFilter, setSidebarStickerFilter] = useState<NotebookStickerType | 'all'>('all');
@@ -323,7 +332,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
       const avail = el.clientWidth;
       if (avail > 0) {
         const padding = avail < 640 ? 20 : 56;
-        const maxFit = isFullscreen ? 1040 : 860;
+        const maxFit = getNotebookMaxFitWidth(macSettings.contentWidth, isFullscreen);
         setFitWidth(Math.min(maxFit, Math.max(280, avail - padding)));
       }
     };
@@ -331,7 +340,39 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     const observer = new ResizeObserver(updateSize);
     observer.observe(el);
     return () => observer.disconnect();
-  }, [showThumbnails, isFullscreen]);
+  }, [showThumbnails, isFullscreen, macSettings.contentWidth]);
+
+  // MacBook Trackpad Pinch & Cmd+Scroll Zoom Guard inside Notebook Stage
+  useEffect(() => {
+    const el = stageContainerRef.current;
+    if (!el) return;
+    const handleStageWheel = (e: WheelEvent) => {
+      const isPinch = e.ctrlKey;
+      const isCmdScroll = e.metaKey;
+      if (!isPinch && !isCmdScroll) return;
+
+      const mode = macSettings.notebookPinchMode;
+      if (mode === 'block') {
+        e.preventDefault();
+        return;
+      }
+      if (mode === 'cmd-only') {
+        if (isPinch && !isCmdScroll) {
+          e.preventDefault();
+          return;
+        }
+        if (!isCmdScroll) return;
+      }
+
+      e.preventDefault();
+      if (Math.abs(e.deltaY) < 0.01) return;
+      const sensitivity = isPinch ? 0.0065 : 0.0025;
+      const rawDelta = Math.max(-0.18, Math.min(0.18, -e.deltaY * sensitivity));
+      setZoom((prev) => Math.max(0.75, Math.min(2.5, +(prev + rawDelta).toFixed(2))));
+    };
+    el.addEventListener('wheel', handleStageWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleStageWheel);
+  }, [macSettings.notebookPinchMode]);
 
   // Lock background page scroll while in fullscreen mode, reset collapse on exit
   useEffect(() => {
@@ -664,6 +705,15 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
 
     const mod = e.metaKey || e.ctrlKey;
     const keyLower = e.key.toLowerCase();
+
+    // Display settings modal close
+    if (showDisplaySettingsModal) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setShowDisplaySettingsModal(false);
+      }
+      return;
+    }
 
     // Shortcuts overview modal toggle/close
     if (showShortcutsModal) {
@@ -1303,6 +1353,16 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
               aria-label="Tastaturkürzel anzeigen"
             >
               <Keyboard className="w-4 h-4" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowDisplaySettingsModal(true)}
+              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer min-h-[38px] min-w-[38px] flex items-center justify-center"
+              title="MacBook, Auflösung & Trackpad-Sicherheit anpassen"
+              aria-label="MacBook & Anzeige-Einstellungen"
+            >
+              <Laptop className="w-4 h-4" />
             </button>
 
             <button
@@ -2361,6 +2421,10 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
         {/* Scrollable Canvas Stage */}
         <div
           ref={stageContainerRef}
+          data-notebook-stage-scroll="true"
+          style={{
+            overscrollBehaviorX: macSettings.preventSwipeBack ? 'none' : undefined,
+          }}
           className="flex-1 overflow-auto bg-slate-200/70 dark:bg-slate-950 relative"
         >
           <NotebookPageStage
@@ -2386,6 +2450,8 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             zoom={zoom}
             fitWidth={fitWidth}
             pencilOnlyMode={pencilOnlyMode}
+            retinaMode={macSettings.retinaMode}
+            blockCanvasContextMenu={macSettings.blockCanvasContextMenu}
             selectedImageSignal={selectedImageSignal}
             deleteSelectionSignal={deleteSelectionSignal}
             clearSelectionSignal={clearSelectionSignal}
@@ -2490,6 +2556,57 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
         isOpen={showShortcutsModal}
         onClose={() => setShowShortcutsModal(false)}
       />
+
+      {showDisplaySettingsModal && (
+        <div
+          onClick={() => setShowDisplaySettingsModal(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-150 overflow-y-auto"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl max-w-lg w-full my-auto flex flex-col max-h-[88vh] overflow-hidden"
+          >
+            <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-center shrink-0">
+                  <Laptop className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                    MacBook &amp; Anzeige-Optimierung
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Auflösung, Retina-Schärfe &amp; Trackpad-Sicherheit live anpassen
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowDisplaySettingsModal(false)}
+                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
+                aria-label="Schließen"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto flex-1 custom-scrollbar">
+              <MacDisplaySettingsPanel
+                inReader
+                onApplyDefaultZoomNow={(nextZoom) => setZoom(nextZoom)}
+              />
+            </div>
+            <div className="p-3 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-100 dark:border-slate-800 flex justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowDisplaySettingsModal(false)}
+                className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors cursor-pointer"
+              >
+                Fertig
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

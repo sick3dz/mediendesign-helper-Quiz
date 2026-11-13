@@ -69,7 +69,8 @@ export async function renderPdfPageToDataUrl(
   pdfUrl: string,
   pageNumber: number,
   rotation: number = 0,
-  targetWidth: number = 1400
+  targetWidth: number = 1400,
+  maxDpr: number = 2
 ): Promise<{ dataUrl: string; width: number; height: number; totalPages: number }> {
   const doc = await getPdfDocument(pdfUrl);
   const clampedPage = Math.max(1, Math.min(pageNumber, doc.numPages));
@@ -77,7 +78,7 @@ export async function renderPdfPageToDataUrl(
 
   const effectivePdfRotation = ((page.rotate + rotation) % 360 + 360) % 360;
   const baseViewport = page.getViewport({ scale: 1, rotation: effectivePdfRotation });
-  const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+  const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, maxDpr) : 1;
   const scale = Math.max(1.2, (targetWidth * dpr) / baseViewport.width);
   const viewport = page.getViewport({ scale, rotation: effectivePdfRotation });
 
