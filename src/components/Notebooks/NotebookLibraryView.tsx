@@ -526,6 +526,13 @@ export const NotebookLibraryView: React.FC<Props> = ({
                 ? 'Blatt Blanko'
                 : 'Eigenes Heft';
 
+            const effectiveTotalPages =
+              !doc.isCustom && doc.sourceType === 'blatt-blanko'
+                ? store.blankPageCountByBook?.[doc.id] ?? doc.totalPages
+                : doc.totalPages;
+            const firstPageTemplate =
+              store.pages[`${doc.id}::1`]?.templateOverride ?? 'blank';
+
             return (
               <div
                 key={doc.id}
@@ -567,7 +574,7 @@ export const NotebookLibraryView: React.FC<Props> = ({
                             id: 'blank-cover',
                             pageNumber: 1,
                             kind: 'blank',
-                            template: 'blank',
+                            template: firstPageTemplate,
                             title: 'Blatt Blanko',
                           }
                         }
@@ -611,7 +618,7 @@ export const NotebookLibraryView: React.FC<Props> = ({
                     <div className="pt-3 mt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 text-xs">
                       <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 tabular-nums truncate">
                         <span>
-                          {doc.totalPages} {doc.totalPages === 1 ? 'Seite' : 'Seiten'}
+                          {effectiveTotalPages} {effectiveTotalPages === 1 ? 'Seite' : 'Seiten'}
                         </span>
                         {hasSavedNotes && (
                           <>

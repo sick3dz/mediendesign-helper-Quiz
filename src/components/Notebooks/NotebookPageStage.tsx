@@ -8,6 +8,11 @@ import {
   AlertCircle,
   RotateCw,
   Crop as CropIcon,
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  ChevronDown,
 } from 'lucide-react';
 import {
   NotebookDocument,
@@ -17,12 +22,25 @@ import {
   NotebookStickyNote,
   NotebookStroke,
   NotebookTextBox,
+  NotebookTextRun,
   NotebookTool,
   PageAnnotations,
   StickyColor,
   StrokePoint,
 } from '../../types/notebook';
 import { NOTEBOOK_STICKERS, STICKY_NOTE_STYLES } from '../../data/notebooksData';
+import {
+  applyStyleToRange,
+  extractRunsFromElement,
+  getBoxBaseStyle,
+  getEffectiveRuns,
+  getSelectionOffsetsInElement,
+  getStyleAtOffset,
+  renderRunsIntoElement,
+  ResolvedTextStyle,
+  restoreSelectionOffsetsInElement,
+  serializeRunsSignature,
+} from '../../utils/richTextRuns';
 import { renderPdfPageToDataUrl } from '../../services/pdfRenderService';
 import {
   getMediaObjectUrl,
@@ -31,6 +49,7 @@ import {
   saveEmbeddedImageMedia,
 } from '../../services/customNotebookDbService';
 import { ImageCropModal } from './ImageCropModal';
+import { ScrollableColorStrip } from './ScrollableColorStrip';
 
 interface Props {
   notebook: NotebookDocument;
@@ -44,6 +63,10 @@ interface Props {
   textColor: string;
   textSize: number;
   textHasBackground: boolean;
+  textBold: boolean;
+  textItalic: boolean;
+  textUnderline: boolean;
+  textStrikethrough: boolean;
   stickyColor: StickyColor;
   selectedStickerType: NotebookStickerType;
   stickerScale: number;
@@ -52,6 +75,10 @@ interface Props {
   fitWidth: number;
   pencilOnlyMode: boolean;
   selectedImageSignal?: { id: string; seq: number };
+  deleteSelectionSignal?: number;
+  clearSelectionSignal?: number;
+  onSelectionChange?: (hasSelection: boolean) => void;
+  onCropModalOpenChange?: (isOpen: boolean) => void;
   onStylusDetected?: () => void;
   onCommitAnnotations: (
     next: PageAnnotations,
@@ -197,7 +224,15 @@ interface AutoTextItemProps {
   onFocusBox: () => void;
   onClearAutoFocus: () => void;
   onStartDrag: (e: React.PointerEvent<HTMLElement>) => void;
-  onChangeText: (text: string) => void;
+  onUpdateBox: (
+    patch: Partial<
+      Pick<
+        NotebookTextBox,
+        'text' | 'runs' | 'color' | 'bold' | 'italic' | 'underline' | 'strikethrough'
+      >
+    >,
+    recordHistory?: boolean
+  ) => void;
   onToggleBackground: () => void;
   onDelete: () => void;
   onBlurBox: () => void;
@@ -213,31 +248,253 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
   onFocusBox,
   onClearAutoFocus,
   onStartDrag,
-  onChangeText,
+  onUpdateBox,
   onToggleBackground,
   onDelete,
   onBlurBox,
 }) => {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
+  const isFocusedRef = useRef<boolean>(false);
+  const isPickingNativeColorRef = useRef<boolean>(false);
+  const lastSyncedSigRef = useRef<string>('');
+  const savedOffsetsRef = useRef<{ start: number; end: number; hasSelection: boolean } | null>(null);
+  const pendingStyleOverrideRef = useRef<ResolvedTextStyle | null>(null);
 
+  const [isFormatOpen, setIsFormatOpen] = useState<boolean>(false);
+  const [isFocused, setIsFocused] = useState<boolean>(false);
+  const [activeTypingStyle, setActiveTypingStyle] = useState<ResolvedTextStyle>(() =>
+    getBoxBaseStyle(box)
+  );
+
+  // Sync incoming box prop into contentEditable DOM only when it didn't originate from our own input
   useEffect(() => {
-    const el = textareaRef.current;
+    const el = editorRef.current;
     if (!el) return;
-    el.style.height = 'auto';
-    el.style.height = `${Math.max(fontSizePx + 10, el.scrollHeight)}px`;
-  }, [box.text, fontSizePx]);
+    const base = getBoxBaseStyle(box);
+    const runs = getEffectiveRuns(box);
+    const sig = `${serializeRunsSignature(runs, base)}|${box.text}`;
+    if (sig === lastSyncedSigRef.current) return;
+
+    const prevOffsets = isFocusedRef.current ? getSelectionOffsetsInElement(el) : null;
+    renderRunsIntoElement(el, runs, base);
+    lastSyncedSigRef.current = sig;
+
+    if (prevOffsets) {
+      const maxLen = box.text.length;
+      restoreSelectionOffsetsInElement(
+        el,
+        Math.min(prevOffsets.start, maxLen),
+        Math.min(prevOffsets.end, maxLen)
+      );
+    }
+
+    if (!pendingStyleOverrideRef.current) {
+      if (runs.length === 0) {
+        setActiveTypingStyle(base);
+      } else if (prevOffsets) {
+        setActiveTypingStyle(getStyleAtOffset(runs, prevOffsets.end, base));
+      } else {
+        setActiveTypingStyle(getStyleAtOffset(runs, box.text.length, base));
+      }
+    }
+  }, [box]);
 
   useEffect(() => {
-    if (autoFocus && textareaRef.current) {
-      textareaRef.current.focus();
+    if (!isSelected && !isFocused) {
+      setIsFormatOpen(false);
+    }
+  }, [isSelected, isFocused]);
+
+  useEffect(() => {
+    if (autoFocus && editorRef.current) {
+      const el = editorRef.current;
+      el.focus();
+      const base = getBoxBaseStyle(box);
+      const runs = getEffectiveRuns(box);
+      if (runs.length === 0) {
+        renderRunsIntoElement(el, [], base, { offset: 0, style: base });
+        setActiveTypingStyle(base);
+      } else {
+        restoreSelectionOffsetsInElement(el, box.text.length, box.text.length);
+      }
       onClearAutoFocus();
     }
-  }, [autoFocus, onClearAutoFocus]);
+  }, [autoFocus, box, onClearAutoFocus]);
+
+  const syncCursorStyle = useCallback(
+    (clearPendingOverride: boolean) => {
+      const el = editorRef.current;
+      if (!el) return;
+      const offsets = getSelectionOffsetsInElement(el);
+      if (offsets) {
+        savedOffsetsRef.current = offsets;
+      }
+      if (clearPendingOverride) {
+        pendingStyleOverrideRef.current = null;
+      }
+      if (pendingStyleOverrideRef.current) return;
+
+      const base = getBoxBaseStyle(box);
+      const runs = getEffectiveRuns(box);
+      if (runs.length === 0) {
+        setActiveTypingStyle(base);
+        return;
+      }
+      const pos = offsets ? offsets.end : box.text.length;
+      setActiveTypingStyle(getStyleAtOffset(runs, pos, base));
+    },
+    [box]
+  );
+
+  const applyFormatPatch = useCallback(
+    (patch: Partial<ResolvedTextStyle>) => {
+      const el = editorRef.current;
+      if (!el) return;
+      if (!isPickingNativeColorRef.current && document.activeElement !== el) {
+        el.focus();
+      }
+
+      const offsets = getSelectionOffsetsInElement(el) ?? savedOffsetsRef.current;
+      const base = getBoxBaseStyle(box);
+      const currentRuns = getEffectiveRuns(box);
+
+      if (offsets && offsets.hasSelection && currentRuns.length > 0) {
+        const nextRuns = applyStyleToRange(
+          currentRuns,
+          offsets.start,
+          offsets.end,
+          patch,
+          base
+        );
+        const nextText = nextRuns.map((r) => r.text).join('');
+        const endStyle = getStyleAtOffset(nextRuns, offsets.end, base);
+        const nextSig = `${serializeRunsSignature(nextRuns, base)}|${nextText}`;
+
+        renderRunsIntoElement(el, nextRuns, base);
+        if (!isPickingNativeColorRef.current) {
+          restoreSelectionOffsetsInElement(el, offsets.start, offsets.end);
+        }
+        savedOffsetsRef.current = offsets;
+        lastSyncedSigRef.current = nextSig;
+        pendingStyleOverrideRef.current = endStyle;
+        setActiveTypingStyle(endStyle);
+        onUpdateBox({ text: nextText, runs: nextRuns }, !isPickingNativeColorRef.current);
+        return;
+      }
+
+      const nextStyle: ResolvedTextStyle = {
+        color: patch.color !== undefined ? patch.color : activeTypingStyle.color,
+        bold: patch.bold !== undefined ? patch.bold : activeTypingStyle.bold,
+        italic: patch.italic !== undefined ? patch.italic : activeTypingStyle.italic,
+        underline: patch.underline !== undefined ? patch.underline : activeTypingStyle.underline,
+        strikethrough:
+          patch.strikethrough !== undefined
+            ? patch.strikethrough
+            : activeTypingStyle.strikethrough,
+      };
+
+      const caret = offsets ? offsets.start : box.text.length;
+      pendingStyleOverrideRef.current = nextStyle;
+      setActiveTypingStyle(nextStyle);
+      savedOffsetsRef.current = { start: caret, end: caret, hasSelection: false };
+
+      if (!box.text) {
+        const nextBase: ResolvedTextStyle = nextStyle;
+        const nextSig = `${serializeRunsSignature([], nextBase)}|`;
+        lastSyncedSigRef.current = nextSig;
+        if (!isPickingNativeColorRef.current) {
+          renderRunsIntoElement(el, [], nextBase, { offset: 0, style: nextStyle });
+        }
+        onUpdateBox(
+          {
+            color: nextStyle.color,
+            bold: nextStyle.bold,
+            italic: nextStyle.italic,
+            underline: nextStyle.underline,
+            strikethrough: nextStyle.strikethrough,
+          },
+          false
+        );
+      } else if (!isPickingNativeColorRef.current) {
+        renderRunsIntoElement(el, currentRuns, base, {
+          offset: caret,
+          style: nextStyle,
+        });
+      }
+    },
+    [activeTypingStyle, box, onUpdateBox]
+  );
+
+  const handleInput = () => {
+    const el = editorRef.current;
+    if (!el) return;
+    const base = getBoxBaseStyle(box);
+    const fallbackStyle = pendingStyleOverrideRef.current ?? activeTypingStyle;
+    const extracted = extractRunsFromElement(el, box.text ? base : fallbackStyle);
+
+    // If browser collapsed an empty span on the very first typed character, preserve activeTypingStyle
+    let runs: NotebookTextRun[] = extracted.runs;
+    const text = extracted.text;
+    if (
+      pendingStyleOverrideRef.current &&
+      !box.text &&
+      text.length > 0 &&
+      runs.length === 1
+    ) {
+      runs = [{ text, ...pendingStyleOverrideRef.current }];
+    }
+
+    const sig = `${serializeRunsSignature(runs, base)}|${text}`;
+    lastSyncedSigRef.current = sig;
+    pendingStyleOverrideRef.current = null;
+
+    const offsets = getSelectionOffsetsInElement(el);
+    if (offsets) {
+      savedOffsetsRef.current = offsets;
+    }
+
+    onUpdateBox({ text, runs }, false);
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const plain = e.clipboardData.getData('text/plain');
+    if (!plain) return;
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    range.deleteContents();
+
+    const span = document.createElement('span');
+    span.style.color = activeTypingStyle.color;
+    span.style.fontWeight = activeTypingStyle.bold ? '700' : '500';
+    span.style.fontStyle = activeTypingStyle.italic ? 'italic' : 'normal';
+    const deco: string[] = [];
+    if (activeTypingStyle.underline) deco.push('underline');
+    if (activeTypingStyle.strikethrough) deco.push('line-through');
+    span.style.textDecorationLine = deco.length > 0 ? deco.join(' ') : 'none';
+    span.textContent = plain;
+
+    range.insertNode(span);
+    range.setStartAfter(span);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    handleInput();
+  };
 
   const hasBg = box.hasBackground ?? true;
+  const isNearTopEdge = box.y < 20;
+  const hasAnyFormatting =
+    activeTypingStyle.bold ||
+    activeTypingStyle.italic ||
+    activeTypingStyle.underline ||
+    activeTypingStyle.strikethrough;
 
   return (
     <div
+      ref={wrapperRef}
       style={{ left: `${box.x}%`, top: `${box.y}%` }}
       onPointerDown={(e) => {
         if (isDrawTool) return;
@@ -248,11 +505,13 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
         isDrawTool ? 'pointer-events-none opacity-95' : 'pointer-events-auto'
       }`}
     >
-      {/* Floating Mini Toolbar on select/hover */}
+      {/* Compact Floating Mini Toolbar on select/hover */}
       {!isDrawTool && (
         <div
-          className={`absolute -top-6 left-0 flex items-center gap-0.5 px-1.5 py-0.5 rounded-t-lg bg-slate-900/90 text-white shadow-sm transition-opacity z-10 ${
-            isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'
+          className={`absolute -top-7 left-0 flex items-center gap-0.5 px-1.5 py-0.5 rounded-t-lg bg-slate-900/95 text-white shadow-md transition-opacity z-20 ${
+            isSelected || isFormatOpen
+              ? 'opacity-100'
+              : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'
           }`}
         >
           <button
@@ -263,23 +522,37 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
             }}
             title="Textfeld verschieben"
             aria-label="Textfeld verschieben"
-            className="p-0.5 rounded hover:bg-white/15 cursor-grab active:cursor-grabbing flex items-center gap-1 text-[10px] font-semibold"
+            className="p-1 rounded hover:bg-white/15 cursor-grab active:cursor-grabbing flex items-center"
           >
-            <GripHorizontal className="w-3 h-3" />
+            <GripHorizontal className="w-3.5 h-3.5" />
           </button>
+
           <button
             type="button"
             onMouseDown={(e) => e.preventDefault()}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation();
-              onToggleBackground();
+              setIsFormatOpen((prev) => !prev);
             }}
-            title={hasBg ? 'Hintergrund transparent machen' : 'Weißen Hintergrund aktivieren'}
-            className="px-1.5 py-0.5 rounded hover:bg-white/15 text-[10px] font-bold cursor-pointer whitespace-nowrap"
+            title="Schriftformat & Farbe ein-/ausklappen"
+            aria-expanded={isFormatOpen}
+            className={`px-1.5 py-0.5 rounded flex items-center gap-1 text-[11px] font-bold cursor-pointer transition-colors ${
+              isFormatOpen || hasAnyFormatting
+                ? 'bg-indigo-600 text-white'
+                : 'hover:bg-white/15 text-white'
+            }`}
           >
-            {hasBg ? 'Weiß' : 'Transp.'}
+            <span>Aa</span>
+            <span
+              className="w-2 h-2 rounded-full border border-white/60 shrink-0"
+              style={{ backgroundColor: activeTypingStyle.color }}
+            />
+            <ChevronDown
+              className={`w-3 h-3 transition-transform ${isFormatOpen ? 'rotate-180' : ''}`}
+            />
           </button>
+
           <button
             type="button"
             onMouseDown={(e) => e.preventDefault()}
@@ -290,47 +563,266 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
             }}
             title="Textfeld löschen"
             aria-label="Textfeld löschen"
-            className="p-0.5 rounded hover:bg-rose-500/80 text-white cursor-pointer"
+            className="p-1 rounded hover:bg-rose-500/80 text-white cursor-pointer"
           >
-            <X className="w-3 h-3" />
+            <X className="w-3.5 h-3.5" />
           </button>
+
+          {/* Collapsible Aa Format Popover */}
+          {isFormatOpen && (
+            <div
+              onMouseDown={(e) => e.preventDefault()}
+              onPointerDown={(e) => e.stopPropagation()}
+              className={`absolute left-0 ${
+                isNearTopEdge ? 'top-full mt-1.5' : 'bottom-full mb-1.5'
+              } p-2 rounded-xl bg-slate-900/95 border border-slate-700/90 shadow-xl flex flex-col gap-2 min-w-[252px] z-30`}
+            >
+              <div className="flex items-center justify-between gap-1">
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      applyFormatPatch({ bold: !activeTypingStyle.bold });
+                    }}
+                    title="Fett (⌘B)"
+                    aria-label="Fett"
+                    aria-pressed={activeTypingStyle.bold}
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer transition-colors ${
+                      activeTypingStyle.bold
+                        ? 'bg-indigo-500 text-white'
+                        : 'bg-white/10 hover:bg-white/20 text-slate-100'
+                    }`}
+                  >
+                    <Bold className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      applyFormatPatch({ italic: !activeTypingStyle.italic });
+                    }}
+                    title="Kursiv (⌘I)"
+                    aria-label="Kursiv"
+                    aria-pressed={activeTypingStyle.italic}
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer transition-colors ${
+                      activeTypingStyle.italic
+                        ? 'bg-indigo-500 text-white'
+                        : 'bg-white/10 hover:bg-white/20 text-slate-100'
+                    }`}
+                  >
+                    <Italic className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      applyFormatPatch({ underline: !activeTypingStyle.underline });
+                    }}
+                    title="Unterstrichen (⌘U)"
+                    aria-label="Unterstrichen"
+                    aria-pressed={activeTypingStyle.underline}
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer transition-colors ${
+                      activeTypingStyle.underline
+                        ? 'bg-indigo-500 text-white'
+                        : 'bg-white/10 hover:bg-white/20 text-slate-100'
+                    }`}
+                  >
+                    <Underline className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      applyFormatPatch({ strikethrough: !activeTypingStyle.strikethrough });
+                    }}
+                    title="Durchgestrichen (⇧⌘X)"
+                    aria-label="Durchgestrichen"
+                    aria-pressed={activeTypingStyle.strikethrough}
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer transition-colors ${
+                      activeTypingStyle.strikethrough
+                        ? 'bg-indigo-500 text-white'
+                        : 'bg-white/10 hover:bg-white/20 text-slate-100'
+                    }`}
+                  >
+                    <Strikethrough className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleBackground();
+                  }}
+                  title={hasBg ? 'Hintergrund transparent machen' : 'Weißen Hintergrund aktivieren'}
+                  className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-100 cursor-pointer whitespace-nowrap"
+                >
+                  {hasBg ? 'Weiß' : 'Transp.'}
+                </button>
+              </div>
+
+              <div className="flex flex-col gap-1 pt-1.5 border-t border-white/10">
+                <ScrollableColorStrip
+                  variant="floating"
+                  preserveTextFocus
+                  selectedColor={activeTypingStyle.color}
+                  onSelectColor={(color) => applyFormatPatch({ color })}
+                  onBeforeNativeColorPicker={() => {
+                    isPickingNativeColorRef.current = true;
+                    const el = editorRef.current;
+                    if (el) {
+                      const off = getSelectionOffsetsInElement(el);
+                      if (off) savedOffsetsRef.current = off;
+                    }
+                  }}
+                  onAfterNativeColorPicker={() => {
+                    isPickingNativeColorRef.current = false;
+                    requestAnimationFrame(() => {
+                      const el = editorRef.current;
+                      if (!el || !isSelected) return;
+                      el.focus();
+                      const saved = savedOffsetsRef.current;
+                      if (!saved) return;
+                      if (saved.hasSelection) {
+                        restoreSelectionOffsetsInElement(el, saved.start, saved.end);
+                      } else if (pendingStyleOverrideRef.current) {
+                        renderRunsIntoElement(
+                          el,
+                          getEffectiveRuns(box),
+                          getBoxBaseStyle(box),
+                          {
+                            offset: saved.start,
+                            style: pendingStyleOverrideRef.current,
+                          }
+                        );
+                      }
+                    });
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      <textarea
-        ref={textareaRef}
-        value={box.text}
-        readOnly={isDrawTool}
-        rows={1}
-        onFocus={() => {
-          onSelect();
-          onFocusBox();
-        }}
-        onPointerDown={(e) => {
-          if (isDrawTool) return;
-          e.stopPropagation();
-        }}
-        onChange={(e) => onChangeText(e.target.value)}
-        onBlur={onBlurBox}
-        placeholder="Text tippen..."
-        style={{
-          color: box.color,
-          fontSize: `${fontSizePx}px`,
-          lineHeight: 1.35,
-          minWidth: `${Math.max(110, fontSizePx * 7)}px`,
-        }}
-        className={`w-44 sm:w-60 px-2 py-1 rounded-md font-medium resize focus:outline-hidden transition-shadow ${
-          hasBg
-            ? 'bg-white/95 shadow-sm border border-slate-200/90'
-            : 'bg-transparent border border-transparent'
-        } ${
-          isSelected && !isDrawTool
-            ? 'ring-2 ring-indigo-500/80 border-indigo-400'
-            : !isDrawTool
-            ? 'group-hover:border-indigo-300/80'
-            : ''
-        } placeholder:text-slate-400/75`}
-      />
+      <div className="relative">
+        {!box.text && (
+          <span
+            aria-hidden="true"
+            style={{ fontSize: `${fontSizePx}px`, lineHeight: 1.35 }}
+            className="pointer-events-none select-none absolute left-2 top-1 text-slate-400/75 font-medium"
+          >
+            Text tippen...
+          </span>
+        )}
+        <div
+          ref={editorRef}
+          contentEditable={!isDrawTool}
+          suppressContentEditableWarning
+          role="textbox"
+          aria-multiline="true"
+          aria-label="Freitextfeld"
+          onFocus={() => {
+            isFocusedRef.current = true;
+            setIsFocused(true);
+            onSelect();
+            onFocusBox();
+            syncCursorStyle(false);
+          }}
+          onPointerDown={(e) => {
+            if (isDrawTool) return;
+            e.stopPropagation();
+          }}
+          onMouseUp={() => syncCursorStyle(true)}
+          onKeyDown={(e) => {
+            if (isDrawTool) return;
+            const mod = e.metaKey || e.ctrlKey;
+            const key = e.key.toLowerCase();
+            if (mod && !e.altKey && !e.shiftKey && key === 'b') {
+              e.preventDefault();
+              e.stopPropagation();
+              applyFormatPatch({ bold: !activeTypingStyle.bold });
+              return;
+            }
+            if (mod && !e.altKey && !e.shiftKey && key === 'i') {
+              e.preventDefault();
+              e.stopPropagation();
+              applyFormatPatch({ italic: !activeTypingStyle.italic });
+              return;
+            }
+            if (mod && !e.altKey && !e.shiftKey && key === 'u') {
+              e.preventDefault();
+              e.stopPropagation();
+              applyFormatPatch({ underline: !activeTypingStyle.underline });
+              return;
+            }
+            if (mod && !e.altKey && e.shiftKey && key === 'x') {
+              e.preventDefault();
+              e.stopPropagation();
+              applyFormatPatch({ strikethrough: !activeTypingStyle.strikethrough });
+              return;
+            }
+            if (e.key === 'Enter' && !e.shiftKey) {
+              // Insert clean single line break instead of unpredictable browser div blocks when needed
+              e.stopPropagation();
+            }
+          }}
+          onKeyUp={(e) => {
+            const navKeys = [
+              'ArrowLeft',
+              'ArrowRight',
+              'ArrowUp',
+              'ArrowDown',
+              'Home',
+              'End',
+              'PageUp',
+              'PageDown',
+            ];
+            syncCursorStyle(navKeys.includes(e.key));
+          }}
+          onInput={handleInput}
+          onPaste={handlePaste}
+          onBlur={(e) => {
+            const nextFocused = e.relatedTarget as Node | null;
+            if (
+              isPickingNativeColorRef.current ||
+              (nextFocused && wrapperRef.current?.contains(nextFocused))
+            ) {
+              return;
+            }
+            isFocusedRef.current = false;
+            setIsFocused(false);
+            pendingStyleOverrideRef.current = null;
+            onBlurBox();
+          }}
+          style={{
+            color: box.color,
+            fontSize: `${fontSizePx}px`,
+            lineHeight: 1.35,
+            minWidth: `${Math.max(120, fontSizePx * 7)}px`,
+            minHeight: `${Math.max(24, Math.round(fontSizePx * 1.35 + 8))}px`,
+            WebkitUserSelect: isDrawTool ? 'none' : 'text',
+            userSelect: isDrawTool ? 'none' : 'text',
+          }}
+          className={`min-w-[11rem] max-w-full px-2 py-1 rounded-md font-medium whitespace-pre-wrap break-words focus:outline-hidden transition-shadow ${
+            hasBg
+              ? 'bg-white/95 shadow-sm border border-slate-200/90'
+              : 'bg-transparent border border-transparent'
+          } ${
+            isSelected && !isDrawTool
+              ? 'ring-2 ring-indigo-500/80 border-indigo-400'
+              : !isDrawTool
+              ? 'group-hover:border-indigo-300/80'
+              : ''
+          }`}
+        />
+      </div>
     </div>
   );
 };
@@ -637,6 +1129,10 @@ export const NotebookPageStage: React.FC<Props> = ({
   textColor,
   textSize,
   textHasBackground,
+  textBold,
+  textItalic,
+  textUnderline,
+  textStrikethrough,
   stickyColor,
   selectedStickerType,
   stickerScale,
@@ -645,6 +1141,10 @@ export const NotebookPageStage: React.FC<Props> = ({
   fitWidth,
   pencilOnlyMode,
   selectedImageSignal,
+  deleteSelectionSignal,
+  clearSelectionSignal,
+  onSelectionChange,
+  onCropModalOpenChange,
   onStylusDetected,
   onCommitAnnotations,
   onDetectedPdfTotalPages,
@@ -682,6 +1182,66 @@ export const NotebookPageStage: React.FC<Props> = ({
       setSelectedImageId(selectedImageSignal.id);
     }
   }, [selectedImageSignal]);
+
+  useEffect(() => {
+    setSelectedStickerId(null);
+    setSelectedTextId(null);
+    setSelectedImageId(null);
+  }, [notebook.id, pageNumber]);
+
+  useEffect(() => {
+    onSelectionChange?.(Boolean(selectedImageId || selectedTextId || selectedStickerId));
+  }, [selectedImageId, selectedTextId, selectedStickerId, onSelectionChange]);
+
+  useEffect(() => {
+    onCropModalOpenChange?.(Boolean(activeCropImage));
+  }, [activeCropImage, onCropModalOpenChange]);
+
+  const lastDeleteSignalRef = useRef<number>(deleteSelectionSignal ?? 0);
+  useEffect(() => {
+    const seq = deleteSelectionSignal ?? 0;
+    if (seq === 0 || seq === lastDeleteSignalRef.current) return;
+    lastDeleteSignalRef.current = seq;
+    const latest = latestAnnotationsRef.current;
+    if (selectedImageId) {
+      onCommitAnnotations(
+        {
+          ...latest,
+          images: (latest.images || []).filter((img) => img.id !== selectedImageId),
+        },
+        true
+      );
+      setSelectedImageId(null);
+    } else if (selectedTextId) {
+      onCommitAnnotations(
+        {
+          ...latest,
+          textBoxes: (latest.textBoxes || []).filter((t) => t.id !== selectedTextId),
+        },
+        true
+      );
+      setSelectedTextId(null);
+    } else if (selectedStickerId) {
+      onCommitAnnotations(
+        {
+          ...latest,
+          stickers: latest.stickers.filter((s) => s.id !== selectedStickerId),
+        },
+        true
+      );
+      setSelectedStickerId(null);
+    }
+  }, [deleteSelectionSignal, selectedImageId, selectedTextId, selectedStickerId, onCommitAnnotations]);
+
+  const lastClearSignalRef = useRef<number>(clearSelectionSignal ?? 0);
+  useEffect(() => {
+    const seq = clearSelectionSignal ?? 0;
+    if (seq === 0 || seq === lastClearSignalRef.current) return;
+    lastClearSignalRef.current = seq;
+    setSelectedImageId(null);
+    setSelectedTextId(null);
+    setSelectedStickerId(null);
+  }, [clearSelectionSignal]);
 
   // Dragging state for Sticky Notes, Stickers, Text Boxes & Embedded Images
   const dragItemRef = useRef<{
@@ -833,7 +1393,11 @@ export const NotebookPageStage: React.FC<Props> = ({
       customPage
     ) {
       if (customPage.kind === 'blank') {
-        const res = renderBlankTemplateToDataUrl(customPage.template, effectiveRotation, 1240);
+        const res = renderBlankTemplateToDataUrl(
+          annotations.templateOverride ?? customPage.template,
+          effectiveRotation,
+          1240
+        );
         setSurface({
           dataUrl: res.dataUrl,
           width: res.width,
@@ -884,7 +1448,11 @@ export const NotebookPageStage: React.FC<Props> = ({
           });
       }
     } else if (notebook.sourceType === 'blatt-blanko') {
-      const res = renderBlankTemplateToDataUrl('blank', effectiveRotation, 1240);
+      const res = renderBlankTemplateToDataUrl(
+        annotations.templateOverride ?? 'blank',
+        effectiveRotation,
+        1240
+      );
       setSurface({
         dataUrl: res.dataUrl,
         width: res.width,
@@ -908,6 +1476,7 @@ export const NotebookPageStage: React.FC<Props> = ({
     customPage?.id,
     customPage?.kind,
     customPage?.kind === 'blank' ? customPage.template : undefined,
+    annotations.templateOverride,
     pageNumber,
     effectiveRotation,
     annotations.rotationOverride,
@@ -924,7 +1493,15 @@ export const NotebookPageStage: React.FC<Props> = ({
     const blockStylusScroll = (e: TouchEvent) => {
       if (!isDrawTool && !pencilOnlyMode) return;
       const target = e.target as HTMLElement | null;
-      if (target && (target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON')) return;
+      if (
+        target &&
+        (target.tagName === 'TEXTAREA' ||
+          target.tagName === 'BUTTON' ||
+          target.isContentEditable ||
+          Boolean(target.closest('[contenteditable="true"]')))
+      ) {
+        return;
+      }
       const hasStylusTouch = Array.from(e.touches).some(
         (t) => (t as Touch & { touchType?: string }).touchType === 'stylus'
       );
@@ -1044,6 +1621,11 @@ export const NotebookPageStage: React.FC<Props> = ({
         color: textColor,
         fontSize: textSize,
         text: '',
+        runs: [],
+        bold: textBold,
+        italic: textItalic,
+        underline: textUnderline,
+        strikethrough: textStrikethrough,
         hasBackground: textHasBackground,
         createdAt: Date.now(),
       };
@@ -1430,23 +2012,58 @@ export const NotebookPageStage: React.FC<Props> = ({
     if (selectedImageId === id) setSelectedImageId(null);
   };
 
-  const handleTextBoxChange = (id: string, text: string) => {
-    onCommitAnnotations(
-      {
-        ...annotations,
-        textBoxes: (annotations.textBoxes || []).map((t) =>
-          t.id === id ? { ...t, text } : t
-        ),
-      },
-      false
-    );
+  const getTextBoxSignature = (box: NotebookTextBox): string => {
+    const base = getBoxBaseStyle(box);
+    const runs = getEffectiveRuns(box);
+    return `${serializeRunsSignature(runs, base)}|${box.text}|${base.color}|${base.bold}|${base.italic}|${base.underline}|${base.strikethrough}`;
+  };
+
+  const handleUpdateTextBoxRich = (
+    id: string,
+    patch: Partial<
+      Pick<
+        NotebookTextBox,
+        'text' | 'runs' | 'color' | 'bold' | 'italic' | 'underline' | 'strikethrough'
+      >
+    >,
+    recordHistory: boolean = false
+  ) => {
+    const latest = latestAnnotationsRef.current;
+    const nextAnnotations: PageAnnotations = {
+      ...latest,
+      textBoxes: (latest.textBoxes || []).map((t) =>
+        t.id === id ? { ...t, ...patch } : t
+      ),
+    };
+
+    if (recordHistory) {
+      let baseSnapshot = latest;
+      if (pendingNewTextBoxBaseRef.current?.id === id) {
+        baseSnapshot = pendingNewTextBoxBaseRef.current.snapshot;
+        pendingNewTextBoxBaseRef.current = null;
+      }
+      onCommitAnnotations(nextAnnotations, true, baseSnapshot);
+      const updatedBox = (nextAnnotations.textBoxes || []).find((t) => t.id === id);
+      if (updatedBox) {
+        preEditTextSnapshotRef.current = {
+          kind: 'text',
+          id,
+          startText: getTextBoxSignature(updatedBox),
+          snapshot: nextAnnotations,
+        };
+      }
+      return;
+    }
+
+    onCommitAnnotations(nextAnnotations, false);
   };
 
   const handleToggleTextBoxBg = (id: string) => {
+    const latest = latestAnnotationsRef.current;
     onCommitAnnotations(
       {
-        ...annotations,
-        textBoxes: (annotations.textBoxes || []).map((t) =>
+        ...latest,
+        textBoxes: (latest.textBoxes || []).map((t) =>
           t.id === id ? { ...t, hasBackground: !(t.hasBackground ?? true) } : t
         ),
       },
@@ -1474,7 +2091,7 @@ export const NotebookPageStage: React.FC<Props> = ({
     preEditTextSnapshotRef.current = {
       kind: 'text',
       id,
-      startText: box.text,
+      startText: getTextBoxSignature(box),
       snapshot: latestAnnotationsRef.current,
     };
   };
@@ -1507,7 +2124,7 @@ export const NotebookPageStage: React.FC<Props> = ({
       if (newBase) {
         // Brand-new empty box discarded without leaving a dead Undo step
         onCommitAnnotations(cleanedState, false);
-      } else if (editSession && editSession.startText !== '') {
+      } else if (editSession && !editSession.startText.startsWith('[]||')) {
         onCommitAnnotations(cleanedState, true, editSession.snapshot);
       } else {
         onCommitAnnotations(cleanedState, false);
@@ -1521,7 +2138,7 @@ export const NotebookPageStage: React.FC<Props> = ({
       return;
     }
 
-    if (editSession && target && target.text !== editSession.startText) {
+    if (editSession && target && getTextBoxSignature(target) !== editSession.startText) {
       onCommitAnnotations(latestAnnotationsRef.current, true, editSession.snapshot);
     }
   };
@@ -1705,26 +2322,12 @@ export const NotebookPageStage: React.FC<Props> = ({
           />
         )}
 
-        {/* Layer 2: Smooth Vector Ink SVG (Highlighters beneath Pen) */}
+        {/* Layer 2: Smooth Vector Pen Ink SVG */}
         <svg
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
           className="absolute inset-0 w-full h-full pointer-events-none z-10"
         >
-          <g style={{ mixBlendMode: 'multiply' }}>
-            {highlighterStrokes.map((stroke) => (
-              <path
-                key={stroke.id}
-                d={buildSmoothSvgPath(stroke.points)}
-                fill="none"
-                stroke={stroke.color}
-                strokeWidth={stroke.width}
-                strokeOpacity={0.42}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            ))}
-          </g>
           <g>
             {penStrokes.map((stroke) => {
               const pressurePath = buildPressureInkPolygonPath(
@@ -1967,7 +2570,9 @@ export const NotebookPageStage: React.FC<Props> = ({
                     origSnapshot: latestAnnotationsRef.current,
                   };
                 }}
-                onChangeText={(text) => handleTextBoxChange(box.id, text)}
+                onUpdateBox={(patch, recordHistory) =>
+                  handleUpdateTextBoxRich(box.id, patch, recordHistory)
+                }
                 onToggleBackground={() => handleToggleTextBoxBg(box.id)}
                 onDelete={() => handleDeleteTextBox(box.id)}
                 onBlurBox={() => handleTextBoxBlur(box.id)}
@@ -1975,6 +2580,27 @@ export const NotebookPageStage: React.FC<Props> = ({
             );
           })}
         </div>
+
+        {/* Layer 3.8: Foreground Highlighter SVG (above Freitext, Fotos & Stickers, below Klebezettel) */}
+        <svg
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          style={{ mixBlendMode: 'multiply' }}
+          className="absolute inset-0 w-full h-full pointer-events-none z-[28]"
+        >
+          {highlighterStrokes.map((stroke) => (
+            <path
+              key={stroke.id}
+              d={buildSmoothSvgPath(stroke.points)}
+              fill="none"
+              stroke={stroke.color}
+              strokeWidth={stroke.width}
+              strokeOpacity={0.42}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ))}
+        </svg>
 
         {/* Layer 4: Interactive Sticky Notes (Klebezettel / Post-its) */}
         <div className="absolute inset-0 z-30 pointer-events-none">

@@ -1,5 +1,10 @@
 import { jsPDF } from 'jspdf';
-import { NotebookDocument, NotebookStore, PageAnnotations } from '../types/notebook';
+import {
+  NotebookDocument,
+  NotebookStore,
+  NotebookTextBox,
+  PageAnnotations,
+} from '../types/notebook';
 import { getPageAnnotations } from './notebookStorageService';
 import { renderPdfPageToDataUrl } from './pdfRenderService';
 import {
@@ -7,6 +12,12 @@ import {
   renderBlankTemplateToDataUrl,
 } from './customNotebookDbService';
 import { NOTEBOOK_STICKERS } from '../data/notebooksData';
+import {
+  getBoxBaseStyle,
+  getEffectiveRuns,
+  ResolvedTextStyle,
+  resolveRunStyle,
+} from '../utils/richTextRuns';
 
 interface LoadedImageResult {
   img: HTMLImageElement;
@@ -53,7 +64,12 @@ export async function exportNotebookAsPdf(
   store: NotebookStore,
   onProgress?: (current: number, total: number) => void
 ): Promise<void> {
-  const totalPages = Math.max(1, notebook.totalPages);
+  const totalPages = Math.max(
+    1,
+    !notebook.isCustom && notebook.sourceType === 'blatt-blanko'
+      ? store.blankPageCountByBook?.[notebook.id] ?? notebook.totalPages
+      : notebook.totalPages
+  );
   let pdf: jsPDF | null = null;
 
   for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
@@ -141,7 +157,11 @@ export async function exportNotebookAsPdf(
         customPage
       ) {
         if (customPage.kind === 'blank') {
-          const res = renderBlankTemplateToDataUrl(customPage.template, effectiveRotation, 1240);
+          const res = renderBlankTemplateToDataUrl(
+            annotations.templateOverride ?? customPage.template,
+            effectiveRotation,
+            1240
+          );
           backgroundReady = await renderFittedImage(res.dataUrl, 0);
         } else if (customPage.kind === 'image') {
           const url = await getMediaObjectUrl(customPage.mediaId);
@@ -161,7 +181,11 @@ export async function exportNotebookAsPdf(
           }
         }
       } else {
-        const res = renderBlankTemplateToDataUrl('blank', effectiveRotation, 1240);
+        const res = renderBlankTemplateToDataUrl(
+          annotations.templateOverride ?? 'blank',
+          effectiveRotation,
+          1240
+        );
         backgroundReady = await renderFittedImage(res.dataUrl, 0);
       }
     } catch (err) {
@@ -184,17 +208,10 @@ export async function exportNotebookAsPdf(
     // 2. Render Annotations onto canvas using exact page dimensions
     const uiScale = canvasW / 1240;
 
-    // 2a. Strokes (Highlighters first with multiply blend, then smooth/pressure Pen strokes)
+    // 2a. Smooth/pressure Pen strokes
     const allStrokes = annotations.strokes || [];
     const highlighterStrokes = allStrokes.filter((s) => s.tool === 'highlighter');
     const penStrokes = allStrokes.filter((s) => s.tool === 'pen');
-
-    for (const stroke of highlighterStrokes) {
-      drawSmoothStrokeToCanvas(ctx, stroke, canvasW, canvasH, {
-        alpha: 0.42,
-        multiply: true,
-      });
-    }
 
     for (const stroke of penStrokes) {
       if (
@@ -231,7 +248,15 @@ export async function exportNotebookAsPdf(
       drawTextBoxToCanvas(ctx, box, canvasW, canvasH, uiScale);
     }
 
-    // 2e. Sticky Notes
+    // 2e. Highlighter strokes in foreground above Freitext, Fotos & Stickers (multiply blend)
+    for (const stroke of highlighterStrokes) {
+      drawSmoothStrokeToCanvas(ctx, stroke, canvasW, canvasH, {
+        alpha: 0.42,
+        multiply: true,
+      });
+    }
+
+    // 2f. Sticky Notes always on top so they remain readable
     for (const sticky of annotations.stickyNotes || []) {
       drawStickyNoteToCanvas(ctx, sticky, canvasW, canvasH, uiScale);
     }
@@ -464,9 +489,131 @@ function drawStickyNoteToCanvas(
   ctx.restore();
 }
 
+interface CanvasStyledSegment {
+  text: string;
+  style: ResolvedTextStyle;
+  width: number;
+}
+
+interface CanvasWrappedLine {
+  segments: CanvasStyledSegment[];
+  width: number;
+}
+
+function buildCanvasFont(style: ResolvedTextStyle, fontSizePx: number): string {
+  return `${style.italic ? 'italic ' : ''}${style.bold ? '700' : '500'} ${fontSizePx}px system-ui, sans-serif`;
+}
+
+function wrapRichRunsForCanvas(
+  ctx: CanvasRenderingContext2D,
+  box: NotebookTextBox,
+  fontSizePx: number,
+  maxWidth: number
+): CanvasWrappedLine[] {
+  const base = getBoxBaseStyle(box);
+  const runs = getEffectiveRuns(box);
+  if (runs.length === 0) return [];
+
+  // Split runs into newline-separated paragraphs while keeping styles intact
+  const paragraphs: { text: string; style: ResolvedTextStyle }[][] = [[]];
+  for (const run of runs) {
+    const style = resolveRunStyle(run, base);
+    const parts = (run.text || '').split(/\r?\n/);
+    parts.forEach((part, idx) => {
+      if (idx > 0) {
+        paragraphs.push([]);
+      }
+      if (part.length > 0) {
+        paragraphs[paragraphs.length - 1].push({ text: part, style });
+      }
+    });
+  }
+
+  const lines: CanvasWrappedLine[] = [];
+
+  for (const para of paragraphs) {
+    if (para.length === 0) {
+      lines.push({ segments: [], width: 0 });
+      continue;
+    }
+
+    let currentSegments: CanvasStyledSegment[] = [];
+    let currentWidth = 0;
+
+    const flushLine = () => {
+      lines.push({ segments: currentSegments, width: currentWidth });
+      currentSegments = [];
+      currentWidth = 0;
+    };
+
+    const appendPiece = (text: string, style: ResolvedTextStyle, width: number) => {
+      if (!text) return;
+      const last = currentSegments[currentSegments.length - 1];
+      if (
+        last &&
+        last.style.color === style.color &&
+        last.style.bold === style.bold &&
+        last.style.italic === style.italic &&
+        last.style.underline === style.underline &&
+        last.style.strikethrough === style.strikethrough
+      ) {
+        last.text += text;
+        last.width += width;
+      } else {
+        currentSegments.push({ text, style, width });
+      }
+      currentWidth += width;
+    };
+
+    for (const seg of para) {
+      ctx.font = buildCanvasFont(seg.style, fontSizePx);
+      const tokens = seg.text.split(/(\s+)/).filter((t) => t.length > 0);
+
+      for (const token of tokens) {
+        const isWhitespace = /^\s+$/.test(token);
+        const tokenWidth = ctx.measureText(token).width;
+
+        if (currentWidth > 0 && currentWidth + tokenWidth > maxWidth) {
+          if (isWhitespace) {
+            // Skip trailing space before wrapping to a new line
+            flushLine();
+            continue;
+          }
+          flushLine();
+        }
+
+        if (tokenWidth > maxWidth && !isWhitespace) {
+          let chunk = '';
+          let chunkW = 0;
+          for (const ch of token) {
+            const nextChunk = chunk + ch;
+            const nextW = ctx.measureText(nextChunk).width;
+            if (currentWidth + nextW > maxWidth && (chunk.length > 0 || currentWidth > 0)) {
+              if (chunk) appendPiece(chunk, seg.style, chunkW);
+              flushLine();
+              chunk = ch;
+              chunkW = ctx.measureText(ch).width;
+            } else {
+              chunk = nextChunk;
+              chunkW = nextW;
+            }
+          }
+          if (chunk) appendPiece(chunk, seg.style, chunkW);
+        } else {
+          appendPiece(token, seg.style, tokenWidth);
+        }
+      }
+    }
+
+    lines.push({ segments: currentSegments, width: currentWidth });
+  }
+
+  return lines.length > 0 ? lines : [{ segments: [], width: 0 }];
+}
+
 function drawTextBoxToCanvas(
   ctx: CanvasRenderingContext2D,
-  box: { x: number; y: number; text: string; color: string; fontSize: number; hasBackground?: boolean },
+  box: NotebookTextBox,
   canvasW: number,
   canvasH: number,
   uiScale: number
@@ -487,12 +634,10 @@ function drawTextBoxToCanvas(
   const maxContentWidth = Math.max(60 * uiScale, maxBoxWidth - padX * 2);
 
   ctx.save();
-  ctx.font = `500 ${fontSizePx}px system-ui, sans-serif`;
-
-  const wrappedLines = wrapText(ctx, box.text, maxContentWidth);
+  const wrappedLines = wrapRichRunsForCanvas(ctx, box, fontSizePx, maxContentWidth);
   let maxLineW = 0;
   for (const line of wrappedLines) {
-    maxLineW = Math.max(maxLineW, ctx.measureText(line).width);
+    maxLineW = Math.max(maxLineW, line.width);
   }
 
   const boxW = Math.min(maxBoxWidth, Math.max(110 * uiScale, maxLineW + padX * 2));
@@ -508,10 +653,39 @@ function drawTextBoxToCanvas(
     ctx.stroke();
   }
 
-  ctx.fillStyle = box.color || '#0f172a';
   ctx.textBaseline = 'top';
+  const decoStrokeWidth = Math.max(1, fontSizePx * 0.075);
+
   wrappedLines.forEach((line, idx) => {
-    ctx.fillText(line, xPx + padX, yPx + padY + idx * lineHeight);
+    let curX = xPx + padX;
+    const lineTop = yPx + padY + idx * lineHeight;
+
+    for (const seg of line.segments) {
+      ctx.font = buildCanvasFont(seg.style, fontSizePx);
+      ctx.fillStyle = seg.style.color;
+      ctx.fillText(seg.text, curX, lineTop);
+
+      if (seg.style.underline) {
+        ctx.strokeStyle = seg.style.color;
+        ctx.lineWidth = decoStrokeWidth;
+        const underY = lineTop + fontSizePx * 0.96;
+        ctx.beginPath();
+        ctx.moveTo(curX, underY);
+        ctx.lineTo(curX + seg.width, underY);
+        ctx.stroke();
+      }
+      if (seg.style.strikethrough) {
+        ctx.strokeStyle = seg.style.color;
+        ctx.lineWidth = decoStrokeWidth;
+        const strikeY = lineTop + fontSizePx * 0.52;
+        ctx.beginPath();
+        ctx.moveTo(curX, strikeY);
+        ctx.lineTo(curX + seg.width, strikeY);
+        ctx.stroke();
+      }
+
+      curX += seg.width;
+    }
   });
   ctx.restore();
 }

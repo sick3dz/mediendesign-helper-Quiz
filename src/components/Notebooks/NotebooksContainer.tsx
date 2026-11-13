@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { NotebookDocument, NotebookStore, PageAnnotations } from '../../types/notebook';
+import {
+  BlankPageTemplate,
+  NotebookDocument,
+  NotebookStore,
+  PageAnnotations,
+} from '../../types/notebook';
 import {
   deleteNotebookAnnotations,
+  deleteNotebookPageAnnotations,
+  getPageAnnotations,
   loadNotebookStore,
+  reorderNotebookPageAnnotations,
   saveLastPageForBook,
   savePageAnnotations,
 } from '../../services/notebookStorageService';
@@ -10,7 +18,10 @@ import {
   cleanupUnusedEmbeddedMedia,
   createQuickBlankNotebook,
   deleteCustomNotebook,
+  deleteCustomNotebookPage,
   listCustomNotebooks,
+  reorderCustomNotebookPages,
+  updateCustomPageTemplate,
 } from '../../services/customNotebookDbService';
 import { NotebookLibraryView } from './NotebookLibraryView';
 import { NotebookReaderWorkspace } from './NotebookReaderWorkspace';
@@ -109,6 +120,149 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
     setSelection({ notebook: created, page: 1 });
   };
 
+  const handleDeletePage = async (notebook: NotebookDocument, pageNumber: number) => {
+    const latestStore = loadNotebookStore();
+    const isBuiltInBlank = !notebook.isCustom && notebook.sourceType === 'blatt-blanko';
+    const oldTotalPages = isBuiltInBlank
+      ? latestStore.blankPageCountByBook?.[notebook.id] ?? notebook.totalPages
+      : notebook.totalPages;
+
+    if (oldTotalPages <= 1) return;
+
+    if (notebook.isCustom) {
+      const updated = await deleteCustomNotebookPage(notebook.id, pageNumber);
+      if (updated) {
+        setCustomNotebooks((prev) =>
+          prev.map((b) => (b.id === updated.id ? updated : b))
+        );
+        setSelection((prev) =>
+          prev && prev.notebook.id === updated.id ? { ...prev, notebook: updated } : prev
+        );
+      }
+    }
+
+    const nextStore = deleteNotebookPageAnnotations(
+      latestStore,
+      notebook.id,
+      pageNumber,
+      oldTotalPages,
+      isBuiltInBlank
+    );
+    setStore(nextStore);
+    await cleanupUnusedEmbeddedMedia(collectActiveEmbeddedMediaIds(nextStore));
+  };
+
+  const handleChangePageLayout = async (
+    notebook: NotebookDocument,
+    pageNumber: number,
+    template: BlankPageTemplate,
+    applyToAllBlank: boolean = false
+  ) => {
+    const latestStore = loadNotebookStore();
+
+    if (notebook.isCustom) {
+      const updated = await updateCustomPageTemplate(
+        notebook.id,
+        pageNumber,
+        template,
+        applyToAllBlank
+      );
+      if (updated) {
+        setCustomNotebooks((prev) =>
+          prev.map((b) => (b.id === updated.id ? updated : b))
+        );
+        setSelection((prev) =>
+          prev && prev.notebook.id === updated.id ? { ...prev, notebook: updated } : prev
+        );
+      }
+
+      // Keep localStorage annotations in sync (clear any legacy templateOverride on affected blank pages)
+      let workingStore = latestStore;
+      const pagesToClear = applyToAllBlank
+        ? (updated?.customPages ?? notebook.customPages ?? [])
+            .filter((pg) => pg.kind === 'blank')
+            .map((pg) => pg.pageNumber)
+        : [pageNumber];
+
+      for (const pNum of pagesToClear) {
+        const existingAnn = getPageAnnotations(workingStore, notebook.id, pNum);
+        if (existingAnn.templateOverride !== undefined) {
+          workingStore = savePageAnnotations(workingStore, notebook.id, pNum, {
+            ...existingAnn,
+            templateOverride: undefined,
+          });
+        }
+      }
+      setStore(workingStore);
+      return;
+    }
+
+    if (notebook.sourceType === 'blatt-blanko') {
+      const effectiveTotal = Math.max(
+        1,
+        latestStore.blankPageCountByBook?.[notebook.id] ?? notebook.totalPages
+      );
+      const targetPages = applyToAllBlank
+        ? Array.from({ length: effectiveTotal }, (_, idx) => idx + 1)
+        : [pageNumber];
+
+      let workingStore = latestStore;
+      const overrideVal = template === 'blank' ? undefined : template;
+      for (const pNum of targetPages) {
+        const existingAnn = getPageAnnotations(workingStore, notebook.id, pNum);
+        workingStore = savePageAnnotations(workingStore, notebook.id, pNum, {
+          ...existingAnn,
+          templateOverride: overrideVal,
+        });
+      }
+      setStore(workingStore);
+    }
+  };
+
+  const handleMovePage = async (
+    notebook: NotebookDocument,
+    fromPage: number,
+    toPage: number
+  ) => {
+    const latestStore = loadNotebookStore();
+    const isBuiltInBlank = !notebook.isCustom && notebook.sourceType === 'blatt-blanko';
+    const effectiveTotal = isBuiltInBlank
+      ? latestStore.blankPageCountByBook?.[notebook.id] ?? notebook.totalPages
+      : notebook.totalPages;
+
+    if (
+      effectiveTotal <= 1 ||
+      fromPage === toPage ||
+      fromPage < 1 ||
+      toPage < 1 ||
+      fromPage > effectiveTotal ||
+      toPage > effectiveTotal
+    ) {
+      return;
+    }
+
+    if (notebook.isCustom) {
+      const updated = await reorderCustomNotebookPages(notebook.id, fromPage, toPage);
+      if (updated) {
+        setCustomNotebooks((prev) =>
+          prev.map((b) => (b.id === updated.id ? updated : b))
+        );
+        setSelection((prev) =>
+          prev && prev.notebook.id === updated.id ? { ...prev, notebook: updated } : prev
+        );
+      }
+    }
+
+    const nextStore = reorderNotebookPageAnnotations(
+      latestStore,
+      notebook.id,
+      fromPage,
+      toPage,
+      effectiveTotal
+    );
+    setStore(nextStore);
+  };
+
   const handleModalCompleted = ({
     notebook,
     jumpToPage,
@@ -155,6 +309,9 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
           store={store}
           onUpdatePageAnnotations={handleUpdatePageAnnotations}
           onPageChange={handlePageChange}
+          onDeletePage={handleDeletePage}
+          onMovePage={handleMovePage}
+          onChangePageLayout={handleChangePageLayout}
           onOpenAppendPages={
             selection.notebook.isCustom
               ? () =>

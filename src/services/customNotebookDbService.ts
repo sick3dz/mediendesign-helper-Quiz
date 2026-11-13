@@ -443,6 +443,161 @@ export async function appendPagesToCustomNotebook(
   }
 }
 
+export async function updateCustomPageTemplate(
+  notebookId: string,
+  pageNumber: number,
+  template: BlankPageTemplate,
+  applyToAllBlank: boolean = false
+): Promise<NotebookDocument | null> {
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction(STORE_NOTEBOOKS, 'readwrite');
+    const store = tx.objectStore(STORE_NOTEBOOKS);
+    const existing = await txPromise<NotebookDocument | undefined>(store.get(notebookId));
+    if (!existing || !existing.customPages) {
+      return null;
+    }
+
+    let changed = false;
+    const nextPages = existing.customPages.map((pg, idx) => {
+      if (pg.kind !== 'blank') return pg;
+      const shouldUpdate = applyToAllBlank || pg.pageNumber === pageNumber || idx === pageNumber - 1;
+      if (!shouldUpdate) return pg;
+      changed = true;
+      return {
+        ...pg,
+        template,
+        title: makeTemplateLabel(template),
+      };
+    });
+
+    if (!changed) return existing;
+
+    const updated: NotebookDocument = {
+      ...existing,
+      customPages: nextPages,
+      updatedAt: Date.now(),
+    };
+
+    store.put(updated);
+    await transactionDone(tx);
+    return updated;
+  } finally {
+    db.close();
+  }
+}
+
+export async function deleteCustomNotebookPage(
+  notebookId: string,
+  pageNumber: number
+): Promise<NotebookDocument | null> {
+  const db = await openDatabase();
+  try {
+    const readTx = db.transaction(STORE_NOTEBOOKS, 'readonly');
+    const allBooks = await txPromise<NotebookDocument[]>(
+      readTx.objectStore(STORE_NOTEBOOKS).getAll()
+    );
+    const existing = allBooks.find((b) => b.id === notebookId);
+    if (!existing || !existing.customPages || existing.customPages.length <= 1) {
+      return existing ?? null;
+    }
+
+    const idx = existing.customPages.findIndex(
+      (pg, i) => pg.pageNumber === pageNumber || i === pageNumber - 1
+    );
+    if (idx < 0) return existing;
+
+    const removedPage = existing.customPages[idx];
+    const remainingPages = existing.customPages
+      .filter((_, i) => i !== idx)
+      .map((pg, newIdx) => ({
+        ...pg,
+        pageNumber: newIdx + 1,
+      }));
+
+    // Check if the removed page's mediaId is still referenced in this or any other custom notebook
+    let shouldDeleteMedia = false;
+    if (removedPage.kind === 'image' || removedPage.kind === 'pdf-page') {
+      const targetMediaId = removedPage.mediaId;
+      const usedInRemaining = remainingPages.some(
+        (pg) => (pg.kind === 'image' || pg.kind === 'pdf-page') && pg.mediaId === targetMediaId
+      );
+      const usedElsewhere = allBooks.some(
+        (b) =>
+          b.id !== notebookId &&
+          (b.customPages ?? []).some(
+            (pg) => (pg.kind === 'image' || pg.kind === 'pdf-page') && pg.mediaId === targetMediaId
+          )
+      );
+      shouldDeleteMedia = !usedInRemaining && !usedElsewhere;
+    }
+
+    const updated: NotebookDocument = {
+      ...existing,
+      customPages: remainingPages,
+      totalPages: remainingPages.length,
+      updatedAt: Date.now(),
+    };
+
+    const writeTx = db.transaction([STORE_NOTEBOOKS, STORE_MEDIA], 'readwrite');
+    writeTx.objectStore(STORE_NOTEBOOKS).put(updated);
+    if (shouldDeleteMedia && (removedPage.kind === 'image' || removedPage.kind === 'pdf-page')) {
+      writeTx.objectStore(STORE_MEDIA).delete(removedPage.mediaId);
+      revokeMediaObjectUrl(removedPage.mediaId);
+    }
+    await transactionDone(writeTx);
+
+    return updated;
+  } finally {
+    db.close();
+  }
+}
+
+export async function reorderCustomNotebookPages(
+  notebookId: string,
+  fromPage: number,
+  toPage: number
+): Promise<NotebookDocument | null> {
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction(STORE_NOTEBOOKS, 'readwrite');
+    const store = tx.objectStore(STORE_NOTEBOOKS);
+    const existing = await txPromise<NotebookDocument | undefined>(store.get(notebookId));
+    if (!existing || !existing.customPages || existing.customPages.length <= 1) {
+      return existing ?? null;
+    }
+
+    const len = existing.customPages.length;
+    const fromIdx = fromPage - 1;
+    const toIdx = toPage - 1;
+    if (fromIdx === toIdx || fromIdx < 0 || toIdx < 0 || fromIdx >= len || toIdx >= len) {
+      return existing;
+    }
+
+    const reordered = [...existing.customPages];
+    const [moved] = reordered.splice(fromIdx, 1);
+    reordered.splice(toIdx, 0, moved);
+
+    const normalizedPages = reordered.map((pg, idx) => ({
+      ...pg,
+      pageNumber: idx + 1,
+    }));
+
+    const updated: NotebookDocument = {
+      ...existing,
+      customPages: normalizedPages,
+      totalPages: normalizedPages.length,
+      updatedAt: Date.now(),
+    };
+
+    store.put(updated);
+    await transactionDone(tx);
+    return updated;
+  } finally {
+    db.close();
+  }
+}
+
 export async function deleteCustomNotebook(notebookId: string): Promise<void> {
   const db = await openDatabase();
   try {

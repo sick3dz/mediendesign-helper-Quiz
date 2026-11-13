@@ -50,6 +50,23 @@ export interface NotebookStickyNote {
   createdAt: number;
 }
 
+export interface NotebookTextStyle {
+  color?: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  strikethrough?: boolean;
+}
+
+export interface NotebookTextRun {
+  text: string;
+  color?: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  strikethrough?: boolean;
+}
+
 export interface NotebookTextBox {
   id: string;
   x: number; // 0..100 (% of page width)
@@ -57,6 +74,11 @@ export interface NotebookTextBox {
   color: string;
   fontSize: number; // % of page width (e.g., 1.5, 2.0, 2.8)
   text: string;
+  runs?: NotebookTextRun[];
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  strikethrough?: boolean;
   hasBackground?: boolean;
   createdAt: number;
 }
@@ -89,12 +111,14 @@ export interface PageAnnotations {
   textBoxes?: NotebookTextBox[];
   images?: NotebookImageElement[];
   rotationOverride?: number; // 0 | 90 | 180 | 270
+  templateOverride?: BlankPageTemplate;
 }
 
 export interface NotebookStore {
   version: number;
   pages: Record<string, PageAnnotations>; // key: `${notebookId}::${pageNumber}`
   lastPageByBook: Record<string, number>; // key: notebookId -> 1-based page number
+  blankPageCountByBook?: Record<string, number>; // key: built-in blatt-blanko notebookId -> remaining page count
 }
 
 export interface NotebookImagePage {

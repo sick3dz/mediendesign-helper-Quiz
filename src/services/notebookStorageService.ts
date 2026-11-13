@@ -1,4 +1,10 @@
-import { NotebookSticker, NotebookStickyNote, NotebookStore, PageAnnotations } from '../types/notebook';
+import {
+  BlankPageTemplate,
+  NotebookSticker,
+  NotebookStickyNote,
+  NotebookStore,
+  PageAnnotations,
+} from '../types/notebook';
 
 const NOTEBOOKS_STORAGE_KEY = 'mediengestalter_notebooks_v1';
 
@@ -14,6 +20,7 @@ export const DEFAULT_NOTEBOOK_STORE: NotebookStore = {
   version: 1,
   pages: {},
   lastPageByBook: {},
+  blankPageCountByBook: {},
 };
 
 export function makePageKey(notebookId: string, pageNumber: number): string {
@@ -32,6 +39,10 @@ export function loadNotebookStore(): NotebookStore {
       lastPageByBook:
         parsed.lastPageByBook && typeof parsed.lastPageByBook === 'object'
           ? parsed.lastPageByBook
+          : {},
+      blankPageCountByBook:
+        parsed.blankPageCountByBook && typeof parsed.blankPageCountByBook === 'object'
+          ? parsed.blankPageCountByBook
           : {},
     };
   } catch {
@@ -64,6 +75,7 @@ export function getPageAnnotations(
     textBoxes: Array.isArray(entry.textBoxes) ? entry.textBoxes : [],
     images: Array.isArray(entry.images) ? entry.images : [],
     rotationOverride: entry.rotationOverride,
+    templateOverride: entry.templateOverride,
   };
 }
 
@@ -80,7 +92,8 @@ export function savePageAnnotations(
     annotations.stickers.length === 0 &&
     (annotations.textBoxes?.length || 0) === 0 &&
     (annotations.images?.length || 0) === 0 &&
-    annotations.rotationOverride === undefined;
+    annotations.rotationOverride === undefined &&
+    annotations.templateOverride === undefined;
 
   const nextPages = { ...store.pages };
   if (isEmpty) {
@@ -204,6 +217,13 @@ export function getAllAnnotatedPages(store: NotebookStore): AnnotatedPageIndexIt
   return result;
 }
 
+function normalizeBlankTemplate(val: unknown): BlankPageTemplate | undefined {
+  if (val === 'blank' || val === 'lined' || val === 'grid' || val === 'dotted') {
+    return val;
+  }
+  return undefined;
+}
+
 function normalizePageAnnotations(raw: unknown): PageAnnotations | null {
   if (!raw || typeof raw !== 'object') return null;
   const entry = raw as Partial<PageAnnotations>;
@@ -214,6 +234,7 @@ function normalizePageAnnotations(raw: unknown): PageAnnotations | null {
     entry.rotationOverride === 270
       ? entry.rotationOverride
       : undefined;
+  const templateOverride = normalizeBlankTemplate(entry.templateOverride);
 
   return {
     strokes: Array.isArray(entry.strokes)
@@ -228,7 +249,30 @@ function normalizePageAnnotations(raw: unknown): PageAnnotations | null {
       ? entry.stickers.filter((s) => s && typeof s === 'object' && typeof s.id === 'string')
       : [],
     textBoxes: Array.isArray(entry.textBoxes)
-      ? entry.textBoxes.filter((t) => t && typeof t === 'object' && typeof t.id === 'string')
+      ? entry.textBoxes
+          .filter((t) => t && typeof t === 'object' && typeof t.id === 'string')
+          .map((t) => ({
+            ...t,
+            bold: typeof t.bold === 'boolean' ? t.bold : undefined,
+            italic: typeof t.italic === 'boolean' ? t.italic : undefined,
+            underline: typeof t.underline === 'boolean' ? t.underline : undefined,
+            strikethrough: typeof t.strikethrough === 'boolean' ? t.strikethrough : undefined,
+            runs: Array.isArray(t.runs)
+              ? t.runs
+                  .filter(
+                    (r) => r && typeof r === 'object' && typeof r.text === 'string'
+                  )
+                  .map((r) => ({
+                    text: r.text,
+                    color: typeof r.color === 'string' ? r.color : undefined,
+                    bold: typeof r.bold === 'boolean' ? r.bold : undefined,
+                    italic: typeof r.italic === 'boolean' ? r.italic : undefined,
+                    underline: typeof r.underline === 'boolean' ? r.underline : undefined,
+                    strikethrough:
+                      typeof r.strikethrough === 'boolean' ? r.strikethrough : undefined,
+                  }))
+              : undefined,
+          }))
       : [],
     images: Array.isArray(entry.images)
       ? entry.images.filter(
@@ -236,6 +280,7 @@ function normalizePageAnnotations(raw: unknown): PageAnnotations | null {
         )
       : [],
     rotationOverride: rot,
+    templateOverride,
   };
 }
 
@@ -263,10 +308,22 @@ export function restoreNotebookStoreFromBackup(imported: unknown): NotebookStore
     }
   }
 
+  const rawBlankCounts =
+    candidate.blankPageCountByBook && typeof candidate.blankPageCountByBook === 'object'
+      ? candidate.blankPageCountByBook
+      : {};
+  const cleanBlankCounts: Record<string, number> = {};
+  for (const [bookId, count] of Object.entries(rawBlankCounts)) {
+    if (typeof count === 'number' && Number.isFinite(count) && count >= 1) {
+      cleanBlankCounts[bookId] = Math.floor(count);
+    }
+  }
+
   const normalized: NotebookStore = {
     version: 1,
     pages: cleanPages,
     lastPageByBook: cleanLastPage,
+    blankPageCountByBook: cleanBlankCounts,
   };
   saveNotebookStore(normalized);
   return normalized;
@@ -285,6 +342,118 @@ export function deleteNotebookAnnotations(
   }
   const nextLastPage = { ...store.lastPageByBook };
   delete nextLastPage[notebookId];
+
+  const nextBlankCounts = { ...(store.blankPageCountByBook ?? {}) };
+  delete nextBlankCounts[notebookId];
+
+  const nextStore: NotebookStore = {
+    ...store,
+    pages: nextPages,
+    lastPageByBook: nextLastPage,
+    blankPageCountByBook: nextBlankCounts,
+  };
+  saveNotebookStore(nextStore);
+  return nextStore;
+}
+
+export function deleteNotebookPageAnnotations(
+  store: NotebookStore,
+  notebookId: string,
+  deletedPageNumber: number,
+  oldTotalPages: number,
+  isBuiltInBlank: boolean = false
+): NotebookStore {
+  const nextPages = { ...store.pages };
+  const newTotalPages = Math.max(1, oldTotalPages - 1);
+
+  delete nextPages[makePageKey(notebookId, deletedPageNumber)];
+
+  for (let p = deletedPageNumber + 1; p <= oldTotalPages; p++) {
+    const oldKey = makePageKey(notebookId, p);
+    const newKey = makePageKey(notebookId, p - 1);
+    if (nextPages[oldKey]) {
+      nextPages[newKey] = nextPages[oldKey];
+      delete nextPages[oldKey];
+    } else {
+      delete nextPages[newKey];
+    }
+  }
+  // Ensure old last key has no leftover entry
+  delete nextPages[makePageKey(notebookId, oldTotalPages)];
+
+  const prevLast = store.lastPageByBook[notebookId];
+  const nextLastPage = { ...store.lastPageByBook };
+  if (typeof prevLast === 'number') {
+    if (deletedPageNumber < prevLast) {
+      nextLastPage[notebookId] = Math.max(1, prevLast - 1);
+    } else {
+      nextLastPage[notebookId] = Math.max(1, Math.min(prevLast, newTotalPages));
+    }
+  }
+
+  const nextBlankCounts = { ...(store.blankPageCountByBook ?? {}) };
+  if (isBuiltInBlank) {
+    nextBlankCounts[notebookId] = newTotalPages;
+  }
+
+  const nextStore: NotebookStore = {
+    ...store,
+    pages: nextPages,
+    lastPageByBook: nextLastPage,
+    blankPageCountByBook: nextBlankCounts,
+  };
+  saveNotebookStore(nextStore);
+  return nextStore;
+}
+
+export function reorderNotebookPageAnnotations(
+  store: NotebookStore,
+  notebookId: string,
+  fromPage: number,
+  toPage: number,
+  totalPages: number
+): NotebookStore {
+  if (
+    fromPage === toPage ||
+    fromPage < 1 ||
+    toPage < 1 ||
+    fromPage > totalPages ||
+    toPage > totalPages
+  ) {
+    return store;
+  }
+
+  // Build permutation: order[newIndex] = oldPageNumber
+  const order = Array.from({ length: totalPages }, (_, idx) => idx + 1);
+  const [moved] = order.splice(fromPage - 1, 1);
+  order.splice(toPage - 1, 0, moved);
+
+  // Snapshot old entries before writing
+  const snapshotByOldPage = new Map<number, PageAnnotations | undefined>();
+  for (let p = 1; p <= totalPages; p++) {
+    snapshotByOldPage.set(p, store.pages[makePageKey(notebookId, p)]);
+  }
+
+  const nextPages = { ...store.pages };
+  const newPageByOldPage = new Map<number, number>();
+  for (let newIdx = 0; newIdx < order.length; newIdx++) {
+    const newPage = newIdx + 1;
+    const oldPage = order[newIdx];
+    newPageByOldPage.set(oldPage, newPage);
+    const ann = snapshotByOldPage.get(oldPage);
+    const destKey = makePageKey(notebookId, newPage);
+    if (ann) {
+      nextPages[destKey] = ann;
+    } else {
+      delete nextPages[destKey];
+    }
+  }
+
+  const prevLast = store.lastPageByBook[notebookId];
+  const nextLastPage = { ...store.lastPageByBook };
+  if (typeof prevLast === 'number') {
+    nextLastPage[notebookId] = newPageByOldPage.get(prevLast) ?? prevLast;
+  }
 
   const nextStore: NotebookStore = {
     ...store,

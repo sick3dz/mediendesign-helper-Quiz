@@ -208,6 +208,11 @@ export const PEN_COLORS = [
   { id: 'red', label: 'Korrekturrot', color: '#dc2626' },
   { id: 'green', label: 'Grün', color: '#15803d' },
   { id: 'purple', label: 'Violett', color: '#7e22ce' },
+  { id: 'orange', label: 'Orange', color: '#ea580c' },
+  { id: 'teal', label: 'Petrol', color: '#0f766e' },
+  { id: 'pink', label: 'Pink', color: '#db2777' },
+  { id: 'slate', label: 'Schiefergrau', color: '#475569' },
+  { id: 'brown', label: 'Kastanienbraun', color: '#92400e' },
 ];
 
 export const STICKY_NOTE_STYLES: Record<
