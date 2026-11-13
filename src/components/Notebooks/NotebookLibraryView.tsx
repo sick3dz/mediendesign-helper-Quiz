@@ -518,9 +518,16 @@ export const NotebookLibraryView: React.FC<Props> = ({
                 key={doc.id}
                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 rounded-2xl p-4 transition-all hover:shadow-md flex flex-col justify-between gap-3"
               >
-                <button
-                  type="button"
+                <div
                   onClick={() => onSelectNotebook(doc)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onSelectNotebook(doc);
+                    }
+                  }}
                   className="group text-left cursor-pointer flex gap-4 items-stretch w-full"
                 >
                   {/* Booklet Spine & Thumbnail Cover */}
@@ -642,7 +649,7 @@ export const NotebookLibraryView: React.FC<Props> = ({
                       </div>
                     </div>
                   </div>
-                </button>
+                </div>
 
                 {/* Management Actions Bar (only for user-created custom notebooks) */}
                 {doc.isCustom && (
