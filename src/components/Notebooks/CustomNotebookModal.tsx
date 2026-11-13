@@ -26,10 +26,37 @@ import {
 import {
   appendPagesToCustomNotebook,
   createCustomNotebook,
+  renderBlankTemplateToDataUrl,
   StagedCustomItem,
   updateCustomNotebookMeta,
 } from '../../services/customNotebookDbService';
 import { inspectPdfBlob } from '../../services/pdfRenderService';
+
+const SERRATED_TEETH = 18;
+const SERRATED_CLIP_PATH = (() => {
+  const pts: string[] = ['0% 0%', '100% 0%', '100% 89%'];
+  for (let i = SERRATED_TEETH - 1; i >= 0; i--) {
+    const peakX = (((i + 0.5) / SERRATED_TEETH) * 100).toFixed(2);
+    const valleyX = ((i / SERRATED_TEETH) * 100).toFixed(2);
+    pts.push(`${peakX}% 100%`, `${valleyX}% 89%`);
+  }
+  return `polygon(${pts.join(', ')})`;
+})();
+
+const SERRATED_BORDER_SVG_PATH = (() => {
+  const width = 180;
+  const valleyY = 57;
+  const peakY = 63.5;
+  const segs: string[] = [`M 0.5 0.5 H ${width - 0.5} V ${valleyY}`];
+  const step = width / SERRATED_TEETH;
+  for (let i = SERRATED_TEETH - 1; i >= 0; i--) {
+    const peakX = (i + 0.5) * step;
+    const valleyX = i === 0 ? 0.5 : i * step;
+    segs.push(`L ${peakX.toFixed(2)} ${peakY}`, `L ${valleyX.toFixed(2)} ${valleyY}`);
+  }
+  segs.push('Z');
+  return segs.join(' ');
+})();
 
 export type CustomNotebookModalMode = 'create' | 'append' | 'edit-meta';
 
@@ -107,10 +134,40 @@ export const CustomNotebookModal: React.FC<Props> = ({
   const [isInspectingFiles, setIsInspectingFiles] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [invalidField, setInvalidField] = useState<'title' | 'customCategory' | 'pages' | null>(null);
+  const [validationSeq, setValidationSeq] = useState<number>(0);
 
+  const formScrollRef = useRef<HTMLFormElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const customCategoryInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const previewUrlsRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    if (validationSeq === 0) return;
+    const scrollEl = formScrollRef.current;
+    if (scrollEl) {
+      scrollEl.scrollTop = 0;
+    }
+    const targetInput =
+      invalidField === 'title'
+        ? titleInputRef.current
+        : invalidField === 'customCategory'
+        ? customCategoryInputRef.current
+        : null;
+
+    const rafId = window.requestAnimationFrame(() => {
+      if (formScrollRef.current) {
+        formScrollRef.current.scrollTop = 0;
+      }
+      if (targetInput) {
+        targetInput.focus({ preventScroll: true });
+        targetInput.scrollIntoView({ block: 'nearest' });
+      }
+    });
+    return () => window.cancelAnimationFrame(rafId);
+  }, [validationSeq, invalidField]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -275,23 +332,30 @@ export const CustomNotebookModal: React.FC<Props> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+    setInvalidField(null);
 
     const resolvedCategory =
       categorySelect === '__custom__' ? customCategory.trim() : categorySelect;
 
     if (mode === 'create') {
       if (!title.trim()) {
+        setInvalidField('title');
         setErrorMsg('Bitte gib einen Titel für dein neues Heft ein.');
+        setValidationSeq((s) => s + 1);
         return;
       }
       if (!resolvedCategory) {
+        setInvalidField('customCategory');
         setErrorMsg('Bitte wähle oder benenne eine Kategorie.');
+        setValidationSeq((s) => s + 1);
         return;
       }
       if (stagedItems.length === 0 || totalStagedPages === 0) {
+        setInvalidField('pages');
         setErrorMsg(
           'Füge mindestens ein PDF, ein Foto oder eine leere Notizseite hinzu.'
         );
+        setValidationSeq((s) => s + 1);
         return;
       }
 
@@ -311,6 +375,7 @@ export const CustomNotebookModal: React.FC<Props> = ({
             ? err.message
             : 'Heft konnte nicht gespeichert werden.'
         );
+        setValidationSeq((s) => s + 1);
       } finally {
         setIsSaving(false);
       }
@@ -319,11 +384,15 @@ export const CustomNotebookModal: React.FC<Props> = ({
 
     if (mode === 'edit-meta' && targetNotebook) {
       if (!title.trim()) {
+        setInvalidField('title');
         setErrorMsg('Der Titel darf nicht leer sein.');
+        setValidationSeq((s) => s + 1);
         return;
       }
       if (!resolvedCategory) {
+        setInvalidField('customCategory');
         setErrorMsg('Bitte wähle oder benenne eine Kategorie.');
+        setValidationSeq((s) => s + 1);
         return;
       }
       setIsSaving(true);
@@ -339,6 +408,7 @@ export const CustomNotebookModal: React.FC<Props> = ({
         }
       } catch {
         setErrorMsg('Änderungen konnten nicht gespeichert werden.');
+        setValidationSeq((s) => s + 1);
       } finally {
         setIsSaving(false);
       }
@@ -347,9 +417,11 @@ export const CustomNotebookModal: React.FC<Props> = ({
 
     if (mode === 'append' && targetNotebook) {
       if (stagedItems.length === 0 || totalStagedPages === 0) {
+        setInvalidField('pages');
         setErrorMsg(
           'Bitte füge mindestens ein PDF, ein Foto oder eine Notizseite hinzu.'
         );
+        setValidationSeq((s) => s + 1);
         return;
       }
       setIsSaving(true);
@@ -363,6 +435,7 @@ export const CustomNotebookModal: React.FC<Props> = ({
         }
       } catch {
         setErrorMsg('Weitere Seiten konnten nicht angefügt werden.');
+        setValidationSeq((s) => s + 1);
       } finally {
         setIsSaving(false);
       }
@@ -409,15 +482,23 @@ export const CustomNotebookModal: React.FC<Props> = ({
           </button>
         </div>
 
-        {/* Scrollable Form Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-5">
-          {errorMsg && (
-            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-200 text-xs font-medium">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
+        {/* Always-visible Error Banner above scroll container */}
+        {errorMsg && (
+          <div
+            role="alert"
+            className="mx-5 mt-3 mb-1 flex items-start gap-2.5 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs font-semibold shrink-0"
+          >
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
 
+        {/* Scrollable Form Body */}
+        <form
+          ref={formScrollRef}
+          onSubmit={handleSubmit}
+          className="flex-1 min-h-0 overflow-y-auto p-5 space-y-5"
+        >
           {(mode === 'create' || mode === 'edit-meta') && (
             <div className="space-y-4">
               <div>
@@ -425,12 +506,29 @@ export const CustomNotebookModal: React.FC<Props> = ({
                   Titel des Hefts *
                 </label>
                 <input
+                  ref={titleInputRef}
                   type="text"
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => {
+                    setTitle(e.target.value);
+                    if (invalidField === 'title') {
+                      setInvalidField(null);
+                      setErrorMsg(null);
+                    }
+                  }}
                   placeholder="z. B. Druckvorstufe Mitschrift oder IHK Prüfung 2025"
-                  className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                  aria-invalid={invalidField === 'title'}
+                  className={`w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-950 border rounded-xl text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 transition-colors ${
+                    invalidField === 'title'
+                      ? 'border-rose-500 ring-2 ring-rose-500/30 focus:ring-rose-500'
+                      : 'border-slate-200 dark:border-slate-800 focus:ring-indigo-500'
+                  }`}
                 />
+                {invalidField === 'title' && (
+                  <p className="mt-1 text-[11px] font-semibold text-rose-600 dark:text-rose-400">
+                    Pflichtfeld – bitte einen Hefttitel eingeben.
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -440,7 +538,13 @@ export const CustomNotebookModal: React.FC<Props> = ({
                   </label>
                   <select
                     value={categorySelect}
-                    onChange={(e) => setCategorySelect(e.target.value)}
+                    onChange={(e) => {
+                      setCategorySelect(e.target.value);
+                      if (invalidField === 'customCategory') {
+                        setInvalidField(null);
+                        setErrorMsg(null);
+                      }
+                    }}
                     className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 min-h-[42px]"
                   >
                     {CUSTOM_NOTEBOOK_CATEGORIES.map((cat) => (
@@ -458,11 +562,23 @@ export const CustomNotebookModal: React.FC<Props> = ({
                       Name der Kategorie *
                     </label>
                     <input
+                      ref={customCategoryInputRef}
                       type="text"
                       value={customCategory}
-                      onChange={(e) => setCustomCategory(e.target.value)}
+                      onChange={(e) => {
+                        setCustomCategory(e.target.value);
+                        if (invalidField === 'customCategory') {
+                          setInvalidField(null);
+                          setErrorMsg(null);
+                        }
+                      }}
                       placeholder="z. B. Typografie"
-                      className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                      aria-invalid={invalidField === 'customCategory'}
+                      className={`w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-950 border rounded-xl text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 transition-colors ${
+                        invalidField === 'customCategory'
+                          ? 'border-rose-500 ring-2 ring-rose-500/30 focus:ring-rose-500'
+                          : 'border-slate-200 dark:border-slate-800 focus:ring-indigo-500'
+                      }`}
                     />
                   </div>
                 ) : (
@@ -605,76 +721,135 @@ export const CustomNotebookModal: React.FC<Props> = ({
                   <span>Leere Notizseiten für Stift & Skizzen hinzufügen</span>
                 </div>
 
-                <div className="flex flex-wrap gap-1.5">
-                  {BLANK_PAGE_TEMPLATES.map((tpl) => (
-                    <button
-                      key={tpl.id}
-                      type="button"
-                      onClick={() => setSelectedTemplate(tpl.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer min-h-[36px] ${
-                        selectedTemplate === tpl.id
-                          ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white'
-                          : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
-                      }`}
-                      title={tpl.description}
-                    >
-                      {tpl.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Pastel Paper Color Picker */}
-                <div className="flex flex-wrap items-center gap-2 pt-0.5">
-                  <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                    Papierfarbe:
-                  </span>
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {BLANK_PAPER_COLORS.map((col) => {
-                      const active = selectedPaperColor === col.id;
-                      return (
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3.5">
+                  <div className="flex-1 min-w-0 space-y-2.5">
+                    <div className="flex flex-wrap gap-1.5">
+                      {BLANK_PAGE_TEMPLATES.map((tpl) => (
                         <button
-                          key={col.id}
+                          key={tpl.id}
                           type="button"
-                          onClick={() => setSelectedPaperColor(col.id)}
-                          aria-pressed={active}
-                          title={`Papierfarbe: ${col.label}`}
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer min-h-[32px] whitespace-nowrap ${
-                            active
-                              ? 'border-indigo-500 bg-indigo-50/80 dark:bg-indigo-950/50 text-slate-900 dark:text-white ring-2 ring-indigo-500/25'
-                              : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
+                          onClick={() => setSelectedTemplate(tpl.id)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer min-h-[36px] ${
+                            selectedTemplate === tpl.id
+                              ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white'
+                              : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                           }`}
+                          title={tpl.description}
                         >
-                          <span
-                            className="w-3.5 h-3.5 rounded-full border shrink-0 relative flex items-center justify-center"
+                          {tpl.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Pastel Paper Color Picker */}
+                    <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                      <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                        Papierfarbe:
+                      </span>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {BLANK_PAPER_COLORS.map((col) => {
+                          const active = selectedPaperColor === col.id;
+                          return (
+                            <button
+                              key={col.id}
+                              type="button"
+                              onClick={() => setSelectedPaperColor(col.id)}
+                              aria-pressed={active}
+                              title={`Papierfarbe: ${col.label}`}
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition-all cursor-pointer min-h-[32px] whitespace-nowrap ${
+                                active
+                                  ? 'border-indigo-500 bg-indigo-50/80 dark:bg-indigo-950/50 text-slate-900 dark:text-white ring-2 ring-indigo-500/25'
+                                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
+                              }`}
+                            >
+                              <span
+                                className="w-3.5 h-3.5 rounded-full border shrink-0 relative flex items-center justify-center"
+                                style={{
+                                  backgroundColor: col.bgHex,
+                                  borderColor: col.swatchBorder,
+                                }}
+                              >
+                                {col.id !== 'white' && (
+                                  <span
+                                    className="w-1.5 h-1.5 rounded-full"
+                                    style={{ backgroundColor: col.marginHex }}
+                                  />
+                                )}
+                              </span>
+                              <span>{col.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Optional Thema / Datum Header Toggle */}
+                    <label className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-700 dark:text-slate-300 cursor-pointer pt-0.5">
+                      <input
+                        type="checkbox"
+                        checked={showDateHeader}
+                        onChange={(e) => setShowDateHeader(e.target.checked)}
+                        className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <span>Kopfzeile („Thema / Datum“) einblenden</span>
+                    </label>
+                  </div>
+
+                  {/* Live 1/4 Page Preview with Serrated Bottom Edge */}
+                  {(() => {
+                    const previewSurface = renderBlankTemplateToDataUrl(
+                      selectedTemplate,
+                      0,
+                      560,
+                      selectedPaperColor,
+                      showDateHeader
+                    );
+                    const previewPalette = getBlankPaperPalette(selectedPaperColor);
+                    return (
+                      <div className="shrink-0 flex flex-col items-start sm:items-end gap-1 pt-0.5">
+                        <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">
+                          Vorschau (¼ Seite)
+                        </span>
+                        <div
+                          className="drop-shadow-[0_2px_4px_rgba(15,23,42,0.08)]"
+                          aria-label={`Papier-Vorschau: ${
+                            BLANK_PAGE_TEMPLATES.find((t) => t.id === selectedTemplate)?.label ??
+                            'Notizseite'
+                          }, ${previewPalette.label}`}
+                        >
+                          <div
+                            className="relative w-[180px] h-[64px] overflow-hidden select-none"
                             style={{
-                              backgroundColor: col.bgHex,
-                              borderColor: col.swatchBorder,
+                              clipPath: SERRATED_CLIP_PATH,
+                              backgroundColor: previewPalette.bgHex,
                             }}
                           >
-                            {col.id !== 'white' && (
-                              <span
-                                className="w-1.5 h-1.5 rounded-full"
-                                style={{ backgroundColor: col.marginHex }}
+                            <img
+                              src={previewSurface.dataUrl}
+                              alt="Vorschau Notizseite"
+                              draggable={false}
+                              className="w-full h-full object-cover object-top pointer-events-none"
+                            />
+                            <svg
+                              viewBox="0 0 180 64"
+                              preserveAspectRatio="none"
+                              aria-hidden="true"
+                              className="absolute inset-0 w-full h-full pointer-events-none"
+                            >
+                              <path
+                                d={SERRATED_BORDER_SVG_PATH}
+                                fill="none"
+                                stroke={previewPalette.swatchBorder}
+                                strokeWidth={1.1}
+                                strokeLinejoin="round"
                               />
-                            )}
-                          </span>
-                          <span>{col.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
-
-                {/* Optional Thema / Datum Header Toggle */}
-                <label className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-700 dark:text-slate-300 cursor-pointer pt-0.5">
-                  <input
-                    type="checkbox"
-                    checked={showDateHeader}
-                    onChange={(e) => setShowDateHeader(e.target.checked)}
-                    className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <span>Kopfzeile („Thema / Datum“) einblenden</span>
-                </label>
 
                 <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
                   <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
@@ -745,14 +920,15 @@ export const CustomNotebookModal: React.FC<Props> = ({
                       setBlankCountInput(String(resolvedBlankCount));
                       handleAddBlankPages(resolvedBlankCount);
                     }}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/60 dark:hover:bg-amber-900/70 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-800 text-xs font-bold cursor-pointer transition-colors min-h-[36px] whitespace-nowrap"
+                    title={
+                      resolvedBlankCount === 1
+                        ? '1 Notizseite hinzufügen'
+                        : `${resolvedBlankCount} Notizseiten hinzufügen`
+                    }
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs cursor-pointer transition-colors min-h-[36px] whitespace-nowrap"
                   >
                     <Plus className="w-3.5 h-3.5 shrink-0" />
-                    <span>
-                      {resolvedBlankCount === 1
-                        ? '1 Seite anfügen'
-                        : `${resolvedBlankCount} Seiten anfügen`}
-                    </span>
+                    <span>Hinzufügen</span>
                   </button>
                 </div>
               </div>

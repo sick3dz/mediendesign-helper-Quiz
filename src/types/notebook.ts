@@ -119,6 +119,8 @@ export interface PageAnnotations {
   templateOverride?: BlankPageTemplate;
   paperColorOverride?: BlankPaperColor;
   showDateHeader?: boolean;
+  headerTopic?: string;
+  headerDate?: string;
 }
 
 export interface NotebookStore {

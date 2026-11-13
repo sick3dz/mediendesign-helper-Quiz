@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import {
+  BlankPageTemplate,
   BlankPaperColor,
   NotebookDocument,
   NotebookStore,
@@ -9,6 +10,7 @@ import {
 import { getPageAnnotations } from './notebookStorageService';
 import { renderPdfPageToDataUrl } from './pdfRenderService';
 import {
+  getBlankHeaderLayoutMetrics,
   getMediaObjectUrl,
   renderBlankTemplateToDataUrl,
 } from './customNotebookDbService';
@@ -145,6 +147,7 @@ export async function exportNotebookAsPdf(
       annotations.showDateHeader ??
       (customPage?.kind === 'blank' ? customPage.showDateHeader : undefined) ??
       false;
+    let blankTemplateForHeader: BlankPageTemplate | null = null;
 
     try {
       if (notebook.sourceType === 'foto-skript' && imagePageMeta) {
@@ -166,8 +169,9 @@ export async function exportNotebookAsPdf(
         customPage
       ) {
         if (customPage.kind === 'blank') {
+          blankTemplateForHeader = annotations.templateOverride ?? customPage.template;
           const res = renderBlankTemplateToDataUrl(
-            annotations.templateOverride ?? customPage.template,
+            blankTemplateForHeader,
             effectiveRotation,
             1240,
             effectivePaperColor,
@@ -192,8 +196,9 @@ export async function exportNotebookAsPdf(
           }
         }
       } else {
+        blankTemplateForHeader = annotations.templateOverride ?? 'blank';
         const res = renderBlankTemplateToDataUrl(
-          annotations.templateOverride ?? 'blank',
+          blankTemplateForHeader,
           effectiveRotation,
           1240,
           effectivePaperColor,
@@ -218,7 +223,24 @@ export async function exportNotebookAsPdf(
     const ctx = canvas.getContext('2d');
     if (!ctx) continue;
 
-    // 2. Render Annotations onto canvas using exact page dimensions
+    // 2. Render Typed Header Fields (Thema / Datum) under ink strokes
+    if (
+      blankTemplateForHeader &&
+      effectiveShowHeader &&
+      (annotations.headerTopic?.trim() || annotations.headerDate?.trim())
+    ) {
+      drawBlankHeaderEntriesToCanvas(
+        ctx,
+        blankTemplateForHeader,
+        effectiveRotation,
+        canvasW,
+        canvasH,
+        annotations.headerTopic,
+        annotations.headerDate
+      );
+    }
+
+    // 2b. Render Annotations onto canvas using exact page dimensions
     const uiScale = canvasW / 1240;
 
     // 2a. Smooth/pressure Pen strokes
@@ -300,6 +322,65 @@ export async function exportNotebookAsPdf(
     .replace(/[^a-zA-Z0-9äöüÄÖÜß_-]/g, '_')
     .replace(/_+/g, '_');
   pdf.save(`${safeTitle || 'Heft'}-Export.pdf`);
+}
+
+function drawBlankHeaderEntriesToCanvas(
+  ctx: CanvasRenderingContext2D,
+  template: BlankPageTemplate,
+  rotation: number,
+  canvasW: number,
+  canvasH: number,
+  headerTopic?: string,
+  headerDate?: string
+): void {
+  const normRot = ((rotation % 360) + 360) % 360;
+  const isQuarter = normRot === 90 || normRot === 270;
+  const baseW = isQuarter ? canvasH : canvasW;
+  const baseH = isQuarter ? canvasW : canvasH;
+  const metrics = getBlankHeaderLayoutMetrics(template, baseW);
+
+  ctx.save();
+  ctx.translate(canvasW / 2, canvasH / 2);
+  ctx.rotate((normRot * Math.PI) / 180);
+  ctx.translate(-baseW / 2, -baseH / 2);
+
+  ctx.font = `500 ${metrics.fontPx}px system-ui, -apple-system, sans-serif`;
+  ctx.fillStyle = '#1e293b';
+  ctx.textBaseline = 'alphabetic';
+
+  const padX = Math.max(3, baseW * 0.004);
+  const clipTop = Math.max(0, metrics.textBaselineY - metrics.fontPx * 1.35);
+  const clipH = metrics.fontPx * 1.75;
+
+  if (headerTopic?.trim()) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(
+      metrics.themaInputLeft,
+      clipTop,
+      Math.max(10, metrics.themaInputRight - metrics.themaInputLeft),
+      clipH
+    );
+    ctx.clip();
+    ctx.fillText(headerTopic.trim(), metrics.themaInputLeft + padX, metrics.textBaselineY);
+    ctx.restore();
+  }
+
+  if (headerDate?.trim()) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(
+      metrics.datumInputLeft,
+      clipTop,
+      Math.max(10, metrics.datumInputRight - metrics.datumInputLeft),
+      clipH
+    );
+    ctx.clip();
+    ctx.fillText(headerDate.trim(), metrics.datumInputLeft + padX, metrics.textBaselineY);
+    ctx.restore();
+  }
+
+  ctx.restore();
 }
 
 function drawSmoothStrokeToCanvas(

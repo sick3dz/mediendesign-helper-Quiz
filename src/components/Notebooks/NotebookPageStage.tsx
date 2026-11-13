@@ -15,6 +15,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import {
+  BlankPageTemplate,
   NotebookDocument,
   NotebookImageElement,
   NotebookSticker,
@@ -48,6 +49,7 @@ import {
 } from '../../utils/richTextRuns';
 import { renderPdfPageToDataUrl } from '../../services/pdfRenderService';
 import {
+  getBlankHeaderLayoutMetrics,
   getMediaObjectUrl,
   renderBlankTemplateToDataUrl,
   revokeMediaObjectUrl,
@@ -1321,6 +1323,15 @@ export const NotebookPageStage: React.FC<Props> = ({
     snapshot: PageAnnotations;
   } | null>(null);
 
+  const preEditHeaderSnapshotRef = useRef<{
+    field: 'topic' | 'date';
+    startValue: string;
+    snapshot: PageAnnotations;
+  } | null>(null);
+
+  const headerTopicInputRef = useRef<HTMLInputElement>(null);
+  const headerDateInputRef = useRef<HTMLInputElement>(null);
+
   const pendingNewTextBoxBaseRef = useRef<{
     id: string;
     snapshot: PageAnnotations;
@@ -1566,6 +1577,7 @@ export const NotebookPageStage: React.FC<Props> = ({
       if (
         target &&
         (target.tagName === 'TEXTAREA' ||
+          target.tagName === 'INPUT' ||
           target.tagName === 'BUTTON' ||
           target.isContentEditable ||
           Boolean(target.closest('[contenteditable="true"]')))
@@ -2298,9 +2310,64 @@ export const NotebookPageStage: React.FC<Props> = ({
     }
   };
 
+  const handleHeaderFieldFocus = (field: 'topic' | 'date') => {
+    const latest = latestAnnotationsRef.current;
+    preEditHeaderSnapshotRef.current = {
+      field,
+      startValue:
+        field === 'topic' ? (latest.headerTopic ?? '') : (latest.headerDate ?? ''),
+      snapshot: latest,
+    };
+  };
+
+  const handleHeaderFieldChange = (field: 'topic' | 'date', value: string) => {
+    const latest = latestAnnotationsRef.current;
+    onCommitAnnotations(
+      field === 'topic'
+        ? { ...latest, headerTopic: value ? value : undefined }
+        : { ...latest, headerDate: value ? value : undefined },
+      false
+    );
+  };
+
+  const handleHeaderFieldBlur = (field: 'topic' | 'date') => {
+    const session = preEditHeaderSnapshotRef.current;
+    if (!session || session.field !== field) return;
+    preEditHeaderSnapshotRef.current = null;
+    const latest = latestAnnotationsRef.current;
+    const currentVal =
+      field === 'topic' ? (latest.headerTopic ?? '') : (latest.headerDate ?? '');
+    if (currentVal !== session.startValue) {
+      onCommitAnnotations(latest, true, session.snapshot);
+    }
+  };
+
+  const isBlankSurfacePage =
+    customPage?.kind === 'blank' ||
+    (!notebook.isCustom && notebook.sourceType === 'blatt-blanko') ||
+    (!customPage && notebook.sourceType === 'blatt-blanko');
+
+  const effectiveBlankTemplate: BlankPageTemplate =
+    annotations.templateOverride ??
+    (customPage?.kind === 'blank' ? customPage.template : 'blank');
+
+  const effectiveShowDateHeader = isBlankSurfacePage
+    ? annotations.showDateHeader ??
+      (customPage?.kind === 'blank' ? Boolean(customPage.showDateHeader) : false)
+    : false;
+
+  const normHeaderRot = ((effectiveRotation % 360) + 360) % 360;
+  const isQuarterHeaderRot = normHeaderRot === 90 || normHeaderRot === 270;
+
   const aspectRatio = surface ? surface.width / surface.height : 0.707;
   const displayWidth = Math.max(260, Math.round(fitWidth * zoom));
   const displayHeight = Math.round(displayWidth / aspectRatio);
+
+  const headerPaperW = isQuarterHeaderRot ? displayHeight : displayWidth;
+  const headerPaperH = isQuarterHeaderRot ? displayWidth : displayHeight;
+  const headerMetrics = effectiveShowDateHeader
+    ? getBlankHeaderLayoutMetrics(effectiveBlankTemplate, headerPaperW)
+    : null;
 
   const allStrokes = draftStroke
     ? [...annotations.strokes, draftStroke]
@@ -2367,6 +2434,110 @@ export const NotebookPageStage: React.FC<Props> = ({
             className="w-full h-full object-fill pointer-events-none block"
           />
         ) : null}
+
+        {/* Layer 1.2: Editable Thema & Datum Header Fields on Blank Note Pages */}
+        {effectiveShowDateHeader && headerMetrics && !isLoading && !loadError && (
+          <div
+            style={{
+              left: '50%',
+              top: '50%',
+              width: `${headerPaperW}px`,
+              height: `${headerPaperH}px`,
+              transform: `translate(-50%, -50%) rotate(${normHeaderRot}deg)`,
+            }}
+            className="absolute pointer-events-none z-[8]"
+          >
+            {(() => {
+              const inputH = Math.max(18, Math.round(headerMetrics.fontPx * 1.5));
+              const inputTop =
+                headerMetrics.textBaselineY - 0.5 * inputH - 0.34 * headerMetrics.fontPx;
+              const themaW = Math.max(
+                44,
+                headerMetrics.themaInputRight - headerMetrics.themaInputLeft
+              );
+              const datumW = Math.max(
+                36,
+                headerMetrics.datumInputRight - headerMetrics.datumInputLeft
+              );
+              const sharedStyle: React.CSSProperties = {
+                top: `${inputTop}px`,
+                height: `${inputH}px`,
+                fontSize: `${headerMetrics.fontPx}px`,
+                lineHeight: 1.1,
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+                WebkitUserSelect: isDrawTool ? 'none' : 'text',
+                userSelect: isDrawTool ? 'none' : 'text',
+              };
+              const sharedClass = `absolute rounded-xs px-1 font-medium text-slate-800 placeholder:text-slate-400/75 bg-transparent transition-colors focus:outline-hidden ${
+                isDrawTool
+                  ? 'pointer-events-none select-none'
+                  : 'pointer-events-auto hover:bg-slate-900/[0.04] focus:bg-white/80 focus:ring-1 focus:ring-indigo-500/70'
+              }`;
+
+              return (
+                <>
+                  <input
+                    ref={headerTopicInputRef}
+                    type="text"
+                    value={annotations.headerTopic ?? ''}
+                    placeholder={isDrawTool ? undefined : 'Thema eingeben...'}
+                    aria-label="Thema dieser Seite"
+                    tabIndex={isDrawTool ? -1 : 0}
+                    onPointerDown={(e) => {
+                      if (isDrawTool) return;
+                      e.stopPropagation();
+                    }}
+                    onFocus={() => handleHeaderFieldFocus('topic')}
+                    onChange={(e) => handleHeaderFieldChange('topic', e.target.value)}
+                    onBlur={() => handleHeaderFieldBlur('topic')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        headerDateInputRef.current?.focus();
+                      }
+                    }}
+                    style={{
+                      ...sharedStyle,
+                      left: `${headerMetrics.themaInputLeft}px`,
+                      width: `${themaW}px`,
+                    }}
+                    className={sharedClass}
+                  />
+
+                  <input
+                    ref={headerDateInputRef}
+                    type="text"
+                    value={annotations.headerDate ?? ''}
+                    placeholder={isDrawTool ? undefined : 'TT.MM.JJJJ'}
+                    aria-label="Datum dieser Seite"
+                    tabIndex={isDrawTool ? -1 : 0}
+                    onPointerDown={(e) => {
+                      if (isDrawTool) return;
+                      e.stopPropagation();
+                    }}
+                    onFocus={() => handleHeaderFieldFocus('date')}
+                    onChange={(e) => handleHeaderFieldChange('date', e.target.value)}
+                    onBlur={() => handleHeaderFieldBlur('date')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.currentTarget.blur();
+                      }
+                    }}
+                    style={{
+                      ...sharedStyle,
+                      left: `${headerMetrics.datumInputLeft}px`,
+                      width: `${datumW}px`,
+                    }}
+                    className={sharedClass}
+                  />
+                </>
+              );
+            })()}
+          </div>
+        )}
 
         {/* Layer 1.5: Interactive Embedded Images (on custom & existing pages) */}
         <div className="absolute inset-0 z-[5] pointer-events-none">

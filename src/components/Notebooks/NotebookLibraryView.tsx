@@ -12,7 +12,6 @@ import {
   FilePlus2,
   Pencil,
   Trash2,
-  File,
   Loader2,
 } from 'lucide-react';
 import { exportNotebookAsPdf } from '../../services/pdfExportService';
@@ -40,7 +39,6 @@ interface Props {
   customNotebooks: NotebookDocument[];
   onSelectNotebook: (notebook: NotebookDocument, pageNumber?: number) => void;
   onCreateCustomNotebook: () => void;
-  onCreateBlankNotebook: () => void;
   onEditCustomNotebook: (notebook: NotebookDocument) => void;
   onAppendPagesToNotebook: (notebook: NotebookDocument) => void;
   onDeleteCustomNotebook: (notebookId: string) => void;
@@ -168,7 +166,6 @@ export const NotebookLibraryView: React.FC<Props> = ({
   customNotebooks,
   onSelectNotebook,
   onCreateCustomNotebook,
-  onCreateBlankNotebook,
   onEditCustomNotebook,
   onAppendPagesToNotebook,
   onDeleteCustomNotebook,
@@ -325,18 +322,6 @@ export const NotebookLibraryView: React.FC<Props> = ({
               </>
             )}
           </div>
-
-
-          <button
-            type="button"
-            onClick={onCreateBlankNotebook}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-2xs transition-colors cursor-pointer min-h-[44px] whitespace-nowrap"
-            title="Schnellstart: neues leeres DIN-A4-Notizheft öffnen"
-          >
-            <File className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-            <span>Blanko-Heft</span>
-          </button>
-
           <button
             type="button"
             onClick={onCreateCustomNotebook}

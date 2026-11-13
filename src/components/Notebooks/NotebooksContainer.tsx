@@ -18,7 +18,6 @@ import {
 import {
   appendQuickBlankPageToCustomNotebook,
   cleanupUnusedEmbeddedMedia,
-  createQuickBlankNotebook,
   deleteCustomNotebook,
   deleteCustomNotebookPage,
   listCustomNotebooks,
@@ -113,13 +112,6 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
     setStore(nextStore);
     setSelection((prev) => (prev && prev.notebook.id === notebookId ? null : prev));
     await cleanupUnusedEmbeddedMedia(collectActiveEmbeddedMediaIds(nextStore));
-  };
-
-  const handleCreateBlankNotebook = async () => {
-    const created = await createQuickBlankNotebook();
-    setCustomNotebooks((prev) => [created, ...prev]);
-    setJumpSignal(undefined);
-    setSelection({ notebook: created, page: 1 });
   };
 
   const handleDeletePage = async (notebook: NotebookDocument, pageNumber: number) => {
@@ -421,7 +413,6 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
             setSelection({ notebook, page });
           }}
           onCreateCustomNotebook={() => setModalState({ mode: 'create' })}
-          onCreateBlankNotebook={handleCreateBlankNotebook}
           onEditCustomNotebook={(notebook) =>
             setModalState({ mode: 'edit-meta', targetNotebook: notebook })
           }

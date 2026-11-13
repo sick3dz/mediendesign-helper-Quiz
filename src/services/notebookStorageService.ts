@@ -80,6 +80,8 @@ export function getPageAnnotations(
     paperColorOverride: entry.paperColorOverride,
     showDateHeader:
       typeof entry.showDateHeader === 'boolean' ? entry.showDateHeader : undefined,
+    headerTopic: typeof entry.headerTopic === 'string' ? entry.headerTopic : undefined,
+    headerDate: typeof entry.headerDate === 'string' ? entry.headerDate : undefined,
   };
 }
 
@@ -99,7 +101,9 @@ export function savePageAnnotations(
     annotations.rotationOverride === undefined &&
     annotations.templateOverride === undefined &&
     annotations.paperColorOverride === undefined &&
-    annotations.showDateHeader === undefined;
+    annotations.showDateHeader === undefined &&
+    !annotations.headerTopic &&
+    !annotations.headerDate;
 
   const nextPages = { ...store.pages };
   if (isEmpty) {
@@ -158,7 +162,8 @@ export function getNotebookAnnotationSummary(
     const stickers = page.stickers?.length || 0;
     const texts = page.textBoxes?.length || 0;
     const images = page.images?.length || 0;
-    if (strokes > 0 || stickies > 0 || stickers > 0 || texts > 0 || images > 0) {
+    const hasHeaderEntry = Boolean(page.headerTopic?.trim() || page.headerDate?.trim());
+    if (strokes > 0 || stickies > 0 || stickers > 0 || texts > 0 || images > 0 || hasHeaderEntry) {
       annotatedPages += 1;
       strokeCount += strokes;
       stickyCount += stickies;
@@ -196,13 +201,15 @@ export function getAllAnnotatedPages(store: NotebookStore): AnnotatedPageIndexIt
     const strokeCount = Array.isArray(page.strokes) ? page.strokes.length : 0;
     const textCount = Array.isArray(page.textBoxes) ? page.textBoxes.length : 0;
     const imageCount = Array.isArray(page.images) ? page.images.length : 0;
+    const hasHeaderEntry = Boolean(page.headerTopic?.trim() || page.headerDate?.trim());
 
     if (
       stickers.length > 0 ||
       stickyNotes.length > 0 ||
       strokeCount > 0 ||
       textCount > 0 ||
-      imageCount > 0
+      imageCount > 0 ||
+      hasHeaderEntry
     ) {
       result.push({
         notebookId,
@@ -311,6 +318,14 @@ function normalizePageAnnotations(raw: unknown): PageAnnotations | null {
     paperColorOverride,
     showDateHeader:
       typeof entry.showDateHeader === 'boolean' ? entry.showDateHeader : undefined,
+    headerTopic:
+      typeof entry.headerTopic === 'string' && entry.headerTopic.length > 0
+        ? entry.headerTopic
+        : undefined,
+    headerDate:
+      typeof entry.headerDate === 'string' && entry.headerDate.length > 0
+        ? entry.headerDate
+        : undefined,
   };
 }
 
@@ -497,7 +512,7 @@ export function reorderNotebookPageAnnotations(
 export interface NotebookNoteSearchHit {
   notebookId: string;
   pageNumber: number;
-  kind: 'sticky' | 'text';
+  kind: 'sticky' | 'text' | 'header';
   id: string;
   text: string;
 }
@@ -515,6 +530,21 @@ export function searchNotebookNotes(
   for (let p = 1; p <= totalPages; p++) {
     const page = store.pages[makePageKey(notebookId, p)];
     if (!page) continue;
+
+    const headerTopic = (page.headerTopic || '').trim();
+    const headerDate = (page.headerDate || '').trim();
+    if (headerTopic || headerDate) {
+      const combined = [headerTopic, headerDate].filter(Boolean).join(' · ');
+      if (combined.toLowerCase().includes(q)) {
+        hits.push({
+          notebookId,
+          pageNumber: p,
+          kind: 'header',
+          id: `hdr-${p}`,
+          text: combined,
+        });
+      }
+    }
 
     for (const sticky of page.stickyNotes || []) {
       const txt = (sticky.text || '').trim();

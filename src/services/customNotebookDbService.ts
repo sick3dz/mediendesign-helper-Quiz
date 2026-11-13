@@ -705,6 +705,76 @@ export async function cleanupUnusedEmbeddedMedia(
   }
 }
 
+export interface BlankHeaderLayoutMetrics {
+  fontPx: number;
+  textBaselineY: number;
+  underlineY: number;
+  dividerY: number;
+  leftStart: number;
+  dateColX: number;
+  rightEnd: number;
+  themaInputLeft: number;
+  themaInputRight: number;
+  datumInputLeft: number;
+  datumInputRight: number;
+}
+
+let headerMeasureCtx: CanvasRenderingContext2D | null = null;
+function measureHeaderLabelWidths(fontPx: number): { themaW: number; datumW: number } {
+  if (typeof document !== 'undefined') {
+    if (!headerMeasureCtx) {
+      const c = document.createElement('canvas');
+      headerMeasureCtx = c.getContext('2d');
+    }
+    if (headerMeasureCtx) {
+      headerMeasureCtx.font = `600 ${fontPx}px system-ui, -apple-system, sans-serif`;
+      return {
+        themaW: headerMeasureCtx.measureText('Thema:').width,
+        datumW: headerMeasureCtx.measureText('Datum:').width,
+      };
+    }
+  }
+  return {
+    themaW: fontPx * 3.55,
+    datumW: fontPx * 3.55,
+  };
+}
+
+export function getBlankHeaderLayoutMetrics(
+  template: BlankPageTemplate,
+  paperWidthPx: number
+): BlankHeaderLayoutMetrics {
+  const refW = 1240;
+  const scale = paperWidthPx / refW;
+  const linedStep = Math.round(refW / 26); // 48
+  const linedLeftMargin = Math.round(refW * 0.115); // 143
+  const headerFontPx = Math.max(11, Math.round(refW * 0.016)); // 20
+  const headerTextY = Math.round(linedStep * 1.25); // 60
+  const leftStart =
+    template === 'lined'
+      ? linedLeftMargin + Math.round(linedStep * 0.35)
+      : Math.round(refW * 0.065);
+  const dateColX = Math.round(refW * 0.7);
+  const rightEnd = Math.round(refW * 0.935);
+  const { themaW, datumW } = measureHeaderLabelWidths(headerFontPx);
+  const gap = Math.round(refW * 0.012);
+  const rightGap = Math.round(refW * 0.028);
+
+  return {
+    fontPx: Math.max(9, headerFontPx * scale),
+    textBaselineY: headerTextY * scale,
+    underlineY: (headerTextY + 2) * scale,
+    dividerY: (Math.round(linedStep * 1.75) + 0.5) * scale,
+    leftStart: leftStart * scale,
+    dateColX: dateColX * scale,
+    rightEnd: rightEnd * scale,
+    themaInputLeft: (leftStart + themaW + gap) * scale,
+    themaInputRight: (dateColX - rightGap) * scale,
+    datumInputLeft: (dateColX + datumW + gap) * scale,
+    datumInputRight: rightEnd * scale,
+  };
+}
+
 export function renderBlankTemplateToDataUrl(
   template: BlankPageTemplate,
   rotation: number = 0,

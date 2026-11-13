@@ -505,6 +505,8 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
         templateOverride: currentAnnotations.templateOverride,
         paperColorOverride: currentAnnotations.paperColorOverride,
         showDateHeader: currentAnnotations.showDateHeader,
+        headerTopic: undefined,
+        headerDate: undefined,
       },
       true
     );
@@ -1019,7 +1021,9 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     currentAnnotations.stickyNotes.length +
     currentAnnotations.stickers.length +
     (currentAnnotations.textBoxes?.length || 0) +
-    (currentAnnotations.images?.length || 0);
+    (currentAnnotations.images?.length || 0) +
+    (currentAnnotations.headerTopic?.trim() ? 1 : 0) +
+    (currentAnnotations.headerDate?.trim() ? 1 : 0);
 
   const bookStickerPages = Array.from({ length: totalPages }, (_, idx) => idx + 1)
     .map((pageNum) => {
@@ -1034,12 +1038,23 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     const items: {
       notebookId: string;
       pageNumber: number;
-      kind: 'sticky' | 'text';
+      kind: 'sticky' | 'text' | 'header';
       id: string;
       text: string;
     }[] = [];
     for (let p = 1; p <= totalPages; p++) {
       const ann = getPageAnnotations(store, notebook.id, p);
+      const headerTopic = (ann.headerTopic || '').trim();
+      const headerDate = (ann.headerDate || '').trim();
+      if (headerTopic || headerDate) {
+        items.push({
+          notebookId: notebook.id,
+          pageNumber: p,
+          kind: 'header',
+          id: `hdr-${p}`,
+          text: [headerTopic, headerDate].filter(Boolean).join(' · '),
+        });
+      }
       for (const sticky of ann.stickyNotes) {
         const txt = (sticky.text || '').trim();
         items.push({
@@ -2384,7 +2399,8 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                       pageAnn.stickyNotes.length > 0 ||
                       pageAnn.stickers.length > 0 ||
                       (pageAnn.textBoxes?.length || 0) > 0 ||
-                      (pageAnn.images?.length || 0) > 0;
+                      (pageAnn.images?.length || 0) > 0 ||
+                      Boolean(pageAnn.headerTopic?.trim() || pageAnn.headerDate?.trim());
                     const imgMeta =
                       notebook.sourceType === 'foto-skript'
                         ? notebook.imagePages?.[pageNum - 1]
@@ -2800,10 +2816,18 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600 dark:text-slate-300">
                             {hit.kind === 'sticky' ? (
                               <StickyNote className="w-3 h-3 text-amber-500" />
+                            ) : hit.kind === 'header' ? (
+                              <Calendar className="w-3 h-3 text-emerald-500" />
                             ) : (
                               <Type className="w-3 h-3 text-indigo-500" />
                             )}
-                            <span>{hit.kind === 'sticky' ? 'Klebezettel' : 'Freitext'}</span>
+                            <span>
+                              {hit.kind === 'sticky'
+                                ? 'Klebezettel'
+                                : hit.kind === 'header'
+                                ? 'Kopfzeile'
+                                : 'Freitext'}
+                            </span>
                           </span>
                           <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">
                             S. {hit.pageNumber}
