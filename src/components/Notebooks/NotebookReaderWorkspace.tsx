@@ -205,7 +205,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   }, [jumpSignal, notebook.totalPages]);
 
   // Active Tool & Sub-options (Classic GoodNotes)
-  const [activeTool, setActiveTool] = useState<NotebookTool>('highlighter');
+  const [activeTool, setActiveTool] = useState<NotebookTool>('hand');
   const [openToolPopover, setOpenToolPopover] = useState<
     'highlighter' | 'pen' | 'text' | 'sticky' | 'sticker' | null
   >(null);
