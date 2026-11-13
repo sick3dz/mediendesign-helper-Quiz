@@ -1,4 +1,6 @@
-export type NotebookSourceType = 'foto-skript' | 'pdf-dokument';
+export type NotebookSourceType = 'foto-skript' | 'pdf-dokument' | 'eigenes-heft';
+
+export type BlankPageTemplate = 'blank' | 'lined' | 'grid' | 'dotted';
 
 export type NotebookTool =
   | 'hand'
@@ -70,6 +72,33 @@ export interface NotebookImagePage {
   preferPortrait?: boolean;
 }
 
+export type CustomNotebookPage =
+  | {
+      id: string;
+      pageNumber: number;
+      kind: 'blank';
+      template: BlankPageTemplate;
+      title: string;
+      defaultRotation?: 0 | 90 | 180 | 270;
+    }
+  | {
+      id: string;
+      pageNumber: number;
+      kind: 'image';
+      mediaId: string;
+      title: string;
+      defaultRotation?: 0 | 90 | 180 | 270;
+    }
+  | {
+      id: string;
+      pageNumber: number;
+      kind: 'pdf-page';
+      mediaId: string;
+      pdfPageNumber: number;
+      title: string;
+      defaultRotation?: 0 | 90 | 180 | 270;
+    };
+
 export interface NotebookDocument {
   id: string;
   title: string;
@@ -83,5 +112,10 @@ export interface NotebookDocument {
   imagePages?: NotebookImagePage[];
   // For genuine PDF files: URL to public PDF asset
   pdfUrl?: string;
+  // For user-created hybrid booklets (PDFs, images & blank note pages)
+  isCustom?: boolean;
+  customPages?: CustomNotebookPage[];
+  createdAt?: number;
+  updatedAt?: number;
   totalPages: number;
 }

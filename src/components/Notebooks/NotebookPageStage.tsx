@@ -13,6 +13,10 @@ import {
 } from '../../types/notebook';
 import { NOTEBOOK_STICKERS, STICKY_NOTE_STYLES } from '../../data/notebooksData';
 import { renderPdfPageToDataUrl } from '../../services/pdfRenderService';
+import {
+  getMediaObjectUrl,
+  renderBlankTemplateToDataUrl,
+} from '../../services/customNotebookDbService';
 
 interface Props {
   notebook: NotebookDocument;
@@ -212,17 +216,26 @@ export const NotebookPageStage: React.FC<Props> = ({
       ? notebook.imagePages?.[pageNumber - 1]
       : undefined;
 
-  const baseRotation = imagePageMeta?.defaultRotation ?? 0;
+  const customPage =
+    notebook.sourceType === 'eigenes-heft'
+      ? notebook.customPages?.[pageNumber - 1]
+      : undefined;
+
+  const baseRotation = imagePageMeta?.defaultRotation ?? customPage?.defaultRotation ?? 0;
   const effectiveRotation =
     annotations.rotationOverride !== undefined ? annotations.rotationOverride : baseRotation;
 
-  // Load and render current page (Photo rotated to upright OR PDF page rendered via PDF.js)
+  // Load and render current page (Photo rotated to upright, PDF page via PDF.js, or Custom hybrid page)
   useEffect(() => {
     let cancelled = false;
     setIsLoading(true);
     setLoadError(null);
 
-    if (notebook.sourceType === 'foto-skript' && imagePageMeta) {
+    const loadImageSurface = (
+      src: string,
+      preferPortrait?: boolean,
+      errorMessage: string = 'Bildseite konnte nicht geladen werden.'
+    ) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => {
@@ -233,7 +246,7 @@ export const NotebookPageStage: React.FC<Props> = ({
         // If an environment ignores EXIF on a known portrait script photo, apply +90° fallback automatically.
         const needsLegacyExifFallback =
           annotations.rotationOverride === undefined &&
-          imagePageMeta.preferPortrait &&
+          Boolean(preferPortrait) &&
           rawW > rawH;
         const rot = (((effectiveRotation + (needsLegacyExifFallback ? 90 : 0)) % 360) + 360) % 360;
         const isQuarterTurn = rot === 90 || rot === 270;
@@ -277,10 +290,18 @@ export const NotebookPageStage: React.FC<Props> = ({
       };
       img.onerror = () => {
         if (cancelled) return;
-        setLoadError('Skript-Foto konnte nicht geladen werden.');
+        setLoadError(errorMessage);
         setIsLoading(false);
       };
-      img.src = imagePageMeta.imageUrl;
+      img.src = src;
+    };
+
+    if (notebook.sourceType === 'foto-skript' && imagePageMeta) {
+      loadImageSurface(
+        imagePageMeta.imageUrl,
+        imagePageMeta.preferPortrait,
+        'Skript-Foto konnte nicht geladen werden.'
+      );
     } else if (notebook.sourceType === 'pdf-dokument' && notebook.pdfUrl) {
       renderPdfPageToDataUrl(notebook.pdfUrl, pageNumber, effectiveRotation, 1300)
         .then((res) => {
@@ -300,6 +321,58 @@ export const NotebookPageStage: React.FC<Props> = ({
           setLoadError('PDF-Seite konnte nicht gerendert werden.');
           setIsLoading(false);
         });
+    } else if (notebook.sourceType === 'eigenes-heft' && customPage) {
+      if (customPage.kind === 'blank') {
+        const res = renderBlankTemplateToDataUrl(customPage.template, effectiveRotation, 1240);
+        setSurface({
+          dataUrl: res.dataUrl,
+          width: res.width,
+          height: res.height,
+        });
+        setIsLoading(false);
+      } else if (customPage.kind === 'image') {
+        getMediaObjectUrl(customPage.mediaId)
+          .then((url) => {
+            if (cancelled) return;
+            if (!url) {
+              setLoadError('Gespeichertes Foto nicht im Browser gefunden.');
+              setIsLoading(false);
+              return;
+            }
+            loadImageSurface(url, false, 'Gespeichertes Foto konnte nicht geladen werden.');
+          })
+          .catch(() => {
+            if (cancelled) return;
+            setLoadError('Gespeichertes Foto konnte nicht geladen werden.');
+            setIsLoading(false);
+          });
+      } else if (customPage.kind === 'pdf-page') {
+        getMediaObjectUrl(customPage.mediaId)
+          .then((url) => {
+            if (cancelled) return null;
+            if (!url) throw new Error('missing media');
+            return renderPdfPageToDataUrl(
+              url,
+              customPage.pdfPageNumber,
+              effectiveRotation,
+              1300
+            );
+          })
+          .then((res) => {
+            if (cancelled || !res) return;
+            setSurface({
+              dataUrl: res.dataUrl,
+              width: res.width,
+              height: res.height,
+            });
+            setIsLoading(false);
+          })
+          .catch(() => {
+            if (cancelled) return;
+            setLoadError('Eigene PDF-Seite konnte nicht gerendert werden.');
+            setIsLoading(false);
+          });
+      }
     } else {
       setLoadError('Keine gültige Seitenquelle definiert.');
       setIsLoading(false);
@@ -314,6 +387,8 @@ export const NotebookPageStage: React.FC<Props> = ({
     notebook.pdfUrl,
     imagePageMeta?.imageUrl,
     imagePageMeta?.preferPortrait,
+    customPage?.id,
+    customPage?.kind,
     pageNumber,
     effectiveRotation,
     annotations.rotationOverride,

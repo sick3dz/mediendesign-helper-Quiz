@@ -7,6 +7,46 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 const documentCache = new Map<string, Promise<PDFDocumentProxy>>();
 const thumbnailCache = new Map<string, Promise<string>>();
 
+export function evictPdfCache(pdfUrl: string): void {
+  const cachedPromise = documentCache.get(pdfUrl);
+  documentCache.delete(pdfUrl);
+  if (cachedPromise) {
+    cachedPromise
+      .then((doc) => {
+        try {
+          doc.cleanup();
+        } catch {
+          // ignore
+        }
+      })
+      .catch(() => {
+        // ignore
+      });
+  }
+  const thumbPrefix = `${pdfUrl}::`;
+  for (const key of Array.from(thumbnailCache.keys())) {
+    if (key.startsWith(thumbPrefix)) {
+      thumbnailCache.delete(key);
+    }
+  }
+}
+
+export async function inspectPdfBlob(blob: Blob): Promise<number> {
+  const buffer = await blob.arrayBuffer();
+  const loadingTask = pdfjsLib.getDocument({
+    data: new Uint8Array(buffer),
+    cMapPacked: true,
+  });
+  const doc = await loadingTask.promise;
+  const count = doc.numPages;
+  try {
+    await loadingTask.destroy();
+  } catch {
+    // ignore cleanup error
+  }
+  return count;
+}
+
 export function getPdfDocument(pdfUrl: string): Promise<PDFDocumentProxy> {
   const existing = documentCache.get(pdfUrl);
   if (existing) return existing;

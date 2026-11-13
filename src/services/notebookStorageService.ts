@@ -1,4 +1,4 @@
-import { NotebookStore, PageAnnotations } from '../types/notebook';
+import { NotebookSticker, NotebookStickyNote, NotebookStore, PageAnnotations } from '../types/notebook';
 
 const NOTEBOOKS_STORAGE_KEY = 'mediengestalter_notebooks_v1';
 
@@ -138,6 +138,46 @@ export function getNotebookAnnotationSummary(
   return { annotatedPages, stickyCount, stickerCount, strokeCount };
 }
 
+export interface AnnotatedPageIndexItem {
+  notebookId: string;
+  pageNumber: number;
+  stickers: NotebookSticker[];
+  stickyNotes: NotebookStickyNote[];
+  strokeCount: number;
+}
+
+export function getAllAnnotatedPages(store: NotebookStore): AnnotatedPageIndexItem[] {
+  const result: AnnotatedPageIndexItem[] = [];
+  for (const [key, page] of Object.entries(store.pages)) {
+    if (!page) continue;
+    const sepIdx = key.lastIndexOf('::');
+    if (sepIdx <= 0) continue;
+    const notebookId = key.slice(0, sepIdx);
+    const pageNumber = parseInt(key.slice(sepIdx + 2), 10);
+    if (!notebookId || !Number.isFinite(pageNumber)) continue;
+
+    const stickers = Array.isArray(page.stickers) ? page.stickers : [];
+    const stickyNotes = Array.isArray(page.stickyNotes) ? page.stickyNotes : [];
+    const strokeCount = Array.isArray(page.strokes) ? page.strokes.length : 0;
+
+    if (stickers.length > 0 || stickyNotes.length > 0 || strokeCount > 0) {
+      result.push({
+        notebookId,
+        pageNumber,
+        stickers,
+        stickyNotes,
+        strokeCount,
+      });
+    }
+  }
+  result.sort((a, b) =>
+    a.notebookId === b.notebookId
+      ? a.pageNumber - b.pageNumber
+      : a.notebookId.localeCompare(b.notebookId)
+  );
+  return result;
+}
+
 export function restoreNotebookStoreFromBackup(imported: unknown): NotebookStore | null {
   if (!imported || typeof imported !== 'object') return null;
   const candidate = imported as Partial<NotebookStore>;
@@ -151,4 +191,27 @@ export function restoreNotebookStoreFromBackup(imported: unknown): NotebookStore
   };
   saveNotebookStore(normalized);
   return normalized;
+}
+
+export function deleteNotebookAnnotations(
+  store: NotebookStore,
+  notebookId: string
+): NotebookStore {
+  const prefix = `${notebookId}::`;
+  const nextPages: Record<string, PageAnnotations> = {};
+  for (const [key, val] of Object.entries(store.pages)) {
+    if (!key.startsWith(prefix)) {
+      nextPages[key] = val;
+    }
+  }
+  const nextLastPage = { ...store.lastPageByBook };
+  delete nextLastPage[notebookId];
+
+  const nextStore: NotebookStore = {
+    ...store,
+    pages: nextPages,
+    lastPageByBook: nextLastPage,
+  };
+  saveNotebookStore(nextStore);
+  return nextStore;
 }

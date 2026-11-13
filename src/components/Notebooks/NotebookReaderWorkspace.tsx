@@ -22,8 +22,10 @@ import {
   ChevronUp,
   ChevronDown,
   Pencil,
+  FilePlus2,
 } from 'lucide-react';
 import {
+  CustomNotebookPage,
   NotebookDocument,
   NotebookStickerType,
   NotebookStore,
@@ -39,10 +41,16 @@ import {
 } from '../../data/notebooksData';
 import { getPageAnnotations } from '../../services/notebookStorageService';
 import { getPdfThumbnailDataUrl } from '../../services/pdfRenderService';
+import {
+  getMediaObjectUrl,
+  renderBlankTemplateToDataUrl,
+} from '../../services/customNotebookDbService';
 import { NotebookPageStage } from './NotebookPageStage';
 
 interface Props {
   notebook: NotebookDocument;
+  initialPage?: number;
+  jumpSignal?: { page: number; seq: number };
   store: NotebookStore;
   onUpdatePageAnnotations: (
     notebookId: string,
@@ -50,6 +58,7 @@ interface Props {
     annotations: PageAnnotations
   ) => void;
   onPageChange: (notebookId: string, pageNumber: number) => void;
+  onOpenAppendPages?: () => void;
   onBackToLibrary: () => void;
 }
 
@@ -88,19 +97,102 @@ const PdfPageThumbnail: React.FC<{
   );
 };
 
+const CustomPageThumbnail: React.FC<{
+  page: CustomNotebookPage;
+  rotation: number;
+}> = ({ page, rotation }) => {
+  const [mediaUrl, setMediaUrl] = useState<string>('');
+
+  useEffect(() => {
+    if (page.kind === 'blank') return;
+    let active = true;
+    getMediaObjectUrl(page.mediaId).then((url) => {
+      if (active && url) setMediaUrl(url);
+    });
+    return () => {
+      active = false;
+    };
+  }, [page.id, page.kind]);
+
+  if (page.kind === 'blank') {
+    const { dataUrl } = renderBlankTemplateToDataUrl(page.template, rotation, 220);
+    return (
+      <img
+        src={dataUrl}
+        alt={page.title}
+        className="w-full h-full object-cover object-top"
+      />
+    );
+  }
+
+  if (!mediaUrl) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-400 text-[11px] font-mono tabular-nums">
+        {page.pageNumber}
+      </div>
+    );
+  }
+
+  if (page.kind === 'pdf-page') {
+    return (
+      <PdfPageThumbnail
+        pdfUrl={mediaUrl}
+        pageNumber={page.pdfPageNumber}
+        isActive={false}
+      />
+    );
+  }
+
+  const rotClass =
+    rotation === 90
+      ? 'rotate-90 scale-125'
+      : rotation === 180
+      ? 'rotate-180'
+      : rotation === 270
+      ? '-rotate-90 scale-125'
+      : '';
+
+  return (
+    <img
+      src={mediaUrl}
+      alt={page.title}
+      className={`w-full h-full object-cover object-top ${rotClass}`}
+    />
+  );
+};
+
 export const NotebookReaderWorkspace: React.FC<Props> = ({
   notebook,
+  initialPage: explicitInitialPage,
+  jumpSignal,
   store,
   onUpdatePageAnnotations,
   onPageChange,
+  onOpenAppendPages,
   onBackToLibrary,
 }) => {
   const initialPage = Math.max(
     1,
-    Math.min(store.lastPageByBook[notebook.id] || 1, notebook.totalPages)
+    Math.min(
+      explicitInitialPage ?? store.lastPageByBook[notebook.id] ?? 1,
+      notebook.totalPages
+    )
   );
   const [currentPage, setCurrentPage] = useState<number>(initialPage);
   const [totalPages, setTotalPages] = useState<number>(notebook.totalPages);
+
+  useEffect(() => {
+    setTotalPages(notebook.totalPages);
+  }, [notebook.totalPages]);
+
+  const lastAppliedJumpSeqRef = useRef<number>(0);
+  useEffect(() => {
+    if (!jumpSignal || jumpSignal.seq === lastAppliedJumpSeqRef.current) return;
+    lastAppliedJumpSeqRef.current = jumpSignal.seq;
+    const clamped = Math.max(1, Math.min(jumpSignal.page, notebook.totalPages));
+    setCurrentPage(clamped);
+    stageContainerRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+  }, [jumpSignal, notebook.totalPages]);
 
   // Active Tool & Sub-options (Classic GoodNotes)
   const [activeTool, setActiveTool] = useState<NotebookTool>('highlighter');
@@ -119,6 +211,8 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   // View controls
   const [zoom, setZoom] = useState<number>(1);
   const [showThumbnails, setShowThumbnails] = useState<boolean>(false);
+  const [sidebarTab, setSidebarTab] = useState<'pages' | 'stickers'>('pages');
+  const [sidebarStickerFilter, setSidebarStickerFilter] = useState<NotebookStickerType | 'all'>('all');
   const [confirmClearPage, setConfirmClearPage] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [isToolbarCollapsed, setIsToolbarCollapsed] = useState<boolean>(false);
@@ -205,10 +299,14 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
       notebook.sourceType === 'foto-skript'
         ? notebook.imagePages?.[currentPage - 1]
         : undefined;
+    const customMeta =
+      notebook.sourceType === 'eigenes-heft'
+        ? notebook.customPages?.[currentPage - 1]
+        : undefined;
     const currentRot =
       currentAnnotations.rotationOverride !== undefined
         ? currentAnnotations.rotationOverride
-        : imageMeta?.defaultRotation ?? 0;
+        : imageMeta?.defaultRotation ?? customMeta?.defaultRotation ?? 0;
     const nextRot = (currentRot + 90) % 360;
     handleCommitAnnotations(
       { ...currentAnnotations, rotationOverride: nextRot },
@@ -275,12 +373,23 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const currentPageTitle =
     notebook.sourceType === 'foto-skript'
       ? notebook.imagePages?.[currentPage - 1]?.title
+      : notebook.sourceType === 'eigenes-heft'
+      ? notebook.customPages?.[currentPage - 1]?.title || `Seite ${currentPage} von ${totalPages}`
       : `Seite ${currentPage} von ${totalPages}`;
 
   const pageAnnotationCount =
     currentAnnotations.strokes.length +
     currentAnnotations.stickyNotes.length +
     currentAnnotations.stickers.length;
+
+  const bookStickerPages = Array.from({ length: totalPages }, (_, idx) => idx + 1)
+    .map((pageNum) => {
+      const ann = getPageAnnotations(store, notebook.id, pageNum);
+      return { pageNum, stickers: ann.stickers, stickies: ann.stickyNotes };
+    })
+    .filter((entry) => entry.stickers.length > 0);
+
+  const totalBookStickers = bookStickerPages.reduce((sum, p) => sum + p.stickers.length, 0);
 
   return (
     <div
@@ -306,9 +415,16 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             </button>
 
             <button
-              onClick={() => setShowThumbnails((prev) => !prev)}
+              onClick={() => {
+                if (showThumbnails && sidebarTab === 'pages') {
+                  setShowThumbnails(false);
+                } else {
+                  setSidebarTab('pages');
+                  setShowThumbnails(true);
+                }
+              }}
               className={`p-2 rounded-xl transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center shrink-0 ${
-                showThumbnails
+                showThumbnails && sidebarTab === 'pages'
                   ? 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
@@ -316,6 +432,29 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
               aria-label="Seitenübersicht"
             >
               <LayoutGrid className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={() => {
+                if (showThumbnails && sidebarTab === 'stickers') {
+                  setShowThumbnails(false);
+                } else {
+                  setSidebarTab('stickers');
+                  setShowThumbnails(true);
+                }
+              }}
+              className={`inline-flex items-center gap-1 px-2 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer min-h-[40px] shrink-0 ${
+                showThumbnails && sidebarTab === 'stickers'
+                  ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+              title="Sticker-Übersicht dieses Hefts anzeigen"
+              aria-label="Sticker-Übersicht"
+            >
+              <Sticker className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              {totalBookStickers > 0 && (
+                <span className="text-[11px] font-bold tabular-nums">{totalBookStickers}</span>
+              )}
             </button>
 
             <div className="hidden lg:block min-w-0 max-w-[180px] pl-1">
@@ -352,6 +491,18 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
+
+            {notebook.isCustom && onOpenAppendPages && (
+              <button
+                type="button"
+                onClick={onOpenAppendPages}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold transition-colors cursor-pointer min-h-[36px] whitespace-nowrap shrink-0"
+                title="Weitere PDFs, Fotos oder leere Notizseiten hinten anfügen"
+              >
+                <FilePlus2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">+ Seiten</span>
+              </button>
+            )}
           </div>
 
           {/* Center Group: Classic GoodNotes Annotation Tools */}
@@ -770,91 +921,249 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
 
         {showThumbnails && (!isFullscreen || !isToolbarCollapsed) && (
           <aside
-            className={`w-48 sm:w-56 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 overflow-y-auto p-3 space-y-2.5 shrink-0 ${
+            className={`w-52 sm:w-60 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 overflow-y-auto p-3 space-y-2.5 shrink-0 ${
               isFullscreen ? 'max-h-full' : 'max-h-[75vh]'
             }`}
           >
-            <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 pb-1 border-b border-slate-100 dark:border-slate-800">
-              <span>Seitenübersicht</span>
+            <div className="flex items-center justify-between gap-1 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg flex-1">
+                <button
+                  onClick={() => setSidebarTab('pages')}
+                  className={`flex-1 py-1 px-2 rounded-md text-[11px] font-bold transition-colors cursor-pointer ${
+                    sidebarTab === 'pages'
+                      ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
+                      : 'text-slate-600 dark:text-slate-300'
+                  }`}
+                >
+                  Seiten
+                </button>
+                <button
+                  onClick={() => setSidebarTab('stickers')}
+                  className={`flex-1 py-1 px-2 rounded-md text-[11px] font-bold transition-colors cursor-pointer tabular-nums ${
+                    sidebarTab === 'stickers'
+                      ? 'bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300 shadow-2xs'
+                      : 'text-slate-600 dark:text-slate-300'
+                  }`}
+                >
+                  Sticker ({totalBookStickers})
+                </button>
+              </div>
               <button
                 onClick={() => setShowThumbnails(false)}
-                className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-                aria-label="Seitenübersicht schließen"
+                className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer shrink-0"
+                aria-label="Übersicht schließen"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-3.5 h-3.5 text-slate-500" />
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-2.5">
-              {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pageNum) => {
-                const pageAnn = getPageAnnotations(store, notebook.id, pageNum);
-                const hasAny =
-                  pageAnn.strokes.length > 0 ||
-                  pageAnn.stickyNotes.length > 0 ||
-                  pageAnn.stickers.length > 0;
-                const imgMeta =
-                  notebook.sourceType === 'foto-skript'
-                    ? notebook.imagePages?.[pageNum - 1]
-                    : undefined;
+            {sidebarTab === 'pages' ? (
+              <div className="grid grid-cols-2 gap-2.5">
+                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pageNum) => {
+                  const pageAnn = getPageAnnotations(store, notebook.id, pageNum);
+                  const hasAny =
+                    pageAnn.strokes.length > 0 ||
+                    pageAnn.stickyNotes.length > 0 ||
+                    pageAnn.stickers.length > 0;
+                  const imgMeta =
+                    notebook.sourceType === 'foto-skript'
+                      ? notebook.imagePages?.[pageNum - 1]
+                      : undefined;
+                  const customMeta =
+                    notebook.sourceType === 'eigenes-heft'
+                      ? notebook.customPages?.[pageNum - 1]
+                      : undefined;
 
-                return (
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => goToPage(pageNum)}
+                      className={`group flex flex-col items-center gap-1 p-1.5 rounded-xl border transition-all cursor-pointer ${
+                        currentPage === pageNum
+                          ? 'border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/40 ring-2 ring-indigo-500/30'
+                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="w-full aspect-[3/4] rounded-md overflow-hidden bg-white border border-slate-200 dark:border-slate-700 relative">
+                        {notebook.sourceType === 'foto-skript' && imgMeta ? (
+                          (() => {
+                            const thumbRot =
+                              pageAnn.rotationOverride !== undefined
+                                ? pageAnn.rotationOverride
+                                : imgMeta.defaultRotation ?? 0;
+                            const rotClass =
+                              thumbRot === 90
+                                ? 'rotate-90 scale-125'
+                                : thumbRot === 180
+                                ? 'rotate-180'
+                                : thumbRot === 270
+                                ? '-rotate-90 scale-125'
+                                : '';
+                            return (
+                              <img
+                                src={imgMeta.imageUrl}
+                                alt={`Seite ${pageNum}`}
+                                referrerPolicy="no-referrer"
+                                className={`w-full h-full object-cover object-top ${rotClass}`}
+                              />
+                            );
+                          })()
+                        ) : notebook.sourceType === 'eigenes-heft' && customMeta ? (
+                          <CustomPageThumbnail
+                            page={customMeta}
+                            rotation={
+                              pageAnn.rotationOverride !== undefined
+                                ? pageAnn.rotationOverride
+                                : customMeta.defaultRotation ?? 0
+                            }
+                          />
+                        ) : notebook.pdfUrl ? (
+                          <PdfPageThumbnail
+                            pdfUrl={notebook.pdfUrl}
+                            pageNumber={pageNum}
+                            isActive={currentPage === pageNum}
+                          />
+                        ) : null}
+
+                        {pageAnn.stickers.length > 0 ? (
+                          <div className="absolute bottom-1 left-1 flex flex-wrap gap-0.5 max-w-[90%]">
+                            {pageAnn.stickers.slice(0, 3).map((stk) => {
+                              const preset = NOTEBOOK_STICKERS.find((p) => p.type === stk.type);
+                              return preset ? (
+                                <span
+                                  key={stk.id}
+                                  className="px-1 py-0.2 rounded bg-white/95 text-[10px] shadow-xs"
+                                  title={preset.label}
+                                >
+                                  {preset.symbol}
+                                </span>
+                              ) : null;
+                            })}
+                          </div>
+                        ) : null}
+
+                        {hasAny && (
+                          <span
+                            className="absolute top-1 right-1 px-1 py-0.2 rounded bg-amber-400 text-amber-950 text-[9px] font-extrabold shadow-xs"
+                            title="Seite enthält Notizen oder Markierungen"
+                          >
+                            Notiz
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 tabular-nums">
+                        {pageNum}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {/* Quick Filter by Sticker Type inside Booklet */}
+                <div className="flex flex-wrap gap-1">
                   <button
-                    key={pageNum}
-                    onClick={() => goToPage(pageNum)}
-                    className={`group flex flex-col items-center gap-1 p-1.5 rounded-xl border transition-all cursor-pointer ${
-                      currentPage === pageNum
-                        ? 'border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/40 ring-2 ring-indigo-500/30'
-                        : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                    onClick={() => setSidebarStickerFilter('all')}
+                    className={`px-2 py-1 rounded-md text-[10px] font-bold cursor-pointer ${
+                      sidebarStickerFilter === 'all'
+                        ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
                     }`}
                   >
-                    <div className="w-full aspect-[3/4] rounded-md overflow-hidden bg-white border border-slate-200 dark:border-slate-700 relative">
-                      {notebook.sourceType === 'foto-skript' && imgMeta ? (
-                        (() => {
-                          const thumbRot =
-                            pageAnn.rotationOverride !== undefined
-                              ? pageAnn.rotationOverride
-                              : imgMeta.defaultRotation ?? 0;
-                          const rotClass =
-                            thumbRot === 90
-                              ? 'rotate-90 scale-125'
-                              : thumbRot === 180
-                              ? 'rotate-180'
-                              : thumbRot === 270
-                              ? '-rotate-90 scale-125'
-                              : '';
-                          return (
-                            <img
-                              src={imgMeta.imageUrl}
-                              alt={`Seite ${pageNum}`}
-                              referrerPolicy="no-referrer"
-                              className={`w-full h-full object-cover object-top ${rotClass}`}
-                            />
-                          );
-                        })()
-                      ) : notebook.pdfUrl ? (
-                        <PdfPageThumbnail
-                          pdfUrl={notebook.pdfUrl}
-                          pageNumber={pageNum}
-                          isActive={currentPage === pageNum}
-                        />
-                      ) : null}
-
-                      {hasAny && (
-                        <span
-                          className="absolute top-1 right-1 px-1 py-0.2 rounded bg-amber-400 text-amber-950 text-[9px] font-extrabold shadow-xs"
-                          title="Seite enthält Notizen oder Markierungen"
-                        >
-                          Notiz
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 tabular-nums">
-                      {pageNum}
-                    </span>
+                    Alle
                   </button>
-                );
-              })}
-            </div>
+                  {NOTEBOOK_STICKERS.map((stk) => (
+                    <button
+                      key={stk.type}
+                      onClick={() => setSidebarStickerFilter(stk.type)}
+                      title={stk.label}
+                      className={`px-1.5 py-1 rounded-md text-[11px] border cursor-pointer transition-all ${stk.bgClass} ${stk.borderClass} ${
+                        sidebarStickerFilter === stk.type
+                          ? 'ring-2 ring-indigo-500'
+                          : 'opacity-75 hover:opacity-100'
+                      }`}
+                    >
+                      {stk.symbol}
+                    </button>
+                  ))}
+                </div>
+
+                {(() => {
+                  const visiblePages = bookStickerPages.filter((entry) =>
+                    sidebarStickerFilter === 'all'
+                      ? true
+                      : entry.stickers.some((s) => s.type === sidebarStickerFilter)
+                  );
+
+                  if (visiblePages.length === 0) {
+                    return (
+                      <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-center space-y-1.5">
+                        <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                          {totalBookStickers === 0
+                            ? 'Noch keine Sticker in diesem Heft'
+                            : 'Keine passenden Sticker'}
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                          Wähle oben „Sticker“ und tippe auf eine Textstelle, um sie hier als Lesezeichen zu sehen.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="space-y-2">
+                      {visiblePages.map((entry) => {
+                        const imgTitle =
+                          notebook.sourceType === 'foto-skript'
+                            ? notebook.imagePages?.[entry.pageNum - 1]?.title
+                            : notebook.sourceType === 'eigenes-heft'
+                            ? notebook.customPages?.[entry.pageNum - 1]?.title
+                            : undefined;
+
+                        return (
+                          <button
+                            key={entry.pageNum}
+                            onClick={() => goToPage(entry.pageNum)}
+                            className={`w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer space-y-1.5 ${
+                              currentPage === entry.pageNum
+                                ? 'border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/40'
+                                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-100 tabular-nums">
+                              <span>Seite {entry.pageNum}</span>
+                              <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                            </div>
+                            {imgTitle && (
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                                {imgTitle}
+                              </p>
+                            )}
+                            <div className="flex flex-wrap gap-1">
+                              {entry.stickers.map((stk) => {
+                                const preset = NOTEBOOK_STICKERS.find(
+                                  (p) => p.type === stk.type
+                                );
+                                if (!preset) return null;
+                                return (
+                                  <span
+                                    key={stk.id}
+                                    className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[10px] font-extrabold ${preset.bgClass} ${preset.borderClass} ${preset.textClass}`}
+                                  >
+                                    <span>{preset.symbol}</span>
+                                    <span>{preset.shortLabel}</span>
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </aside>
         )}
 

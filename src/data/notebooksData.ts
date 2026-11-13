@@ -310,3 +310,39 @@ export const NOTEBOOK_STICKERS: {
     symbol: '★',
   },
 ];
+
+export const BLANK_PAGE_TEMPLATES: {
+  id: 'blank' | 'lined' | 'grid' | 'dotted';
+  label: string;
+  description: string;
+}[] = [
+  { id: 'blank', label: 'Blanko', description: 'Weißes DIN-A4-Blatt' },
+  { id: 'lined', label: 'Liniert', description: 'Mit Randlinie' },
+  { id: 'grid', label: 'Kariert', description: '5-mm-Rechenkästchen' },
+  { id: 'dotted', label: 'Punktkariert', description: 'Dezentes Punktraster' },
+];
+
+export const CUSTOM_COVER_COLORS: {
+  id: string;
+  label: string;
+  gradient: string;
+  swatch: string;
+}[] = [
+  { id: 'indigo', label: 'Indigo', gradient: 'from-indigo-600 to-blue-700', swatch: 'bg-indigo-600' },
+  { id: 'emerald', label: 'Smaragd', gradient: 'from-emerald-600 to-teal-700', swatch: 'bg-emerald-600' },
+  { id: 'amber', label: 'Bernstein', gradient: 'from-amber-600 to-orange-600', swatch: 'bg-amber-600' },
+  { id: 'rose', label: 'Rubin', gradient: 'from-rose-600 to-pink-700', swatch: 'bg-rose-600' },
+  { id: 'purple', label: 'Violett', gradient: 'from-purple-600 to-indigo-700', swatch: 'bg-purple-600' },
+  { id: 'slate', label: 'Anthrazit', gradient: 'from-slate-700 to-slate-900', swatch: 'bg-slate-700' },
+];
+
+export const CUSTOM_NOTEBOOK_CATEGORIES: string[] = [
+  'Eigene Mitschriften',
+  'IHK-Prüfung',
+  'Projektmanagement',
+  'Medienproduktion',
+  'Datenhaltung',
+  'Datenbanken',
+  'Datenformate',
+  'Farbe & Layout',
+];
