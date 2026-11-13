@@ -56,6 +56,7 @@ import {
   saveEmbeddedImageMedia,
 } from '../../services/customNotebookDbService';
 import { NotebookPageStage } from './NotebookPageStage';
+import { ImageCropModal } from './ImageCropModal';
 
 interface Props {
   notebook: NotebookDocument;
@@ -237,6 +238,10 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const [pencilOnlyMode, setPencilOnlyMode] = useState<boolean>(false);
   const userToggledPencilRef = useRef<boolean>(false);
   const insertImageInputRef = useRef<HTMLInputElement>(null);
+  const [pendingCropQueue, setPendingCropQueue] = useState<
+    { file: File; previewUrl: string }[]
+  >([]);
+  const activePendingCrop = pendingCropQueue[0] ?? null;
   const [selectedImageSignal, setSelectedImageSignal] = useState<{
     id: string;
     seq: number;
@@ -445,6 +450,20 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     [currentPage, notebook.id, onUpdatePageAnnotations]
   );
 
+  const handleFilesSelectedForInsert = useCallback((files: File[]) => {
+    const imageFiles = files.filter(
+      (f) =>
+        f.type.startsWith('image/') ||
+        /\.(png|jpe?g|gif|webp|svg|bmp|heic|heif|avif)$/i.test(f.name)
+    );
+    if (imageFiles.length === 0) return;
+    const queued = imageFiles.map((file) => ({
+      file,
+      previewUrl: URL.createObjectURL(file),
+    }));
+    setPendingCropQueue((prev) => [...prev, ...queued]);
+  }, []);
+
   // Clipboard image paste support (Ctrl+V / Cmd+V)
   useEffect(() => {
     const onPaste = (e: ClipboardEvent) => {
@@ -462,12 +481,12 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
       }
       if (files.length > 0) {
         e.preventDefault();
-        insertImageFilesToCurrentPage(files);
+        handleFilesSelectedForInsert(files);
       }
     };
     window.addEventListener('paste', onPaste);
     return () => window.removeEventListener('paste', onPaste);
-  }, [insertImageFilesToCurrentPage]);
+  }, [handleFilesSelectedForInsert]);
 
   const goToPage = (pageNum: number) => {
     const clamped = Math.max(1, Math.min(pageNum, totalPages));
@@ -777,7 +796,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                 const files = Array.from(e.target.files ?? []);
                 e.target.value = '';
                 if (files.length > 0) {
-                  insertImageFilesToCurrentPage(files);
+                  handleFilesSelectedForInsert(files);
                 }
               }}
               className="hidden"
@@ -1600,6 +1619,47 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             </button>
           </div>
         </div>
+      )}
+
+      {activePendingCrop && (
+        <ImageCropModal
+          isOpen={true}
+          imageSrc={activePendingCrop.previewUrl}
+          imageName={
+            pendingCropQueue.length > 1
+              ? `${activePendingCrop.file.name} (1/${pendingCropQueue.length})`
+              : activePendingCrop.file.name
+          }
+          confirmLabel="Zuschneiden & Einfügen"
+          skipLabel="Ohne Zuschnitt einfügen"
+          onClose={() => {
+            for (const item of pendingCropQueue) {
+              try {
+                URL.revokeObjectURL(item.previewUrl);
+              } catch {}
+            }
+            setPendingCropQueue([]);
+          }}
+          onSkipCrop={async () => {
+            const current = activePendingCrop;
+            try {
+              URL.revokeObjectURL(current.previewUrl);
+            } catch {}
+            setPendingCropQueue((prev) => prev.slice(1));
+            await insertImageFilesToCurrentPage([current.file]);
+          }}
+          onCropCompleted={async (croppedBlob) => {
+            const current = activePendingCrop;
+            const file = new File([croppedBlob], current.file.name, {
+              type: 'image/jpeg',
+            });
+            try {
+              URL.revokeObjectURL(current.previewUrl);
+            } catch {}
+            setPendingCropQueue((prev) => prev.slice(1));
+            await insertImageFilesToCurrentPage([file]);
+          }}
+        />
       )}
     </div>
   );

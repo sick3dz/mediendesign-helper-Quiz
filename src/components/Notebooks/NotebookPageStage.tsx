@@ -7,6 +7,7 @@ import {
   Loader2,
   AlertCircle,
   RotateCw,
+  Crop as CropIcon,
 } from 'lucide-react';
 import {
   NotebookDocument,
@@ -27,7 +28,9 @@ import {
   getMediaObjectUrl,
   renderBlankTemplateToDataUrl,
   revokeMediaObjectUrl,
+  saveEmbeddedImageMedia,
 } from '../../services/customNotebookDbService';
+import { ImageCropModal } from './ImageCropModal';
 
 interface Props {
   notebook: NotebookDocument;
@@ -332,6 +335,7 @@ interface EmbeddedImageItemProps {
   onStartResize: (e: React.PointerEvent<HTMLElement>) => void;
   onUpdate: (patch: Partial<Pick<NotebookImageElement, 'widthPct' | 'opacity' | 'rotation'>>) => void;
   onDelete: () => void;
+  onCrop: () => void;
 }
 
 const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
@@ -343,6 +347,7 @@ const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
   onStartResize,
   onUpdate,
   onDelete,
+  onCrop,
 }) => {
   const [rawUrl, setRawUrl] = useState<string>('');
   const [rotatedUrl, setRotatedUrl] = useState<string>('');
@@ -367,7 +372,9 @@ const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
     }
     let cancelled = false;
     const img = new Image();
-    img.crossOrigin = 'anonymous';
+    if (!rawUrl.startsWith('blob:') && !rawUrl.startsWith('data:')) {
+      img.crossOrigin = 'anonymous';
+    }
     img.onload = () => {
       if (cancelled) return;
       const w = img.naturalWidth || 800;
@@ -427,7 +434,7 @@ const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
             showToolbarBelow ? 'top-full mt-2' : 'bottom-full mb-2'
           } flex items-center gap-1.5 px-2 py-1 rounded-xl bg-slate-900/95 text-white shadow-lg border border-slate-700/80 text-[10px] font-bold whitespace-nowrap z-20 cursor-default`}
         >
-          <span className="text-slate-400">Breite</span>
+          <span className="text-slate-400">Größe</span>
           <button
             type="button"
             onClick={(e) => {
@@ -496,6 +503,19 @@ const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
             className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer"
           >
             <RotateCw className="w-3 h-3" />
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onCrop();
+            }}
+            title="Foto zuschneiden"
+            aria-label="Foto zuschneiden"
+            className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer"
+          >
+            <CropIcon className="w-3 h-3" />
           </button>
 
           <button
@@ -606,6 +626,11 @@ export const NotebookPageStage: React.FC<Props> = ({
   const [selectedStickerId, setSelectedStickerId] = useState<string | null>(null);
   const [selectedTextId, setSelectedTextId] = useState<string | null>(null);
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
+  const [activeCropImage, setActiveCropImage] = useState<{
+    id: string;
+    url: string;
+    rotation?: number;
+  } | null>(null);
 
   useEffect(() => {
     if (selectedImageSignal?.id) {
@@ -626,6 +651,7 @@ export const NotebookPageStage: React.FC<Props> = ({
   const resizeImageRef = useRef<{
     id: string;
     startClientX: number;
+    startClientY: number;
     origWidthPct: number;
   } | null>(null);
 
@@ -655,7 +681,9 @@ export const NotebookPageStage: React.FC<Props> = ({
       errorMessage: string = 'Bildseite konnte nicht geladen werden.'
     ) => {
       const img = new Image();
-      img.crossOrigin = 'anonymous';
+      if (!src.startsWith('blob:') && !src.startsWith('data:')) {
+        img.crossOrigin = 'anonymous';
+      }
       img.onload = () => {
         if (cancelled) return;
         const rawW = img.naturalWidth || 1200;
@@ -1025,10 +1053,12 @@ export const NotebookPageStage: React.FC<Props> = ({
       e.preventDefault();
       const rect = stageRef.current.getBoundingClientRect();
       if (rect.width <= 0) return;
-      const dxPct = ((e.clientX - resizeImageRef.current.startClientX) / rect.width) * 100;
+      const dx = e.clientX - resizeImageRef.current.startClientX;
+      const dy = e.clientY - resizeImageRef.current.startClientY;
+      const deltaPct = ((dx + dy) * 0.7 / rect.width) * 100;
       const nextWidth = Math.max(
         12,
-        Math.min(95, +(resizeImageRef.current.origWidthPct + dxPct * 2).toFixed(1))
+        Math.min(95, +(resizeImageRef.current.origWidthPct + deltaPct * 2).toFixed(1))
       );
       const targetId = resizeImageRef.current.id;
       onCommitAnnotations(
@@ -1437,17 +1467,61 @@ export const NotebookPageStage: React.FC<Props> = ({
                 };
               }}
               onStartResize={(e) => {
+                try {
+                  e.currentTarget.setPointerCapture(e.pointerId);
+                } catch {}
                 resizeImageRef.current = {
                   id: imgEl.id,
                   startClientX: e.clientX,
+                  startClientY: e.clientY,
                   origWidthPct: imgEl.widthPct,
                 };
+              }}
+              onCrop={async () => {
+                const url = await getMediaObjectUrl(imgEl.mediaId);
+                if (url) {
+                  setActiveCropImage({
+                    id: imgEl.id,
+                    url,
+                    rotation: imgEl.rotation ?? 0,
+                  });
+                }
               }}
               onUpdate={(patch) => handleUpdateEmbeddedImage(imgEl.id, patch)}
               onDelete={() => handleDeleteEmbeddedImage(imgEl.id)}
             />
           ))}
         </div>
+
+        {activeCropImage && (
+          <ImageCropModal
+            isOpen={true}
+            imageSrc={activeCropImage.url}
+            imageName="Eingefügtes Foto"
+            confirmLabel="Zuschneiden anwenden"
+            initialRotation={activeCropImage.rotation ?? 0}
+            onClose={() => setActiveCropImage(null)}
+            onCropCompleted={async (croppedBlob) => {
+              const targetId = activeCropImage.id;
+              const { mediaId, aspectRatio } = await saveEmbeddedImageMedia(
+                croppedBlob,
+                'cropped-photo.jpg'
+              );
+              onCommitAnnotations(
+                {
+                  ...annotations,
+                  images: (annotations.images || []).map((img) =>
+                    img.id === targetId
+                      ? { ...img, mediaId, aspectRatio, rotation: 0 }
+                      : img
+                  ),
+                },
+                true
+              );
+              setActiveCropImage(null);
+            }}
+          />
+        )}
 
         {/* Layer 2: Smooth Vector Ink SVG (Highlighters beneath Pen) */}
         <svg

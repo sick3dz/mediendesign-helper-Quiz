@@ -48,7 +48,6 @@ interface Props {
 type FilterMode =
   | 'all'
   | 'eigenes-heft'
-  | 'blatt-blanko'
   | 'foto-skript'
   | 'pdf-dokument'
   | 'annotated'
@@ -184,7 +183,6 @@ export const NotebookLibraryView: React.FC<Props> = ({
       const hasNotes = summary.annotatedPages > 0;
 
       if (filter === 'eigenes-heft' && !doc.isCustom) return false;
-      if (filter === 'blatt-blanko' && doc.sourceType !== 'blatt-blanko') return false;
       if (filter === 'foto-skript' && doc.sourceType !== 'foto-skript') return false;
       if (filter === 'pdf-dokument' && doc.sourceType !== 'pdf-dokument') return false;
       if (filter === 'annotated' && !hasNotes) return false;
@@ -208,7 +206,7 @@ export const NotebookLibraryView: React.FC<Props> = ({
         const pageTitle =
           doc.sourceType === 'foto-skript'
             ? doc.imagePages?.[item.pageNumber - 1]?.title
-            : doc.sourceType === 'eigenes-heft'
+            : doc.sourceType === 'eigenes-heft' || doc.sourceType === 'blatt-blanko'
             ? doc.customPages?.[item.pageNumber - 1]?.title
             : undefined;
         return { ...item, doc, pageTitle };
@@ -324,7 +322,6 @@ export const NotebookLibraryView: React.FC<Props> = ({
                     ? `Eigene (${customNotebooks.length})`
                     : 'Eigene Hefte',
               },
-              { id: 'blatt-blanko', label: 'Blatt Blanko' },
               { id: 'foto-skript', label: 'Foto-Skripte' },
               { id: 'pdf-dokument', label: 'Original-PDFs' },
               { id: 'annotated', label: 'Mit Notizen' },

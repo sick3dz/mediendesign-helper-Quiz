@@ -10,8 +10,10 @@ import {
   Trash2,
   X,
   AlertCircle,
+  Crop as CropIcon,
 } from 'lucide-react';
 import { BlankPageTemplate, NotebookDocument } from '../../types/notebook';
+import { ImageCropModal } from './ImageCropModal';
 import {
   BLANK_PAGE_TEMPLATES,
   CUSTOM_COVER_COLORS,
@@ -79,6 +81,7 @@ export const CustomNotebookModal: React.FC<Props> = ({
   const [stagedItems, setStagedItems] = useState<StagedCustomItem[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<BlankPageTemplate>('lined');
   const [jumpToNewPage, setJumpToNewPage] = useState<boolean>(defaultJumpToNewPage);
+  const [activeCropItem, setActiveCropItem] = useState<StagedCustomItem | null>(null);
 
   const [isInspectingFiles, setIsInspectingFiles] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -165,6 +168,9 @@ export const CustomNotebookModal: React.FC<Props> = ({
     });
 
     setStagedItems((prev) => [...prev, ...additions]);
+    if (additions.length === 1) {
+      setActiveCropItem(additions[0]);
+    }
   };
 
   const handleAddBlankPages = (count: number) => {
@@ -652,6 +658,17 @@ export const CustomNotebookModal: React.FC<Props> = ({
                           >
                             <ArrowDown className="w-3.5 h-3.5" />
                           </button>
+                          {item.kind === 'image' && (
+                            <button
+                              type="button"
+                              onClick={() => setActiveCropItem(item)}
+                              className="p-1.5 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 cursor-pointer"
+                              title="Foto zuschneiden"
+                              aria-label="Foto zuschneiden"
+                            >
+                              <CropIcon className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() => handleRemoveItem(item.tempId)}
@@ -713,6 +730,39 @@ export const CustomNotebookModal: React.FC<Props> = ({
           </div>
         </form>
       </div>
+
+      {activeCropItem && activeCropItem.kind === 'image' && (
+        <ImageCropModal
+          isOpen={true}
+          imageSrc={activeCropItem.previewUrl}
+          imageName={activeCropItem.fileName}
+          confirmLabel="Zuschneiden anwenden"
+          skipLabel="Ohne Zuschnitt behalten"
+          onClose={() => setActiveCropItem(null)}
+          onSkipCrop={() => setActiveCropItem(null)}
+          onCropCompleted={(croppedBlob) => {
+            const targetTempId = activeCropItem.tempId;
+            const targetFileName = activeCropItem.fileName;
+            const previewToRevoke = activeCropItem.previewUrl;
+            const newFile = new File([croppedBlob], targetFileName, {
+              type: 'image/jpeg',
+            });
+            const newPreviewUrl = URL.createObjectURL(croppedBlob);
+            previewUrlsRef.current.push(newPreviewUrl);
+            try {
+              URL.revokeObjectURL(previewToRevoke);
+            } catch {}
+            setStagedItems((prev) =>
+              prev.map((i) =>
+                i.tempId === targetTempId
+                  ? { ...i, file: newFile, previewUrl: newPreviewUrl }
+                  : i
+              )
+            );
+            setActiveCropItem(null);
+          }}
+        />
+      )}
     </div>
   );
 };
