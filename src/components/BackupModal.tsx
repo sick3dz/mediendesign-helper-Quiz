@@ -190,6 +190,7 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
             type: 'success',
             message: `Backup mit eigenen Inhalten wiederhergestellt${suffix}!`,
           });
+          getCustomNotebooksBackupStats().then((res) => setCustomStats(res));
           setTimeout(() => {
             onBackupRestored(result.stats!, result.settings);
             onClose();
@@ -311,8 +312,14 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
                 <span className="text-[10px] text-slate-500 font-mono">.json Datei</span>
               </div>
               <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                Kompakte Sicherung für Spielstand, Einstellungen und alle Skript-Markierungen (ohne eigene hochgeladene Dateien).
+                Kompakte Sicherung für Spielstand, Einstellungen und alle Markierungen, Textfelder, Sticker-Werte &amp; Blatt-Drehungen (ohne lokale Bild-/PDF-Dateien).
               </p>
+              {(customStats.notebookCount > 0 || customStats.mediaCount > 0) && (
+                <p className="text-[11px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 rounded-lg px-2.5 py-1.5 leading-snug">
+                  Hinweis: Du hast {customStats.mediaCount}{' '}
+                  {customStats.mediaCount === 1 ? 'lokale Datei' : 'lokale Dateien'} (eigene Hefte oder auf Seiten eingefügte Bilder). Für eine komplette Sicherung nutze unten das <span className="font-mono font-semibold">.zip</span>-Backup.
+                </p>
+              )}
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={handleExportDownload}
@@ -353,19 +360,19 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
                 </span>
               </div>
               <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                Vollständige Sicherung inklusive aller in IndexedDB gespeicherten eigenen Hefte (Metadaten, Bilder &amp; PDFs) sowie dem kompletten Lernfortschritt.
+                Vollständige Sicherung inklusive aller eigenen Hefte, <span className="font-semibold">Blatt Blanko</span>, lokal auf Seiten eingefügter Bilder, Textfelder, Sticker &amp; PDFs sowie dem kompletten Lernfortschritt.
               </p>
               <div className="text-[11px] text-slate-500 dark:text-slate-400 font-medium tabular-nums">
-                {customStats.notebookCount > 0 ? (
+                {customStats.notebookCount > 0 || customStats.mediaCount > 0 ? (
                   <span>
                     Aktuell gespeichert: {customStats.notebookCount}{' '}
                     {customStats.notebookCount === 1 ? 'eigenes Heft' : 'eigene Hefte'} ·{' '}
                     {customStats.mediaCount}{' '}
-                    {customStats.mediaCount === 1 ? 'Datei' : 'Dateien'} (
+                    {customStats.mediaCount === 1 ? 'lokale Medien-Datei' : 'lokale Medien-Dateien'} (
                     {formatBytes(customStats.totalBytes)})
                   </span>
                 ) : (
-                  <span>Aktuell keine eigenen Hefte angelegt – exportiert komplettes .zip Archiv</span>
+                  <span>Aktuell keine lokalen Medien gespeichert – exportiert komplettes .zip Archiv</span>
                 )}
               </div>
               <button

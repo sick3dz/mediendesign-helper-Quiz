@@ -26,6 +26,7 @@ import { renderPdfPageToDataUrl } from '../../services/pdfRenderService';
 import {
   getMediaObjectUrl,
   renderBlankTemplateToDataUrl,
+  revokeMediaObjectUrl,
 } from '../../services/customNotebookDbService';
 
 interface Props {
@@ -345,9 +346,11 @@ const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
 }) => {
   const [rawUrl, setRawUrl] = useState<string>('');
   const [rotatedUrl, setRotatedUrl] = useState<string>('');
+  const retriedRef = useRef<boolean>(false);
   const rot = (((item.rotation ?? 0) % 360) + 360) % 360;
 
   useEffect(() => {
+    retriedRef.current = false;
     let active = true;
     getMediaObjectUrl(item.mediaId).then((url) => {
       if (active && url) setRawUrl(url);
@@ -525,6 +528,14 @@ const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
             src={displaySrc}
             alt="Eingefügtes Bild"
             draggable={false}
+            onError={() => {
+              if (retriedRef.current) return;
+              retriedRef.current = true;
+              revokeMediaObjectUrl(item.mediaId);
+              getMediaObjectUrl(item.mediaId).then((freshUrl) => {
+                if (freshUrl) setRawUrl(freshUrl);
+              });
+            }}
             className="w-full h-auto block pointer-events-none"
           />
         ) : (

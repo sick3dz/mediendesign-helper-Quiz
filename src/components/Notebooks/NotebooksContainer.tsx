@@ -7,6 +7,7 @@ import {
   savePageAnnotations,
 } from '../../services/notebookStorageService';
 import {
+  cleanupUnusedEmbeddedMedia,
   createQuickBlankNotebook,
   deleteCustomNotebook,
   listCustomNotebooks,
@@ -75,8 +76,19 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
   const handleDeleteCustomNotebook = async (notebookId: string) => {
     await deleteCustomNotebook(notebookId);
     setCustomNotebooks((prev) => prev.filter((b) => b.id !== notebookId));
-    setStore((prev) => deleteNotebookAnnotations(prev, notebookId));
+    const nextStore = deleteNotebookAnnotations(loadNotebookStore(), notebookId);
+    setStore(nextStore);
     setSelection((prev) => (prev && prev.notebook.id === notebookId ? null : prev));
+
+    const activeEmbedMediaIds = new Set<string>();
+    for (const page of Object.values(nextStore.pages)) {
+      for (const img of page.images || []) {
+        if (img.mediaId) {
+          activeEmbedMediaIds.add(img.mediaId);
+        }
+      }
+    }
+    await cleanupUnusedEmbeddedMedia(activeEmbedMediaIds);
   };
 
   const handleCreateBlankNotebook = async () => {

@@ -264,14 +264,17 @@ export async function createCustomNotebook(input: {
   };
 
   const db = await openDatabase();
-  const tx = db.transaction([STORE_MEDIA, STORE_NOTEBOOKS], 'readwrite');
-  const mediaStore = tx.objectStore(STORE_MEDIA);
-  for (const media of mediaRecords) {
-    mediaStore.put(media);
+  try {
+    const tx = db.transaction([STORE_MEDIA, STORE_NOTEBOOKS], 'readwrite');
+    const mediaStore = tx.objectStore(STORE_MEDIA);
+    for (const media of mediaRecords) {
+      mediaStore.put(media);
+    }
+    tx.objectStore(STORE_NOTEBOOKS).put(notebook);
+    await transactionDone(tx);
+  } finally {
+    db.close();
   }
-  tx.objectStore(STORE_NOTEBOOKS).put(notebook);
-  await transactionDone(tx);
-  db.close();
 
   return notebook;
 }
@@ -323,6 +326,10 @@ export async function saveEmbeddedImageMedia(
   file: File | Blob,
   fileName?: string
 ): Promise<{ mediaId: string; aspectRatio: number }> {
+  if (typeof navigator !== 'undefined' && navigator.storage?.persist) {
+    navigator.storage.persist().catch(() => {});
+  }
+
   const mediaId = `med-embed-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const aspectRatio = await measureBlobImageAspectRatio(file);
   const record: MediaRecord = {
@@ -334,10 +341,20 @@ export async function saveEmbeddedImageMedia(
   };
 
   const db = await openDatabase();
-  const tx = db.transaction(STORE_MEDIA, 'readwrite');
-  tx.objectStore(STORE_MEDIA).put(record);
-  await transactionDone(tx);
-  db.close();
+  try {
+    const tx = db.transaction(STORE_MEDIA, 'readwrite');
+    tx.objectStore(STORE_MEDIA).put(record);
+    await transactionDone(tx);
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'QuotaExceededError') {
+      throw new Error(
+        'Der lokale Browser-Speicher ist voll. Bitte zuerst ein ZIP-Backup sichern oder alte Hefte löschen.'
+      );
+    }
+    throw err;
+  } finally {
+    db.close();
+  }
 
   const objectUrl = URL.createObjectURL(file);
   mediaUrlCache.set(mediaId, objectUrl);
@@ -355,27 +372,29 @@ export async function updateCustomNotebookMeta(
   }
 ): Promise<NotebookDocument | null> {
   const db = await openDatabase();
-  const tx = db.transaction(STORE_NOTEBOOKS, 'readwrite');
-  const store = tx.objectStore(STORE_NOTEBOOKS);
-  const existing = await txPromise<NotebookDocument | undefined>(store.get(notebookId));
-  if (!existing) {
+  try {
+    const tx = db.transaction(STORE_NOTEBOOKS, 'readwrite');
+    const store = tx.objectStore(STORE_NOTEBOOKS);
+    const existing = await txPromise<NotebookDocument | undefined>(store.get(notebookId));
+    if (!existing) {
+      return null;
+    }
+
+    const updated: NotebookDocument = {
+      ...existing,
+      title: patch.title.trim() || existing.title,
+      subtitle: patch.subtitle.trim() || existing.subtitle,
+      category: patch.category.trim() || existing.category,
+      coverColor: patch.coverColor || existing.coverColor,
+      updatedAt: Date.now(),
+    };
+
+    store.put(updated);
+    await transactionDone(tx);
+    return updated;
+  } finally {
     db.close();
-    return null;
   }
-
-  const updated: NotebookDocument = {
-    ...existing,
-    title: patch.title.trim() || existing.title,
-    subtitle: patch.subtitle.trim() || existing.subtitle,
-    category: patch.category.trim() || existing.category,
-    coverColor: patch.coverColor || existing.coverColor,
-    updatedAt: Date.now(),
-  };
-
-  store.put(updated);
-  await transactionDone(tx);
-  db.close();
-  return updated;
 }
 
 export async function appendPagesToCustomNotebook(
@@ -383,80 +402,114 @@ export async function appendPagesToCustomNotebook(
   stagedItems: StagedCustomItem[]
 ): Promise<{ notebook: NotebookDocument; firstNewPageNumber: number } | null> {
   const db = await openDatabase();
-  const readTx = db.transaction(STORE_NOTEBOOKS, 'readonly');
-  const existing = await txPromise<NotebookDocument | undefined>(
-    readTx.objectStore(STORE_NOTEBOOKS).get(notebookId)
-  );
-  if (!existing) {
+  try {
+    const readTx = db.transaction(STORE_NOTEBOOKS, 'readonly');
+    const existing = await txPromise<NotebookDocument | undefined>(
+      readTx.objectStore(STORE_NOTEBOOKS).get(notebookId)
+    );
+    if (!existing) {
+      return null;
+    }
+
+    const currentPages = existing.customPages ?? [];
+    const startPage = currentPages.length + 1;
+    const { pages: newPages, mediaRecords } = await materializeStagedItems(
+      stagedItems,
+      startPage
+    );
+    if (newPages.length === 0) {
+      return { notebook: existing, firstNewPageNumber: currentPages.length || 1 };
+    }
+
+    const combinedPages = [...currentPages, ...newPages];
+    const updated: NotebookDocument = {
+      ...existing,
+      customPages: combinedPages,
+      totalPages: combinedPages.length,
+      updatedAt: Date.now(),
+    };
+
+    const writeTx = db.transaction([STORE_MEDIA, STORE_NOTEBOOKS], 'readwrite');
+    const mediaStore = writeTx.objectStore(STORE_MEDIA);
+    for (const media of mediaRecords) {
+      mediaStore.put(media);
+    }
+    writeTx.objectStore(STORE_NOTEBOOKS).put(updated);
+    await transactionDone(writeTx);
+
+    return { notebook: updated, firstNewPageNumber: startPage };
+  } finally {
     db.close();
-    return null;
   }
-
-  const currentPages = existing.customPages ?? [];
-  const startPage = currentPages.length + 1;
-  const { pages: newPages, mediaRecords } = await materializeStagedItems(
-    stagedItems,
-    startPage
-  );
-  if (newPages.length === 0) {
-    db.close();
-    return { notebook: existing, firstNewPageNumber: currentPages.length || 1 };
-  }
-
-  const combinedPages = [...currentPages, ...newPages];
-  const updated: NotebookDocument = {
-    ...existing,
-    customPages: combinedPages,
-    totalPages: combinedPages.length,
-    updatedAt: Date.now(),
-  };
-
-  const writeTx = db.transaction([STORE_MEDIA, STORE_NOTEBOOKS], 'readwrite');
-  const mediaStore = writeTx.objectStore(STORE_MEDIA);
-  for (const media of mediaRecords) {
-    mediaStore.put(media);
-  }
-  writeTx.objectStore(STORE_NOTEBOOKS).put(updated);
-  await transactionDone(writeTx);
-  db.close();
-
-  return { notebook: updated, firstNewPageNumber: startPage };
 }
 
 export async function deleteCustomNotebook(notebookId: string): Promise<void> {
   const db = await openDatabase();
-  const readTx = db.transaction(STORE_NOTEBOOKS, 'readonly');
-  const allBooks = await txPromise<NotebookDocument[]>(
-    readTx.objectStore(STORE_NOTEBOOKS).getAll()
-  );
+  try {
+    const readTx = db.transaction(STORE_NOTEBOOKS, 'readonly');
+    const allBooks = await txPromise<NotebookDocument[]>(
+      readTx.objectStore(STORE_NOTEBOOKS).getAll()
+    );
 
-  const target = allBooks.find((b) => b.id === notebookId);
-  const usedElsewhere = new Set<string>();
-  for (const book of allBooks) {
-    if (book.id === notebookId) continue;
-    for (const pg of book.customPages ?? []) {
-      if (pg.kind === 'image' || pg.kind === 'pdf-page') {
-        usedElsewhere.add(pg.mediaId);
+    const target = allBooks.find((b) => b.id === notebookId);
+    const usedElsewhere = new Set<string>();
+    for (const book of allBooks) {
+      if (book.id === notebookId) continue;
+      for (const pg of book.customPages ?? []) {
+        if (pg.kind === 'image' || pg.kind === 'pdf-page') {
+          usedElsewhere.add(pg.mediaId);
+        }
       }
     }
-  }
 
-  const mediaToDelete = new Set<string>();
-  for (const pg of target?.customPages ?? []) {
-    if ((pg.kind === 'image' || pg.kind === 'pdf-page') && !usedElsewhere.has(pg.mediaId)) {
-      mediaToDelete.add(pg.mediaId);
+    const mediaToDelete = new Set<string>();
+    for (const pg of target?.customPages ?? []) {
+      if ((pg.kind === 'image' || pg.kind === 'pdf-page') && !usedElsewhere.has(pg.mediaId)) {
+        mediaToDelete.add(pg.mediaId);
+      }
     }
-  }
 
-  const writeTx = db.transaction([STORE_NOTEBOOKS, STORE_MEDIA], 'readwrite');
-  writeTx.objectStore(STORE_NOTEBOOKS).delete(notebookId);
-  const mediaStore = writeTx.objectStore(STORE_MEDIA);
-  for (const mId of mediaToDelete) {
-    mediaStore.delete(mId);
-    revokeMediaObjectUrl(mId);
+    const writeTx = db.transaction([STORE_NOTEBOOKS, STORE_MEDIA], 'readwrite');
+    writeTx.objectStore(STORE_NOTEBOOKS).delete(notebookId);
+    const mediaStore = writeTx.objectStore(STORE_MEDIA);
+    for (const mId of mediaToDelete) {
+      mediaStore.delete(mId);
+      revokeMediaObjectUrl(mId);
+    }
+    await transactionDone(writeTx);
+  } finally {
+    db.close();
   }
-  await transactionDone(writeTx);
-  db.close();
+}
+
+export async function cleanupUnusedEmbeddedMedia(
+  activeEmbedMediaIds: Set<string>
+): Promise<void> {
+  try {
+    const db = await openDatabase();
+    try {
+      const readTx = db.transaction(STORE_MEDIA, 'readonly');
+      const allMedia = await txPromise<MediaRecord[]>(
+        readTx.objectStore(STORE_MEDIA).getAll()
+      );
+      const orphanIds = (allMedia || [])
+        .filter((m) => m.id.startsWith('med-embed-') && !activeEmbedMediaIds.has(m.id))
+        .map((m) => m.id);
+      if (orphanIds.length === 0) return;
+
+      const writeTx = db.transaction(STORE_MEDIA, 'readwrite');
+      const mediaStore = writeTx.objectStore(STORE_MEDIA);
+      for (const id of orphanIds) {
+        mediaStore.delete(id);
+        revokeMediaObjectUrl(id);
+      }
+      await transactionDone(writeTx);
+    } finally {
+      db.close();
+    }
+  } catch (err) {
+    console.error('Bereinigung nicht verwendeter Bilder fehlgeschlagen:', err);
+  }
 }
 
 export function renderBlankTemplateToDataUrl(
@@ -585,27 +638,30 @@ export async function exportAllCustomNotebooksWithMedia(): Promise<{
   media: MediaRecord[];
 }> {
   const db = await openDatabase();
-  const tx = db.transaction([STORE_NOTEBOOKS, STORE_MEDIA], 'readonly');
-  const [rawNotebooks, rawMedia] = await Promise.all([
-    txPromise<NotebookDocument[]>(tx.objectStore(STORE_NOTEBOOKS).getAll()),
-    txPromise<MediaRecord[]>(tx.objectStore(STORE_MEDIA).getAll()),
-  ]);
-  db.close();
+  try {
+    const tx = db.transaction([STORE_NOTEBOOKS, STORE_MEDIA], 'readonly');
+    const [rawNotebooks, rawMedia] = await Promise.all([
+      txPromise<NotebookDocument[]>(tx.objectStore(STORE_NOTEBOOKS).getAll()),
+      txPromise<MediaRecord[]>(tx.objectStore(STORE_MEDIA).getAll()),
+    ]);
 
-  const notebooks = (rawNotebooks || []).map((doc) => ({
-    ...doc,
-    isCustom: true,
-    sourceType:
-      doc.sourceType === 'blatt-blanko'
-        ? ('blatt-blanko' as const)
-        : ('eigenes-heft' as const),
-    totalPages: doc.customPages?.length ?? doc.totalPages ?? 0,
-  }));
+    const notebooks = (rawNotebooks || []).map((doc) => ({
+      ...doc,
+      isCustom: true,
+      sourceType:
+        doc.sourceType === 'blatt-blanko'
+          ? ('blatt-blanko' as const)
+          : ('eigenes-heft' as const),
+      totalPages: doc.customPages?.length ?? doc.totalPages ?? 0,
+    }));
 
-  return {
-    notebooks,
-    media: rawMedia || [],
-  };
+    return {
+      notebooks,
+      media: rawMedia || [],
+    };
+  } finally {
+    db.close();
+  }
 }
 
 export async function importCustomNotebooksWithMedia(
@@ -621,34 +677,37 @@ export async function importCustomNotebooksWithMedia(
   }
 
   const db = await openDatabase();
-  const tx = db.transaction([STORE_MEDIA, STORE_NOTEBOOKS], 'readwrite');
-  const mediaStore = tx.objectStore(STORE_MEDIA);
-  const notebookStore = tx.objectStore(STORE_NOTEBOOKS);
+  try {
+    const tx = db.transaction([STORE_MEDIA, STORE_NOTEBOOKS], 'readwrite');
+    const mediaStore = tx.objectStore(STORE_MEDIA);
+    const notebookStore = tx.objectStore(STORE_NOTEBOOKS);
 
-  let importedMedia = 0;
-  for (const m of media) {
-    if (!m?.id || !m.blob) continue;
-    mediaStore.put(m);
-    importedMedia += 1;
+    let importedMedia = 0;
+    for (const m of media) {
+      if (!m?.id || !m.blob) continue;
+      mediaStore.put(m);
+      importedMedia += 1;
+    }
+
+    let importedNotebooks = 0;
+    for (const doc of notebooks) {
+      if (!doc?.id) continue;
+      notebookStore.put({
+        ...doc,
+        isCustom: true,
+        sourceType:
+          doc.sourceType === 'blatt-blanko'
+            ? ('blatt-blanko' as const)
+            : ('eigenes-heft' as const),
+        totalPages: doc.customPages?.length ?? doc.totalPages ?? 0,
+      });
+      importedNotebooks += 1;
+    }
+
+    await transactionDone(tx);
+    return { importedNotebooks, importedMedia };
+  } finally {
+    db.close();
   }
-
-  let importedNotebooks = 0;
-  for (const doc of notebooks) {
-    if (!doc?.id) continue;
-    notebookStore.put({
-      ...doc,
-      isCustom: true,
-      sourceType:
-        doc.sourceType === 'blatt-blanko'
-          ? ('blatt-blanko' as const)
-          : ('eigenes-heft' as const),
-      totalPages: doc.customPages?.length ?? doc.totalPages ?? 0,
-    });
-    importedNotebooks += 1;
-  }
-
-  await transactionDone(tx);
-  db.close();
-  return { importedNotebooks, importedMedia };
 }
 

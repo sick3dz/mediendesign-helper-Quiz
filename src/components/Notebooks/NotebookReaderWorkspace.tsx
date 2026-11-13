@@ -42,7 +42,10 @@ import {
   PEN_COLORS,
   STICKY_NOTE_STYLES,
 } from '../../data/notebooksData';
-import { getPageAnnotations } from '../../services/notebookStorageService';
+import {
+  getPageAnnotations,
+  loadNotebookStore,
+} from '../../services/notebookStorageService';
 import { getPdfThumbnailDataUrl } from '../../services/pdfRenderService';
 import {
   getMediaObjectUrl,
@@ -223,6 +226,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const [sidebarTab, setSidebarTab] = useState<'pages' | 'stickers'>('pages');
   const [sidebarStickerFilter, setSidebarStickerFilter] = useState<NotebookStickerType | 'all'>('all');
   const [confirmClearPage, setConfirmClearPage] = useState<boolean>(false);
+  const [imageInsertError, setImageInsertError] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [isToolbarCollapsed, setIsToolbarCollapsed] = useState<boolean>(false);
   const [pencilOnlyMode, setPencilOnlyMode] = useState<boolean>(false);
@@ -276,6 +280,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     setUndoStack([]);
     setRedoStack([]);
     setConfirmClearPage(false);
+    setImageInsertError(null);
     onPageChange(notebook.id, currentPage);
   }, [notebook.id, currentPage]);
 
@@ -349,12 +354,27 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     setConfirmClearPage(false);
   };
 
+  const currentTargetRef = useRef<{ notebookId: string; page: number }>({
+    notebookId: notebook.id,
+    page: currentPage,
+  });
+  currentTargetRef.current = { notebookId: notebook.id, page: currentPage };
+
   const insertImageFilesToCurrentPage = useCallback(
     async (files: File[]) => {
-      const imageFiles = files.filter((f) => f.type.startsWith('image/'));
+      const imageFiles = files.filter(
+        (f) =>
+          f.type.startsWith('image/') ||
+          /\.(png|jpe?g|gif|webp|svg|bmp|heic|heif|avif)$/i.test(f.name)
+      );
       if (imageFiles.length === 0) return;
 
+      const targetNotebookId = notebook.id;
+      const targetPage = currentPage;
+      setImageInsertError(null);
+
       const added: NotebookImageElement[] = [];
+      let firstError: string | null = null;
       for (let idx = 0; idx < imageFiles.length; idx++) {
         const file = imageFiles[idx];
         try {
@@ -376,28 +396,48 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
           });
         } catch (err) {
           console.error('Bild konnte nicht eingefügt werden:', err);
+          if (!firstError) {
+            firstError =
+              err instanceof Error
+                ? err.message
+                : 'Bild konnte nicht lokal im Browser gespeichert werden.';
+          }
         }
       }
 
+      if (firstError) {
+        setImageInsertError(firstError);
+      }
+
       if (added.length > 0) {
-        const latest = getPageAnnotations(store, notebook.id, currentPage);
-        handleCommitAnnotations(
-          {
-            ...latest,
-            images: [...(latest.images || []), ...added],
-          },
-          true
+        const latest = getPageAnnotations(
+          loadNotebookStore(),
+          targetNotebookId,
+          targetPage
         );
-        setActiveTool('hand');
-        setOpenToolPopover(null);
-        const lastAdded = added[added.length - 1];
-        setSelectedImageSignal((prev) => ({
-          id: lastAdded.id,
-          seq: (prev?.seq ?? 0) + 1,
-        }));
+        const next: PageAnnotations = {
+          ...latest,
+          images: [...(latest.images || []), ...added],
+        };
+        const stillOnTargetPage =
+          currentTargetRef.current.notebookId === targetNotebookId &&
+          currentTargetRef.current.page === targetPage;
+
+        if (stillOnTargetPage) {
+          setUndoStack((prev) => [...prev.slice(-29), latest]);
+          setRedoStack([]);
+          setActiveTool('hand');
+          setOpenToolPopover(null);
+          const lastAdded = added[added.length - 1];
+          setSelectedImageSignal((prev) => ({
+            id: lastAdded.id,
+            seq: (prev?.seq ?? 0) + 1,
+          }));
+        }
+        onUpdatePageAnnotations(targetNotebookId, targetPage, next);
       }
     },
-    [currentPage, handleCommitAnnotations, notebook.id, store]
+    [currentPage, notebook.id, onUpdatePageAnnotations]
   );
 
   // Clipboard image paste support (Ctrl+V / Cmd+V)
@@ -1124,6 +1164,21 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                 Abbrechen
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Inline Error Notice when Local Image Insertion Fails */}
+        {imageInsertError && (
+          <div className="mt-2 pt-2 border-t border-rose-200 dark:border-rose-900/60 flex items-center justify-between gap-2 text-xs text-rose-700 dark:text-rose-300">
+            <span className="font-semibold">{imageInsertError}</span>
+            <button
+              type="button"
+              onClick={() => setImageInsertError(null)}
+              className="p-1 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-950/50 cursor-pointer shrink-0"
+              aria-label="Fehlermeldung schließen"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
         )}
       </div>
