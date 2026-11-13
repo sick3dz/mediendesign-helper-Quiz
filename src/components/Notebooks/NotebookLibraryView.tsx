@@ -95,17 +95,18 @@ const CustomCoverThumb: React.FC<{
 }> = ({ firstPage, title }) => {
   const [mediaUrl, setMediaUrl] = useState<string>('');
 
+  const firstMediaId = firstPage && firstPage.kind !== 'blank' ? firstPage.mediaId : '';
   useEffect(() => {
     setMediaUrl('');
     if (!firstPage || firstPage.kind === 'blank') return;
     let active = true;
-    getMediaObjectUrl(firstPage.mediaId).then((url) => {
+    getMediaObjectUrl(firstMediaId).then((url) => {
       if (active && url) setMediaUrl(url);
     });
     return () => {
       active = false;
     };
-  }, [firstPage?.id, firstPage?.kind]);
+  }, [firstPage?.id, firstPage?.kind, firstMediaId]);
 
   if (!firstPage) {
     return (
@@ -170,6 +171,7 @@ export const NotebookLibraryView: React.FC<Props> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [exportingNotebookId, setExportingNotebookId] = useState<string | null>(null);
+  const [pdfExportError, setPdfExportError] = useState<string | null>(null);
 
   const allNotebooks = useMemo(
     () => [...customNotebooks, ...NOTEBOOKS_CATALOG],
@@ -308,6 +310,20 @@ export const NotebookLibraryView: React.FC<Props> = ({
           </button>
         </div>
       </div>
+
+      {/* PDF Export Error Banner */}
+      {pdfExportError && (
+        <div className="bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/60 rounded-2xl px-4 py-3 flex items-center justify-between gap-3 text-xs text-rose-700 dark:text-rose-300">
+          <span className="font-semibold">{pdfExportError}</span>
+          <button
+            type="button"
+            onClick={() => setPdfExportError(null)}
+            className="px-2 py-1 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-900/50 font-bold cursor-pointer shrink-0"
+          >
+            Schließen
+          </button>
+        </div>
+      )}
 
       {/* Filter & Search Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3">
@@ -520,6 +536,7 @@ export const NotebookLibraryView: React.FC<Props> = ({
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
+                    if (e.target !== e.currentTarget) return;
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
                       onSelectNotebook(doc);
@@ -618,11 +635,17 @@ export const NotebookLibraryView: React.FC<Props> = ({
                           type="button"
                           onClick={async (e) => {
                             e.stopPropagation();
+                            setPdfExportError(null);
                             setExportingNotebookId(doc.id);
                             try {
                               await exportNotebookAsPdf(doc, store);
                             } catch (err) {
                               console.error('PDF-Export fehlgeschlagen:', err);
+                              setPdfExportError(
+                                err instanceof Error
+                                  ? err.message
+                                  : `PDF-Export für „${doc.title}“ fehlgeschlagen.`
+                              );
                             } finally {
                               setExportingNotebookId(null);
                             }

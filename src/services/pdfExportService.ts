@@ -184,28 +184,33 @@ export async function exportNotebookAsPdf(
     // 2. Render Annotations onto canvas using exact page dimensions
     const uiScale = canvasW / 1240;
 
-    // Strokes
-    for (const stroke of annotations.strokes || []) {
-      const pts = stroke.points;
-      if (pts.length === 0) continue;
-      ctx.save();
-      ctx.strokeStyle = stroke.color;
-      ctx.lineWidth = Math.max(1, (stroke.width / 100) * canvasW);
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      if (stroke.tool === 'highlighter') {
-        ctx.globalAlpha = 0.35;
-      }
-      ctx.beginPath();
-      ctx.moveTo((pts[0].x / 100) * canvasW, (pts[0].y / 100) * canvasH);
-      for (let i = 1; i < pts.length; i++) {
-        ctx.lineTo((pts[i].x / 100) * canvasW, (pts[i].y / 100) * canvasH);
-      }
-      ctx.stroke();
-      ctx.restore();
+    // 2a. Strokes (Highlighters first with multiply blend, then smooth/pressure Pen strokes)
+    const allStrokes = annotations.strokes || [];
+    const highlighterStrokes = allStrokes.filter((s) => s.tool === 'highlighter');
+    const penStrokes = allStrokes.filter((s) => s.tool === 'pen');
+
+    for (const stroke of highlighterStrokes) {
+      drawSmoothStrokeToCanvas(ctx, stroke, canvasW, canvasH, {
+        alpha: 0.42,
+        multiply: true,
+      });
     }
 
-    // Embedded Images
+    for (const stroke of penStrokes) {
+      if (
+        stroke.points.length >= 3 &&
+        stroke.points.some((pt) => typeof pt.p === 'number')
+      ) {
+        drawPressureInkPolygonToCanvas(ctx, stroke, canvasW, canvasH);
+      } else {
+        drawSmoothStrokeToCanvas(ctx, stroke, canvasW, canvasH, {
+          alpha: 0.96,
+          multiply: false,
+        });
+      }
+    }
+
+    // 2b. Embedded Images
     for (const imgEl of annotations.images || []) {
       try {
         const url = await getMediaObjectUrl(imgEl.mediaId);
@@ -216,19 +221,19 @@ export async function exportNotebookAsPdf(
       }
     }
 
-    // Sticky Notes
-    for (const sticky of annotations.stickyNotes || []) {
-      drawStickyNoteToCanvas(ctx, sticky, canvasW, canvasH, uiScale);
+    // 2c. Stickers
+    for (const stk of annotations.stickers || []) {
+      drawStickerToCanvas(ctx, stk, canvasW, canvasH, uiScale);
     }
 
-    // Text Boxes
+    // 2d. Text Boxes
     for (const box of annotations.textBoxes || []) {
       drawTextBoxToCanvas(ctx, box, canvasW, canvasH, uiScale);
     }
 
-    // Stickers
-    for (const stk of annotations.stickers || []) {
-      drawStickerToCanvas(ctx, stk, canvasW, canvasH, uiScale);
+    // 2e. Sticky Notes
+    for (const sticky of annotations.stickyNotes || []) {
+      drawStickyNoteToCanvas(ctx, sticky, canvasW, canvasH, uiScale);
     }
 
     // 3. Add PDF page with exact matching dimensions & orientation (zero cropping!)
@@ -259,6 +264,123 @@ export async function exportNotebookAsPdf(
   pdf.save(`${safeTitle || 'Heft'}-Export.pdf`);
 }
 
+function drawSmoothStrokeToCanvas(
+  ctx: CanvasRenderingContext2D,
+  stroke: { color: string; width: number; points: { x: number; y: number }[] },
+  canvasW: number,
+  canvasH: number,
+  opts: { alpha: number; multiply: boolean }
+): void {
+  const pts = stroke.points;
+  if (pts.length === 0) return;
+
+  ctx.save();
+  if (opts.multiply) {
+    ctx.globalCompositeOperation = 'multiply';
+  }
+  ctx.globalAlpha = opts.alpha;
+  ctx.strokeStyle = stroke.color;
+  ctx.lineWidth = Math.max(1, (stroke.width / 100) * canvasW);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  ctx.beginPath();
+  const x0 = (pts[0].x / 100) * canvasW;
+  const y0 = (pts[0].y / 100) * canvasH;
+  ctx.moveTo(x0, y0);
+
+  if (pts.length === 1) {
+    ctx.lineTo(x0 + 0.5, y0 + 0.5);
+  } else {
+    for (let i = 1; i < pts.length - 1; i++) {
+      const cx = (pts[i].x / 100) * canvasW;
+      const cy = (pts[i].y / 100) * canvasH;
+      const nx = (pts[i + 1].x / 100) * canvasW;
+      const ny = (pts[i + 1].y / 100) * canvasH;
+      ctx.quadraticCurveTo(cx, cy, (cx + nx) / 2, (cy + ny) / 2);
+    }
+    const last = pts[pts.length - 1];
+    ctx.lineTo((last.x / 100) * canvasW, (last.y / 100) * canvasH);
+  }
+
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawPressureInkPolygonToCanvas(
+  ctx: CanvasRenderingContext2D,
+  stroke: { color: string; width: number; points: { x: number; y: number; p?: number }[] },
+  canvasW: number,
+  canvasH: number
+): void {
+  const pts = stroke.points;
+  if (pts.length < 3) return;
+
+  const leftPts: { x: number; y: number }[] = [];
+  const rightPts: { x: number; y: number }[] = [];
+
+  for (let i = 0; i < pts.length; i++) {
+    const prev = pts[Math.max(0, i - 1)];
+    const curr = pts[i];
+    const next = pts[Math.min(pts.length - 1, i + 1)];
+
+    const pPrev = prev.p ?? 0.5;
+    const pCurr = curr.p ?? 0.5;
+    const pNext = next.p ?? 0.5;
+    const pSmooth = Math.max(0.15, Math.min(1, (pPrev + pCurr * 2 + pNext) / 4));
+    const radiusPx = ((stroke.width / 100) * canvasW * (0.48 + 0.88 * pSmooth)) / 2;
+
+    const tx = ((next.x - prev.x) / 100) * canvasW;
+    const ty = ((next.y - prev.y) / 100) * canvasH;
+    const len = Math.hypot(tx, ty);
+    const nx = len > 0.0001 ? -ty / len : 0;
+    const ny = len > 0.0001 ? tx / len : 1;
+
+    const cx = (curr.x / 100) * canvasW;
+    const cy = (curr.y / 100) * canvasH;
+
+    leftPts.push({ x: cx + nx * radiusPx, y: cy + ny * radiusPx });
+    rightPts.push({ x: cx - nx * radiusPx, y: cy - ny * radiusPx });
+  }
+
+  ctx.save();
+  ctx.fillStyle = stroke.color;
+  ctx.globalAlpha = 0.96;
+  ctx.beginPath();
+  ctx.moveTo(leftPts[0].x, leftPts[0].y);
+
+  for (let i = 1; i < leftPts.length - 1; i++) {
+    const mx = (leftPts[i].x + leftPts[i + 1].x) / 2;
+    const my = (leftPts[i].y + leftPts[i + 1].y) / 2;
+    ctx.quadraticCurveTo(leftPts[i].x, leftPts[i].y, mx, my);
+  }
+
+  const lastLeft = leftPts[leftPts.length - 1];
+  const lastRight = rightPts[rightPts.length - 1];
+  const endTip = {
+    x: (pts[pts.length - 1].x / 100) * canvasW,
+    y: (pts[pts.length - 1].y / 100) * canvasH,
+  };
+  ctx.lineTo(lastLeft.x, lastLeft.y);
+  ctx.quadraticCurveTo(endTip.x, endTip.y, lastRight.x, lastRight.y);
+
+  for (let i = rightPts.length - 2; i > 0; i--) {
+    const mx = (rightPts[i].x + rightPts[i - 1].x) / 2;
+    const my = (rightPts[i].y + rightPts[i - 1].y) / 2;
+    ctx.quadraticCurveTo(rightPts[i].x, rightPts[i].y, mx, my);
+  }
+
+  const startTip = {
+    x: (pts[0].x / 100) * canvasW,
+    y: (pts[0].y / 100) * canvasH,
+  };
+  ctx.lineTo(rightPts[0].x, rightPts[0].y);
+  ctx.quadraticCurveTo(startTip.x, startTip.y, leftPts[0].x, leftPts[0].y);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
 async function drawEmbeddedImageToCanvas(
   ctx: CanvasRenderingContext2D,
   url: string,
@@ -270,12 +392,16 @@ async function drawEmbeddedImageToCanvas(
   if (!loaded) return;
 
   const { img, naturalWidth: iw, naturalHeight: ih } = loaded;
-  const aspect = ih / iw;
-  const wPx = (imgEl.widthPct / 100) * canvasW;
-  const hPx = wPx * aspect;
+  const rot = (((imgEl.rotation ?? 0) % 360) + 360) % 360;
+  const isQuarter = rot === 90 || rot === 270;
+
+  // Match stage display: widthPct is always the visible upright width after rotation
+  const uprightW = (imgEl.widthPct / 100) * canvasW;
+  const drawW = isQuarter ? uprightW * (iw / Math.max(1, ih)) : uprightW;
+  const drawH = isQuarter ? uprightW : uprightW * (ih / Math.max(1, iw));
+
   const xPx = (imgEl.x / 100) * canvasW;
   const yPx = (imgEl.y / 100) * canvasH;
-  const rot = (((imgEl.rotation ?? 0) % 360) + 360) % 360;
 
   ctx.save();
   ctx.globalAlpha = imgEl.opacity ?? 1;
@@ -283,7 +409,7 @@ async function drawEmbeddedImageToCanvas(
   if (rot !== 0) {
     ctx.rotate((rot * Math.PI) / 180);
   }
-  ctx.drawImage(img, -wPx / 2, -hPx / 2, wPx, hPx);
+  ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
   ctx.restore();
 }
 
@@ -294,22 +420,22 @@ function drawStickyNoteToCanvas(
   canvasH: number,
   uiScale: number
 ): void {
-  const colorMap: Record<string, { bg: string; border: string }> = {
-    yellow: { bg: '#fef08a', border: '#facc15' },
-    pink: { bg: '#fbcfe8', border: '#f472b6' },
-    mint: { bg: '#a7f3d0', border: '#34d399' },
-    blue: { bg: '#bae6fd', border: '#38bdf8' },
+  const colorMap: Record<string, { bg: string; border: string; header: string }> = {
+    yellow: { bg: '#fef08a', border: '#facc15', header: '#fde047' },
+    pink: { bg: '#fbcfe8', border: '#f472b6', header: '#f9a8d4' },
+    mint: { bg: '#d1fae5', border: '#6ee7b7', header: '#a7f3d0' },
+    blue: { bg: '#e0f2fe', border: '#7dd3fc', header: '#bae6fd' },
   };
   const theme = colorMap[sticky.color] || colorMap.yellow;
   const xPx = (sticky.x / 100) * canvasW;
   const yPx = (sticky.y / 100) * canvasH;
   const boxW = Math.round(280 * uiScale);
-  const boxH = Math.round((sticky.isCollapsed ? 50 : 200) * uiScale);
+  const boxH = Math.round((sticky.isCollapsed ? 52 : 204) * uiScale);
 
   ctx.save();
   ctx.fillStyle = theme.bg;
   ctx.strokeStyle = theme.border;
-  ctx.lineWidth = Math.max(2, 4 * uiScale);
+  ctx.lineWidth = Math.max(2, 3 * uiScale);
   ctx.beginPath();
   ctx.roundRect(xPx, yPx, boxW, boxH, 12 * uiScale);
   ctx.fill();
@@ -317,14 +443,23 @@ function drawStickyNoteToCanvas(
 
   if (sticky.text && !sticky.isCollapsed) {
     ctx.fillStyle = '#1e293b';
-    const fontPx = Math.round(22 * uiScale);
-    ctx.font = `bold ${fontPx}px system-ui, sans-serif`;
+    const fontPx = Math.max(12, Math.round(20 * uiScale));
+    ctx.font = `600 ${fontPx}px system-ui, sans-serif`;
+    ctx.textBaseline = 'top';
     const lines = wrapText(ctx, sticky.text, boxW - 32 * uiScale);
-    let ty = yPx + 36 * uiScale;
+    let ty = yPx + 20 * uiScale;
+    const lineStep = Math.round(fontPx * 1.35);
     for (const line of lines.slice(0, 7)) {
       ctx.fillText(line, xPx + 16 * uiScale, ty);
-      ty += 28 * uiScale;
+      ty += lineStep;
     }
+  } else if (sticky.isCollapsed) {
+    ctx.fillStyle = '#1e293b';
+    const fontPx = Math.max(11, Math.round(18 * uiScale));
+    ctx.font = `700 ${fontPx}px system-ui, sans-serif`;
+    ctx.textBaseline = 'middle';
+    const snippet = sticky.text?.trim() ? sticky.text.trim().slice(0, 14) : 'Notiz';
+    ctx.fillText(snippet, xPx + 16 * uiScale, yPx + boxH / 2);
   }
   ctx.restore();
 }
@@ -336,23 +471,32 @@ function drawTextBoxToCanvas(
   canvasH: number,
   uiScale: number
 ): void {
-  if (!box.text) return;
+  if (!box.text.trim()) return;
   const xPx = (box.x / 100) * canvasW;
   const yPx = (box.y / 100) * canvasH;
-  const fontSizePx = Math.round((box.fontSize || 2) * 14 * uiScale);
+  const fontSizePx = Math.max(11, Math.round(((box.fontSize || 2) / 100) * canvasW));
   const lineHeight = Math.round(fontSizePx * 1.35);
-  const rawLines = box.text.split(/\r?\n/);
+  const padX = 12 * uiScale;
+  const padY = 8 * uiScale;
+
+  // Match stage max-w-[78%] and right-edge bounds
+  const maxBoxWidth = Math.min(
+    canvasW * 0.78,
+    Math.max(160 * uiScale, canvasW - xPx - 12 * uiScale)
+  );
+  const maxContentWidth = Math.max(60 * uiScale, maxBoxWidth - padX * 2);
 
   ctx.save();
-  ctx.font = `600 ${fontSizePx}px system-ui, sans-serif`;
+  ctx.font = `500 ${fontSizePx}px system-ui, sans-serif`;
+
+  const wrappedLines = wrapText(ctx, box.text, maxContentWidth);
   let maxLineW = 0;
-  for (const line of rawLines) {
+  for (const line of wrappedLines) {
     maxLineW = Math.max(maxLineW, ctx.measureText(line).width);
   }
-  const padX = 12 * uiScale;
-  const padY = 10 * uiScale;
-  const boxW = Math.max(100 * uiScale, maxLineW + padX * 2);
-  const boxH = rawLines.length * lineHeight + padY * 2;
+
+  const boxW = Math.min(maxBoxWidth, Math.max(110 * uiScale, maxLineW + padX * 2));
+  const boxH = wrappedLines.length * lineHeight + padY * 2;
 
   if (box.hasBackground ?? true) {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
@@ -366,11 +510,23 @@ function drawTextBoxToCanvas(
 
   ctx.fillStyle = box.color || '#0f172a';
   ctx.textBaseline = 'top';
-  rawLines.forEach((line, idx) => {
+  wrappedLines.forEach((line, idx) => {
     ctx.fillText(line, xPx + padX, yPx + padY + idx * lineHeight);
   });
   ctx.restore();
 }
+
+const STICKER_CANVAS_PALETTE: Record<
+  string,
+  { bg: string; border: string; text: string }
+> = {
+  merksatz: { bg: '#fef3c7', border: '#fbbf24', text: '#78350f' },
+  wichtig: { bg: '#ffe4e6', border: '#fb7185', text: '#881337' },
+  pruefung: { bg: '#e0e7ff', border: '#818cf8', text: '#312e81' },
+  verstanden: { bg: '#d1fae5', border: '#34d399', text: '#064e3b' },
+  frage: { bg: '#e0f2fe', border: '#38bdf8', text: '#0c4a6e' },
+  stern: { bg: '#fef9c3', border: '#facc15', text: '#713f12' },
+};
 
 function drawStickerToCanvas(
   ctx: CanvasRenderingContext2D,
@@ -381,46 +537,83 @@ function drawStickerToCanvas(
 ): void {
   const preset = NOTEBOOK_STICKERS.find((p) => p.type === stk.type);
   if (!preset) return;
+  const palette = STICKER_CANVAS_PALETTE[preset.type] || {
+    bg: '#ffffff',
+    border: '#cbd5e1',
+    text: '#0f172a',
+  };
   const xPx = (stk.x / 100) * canvasW;
   const yPx = (stk.y / 100) * canvasH;
-  const scale = (stk.scale ?? 1) * uiScale;
+  const scale = (stk.scale ?? 1) * uiScale * 1.15;
+  const labelText = `${preset.symbol} ${preset.shortLabel}`;
 
   ctx.save();
   ctx.globalAlpha = stk.opacity ?? 1;
   ctx.translate(xPx, yPx);
+  ctx.rotate((-2 * Math.PI) / 180);
   ctx.scale(scale, scale);
 
-  ctx.fillStyle = '#ffffff';
-  ctx.strokeStyle = '#cbd5e1';
-  ctx.lineWidth = 3;
+  ctx.font = '800 18px system-ui, sans-serif';
+  const textWidth = ctx.measureText(labelText).width;
+  const pillW = Math.max(120, Math.ceil(textWidth + 30));
+  const pillH = 40;
+
+  ctx.fillStyle = palette.bg;
+  ctx.strokeStyle = palette.border;
+  ctx.lineWidth = 2.5;
   ctx.beginPath();
-  ctx.roundRect(-75, -28, 150, 56, 16);
+  ctx.roundRect(-pillW / 2, -pillH / 2, pillW, pillH, 10);
   ctx.fill();
   ctx.stroke();
 
-  ctx.font = 'bold 24px system-ui, sans-serif';
+  ctx.fillStyle = palette.text;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(`${preset.symbol} ${preset.label}`, 0, 0);
+  ctx.fillText(labelText, 0, 1);
 
   ctx.restore();
 }
 
 function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
-  const words = text.split(' ');
+  const paragraphs = text.split(/\r?\n/);
   const lines: string[] = [];
-  let currentLine = words[0] || '';
 
-  for (let i = 1; i < words.length; i++) {
-    const word = words[i];
-    const width = ctx.measureText(currentLine + ' ' + word).width;
-    if (width < maxWidth) {
-      currentLine += ' ' + word;
-    } else {
-      lines.push(currentLine);
-      currentLine = word;
+  for (const para of paragraphs) {
+    if (!para) {
+      lines.push('');
+      continue;
     }
+    const words = para.split(' ');
+    let currentLine = '';
+
+    for (const word of words) {
+      const candidate = currentLine ? `${currentLine} ${word}` : word;
+      if (ctx.measureText(candidate).width <= maxWidth) {
+        currentLine = candidate;
+      } else {
+        if (currentLine) {
+          lines.push(currentLine);
+          currentLine = '';
+        }
+        // Fallback: split overlong single word if wider than maxWidth
+        if (ctx.measureText(word).width > maxWidth) {
+          let chunk = '';
+          for (const ch of word) {
+            if (ctx.measureText(chunk + ch).width > maxWidth && chunk) {
+              lines.push(chunk);
+              chunk = ch;
+            } else {
+              chunk += ch;
+            }
+          }
+          currentLine = chunk;
+        } else {
+          currentLine = word;
+        }
+      }
+    }
+    lines.push(currentLine);
   }
-  lines.push(currentLine);
-  return lines;
+
+  return lines.length > 0 ? lines : [''];
 }

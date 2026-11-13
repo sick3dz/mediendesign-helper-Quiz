@@ -193,42 +193,40 @@ export const ImageCropModal: React.FC<Props> = ({
     };
   }, [isOpen, imageSrc, rotation]);
 
+  // Keep crop box strictly aligned to locked aspect ratio (also after 90° rotation swaps dimensions)
+  useEffect(() => {
+    const targetRatio = getTargetAspectRatio(aspectMode);
+    if (!targetRatio || sourceDimensions.width <= 0 || sourceDimensions.height <= 0) return;
+
+    const imgAspect = sourceDimensions.width / sourceDimensions.height;
+    const pctRatio = targetRatio / imgAspect;
+
+    setCrop((prev) => {
+      let newW = prev.width > 92 ? 86 : prev.width;
+      let newH = newW / pctRatio;
+      if (newH > 92) {
+        newH = 92;
+        newW = newH * pctRatio;
+      }
+      if (newW > 92) {
+        newW = 92;
+        newH = newW / pctRatio;
+      }
+      const centerX = prev.x + prev.width / 2;
+      const centerY = prev.y + prev.height / 2;
+      const newX = centerX - newW / 2;
+      const newY = centerY - newH / 2;
+      return clampCrop({ x: newX, y: newY, width: newW, height: newH });
+    });
+  }, [aspectMode, sourceDimensions.width, sourceDimensions.height]);
+
   // Adjust crop box when aspect mode changes
-  const handleSelectAspectMode = useCallback(
-    (mode: AspectRatioMode) => {
-      setAspectMode(mode);
-      const targetRatio = getTargetAspectRatio(mode);
-      if (!targetRatio) return;
-
+  const handleSelectAspectMode = useCallback((mode: AspectRatioMode) => {
+    setAspectMode(mode);
+    if (getTargetAspectRatio(mode)) {
       setHasEdited(true);
-
-      const imgAspect =
-        sourceDimensions.width > 0 && sourceDimensions.height > 0
-          ? sourceDimensions.width / sourceDimensions.height
-          : 1;
-
-      const pctRatio = targetRatio / imgAspect;
-
-      setCrop((prev) => {
-        let newW = prev.width > 92 ? 86 : prev.width;
-        let newH = newW / pctRatio;
-        if (newH > 92) {
-          newH = 92;
-          newW = newH * pctRatio;
-        }
-        if (newW > 92) {
-          newW = 92;
-          newH = newW / pctRatio;
-        }
-        const centerX = prev.x + prev.width / 2;
-        const centerY = prev.y + prev.height / 2;
-        const newX = centerX - newW / 2;
-        const newY = centerY - newH / 2;
-        return clampCrop({ x: newX, y: newY, width: newW, height: newH });
-      });
-    },
-    [sourceDimensions]
-  );
+    }
+  }, []);
 
   const handleResetEdits = () => {
     setRotation(initialRotation);

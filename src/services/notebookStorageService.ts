@@ -204,16 +204,69 @@ export function getAllAnnotatedPages(store: NotebookStore): AnnotatedPageIndexIt
   return result;
 }
 
+function normalizePageAnnotations(raw: unknown): PageAnnotations | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const entry = raw as Partial<PageAnnotations>;
+  const rot =
+    entry.rotationOverride === 0 ||
+    entry.rotationOverride === 90 ||
+    entry.rotationOverride === 180 ||
+    entry.rotationOverride === 270
+      ? entry.rotationOverride
+      : undefined;
+
+  return {
+    strokes: Array.isArray(entry.strokes)
+      ? entry.strokes.filter(
+          (s) => s && typeof s === 'object' && Array.isArray(s.points)
+        )
+      : [],
+    stickyNotes: Array.isArray(entry.stickyNotes)
+      ? entry.stickyNotes.filter((n) => n && typeof n === 'object' && typeof n.id === 'string')
+      : [],
+    stickers: Array.isArray(entry.stickers)
+      ? entry.stickers.filter((s) => s && typeof s === 'object' && typeof s.id === 'string')
+      : [],
+    textBoxes: Array.isArray(entry.textBoxes)
+      ? entry.textBoxes.filter((t) => t && typeof t === 'object' && typeof t.id === 'string')
+      : [],
+    images: Array.isArray(entry.images)
+      ? entry.images.filter(
+          (img) => img && typeof img === 'object' && typeof img.id === 'string' && typeof img.mediaId === 'string'
+        )
+      : [],
+    rotationOverride: rot,
+  };
+}
+
 export function restoreNotebookStoreFromBackup(imported: unknown): NotebookStore | null {
   if (!imported || typeof imported !== 'object') return null;
   const candidate = imported as Partial<NotebookStore>;
+  const rawPages =
+    candidate.pages && typeof candidate.pages === 'object' ? candidate.pages : {};
+  const cleanPages: Record<string, PageAnnotations> = {};
+  for (const [key, val] of Object.entries(rawPages)) {
+    const clean = normalizePageAnnotations(val);
+    if (clean) {
+      cleanPages[key] = clean;
+    }
+  }
+
+  const rawLastPage =
+    candidate.lastPageByBook && typeof candidate.lastPageByBook === 'object'
+      ? candidate.lastPageByBook
+      : {};
+  const cleanLastPage: Record<string, number> = {};
+  for (const [bookId, pageNum] of Object.entries(rawLastPage)) {
+    if (typeof pageNum === 'number' && Number.isFinite(pageNum) && pageNum >= 1) {
+      cleanLastPage[bookId] = Math.floor(pageNum);
+    }
+  }
+
   const normalized: NotebookStore = {
     version: 1,
-    pages: candidate.pages && typeof candidate.pages === 'object' ? candidate.pages : {},
-    lastPageByBook:
-      candidate.lastPageByBook && typeof candidate.lastPageByBook === 'object'
-        ? candidate.lastPageByBook
-        : {},
+    pages: cleanPages,
+    lastPageByBook: cleanLastPage,
   };
   saveNotebookStore(normalized);
   return normalized;

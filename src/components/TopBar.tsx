@@ -33,6 +33,7 @@ interface Props {
   isSprintActive?: boolean;
   isSprintDone?: boolean;
   sprintTimeFormatted?: string;
+  hasAppUpdate?: boolean;
 }
 
 export const TopBar: React.FC<Props> = ({
@@ -48,6 +49,7 @@ export const TopBar: React.FC<Props> = ({
   isSprintActive,
   isSprintDone,
   sprintTimeFormatted,
+  hasAppUpdate = false,
 }) => {
   const [isLernenMenuOpen, setIsLernenMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -356,12 +358,25 @@ export const TopBar: React.FC<Props> = ({
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <button
             onClick={onOpenBackupModal}
-            className="p-1.5 sm:px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-semibold"
-            title="Fortschritt extern sichern & wiederherstellen"
-            aria-label="Backup manager"
+            className="relative p-1.5 sm:px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-semibold"
+            title={
+              hasAppUpdate
+                ? 'Backup & App-Update verfügbar – zum Aktualisieren öffnen'
+                : 'Fortschritt extern sichern, wiederherstellen & App neu laden'
+            }
+            aria-label={hasAppUpdate ? 'Backup manager – Update verfügbar' : 'Backup manager'}
           >
             <HardDrive className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
             <span className="hidden md:inline">Backup</span>
+            {hasAppUpdate && (
+              <>
+                <span
+                  className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-white dark:ring-slate-900 shadow-xs"
+                  aria-hidden="true"
+                />
+                <span className="sr-only">Neues WebApp-Update verfügbar</span>
+              </>
+            )}
           </button>
 
           <button

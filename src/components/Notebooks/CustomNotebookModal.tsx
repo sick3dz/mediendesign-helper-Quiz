@@ -749,9 +749,6 @@ export const CustomNotebookModal: React.FC<Props> = ({
             });
             const newPreviewUrl = URL.createObjectURL(croppedBlob);
             previewUrlsRef.current.push(newPreviewUrl);
-            try {
-              URL.revokeObjectURL(previewToRevoke);
-            } catch {}
             setStagedItems((prev) =>
               prev.map((i) =>
                 i.tempId === targetTempId
@@ -760,6 +757,11 @@ export const CustomNotebookModal: React.FC<Props> = ({
               )
             );
             setActiveCropItem(null);
+            window.setTimeout(() => {
+              try {
+                URL.revokeObjectURL(previewToRevoke);
+              } catch {}
+            }, 100);
           }}
         />
       )}

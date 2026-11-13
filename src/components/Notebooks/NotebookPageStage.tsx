@@ -53,7 +53,11 @@ interface Props {
   pencilOnlyMode: boolean;
   selectedImageSignal?: { id: string; seq: number };
   onStylusDetected?: () => void;
-  onCommitAnnotations: (next: PageAnnotations, recordHistory?: boolean) => void;
+  onCommitAnnotations: (
+    next: PageAnnotations,
+    recordHistory?: boolean,
+    historyBaseSnapshot?: PageAnnotations
+  ) => void;
   onDetectedPdfTotalPages?: (totalPages: number) => void;
 }
 
@@ -190,6 +194,7 @@ interface AutoTextItemProps {
   isSelected: boolean;
   autoFocus: boolean;
   onSelect: () => void;
+  onFocusBox: () => void;
   onClearAutoFocus: () => void;
   onStartDrag: (e: React.PointerEvent<HTMLElement>) => void;
   onChangeText: (text: string) => void;
@@ -205,6 +210,7 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
   isSelected,
   autoFocus,
   onSelect,
+  onFocusBox,
   onClearAutoFocus,
   onStartDrag,
   onChangeText,
@@ -296,7 +302,10 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
         value={box.text}
         readOnly={isDrawTool}
         rows={1}
-        onFocus={onSelect}
+        onFocus={() => {
+          onSelect();
+          onFocusBox();
+        }}
         onPointerDown={(e) => {
           if (isDrawTool) return;
           e.stopPropagation();
@@ -351,6 +360,7 @@ const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
 }) => {
   const [rawUrl, setRawUrl] = useState<string>('');
   const [rotatedUrl, setRotatedUrl] = useState<string>('');
+  const [isRotating, setIsRotating] = useState<boolean>(false);
   const retriedRef = useRef<boolean>(false);
   const rot = (((item.rotation ?? 0) % 360) + 360) % 360;
 
@@ -368,9 +378,12 @@ const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
   useEffect(() => {
     if (!rawUrl || rot === 0) {
       setRotatedUrl('');
+      setIsRotating(false);
       return;
     }
     let cancelled = false;
+    let createdBlobUrl = '';
+    setIsRotating(true);
     const img = new Image();
     if (!rawUrl.startsWith('blob:') && !rawUrl.startsWith('data:')) {
       img.crossOrigin = 'anonymous';
@@ -386,19 +399,41 @@ const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
       canvas.width = cw;
       canvas.height = ch;
       const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      if (!ctx) {
+        setIsRotating(false);
+        return;
+      }
       ctx.translate(cw / 2, ch / 2);
       ctx.rotate((rot * Math.PI) / 180);
       ctx.drawImage(img, -w / 2, -h / 2, w, h);
-      setRotatedUrl(canvas.toDataURL('image/png'));
+      canvas.toBlob((blob) => {
+        if (cancelled) return;
+        if (blob) {
+          createdBlobUrl = URL.createObjectURL(blob);
+          setRotatedUrl(createdBlobUrl);
+        } else {
+          setRotatedUrl(canvas.toDataURL('image/png'));
+        }
+        setIsRotating(false);
+      }, 'image/png');
+    };
+    img.onerror = () => {
+      if (!cancelled) setIsRotating(false);
     };
     img.src = rawUrl;
     return () => {
       cancelled = true;
+      if (createdBlobUrl) {
+        try {
+          URL.revokeObjectURL(createdBlobUrl);
+        } catch {
+          // ignore
+        }
+      }
     };
   }, [rawUrl, rot]);
 
-  const displaySrc = rot !== 0 && rotatedUrl ? rotatedUrl : rawUrl;
+  const displaySrc = rot !== 0 ? (rotatedUrl || '') : rawUrl;
   const opacity = item.opacity ?? 1;
   const transparencyPct = Math.round((1 - opacity) * 100);
   const showToolbarBelow = item.y < 18;
@@ -559,7 +594,17 @@ const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
             className="w-full h-auto block pointer-events-none"
           />
         ) : (
-          <div className="w-full aspect-4/3 bg-slate-100 flex items-center justify-center text-slate-400">
+          <div
+            style={{
+              aspectRatio: `${
+                rot === 90 || rot === 270
+                  ? 1 / Math.max(0.2, item.aspectRatio || 1.333)
+                  : Math.max(0.2, item.aspectRatio || 1.333)
+              }`,
+            }}
+            className="w-full bg-slate-100/80 flex items-center justify-center text-slate-400"
+            aria-label={isRotating ? 'Bild wird gedreht…' : 'Bild wird geladen…'}
+          >
             <Loader2 className="w-5 h-5 animate-spin" />
           </div>
         )}
@@ -646,6 +691,8 @@ export const NotebookPageStage: React.FC<Props> = ({
     startClientY: number;
     origX: number;
     origY: number;
+    hasMoved: boolean;
+    origSnapshot: PageAnnotations;
   } | null>(null);
 
   const resizeImageRef = useRef<{
@@ -653,6 +700,20 @@ export const NotebookPageStage: React.FC<Props> = ({
     startClientX: number;
     startClientY: number;
     origWidthPct: number;
+    hasResized: boolean;
+    origSnapshot: PageAnnotations;
+  } | null>(null);
+
+  const preEditTextSnapshotRef = useRef<{
+    kind: 'text' | 'sticky';
+    id: string;
+    startText: string;
+    snapshot: PageAnnotations;
+  } | null>(null);
+
+  const pendingNewTextBoxBaseRef = useRef<{
+    id: string;
+    snapshot: PageAnnotations;
   } | null>(null);
 
   const imagePageMeta =
@@ -986,6 +1047,10 @@ export const NotebookPageStage: React.FC<Props> = ({
         hasBackground: textHasBackground,
         createdAt: Date.now(),
       };
+      pendingNewTextBoxBaseRef.current = {
+        id,
+        snapshot: latestAnnotationsRef.current,
+      };
       setAutoFocusTextId(id);
       setSelectedTextId(id);
       onCommitAnnotations(
@@ -993,7 +1058,7 @@ export const NotebookPageStage: React.FC<Props> = ({
           ...latestAnnotationsRef.current,
           textBoxes: [...(latestAnnotationsRef.current.textBoxes || []), newTextBox],
         },
-        true
+        false
       );
       return;
     }
@@ -1060,6 +1125,9 @@ export const NotebookPageStage: React.FC<Props> = ({
         12,
         Math.min(95, +(resizeImageRef.current.origWidthPct + deltaPct * 2).toFixed(1))
       );
+      if (Math.abs(nextWidth - resizeImageRef.current.origWidthPct) >= 0.1) {
+        resizeImageRef.current.hasResized = true;
+      }
       const targetId = resizeImageRef.current.id;
       onCommitAnnotations(
         {
@@ -1082,6 +1150,13 @@ export const NotebookPageStage: React.FC<Props> = ({
       const dyPct = ((e.clientY - dragItemRef.current.startClientY) / rect.height) * 100;
       const nextX = Math.max(2, Math.min(95, dragItemRef.current.origX + dxPct));
       const nextY = Math.max(2, Math.min(95, dragItemRef.current.origY + dyPct));
+
+      if (
+        Math.abs(nextX - dragItemRef.current.origX) > 0.08 ||
+        Math.abs(nextY - dragItemRef.current.origY) > 0.08
+      ) {
+        dragItemRef.current.hasMoved = true;
+      }
 
       if (dragItemRef.current.kind === 'sticky') {
         const targetId = dragItemRef.current.id;
@@ -1191,15 +1266,38 @@ export const NotebookPageStage: React.FC<Props> = ({
 
   const handleStagePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
     if (resizeImageRef.current) {
+      const resizeSession = resizeImageRef.current;
       resizeImageRef.current = null;
-      onCommitAnnotations(latestAnnotationsRef.current, true);
+      try {
+        stageRef.current?.releasePointerCapture(e.pointerId);
+      } catch {
+        // ignore
+      }
+      if (resizeSession.hasResized) {
+        onCommitAnnotations(
+          latestAnnotationsRef.current,
+          true,
+          resizeSession.origSnapshot
+        );
+      }
       return;
     }
 
     if (dragItemRef.current) {
+      const dragSession = dragItemRef.current;
       dragItemRef.current = null;
-      // Save final position with history record
-      onCommitAnnotations(latestAnnotationsRef.current, true);
+      try {
+        stageRef.current?.releasePointerCapture(e.pointerId);
+      } catch {
+        // ignore
+      }
+      if (dragSession.hasMoved) {
+        onCommitAnnotations(
+          latestAnnotationsRef.current,
+          true,
+          dragSession.origSnapshot
+        );
+      }
       return;
     }
 
@@ -1223,7 +1321,8 @@ export const NotebookPageStage: React.FC<Props> = ({
           ...latestAnnotationsRef.current,
           strokes: [...latestAnnotationsRef.current.strokes, completed],
         },
-        true
+        true,
+        latestAnnotationsRef.current
       );
       return;
     }
@@ -1236,7 +1335,11 @@ export const NotebookPageStage: React.FC<Props> = ({
         // ignore
       }
       if (erasedAnyRef.current) {
-        onCommitAnnotations(latestAnnotationsRef.current, true);
+        onCommitAnnotations(
+          latestAnnotationsRef.current,
+          true,
+          preEraseSnapshotRef.current ?? undefined
+        );
       }
       preEraseSnapshotRef.current = null;
       erasedAnyRef.current = false;
@@ -1362,21 +1465,91 @@ export const NotebookPageStage: React.FC<Props> = ({
     if (selectedTextId === id) setSelectedTextId(null);
   };
 
+  const handleTextBoxFocus = (id: string) => {
+    const box = (latestAnnotationsRef.current.textBoxes || []).find((t) => t.id === id);
+    if (!box) return;
+    if (pendingNewTextBoxBaseRef.current?.id === id) {
+      return;
+    }
+    preEditTextSnapshotRef.current = {
+      kind: 'text',
+      id,
+      startText: box.text,
+      snapshot: latestAnnotationsRef.current,
+    };
+  };
+
   const handleTextBoxBlur = (id: string) => {
     const currentBoxes = latestAnnotationsRef.current.textBoxes || [];
     const target = currentBoxes.find((t) => t.id === id);
+
+    const newBase =
+      pendingNewTextBoxBaseRef.current?.id === id
+        ? pendingNewTextBoxBaseRef.current.snapshot
+        : null;
+    if (pendingNewTextBoxBaseRef.current?.id === id) {
+      pendingNewTextBoxBaseRef.current = null;
+    }
+
+    const editSession =
+      preEditTextSnapshotRef.current?.kind === 'text' && preEditTextSnapshotRef.current.id === id
+        ? preEditTextSnapshotRef.current
+        : null;
+    if (editSession) {
+      preEditTextSnapshotRef.current = null;
+    }
+
     if (target && !target.text.trim()) {
-      onCommitAnnotations(
-        {
-          ...latestAnnotationsRef.current,
-          textBoxes: currentBoxes.filter((t) => t.id !== id),
-        },
-        false
-      );
+      const cleanedState: PageAnnotations = {
+        ...latestAnnotationsRef.current,
+        textBoxes: currentBoxes.filter((t) => t.id !== id),
+      };
+      if (newBase) {
+        // Brand-new empty box discarded without leaving a dead Undo step
+        onCommitAnnotations(cleanedState, false);
+      } else if (editSession && editSession.startText !== '') {
+        onCommitAnnotations(cleanedState, true, editSession.snapshot);
+      } else {
+        onCommitAnnotations(cleanedState, false);
+      }
       if (selectedTextId === id) setSelectedTextId(null);
       return;
     }
-    onCommitAnnotations(latestAnnotationsRef.current, false);
+
+    if (newBase && target && target.text.trim()) {
+      onCommitAnnotations(latestAnnotationsRef.current, true, newBase);
+      return;
+    }
+
+    if (editSession && target && target.text !== editSession.startText) {
+      onCommitAnnotations(latestAnnotationsRef.current, true, editSession.snapshot);
+    }
+  };
+
+  const handleStickyFocus = (id: string) => {
+    const note = latestAnnotationsRef.current.stickyNotes.find((n) => n.id === id);
+    if (!note) return;
+    preEditTextSnapshotRef.current = {
+      kind: 'sticky',
+      id,
+      startText: note.text,
+      snapshot: latestAnnotationsRef.current,
+    };
+  };
+
+  const handleStickyBlur = (id: string) => {
+    const editSession =
+      preEditTextSnapshotRef.current?.kind === 'sticky' &&
+      preEditTextSnapshotRef.current.id === id
+        ? preEditTextSnapshotRef.current
+        : null;
+    if (editSession) {
+      preEditTextSnapshotRef.current = null;
+    }
+    const note = latestAnnotationsRef.current.stickyNotes.find((n) => n.id === id);
+    if (editSession && note && note.text !== editSession.startText) {
+      onCommitAnnotations(latestAnnotationsRef.current, true, editSession.snapshot);
+    }
   };
 
   const aspectRatio = surface ? surface.width / surface.height : 0.707;
@@ -1457,6 +1630,9 @@ export const NotebookPageStage: React.FC<Props> = ({
               isSelected={selectedImageId === imgEl.id}
               onSelect={() => setSelectedImageId(imgEl.id)}
               onStartDrag={(e) => {
+                try {
+                  stageRef.current?.setPointerCapture(e.pointerId);
+                } catch {}
                 dragItemRef.current = {
                   kind: 'image',
                   id: imgEl.id,
@@ -1464,17 +1640,21 @@ export const NotebookPageStage: React.FC<Props> = ({
                   startClientY: e.clientY,
                   origX: imgEl.x,
                   origY: imgEl.y,
+                  hasMoved: false,
+                  origSnapshot: latestAnnotationsRef.current,
                 };
               }}
               onStartResize={(e) => {
                 try {
-                  e.currentTarget.setPointerCapture(e.pointerId);
+                  stageRef.current?.setPointerCapture(e.pointerId);
                 } catch {}
                 resizeImageRef.current = {
                   id: imgEl.id,
                   startClientX: e.clientX,
                   startClientY: e.clientY,
                   origWidthPct: imgEl.widthPct,
+                  hasResized: false,
+                  origSnapshot: latestAnnotationsRef.current,
                 };
               }}
               onCrop={async () => {
@@ -1507,16 +1687,18 @@ export const NotebookPageStage: React.FC<Props> = ({
                 croppedBlob,
                 'cropped-photo.jpg'
               );
+              const latest = latestAnnotationsRef.current;
               onCommitAnnotations(
                 {
-                  ...annotations,
-                  images: (annotations.images || []).map((img) =>
+                  ...latest,
+                  images: (latest.images || []).map((img) =>
                     img.id === targetId
                       ? { ...img, mediaId, aspectRatio, rotation: 0 }
                       : img
                   ),
                 },
-                true
+                true,
+                latest
               );
               setActiveCropImage(null);
             }}
@@ -1601,6 +1783,9 @@ export const NotebookPageStage: React.FC<Props> = ({
                   if (isDrawTool) return;
                   e.stopPropagation();
                   setSelectedStickerId(sticker.id);
+                  try {
+                    stageRef.current?.setPointerCapture(e.pointerId);
+                  } catch {}
                   dragItemRef.current = {
                     kind: 'sticker',
                     id: sticker.id,
@@ -1608,6 +1793,8 @@ export const NotebookPageStage: React.FC<Props> = ({
                     startClientY: e.clientY,
                     origX: sticker.x,
                     origY: sticker.y,
+                    hasMoved: false,
+                    origSnapshot: latestAnnotationsRef.current,
                   };
                 }}
                 className={`absolute pointer-events-auto -translate-x-1/2 -translate-y-1/2 group select-none ${
@@ -1761,10 +1948,14 @@ export const NotebookPageStage: React.FC<Props> = ({
                 isSelected={selectedTextId === box.id}
                 autoFocus={autoFocusTextId === box.id}
                 onSelect={() => setSelectedTextId(box.id)}
+                onFocusBox={() => handleTextBoxFocus(box.id)}
                 onClearAutoFocus={() => {
                   if (autoFocusTextId === box.id) setAutoFocusTextId(null);
                 }}
                 onStartDrag={(e) => {
+                  try {
+                    stageRef.current?.setPointerCapture(e.pointerId);
+                  } catch {}
                   dragItemRef.current = {
                     kind: 'text',
                     id: box.id,
@@ -1772,6 +1963,8 @@ export const NotebookPageStage: React.FC<Props> = ({
                     startClientY: e.clientY,
                     origX: box.x,
                     origY: box.y,
+                    hasMoved: false,
+                    origSnapshot: latestAnnotationsRef.current,
                   };
                 }}
                 onChangeText={(text) => handleTextBoxChange(box.id, text)}
@@ -1809,6 +2002,9 @@ export const NotebookPageStage: React.FC<Props> = ({
                   onPointerDown={(e) => {
                     if (isDrawTool) return;
                     e.stopPropagation();
+                    try {
+                      stageRef.current?.setPointerCapture(e.pointerId);
+                    } catch {}
                     dragItemRef.current = {
                       kind: 'sticky',
                       id: note.id,
@@ -1816,6 +2012,8 @@ export const NotebookPageStage: React.FC<Props> = ({
                       startClientY: e.clientY,
                       origX: note.x,
                       origY: note.y,
+                      hasMoved: false,
+                      origSnapshot: latestAnnotationsRef.current,
                     };
                   }}
                   className={`w-3.5 h-3.5 rounded-full ${theme.pinColor} ring-2 ring-white shadow-sm -translate-x-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing`}
@@ -1847,6 +2045,9 @@ export const NotebookPageStage: React.FC<Props> = ({
                       onPointerDown={(e) => {
                         if (isDrawTool) return;
                         e.stopPropagation();
+                        try {
+                          stageRef.current?.setPointerCapture(e.pointerId);
+                        } catch {}
                         dragItemRef.current = {
                           kind: 'sticky',
                           id: note.id,
@@ -1854,6 +2055,8 @@ export const NotebookPageStage: React.FC<Props> = ({
                           startClientY: e.clientY,
                           origX: note.x,
                           origY: note.y,
+                          hasMoved: false,
+                          origSnapshot: latestAnnotationsRef.current,
                         };
                       }}
                       className={`px-2 py-1 ${theme.headerBg} flex items-center justify-between gap-1 cursor-grab active:cursor-grabbing`}
@@ -1897,10 +2100,11 @@ export const NotebookPageStage: React.FC<Props> = ({
                       value={note.text}
                       onFocus={() => {
                         if (autoFocusStickyId === note.id) setAutoFocusStickyId(null);
+                        handleStickyFocus(note.id);
                       }}
                       onPointerDown={(e) => e.stopPropagation()}
                       onChange={(e) => handleStickyTextChange(note.id, e.target.value)}
-                      onBlur={() => onCommitAnnotations(latestAnnotationsRef.current, false)}
+                      onBlur={() => handleStickyBlur(note.id)}
                       placeholder="Notiz an diese Stelle heften..."
                       rows={3}
                       className="w-full p-2.5 bg-transparent text-xs leading-relaxed focus:outline-hidden resize-y placeholder:text-black/40"

@@ -17,6 +17,15 @@ import {
   ALL_BADGES,
 } from './services/storageService';
 import { soundEffects } from './services/audioService';
+import {
+  AppUpdateStatus,
+  checkForAppUpdate,
+  cleanReloadQueryParamOnBoot,
+  forceSafeAppReload,
+  getAppUpdateStatus,
+  shouldRunScheduledUpdateCheck,
+  subscribeAppUpdateStatus,
+} from './services/appUpdateService';
 import { TopBar, ActiveTab } from './components/TopBar';
 import { AdhdControlsBar } from './components/AdhdControlsBar';
 import { TopPetCompanionBar } from './components/TopPetCompanionBar';
@@ -98,6 +107,45 @@ export default function App() {
   // Break Reminder & Mindful Study Session State
   const [studySeconds, setStudySeconds] = useState<number>(0);
   const [isBreathingModalOpen, setIsBreathingModalOpen] = useState<boolean>(false);
+  const [appUpdateStatus, setAppUpdateStatus] = useState<AppUpdateStatus>(() => {
+    cleanReloadQueryParamOnBoot();
+    return getAppUpdateStatus();
+  });
+
+  // 12-hour WebApp update check scheduler + focus/online catch-up
+  useEffect(() => {
+    const unsubscribe = subscribeAppUpdateStatus((nextStatus) => {
+      setAppUpdateStatus(nextStatus);
+    });
+
+    const runScheduledCheckIfDue = () => {
+      if (shouldRunScheduledUpdateCheck()) {
+        void checkForAppUpdate({ manual: false });
+      }
+    };
+
+    const bootTimer = window.setTimeout(runScheduledCheckIfDue, 1500);
+    const intervalId = window.setInterval(runScheduledCheckIfDue, 15 * 60 * 1000);
+
+    const handleWakeUpCheck = () => {
+      if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+        runScheduledCheckIfDue();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleWakeUpCheck);
+    window.addEventListener('focus', handleWakeUpCheck);
+    window.addEventListener('online', handleWakeUpCheck);
+
+    return () => {
+      unsubscribe();
+      window.clearTimeout(bootTimer);
+      window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleWakeUpCheck);
+      window.removeEventListener('focus', handleWakeUpCheck);
+      window.removeEventListener('online', handleWakeUpCheck);
+    };
+  }, []);
 
   // Restore any ongoing background Focus Sprint on page mount
   useEffect(() => {
@@ -1108,6 +1156,7 @@ export default function App() {
         isSprintActive={isSprintActive}
         isSprintDone={sprintIsDone}
         sprintTimeFormatted={sprintTimeFormatted}
+        hasAppUpdate={appUpdateStatus.updateAvailable}
       />
 
       {/* ADHD Cognitive Aids & Gamification Bar */}
@@ -1403,6 +1452,9 @@ export default function App() {
           if (newSettings) setSettings(newSettings);
           setBackupVersion(v => v + 1);
         }}
+        updateStatus={appUpdateStatus}
+        onCheckForUpdate={() => checkForAppUpdate({ manual: true })}
+        onReloadApp={forceSafeAppReload}
       />
 
       {/* Chapter Completion Surprise Modal */}

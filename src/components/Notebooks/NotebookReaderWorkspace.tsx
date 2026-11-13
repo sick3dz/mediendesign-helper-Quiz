@@ -114,16 +114,17 @@ const CustomPageThumbnail: React.FC<{
 }> = ({ page, rotation }) => {
   const [mediaUrl, setMediaUrl] = useState<string>('');
 
+  const pageMediaId = page.kind === 'blank' ? '' : page.mediaId;
   useEffect(() => {
     if (page.kind === 'blank') return;
     let active = true;
-    getMediaObjectUrl(page.mediaId).then((url) => {
+    getMediaObjectUrl(pageMediaId).then((url) => {
       if (active && url) setMediaUrl(url);
     });
     return () => {
       active = false;
     };
-  }, [page.id, page.kind]);
+  }, [page.id, page.kind, pageMediaId]);
 
   if (page.kind === 'blank') {
     const { dataUrl } = renderBlankTemplateToDataUrl(page.template, rotation, 220);
@@ -231,6 +232,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const [sidebarStickerFilter, setSidebarStickerFilter] = useState<NotebookStickerType | 'all'>('all');
   const [confirmClearPage, setConfirmClearPage] = useState<boolean>(false);
   const [imageInsertError, setImageInsertError] = useState<string | null>(null);
+  const [pdfExportError, setPdfExportError] = useState<string | null>(null);
   const [isExportingPdf, setIsExportingPdf] = useState<boolean>(false);
   const [pdfProgress, setPdfProgress] = useState<{ current: number; total: number } | null>(null);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
@@ -291,15 +293,21 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     setRedoStack([]);
     setConfirmClearPage(false);
     setImageInsertError(null);
+    setPdfExportError(null);
     onPageChange(notebook.id, currentPage);
   }, [notebook.id, currentPage]);
 
   const currentAnnotations = getPageAnnotations(store, notebook.id, currentPage);
 
   const handleCommitAnnotations = useCallback(
-    (next: PageAnnotations, recordHistory: boolean = true) => {
+    (
+      next: PageAnnotations,
+      recordHistory: boolean = true,
+      historyBaseSnapshot?: PageAnnotations
+    ) => {
       if (recordHistory) {
-        setUndoStack((prev) => [...prev.slice(-29), currentAnnotations]);
+        const snapshot = historyBaseSnapshot ?? currentAnnotations;
+        setUndoStack((prev) => [...prev.slice(-29), snapshot]);
         setRedoStack([]);
       }
       onUpdatePageAnnotations(notebook.id, currentPage, next);
@@ -676,6 +684,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             <button
               type="button"
               onClick={async () => {
+                setPdfExportError(null);
                 setIsExportingPdf(true);
                 try {
                   await exportNotebookAsPdf(notebook, store, (cur, tot) => {
@@ -683,6 +692,11 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                   });
                 } catch (err) {
                   console.error('PDF-Export fehlgeschlagen:', err);
+                  setPdfExportError(
+                    err instanceof Error
+                      ? err.message
+                      : 'PDF-Export konnte nicht abgeschlossen werden.'
+                  );
                 } finally {
                   setIsExportingPdf(false);
                   setPdfProgress(null);
@@ -1225,13 +1239,16 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
           </div>
         )}
 
-        {/* Inline Error Notice when Local Image Insertion Fails */}
-        {imageInsertError && (
+        {/* Inline Error Notice when Local Image Insertion or PDF Export Fails */}
+        {(imageInsertError || pdfExportError) && (
           <div className="mt-2 pt-2 border-t border-rose-200 dark:border-rose-900/60 flex items-center justify-between gap-2 text-xs text-rose-700 dark:text-rose-300">
-            <span className="font-semibold">{imageInsertError}</span>
+            <span className="font-semibold">{imageInsertError || pdfExportError}</span>
             <button
               type="button"
-              onClick={() => setImageInsertError(null)}
+              onClick={() => {
+                setImageInsertError(null);
+                setPdfExportError(null);
+              }}
               className="p-1 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-950/50 cursor-pointer shrink-0"
               aria-label="Fehlermeldung schließen"
             >

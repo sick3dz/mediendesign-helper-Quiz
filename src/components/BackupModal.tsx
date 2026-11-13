@@ -23,6 +23,11 @@ import {
   UserSettings,
 } from '../services/storageService';
 import { getCustomNotebooksBackupStats } from '../services/customNotebookDbService';
+import {
+  AppUpdateCheckResult,
+  AppUpdateStatus,
+  formatUpdateTimestamp,
+} from '../services/appUpdateService';
 import { UserStats } from '../types/quiz';
 import { soundEffects } from '../services/audioService';
 
@@ -30,6 +35,9 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onBackupRestored: (stats: UserStats, settings?: UserSettings) => void;
+  updateStatus: AppUpdateStatus;
+  onCheckForUpdate: () => Promise<AppUpdateCheckResult>;
+  onReloadApp: () => Promise<void>;
 }
 
 function formatBytes(bytes: number): string {
@@ -40,7 +48,14 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1).replace('.', ',')} MB`;
 }
 
-export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored }) => {
+export const BackupModal: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  onBackupRestored,
+  updateStatus,
+  onCheckForUpdate,
+  onReloadApp,
+}) => {
   const [copied, setCopied] = useState(false);
   const [pasteText, setPasteText] = useState('');
   const [importStatus, setImportStatus] = useState<{
@@ -48,6 +63,12 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
     message: string;
   } | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showReloadConfirm, setShowReloadConfirm] = useState(false);
+  const [isReloadingApp, setIsReloadingApp] = useState(false);
+  const [manualCheckFeedback, setManualCheckFeedback] = useState<{
+    type: 'info' | 'update' | 'error';
+    message: string;
+  } | null>(null);
   const [isExportingZip, setIsExportingZip] = useState(false);
   const [isImportingZip, setIsImportingZip] = useState(false);
   const [customStats, setCustomStats] = useState<{
@@ -56,15 +77,38 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
     totalBytes: number;
   }>({ notebookCount: 0, mediaCount: 0, totalBytes: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const closeTimerRef = useRef<number | null>(null);
+  const copyTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      setShowResetConfirm(false);
+      setShowReloadConfirm(false);
+      setManualCheckFeedback(null);
+      if (closeTimerRef.current !== null) {
+        window.clearTimeout(closeTimerRef.current);
+        closeTimerRef.current = null;
+      }
+      if (copyTimerRef.current !== null) {
+        window.clearTimeout(copyTimerRef.current);
+        copyTimerRef.current = null;
+      }
+      return;
+    }
     let active = true;
     getCustomNotebooksBackupStats().then((res) => {
       if (active) setCustomStats(res);
     });
     return () => {
       active = false;
+      if (closeTimerRef.current !== null) {
+        window.clearTimeout(closeTimerRef.current);
+        closeTimerRef.current = null;
+      }
+      if (copyTimerRef.current !== null) {
+        window.clearTimeout(copyTimerRef.current);
+        copyTimerRef.current = null;
+      }
     };
   }, [isOpen]);
 
@@ -113,13 +157,30 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
     }
   };
 
-  const handleCopyClipboard = () => {
+  const handleCopyClipboard = async () => {
     soundEffects.playClick();
     const json = generateBackupJson();
-    navigator.clipboard.writeText(json).then(() => {
+    try {
+      if (!navigator.clipboard?.writeText) {
+        throw new Error('Zwischenablage nicht verfügbar');
+      }
+      await navigator.clipboard.writeText(json);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    });
+      if (copyTimerRef.current !== null) {
+        window.clearTimeout(copyTimerRef.current);
+      }
+      copyTimerRef.current = window.setTimeout(() => {
+        setCopied(false);
+        copyTimerRef.current = null;
+      }, 2500);
+    } catch {
+      soundEffects.playWrong();
+      setImportStatus({
+        type: 'error',
+        message:
+          'Zwischenablage ist in dieser Browser-Ansicht gesperrt. Bitte nutze stattdessen „Backup-Datei laden“ oder „Voll-Backup (.zip)“.',
+      });
+    }
   };
 
   const processImportString = (jsonStr: string) => {
@@ -130,7 +191,11 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
         type: 'success',
         message: 'Fortschritt erfolgreich wiederhergestellt!',
       });
-      setTimeout(() => {
+      if (closeTimerRef.current !== null) {
+        window.clearTimeout(closeTimerRef.current);
+      }
+      closeTimerRef.current = window.setTimeout(() => {
+        closeTimerRef.current = null;
         onBackupRestored(result.stats!, result.settings);
         onClose();
         setImportStatus(null);
@@ -191,7 +256,11 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
             message: `Backup mit eigenen Inhalten wiederhergestellt${suffix}!`,
           });
           getCustomNotebooksBackupStats().then((res) => setCustomStats(res));
-          setTimeout(() => {
+          if (closeTimerRef.current !== null) {
+            window.clearTimeout(closeTimerRef.current);
+          }
+          closeTimerRef.current = window.setTimeout(() => {
+            closeTimerRef.current = null;
             onBackupRestored(result.stats!, result.settings);
             onClose();
             setImportStatus(null);
@@ -237,6 +306,44 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
       setShowResetConfirm(false);
       onClose();
     }, 800);
+  };
+
+  const handleManualUpdateCheck = async () => {
+    soundEffects.playClick();
+    setManualCheckFeedback(null);
+    const result = await onCheckForUpdate();
+    if (!result.checked) {
+      soundEffects.playWrong();
+      setManualCheckFeedback({
+        type: 'error',
+        message:
+          result.error ||
+          'Update-Prüfung derzeit nicht möglich. Bitte Verbindung prüfen.',
+      });
+      return;
+    }
+    if (result.updateAvailable) {
+      soundEffects.playLevelUp();
+      setManualCheckFeedback({
+        type: 'update',
+        message: 'Neue Version entdeckt! Über „App neu laden“ kannst du direkt aktualisieren.',
+      });
+    } else {
+      setManualCheckFeedback({
+        type: 'info',
+        message: 'Du nutzt bereits die aktuellste WebApp-Version.',
+      });
+    }
+  };
+
+  const handleConfirmedReload = async () => {
+    soundEffects.playClick();
+    setIsReloadingApp(true);
+    try {
+      await onReloadApp();
+    } catch {
+      setIsReloadingApp(false);
+    }
   };
 
   return (
@@ -293,12 +400,177 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
             </div>
           )}
 
-          {/* Section 1: Export / Download */}
+          {/* Section 1: WebApp Updates & Safe Reload */}
+          <div
+            className={`p-4 rounded-xl border space-y-3 transition-colors ${
+              updateStatus.updateAvailable
+                ? 'bg-amber-50/70 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800/80'
+                : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200/80 dark:border-slate-800'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                <RefreshCw
+                  className={`w-3.5 h-3.5 ${
+                    updateStatus.updateAvailable
+                      ? 'text-amber-600 dark:text-amber-400'
+                      : 'text-indigo-600 dark:text-indigo-400'
+                  }`}
+                />
+                <span>1. App-Updates &amp; WebApp-Reload</span>
+                {updateStatus.updateAvailable && (
+                  <span
+                    className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block shrink-0"
+                    title="Update verfügbar"
+                    aria-label="Update verfügbar"
+                  />
+                )}
+              </span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                Alle 12 Std.
+              </span>
+            </div>
+
+            <div className="p-3 bg-white dark:bg-slate-900/70 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  {updateStatus.updateAvailable ? (
+                    <span
+                      className="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  )}
+                  <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
+                    {updateStatus.updateAvailable
+                      ? 'Neue WebApp-Version verfügbar'
+                      : updateStatus.lastCheckedAt
+                        ? 'App ist auf dem neuesten Stand'
+                        : 'Automatische Update-Prüfung aktiv'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-500 dark:text-slate-400 tabular-nums">
+                <span>Zuletzt geprüft: {formatUpdateTimestamp(updateStatus.lastCheckedAt)}</span>
+                <span aria-hidden="true">·</span>
+                <span>Prüfintervall: alle 12 Stunden</span>
+              </div>
+
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                Für Home-Bildschirm-WebApps ohne Browser-Reload-Button: Lädt die neueste App-Oberfläche sauber vom Server, ohne lokale Spielstände, Haustiere oder eigene Hefte zu löschen.
+              </p>
+            </div>
+
+            {manualCheckFeedback && (
+              <div
+                className={`px-3 py-2 rounded-lg border text-[11px] font-medium flex items-center gap-2 ${
+                  manualCheckFeedback.type === 'update'
+                    ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200'
+                    : manualCheckFeedback.type === 'error'
+                      ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200'
+                      : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
+                }`}
+              >
+                {manualCheckFeedback.type === 'update' ? (
+                  <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" aria-hidden="true" />
+                ) : manualCheckFeedback.type === 'error' ? (
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                ) : (
+                  <Check className="w-3.5 h-3.5 shrink-0" />
+                )}
+                <span>{manualCheckFeedback.message}</span>
+              </div>
+            )}
+
+            {!manualCheckFeedback && updateStatus.lastError && (
+              <div className="px-3 py-2 rounded-lg border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-200 text-[11px] font-medium flex items-center gap-2">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                <span>{updateStatus.lastError}</span>
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                type="button"
+                onClick={handleManualUpdateCheck}
+                disabled={updateStatus.isChecking || isReloadingApp}
+                className="flex-1 py-2.5 px-3.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-60 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                {updateStatus.isChecking ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Prüfe auf Updates...</span>
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                    <span>Jetzt prüfen</span>
+                  </>
+                )}
+              </button>
+
+              {!showReloadConfirm && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEffects.playClick();
+                    setShowReloadConfirm(true);
+                  }}
+                  disabled={isReloadingApp}
+                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
+                    updateStatus.updateAvailable
+                      ? 'bg-amber-500 hover:bg-amber-600 text-slate-950'
+                      : 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white'
+                  }`}
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>{updateStatus.updateAvailable ? 'Update laden (Neu starten)' : 'App neu laden'}</span>
+                </button>
+              )}
+            </div>
+
+            {showReloadConfirm && (
+              <div className="p-3 bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700/80 rounded-xl space-y-2.5">
+                <p className="text-xs font-medium text-slate-800 dark:text-slate-200 leading-relaxed">
+                  WebApp jetzt neu laden und Cache aktualisieren? Alle lokalen Lernstände, Haustiere, Markierungen und eigenen Hefte bleiben vollständig erhalten.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleConfirmedReload}
+                    disabled={isReloadingApp}
+                    className="flex-1 py-2 px-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors shadow-xs flex items-center justify-center gap-1.5"
+                  >
+                    {isReloadingApp ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Lädt neu...</span>
+                      </>
+                    ) : (
+                      <span>Ja, App jetzt neu laden</span>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowReloadConfirm(false)}
+                    disabled={isReloadingApp}
+                    className="flex-1 py-2 px-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+                  >
+                    Abbrechen
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Section 2: Export / Download */}
           <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-3.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                 <Download className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                1. Extern Speichern (Backup Export)
+                2. Extern Speichern (Backup Export)
               </span>
               <span className="text-[10px] text-slate-500 font-mono">.json / .zip</span>
             </div>
@@ -396,12 +668,12 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
             </div>
           </div>
 
-          {/* Section 2: Import / Restore */}
+          {/* Section 3: Import / Restore */}
           <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                 <Upload className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
-                2. Backup Importieren &amp; Laden
+                3. Backup Importieren &amp; Laden
               </span>
               <span className="text-[10px] text-slate-500 font-mono">Wiederherstellung</span>
             </div>
@@ -463,12 +735,12 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
             </div>
           </div>
 
-          {/* Section 3: Reset to 0 EXP */}
+          {/* Section 4: Reset to 0 EXP */}
           <div className="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200/80 dark:border-slate-800 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                 <RotateCcw className="w-3.5 h-3.5 text-rose-500" />
-                3. Spielstand auf 0 EXP zurücksetzen
+                4. Spielstand auf 0 EXP zurücksetzen
               </span>
               <span className="text-[10px] text-rose-500 font-mono">Neustart</span>
             </div>

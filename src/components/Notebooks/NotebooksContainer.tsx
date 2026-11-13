@@ -41,8 +41,21 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
     fromReader?: boolean;
   } | null>(null);
 
+  const collectActiveEmbeddedMediaIds = (notebookStore: NotebookStore): Set<string> => {
+    const activeEmbedMediaIds = new Set<string>();
+    for (const page of Object.values(notebookStore.pages)) {
+      for (const img of page.images || []) {
+        if (img.mediaId) {
+          activeEmbedMediaIds.add(img.mediaId);
+        }
+      }
+    }
+    return activeEmbedMediaIds;
+  };
+
   useEffect(() => {
-    setStore(loadNotebookStore());
+    const loadedStore = loadNotebookStore();
+    setStore(loadedStore);
     let active = true;
     listCustomNotebooks().then((books) => {
       if (!active) return;
@@ -57,6 +70,13 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
       active = false;
     };
   }, [backupVersion]);
+
+  // Clean up orphaned embedded media only when back in Library (no open reader session Undo stack)
+  useEffect(() => {
+    if (selection !== null) return;
+    const latestStore = loadNotebookStore();
+    cleanupUnusedEmbeddedMedia(collectActiveEmbeddedMediaIds(latestStore)).catch(() => {});
+  }, [selection, backupVersion]);
 
   const handleUpdatePageAnnotations = (
     notebookId: string,
@@ -79,16 +99,7 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
     const nextStore = deleteNotebookAnnotations(loadNotebookStore(), notebookId);
     setStore(nextStore);
     setSelection((prev) => (prev && prev.notebook.id === notebookId ? null : prev));
-
-    const activeEmbedMediaIds = new Set<string>();
-    for (const page of Object.values(nextStore.pages)) {
-      for (const img of page.images || []) {
-        if (img.mediaId) {
-          activeEmbedMediaIds.add(img.mediaId);
-        }
-      }
-    }
-    await cleanupUnusedEmbeddedMedia(activeEmbedMediaIds);
+    await cleanupUnusedEmbeddedMedia(collectActiveEmbeddedMediaIds(nextStore));
   };
 
   const handleCreateBlankNotebook = async () => {

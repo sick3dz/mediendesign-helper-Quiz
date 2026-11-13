@@ -404,90 +404,111 @@ export function calculateLevel(xp: number): LevelInfo {
   };
 }
 
+export function sanitizeUserStats(rawStats: unknown): UserStats {
+  if (!rawStats || typeof rawStats !== 'object') {
+    return DEFAULT_STATS;
+  }
+  const parsed = rawStats as Partial<UserStats>;
+  const rawPet: Partial<UserStats['pet']> = parsed.pet || {};
+  const mergedPet = {
+    ...DEFAULT_PET_STATE,
+    ...rawPet,
+    equipped: {
+      ...DEFAULT_PET_STATE.equipped,
+      ...(rawPet.equipped || {}),
+    },
+    inventory: {
+      ...DEFAULT_PET_STATE.inventory,
+      ...(rawPet.inventory || {}),
+      gadgets:
+        Array.isArray(rawPet.inventory?.gadgets) && rawPet.inventory.gadgets.length > 0
+          ? rawPet.inventory.gadgets
+          : ['bouncing_ball'],
+    },
+  };
+  if (!mergedPet.equipped.gadget && mergedPet.inventory.gadgets?.includes('bouncing_ball')) {
+    mergedPet.equipped.gadget = 'bouncing_ball';
+  }
+  const decayedPet = calculatePetDecay(mergedPet);
+  const today = getTodayDateString();
+
+  let dailyMissions = Array.isArray(parsed.dailyMissions) ? parsed.dailyMissions : undefined;
+  let dailyMissionsDate = parsed.dailyMissionsDate;
+
+  // Reset or initialize missions if new day or missing
+  if (!dailyMissions || dailyMissions.length === 0 || dailyMissionsDate !== today) {
+    dailyMissions = generateDailyMissions();
+    dailyMissionsDate = today;
+  }
+
+  const parsedXp = typeof parsed.xp === 'number' ? parsed.xp : 0;
+  const levelLadderFloor = LEVEL_LADDER.find((l) => l.level === (parsed.level || 1))?.xp || 0;
+  const lifetimeXp =
+    typeof parsed.lifetimeXp === 'number'
+      ? Math.max(parsed.lifetimeXp, parsedXp)
+      : Math.max(parsedXp, levelLadderFloor);
+
+  // Calculate question stats sanity check from questionPerformance
+  const rawAnswered =
+    typeof parsed.answeredQuestionsCount === 'number' ? parsed.answeredQuestionsCount : 0;
+  const rawCorrect =
+    typeof parsed.correctAnswersCount === 'number' ? parsed.correctAnswersCount : 0;
+  const perfEntries = Object.values(parsed.questionPerformance || {});
+  let perfCorrect = 0;
+  let perfAnswered = 0;
+  perfEntries.forEach((p: any) => {
+    const c = typeof p?.correctCount === 'number' ? p.correctCount : 0;
+    const w = typeof p?.wrongCount === 'number' ? p.wrongCount : 0;
+    perfCorrect += c;
+    perfAnswered += c + w;
+  });
+
+  const sanitizedCorrect = Math.max(rawCorrect, perfCorrect);
+  const sanitizedAnswered = Math.max(rawAnswered, perfAnswered, sanitizedCorrect);
+
+  return {
+    ...DEFAULT_STATS,
+    ...parsed,
+    xp: parsedXp,
+    lifetimeXp,
+    pet: decayedPet,
+    answeredQuestionsCount: sanitizedAnswered,
+    correctAnswersCount: sanitizedCorrect,
+    completedModules: Array.isArray(parsed.completedModules) ? parsed.completedModules : [],
+    completedModulesLevel2: Array.isArray(parsed.completedModulesLevel2)
+      ? parsed.completedModulesLevel2
+      : [],
+    completedMiniGames: Array.isArray(parsed.completedMiniGames) ? parsed.completedMiniGames : [],
+    earnedBadges:
+      Array.isArray(parsed.earnedBadges) && parsed.earnedBadges.length > 0
+        ? parsed.earnedBadges
+        : DEFAULT_STATS.earnedBadges,
+    dailyMissions,
+    dailyMissionsDate,
+    questionPerformance: parsed.questionPerformance || {},
+    topicMastery: parsed.topicMastery || {},
+    examScores: Array.isArray(parsed.examScores) ? parsed.examScores : [],
+    unlockedCosmetics:
+      Array.isArray(parsed.unlockedCosmetics) && parsed.unlockedCosmetics.length > 0
+        ? parsed.unlockedCosmetics
+        : DEFAULT_STATS.unlockedCosmetics,
+    equippedCosmetics: {
+      ...DEFAULT_STATS.equippedCosmetics,
+      ...(parsed.equippedCosmetics || {}),
+    },
+    freeCookieClaimDate: parsed.freeCookieClaimDate || getTodayDateString(),
+    freeCookieClaimCount:
+      typeof parsed.freeCookieClaimCount === 'number' ? parsed.freeCookieClaimCount : 0,
+    freeCookieLockedUntil:
+      typeof parsed.freeCookieLockedUntil === 'number' ? parsed.freeCookieLockedUntil : 0,
+  };
+}
+
 export function loadUserStats(): UserStats {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_STATS;
-    const parsed = JSON.parse(raw);
-    const rawPet = parsed.pet || {};
-    const mergedPet = {
-      ...DEFAULT_PET_STATE,
-      ...rawPet,
-      equipped: {
-        ...DEFAULT_PET_STATE.equipped,
-        ...(rawPet.equipped || {}),
-      },
-      inventory: {
-        ...DEFAULT_PET_STATE.inventory,
-        ...(rawPet.inventory || {}),
-        gadgets: Array.isArray(rawPet.inventory?.gadgets) && rawPet.inventory.gadgets.length > 0
-          ? rawPet.inventory.gadgets
-          : ['bouncing_ball'],
-      },
-    };
-    if (!mergedPet.equipped.gadget && mergedPet.inventory.gadgets?.includes('bouncing_ball')) {
-      mergedPet.equipped.gadget = 'bouncing_ball';
-    }
-    const decayedPet = calculatePetDecay(mergedPet);
-    const today = getTodayDateString();
-
-    let dailyMissions = parsed.dailyMissions;
-    let dailyMissionsDate = parsed.dailyMissionsDate;
-
-    // Reset or initialize missions if new day
-    if (!dailyMissions || dailyMissionsDate !== today) {
-      dailyMissions = generateDailyMissions();
-      dailyMissionsDate = today;
-    }
-
-    const parsedXp = typeof parsed.xp === 'number' ? parsed.xp : 0;
-    const levelLadderFloor = LEVEL_LADDER.find(l => l.level === (parsed.level || 1))?.xp || 0;
-    const lifetimeXp = typeof parsed.lifetimeXp === 'number'
-      ? Math.max(parsed.lifetimeXp, parsedXp)
-      : Math.max(parsedXp, levelLadderFloor);
-
-    // Calculate question stats sanity check from questionPerformance
-    const rawAnswered = typeof parsed.answeredQuestionsCount === 'number' ? parsed.answeredQuestionsCount : 0;
-    const rawCorrect = typeof parsed.correctAnswersCount === 'number' ? parsed.correctAnswersCount : 0;
-    const perfEntries = Object.values(parsed.questionPerformance || {});
-    let perfCorrect = 0;
-    let perfAnswered = 0;
-    perfEntries.forEach((p: any) => {
-      const c = typeof p.correctCount === 'number' ? p.correctCount : 0;
-      const w = typeof p.wrongCount === 'number' ? p.wrongCount : 0;
-      perfCorrect += c;
-      perfAnswered += (c + w);
-    });
-
-    const sanitizedCorrect = Math.max(rawCorrect, perfCorrect);
-    const sanitizedAnswered = Math.max(rawAnswered, perfAnswered, sanitizedCorrect);
-
-    return {
-      ...DEFAULT_STATS,
-      ...parsed,
-      xp: parsedXp,
-      lifetimeXp,
-      pet: decayedPet,
-      answeredQuestionsCount: sanitizedAnswered,
-      correctAnswersCount: sanitizedCorrect,
-      completedModules: Array.isArray(parsed.completedModules) ? parsed.completedModules : [],
-      completedModulesLevel2: Array.isArray(parsed.completedModulesLevel2) ? parsed.completedModulesLevel2 : [],
-      completedMiniGames: Array.isArray(parsed.completedMiniGames) ? parsed.completedMiniGames : [],
-      dailyMissions,
-      dailyMissionsDate,
-      questionPerformance: parsed.questionPerformance || {},
-      topicMastery: parsed.topicMastery || {},
-      unlockedCosmetics: Array.isArray(parsed.unlockedCosmetics) && parsed.unlockedCosmetics.length > 0
-        ? parsed.unlockedCosmetics
-        : DEFAULT_STATS.unlockedCosmetics,
-      equippedCosmetics: {
-        ...DEFAULT_STATS.equippedCosmetics,
-        ...(parsed.equippedCosmetics || {}),
-      },
-      freeCookieClaimDate: parsed.freeCookieClaimDate || getTodayDateString(),
-      freeCookieClaimCount: typeof parsed.freeCookieClaimCount === 'number' ? parsed.freeCookieClaimCount : 0,
-      freeCookieLockedUntil: typeof parsed.freeCookieLockedUntil === 'number' ? parsed.freeCookieLockedUntil : 0,
-    };
+    return sanitizeUserStats(JSON.parse(raw));
   } catch {
     return DEFAULT_STATS;
   }
@@ -579,11 +600,7 @@ export function restoreBackupJson(jsonString: string): { success: boolean; stats
       return { success: false, error: 'Keine gültigen Fortschrittsdaten im Backup gefunden.' };
     }
 
-    const mergedStats: UserStats = {
-      ...DEFAULT_STATS,
-      ...importedStats,
-      pet: { ...DEFAULT_PET_STATE, ...(importedStats.pet || {}) },
-    };
+    const mergedStats: UserStats = sanitizeUserStats(importedStats);
 
     saveUserStats(mergedStats);
 
