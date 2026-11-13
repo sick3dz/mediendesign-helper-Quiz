@@ -13,11 +13,12 @@ import {
   Trophy,
   Layers,
   FileText,
+  BookMarked,
 } from 'lucide-react';
 
 import { CHAPTERS } from '../data/chaptersData';
 
-export type ActiveTab = 'chapters' | 'spickzettel' | 'stats' | 'exam' | 'sandbox' | 'minigames' | 'challenges' | 'freetext' | 'rank' | 'achievements' | 'pet' | 'shop';
+export type ActiveTab = 'chapters' | 'notebooks' | 'spickzettel' | 'stats' | 'exam' | 'sandbox' | 'minigames' | 'challenges' | 'freetext' | 'rank' | 'achievements' | 'pet' | 'shop';
 
 interface Props {
   activeTab: ActiveTab;
@@ -100,6 +101,12 @@ export const TopBar: React.FC<Props> = ({
           icon: <BookOpen className="w-4 h-4 text-indigo-500 dark:text-indigo-400 shrink-0" />,
           color: 'text-indigo-600 dark:text-indigo-400',
         };
+      case 'notebooks':
+        return {
+          title: 'Skripte & PDF-Hefte',
+          icon: <BookMarked className="w-4 h-4 text-sky-500 dark:text-sky-400 shrink-0" />,
+          color: 'text-sky-600 dark:text-sky-400',
+        };
       case 'spickzettel':
         return {
           title: 'Digital-Leitfaden (IHK)',
@@ -169,6 +176,14 @@ export const TopBar: React.FC<Props> = ({
       subtitle: `Alle ${CHAPTERS.length} IHK-Kapitel, Module & Original-Prüfung`,
       icon: <BookOpen className="w-4 h-4 text-indigo-500" />,
       iconBg: 'bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300',
+    },
+    {
+      tab: 'notebooks',
+      title: 'Skripte & PDF-Hefte',
+      subtitle: 'Foto-Skripte & PDFs blättern, markieren, Sticker & Klebezettel',
+      icon: <BookMarked className="w-4 h-4 text-sky-500" />,
+      iconBg: 'bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400',
+      badge: 'Neu',
     },
     {
       tab: 'spickzettel',

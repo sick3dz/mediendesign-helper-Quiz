@@ -112,7 +112,7 @@ export const BackupModal: React.FC<Props> = ({ isOpen, onClose, onBackupRestored
                 Fortschritt sichern & wiederherstellen
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Sichere dein Level, XP, Abzeichen & Haustier-Status.
+                Sichere dein Level, XP, Abzeichen, Haustier &amp; Skript-Notizen.
               </p>
             </div>
           </div>

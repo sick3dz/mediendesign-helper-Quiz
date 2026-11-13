@@ -48,6 +48,7 @@ import { MindfulBreathingModal } from './components/MindfulBreathingModal';
 import { MixUpConfigModal } from './components/MixUpConfigModal';
 import { DidacticMixUpView } from './components/DidacticMixUpView';
 import { buildCustomMixPool, BlitzItem } from './utils/blitzContent';
+import { NotebooksContainer } from './components/Notebooks/NotebooksContainer';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('chapters');
@@ -73,6 +74,7 @@ export default function App() {
   });
   const [isFocusSprintOpen, setIsFocusSprintOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
+  const [backupVersion, setBackupVersion] = useState(0);
   const [isAdoptionModalOpen, setIsAdoptionModalOpen] = useState<boolean>(
     () => !stats.pet?.hasAdopted
   );
@@ -1352,6 +1354,13 @@ export default function App() {
                 onBack={() => setActiveTab('chapters')}
               />
             )}
+
+            {activeTab === 'notebooks' && (
+              <NotebooksContainer
+                backupVersion={backupVersion}
+                onBack={() => setActiveTab('chapters')}
+              />
+            )}
           </>
         )}
       </main>
@@ -1392,6 +1401,7 @@ export default function App() {
         onBackupRestored={(newStats, newSettings) => {
           setStats(newStats);
           if (newSettings) setSettings(newSettings);
+          setBackupVersion(v => v + 1);
         }}
       />
 

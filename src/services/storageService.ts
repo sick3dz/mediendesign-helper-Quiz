@@ -1,5 +1,7 @@
 import { UserStats, Badge, DailyMission } from '../types/quiz';
+import { NotebookStore } from '../types/notebook';
 import { DEFAULT_PET_STATE, calculatePetDecay } from '../data/petData';
+import { loadNotebookStore, restoreNotebookStoreFromBackup } from './notebookStorageService';
 
 const STORAGE_KEY = 'mediengestalter_adhd_trainer_stats_v2';
 const SETTINGS_KEY = 'mediengestalter_adhd_trainer_settings_v2';
@@ -517,17 +519,20 @@ export interface BackupPayload {
   exportDate: string;
   stats: UserStats;
   settings: UserSettings;
+  notebooks?: NotebookStore;
 }
 
 export function generateBackupJson(): string {
   const stats = loadUserStats();
   const settings = loadUserSettings();
+  const notebooks = loadNotebookStore();
   const payload: BackupPayload = {
     app: 'DesignKonzept.prep',
     version: 1,
     exportDate: new Date().toISOString(),
     stats,
     settings,
+    notebooks,
   };
   return JSON.stringify(payload, null, 2);
 }
@@ -575,6 +580,10 @@ export function restoreBackupJson(jsonString: string): { success: boolean; stats
     };
 
     saveUserStats(mergedStats);
+
+    if (parsed.notebooks && typeof parsed.notebooks === 'object') {
+      restoreNotebookStoreFromBackup(parsed.notebooks);
+    }
 
     if (importedSettings) {
       const mergedSettings = { ...DEFAULT_SETTINGS, ...importedSettings };
