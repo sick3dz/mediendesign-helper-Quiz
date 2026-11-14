@@ -1,9 +1,11 @@
 import {
   BlankPageTemplate,
   BlankPaperColor,
+  NotebookShapeElement,
   NotebookSticker,
   NotebookStickyNote,
   NotebookStore,
+  NotebookStroke,
   PageAnnotations,
 } from '../types/notebook';
 
@@ -11,11 +13,89 @@ const NOTEBOOKS_STORAGE_KEY = 'mediengestalter_notebooks_v1';
 
 export const EMPTY_PAGE_ANNOTATIONS: PageAnnotations = {
   strokes: [],
+  shapes: [],
   stickyNotes: [],
   stickers: [],
   textBoxes: [],
   images: [],
 };
+
+function tryConvertLegacyShapeStroke(stroke: NotebookStroke): NotebookShapeElement | null {
+  const pts = stroke.points;
+  if (!Array.isArray(pts) || pts.some((pt) => typeof pt.p === 'number')) {
+    return null;
+  }
+  const samePt = (a: { x: number; y: number }, b: { x: number; y: number }) =>
+    Math.abs(a.x - b.x) < 0.001 && Math.abs(a.y - b.y) < 0.001;
+
+  // Legacy 10-point rect or arrow with repeated sharp vertices
+  if (
+    pts.length === 10 &&
+    samePt(pts[0], pts[1]) &&
+    samePt(pts[2], pts[3]) &&
+    samePt(pts[4], pts[5]) &&
+    samePt(pts[6], pts[7]) &&
+    samePt(pts[8], pts[9])
+  ) {
+    if (samePt(pts[0], pts[8])) {
+      // Rectangle
+      return {
+        id: stroke.id.startsWith('shp-') ? stroke.id : `shp-${stroke.id}`,
+        kind: 'rect',
+        tool: stroke.tool,
+        color: stroke.color,
+        width: stroke.width,
+        x1: pts[0].x,
+        y1: pts[0].y,
+        x2: pts[4].x,
+        y2: pts[4].y,
+      };
+    }
+    if (samePt(pts[2], pts[6])) {
+      // Arrow
+      return {
+        id: stroke.id.startsWith('shp-') ? stroke.id : `shp-${stroke.id}`,
+        kind: 'arrow',
+        tool: stroke.tool,
+        color: stroke.color,
+        width: stroke.width,
+        x1: pts[0].x,
+        y1: pts[0].y,
+        x2: pts[2].x,
+        y2: pts[2].y,
+      };
+    }
+  }
+
+  // Legacy 37-point ellipse
+  if (pts.length === 37 && samePt(pts[0], pts[36])) {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const p of pts) {
+      if (p.x < minX) minX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y > maxY) maxY = p.y;
+    }
+    if (Number.isFinite(minX) && maxX - minX > 0.2 && maxY - minY > 0.2) {
+      return {
+        id: stroke.id.startsWith('shp-') ? stroke.id : `shp-${stroke.id}`,
+        kind: 'ellipse',
+        tool: stroke.tool,
+        color: stroke.color,
+        width: stroke.width,
+        x1: +minX.toFixed(2),
+        y1: +minY.toFixed(2),
+        x2: +maxX.toFixed(2),
+        y2: +maxY.toFixed(2),
+      };
+    }
+  }
+
+  return null;
+}
 
 export const DEFAULT_NOTEBOOK_STORE: NotebookStore = {
   version: 1,
@@ -67,10 +147,33 @@ export function getPageAnnotations(
   const key = makePageKey(notebookId, pageNumber);
   const entry = store.pages[key];
   if (!entry) {
-    return { strokes: [], stickyNotes: [], stickers: [], textBoxes: [], images: [] };
+    return {
+      strokes: [],
+      shapes: [],
+      stickyNotes: [],
+      stickers: [],
+      textBoxes: [],
+      images: [],
+    };
   }
+
+  const rawStrokes = Array.isArray(entry.strokes) ? entry.strokes : [];
+  const rawShapes = Array.isArray(entry.shapes) ? entry.shapes : [];
+  const keptStrokes: NotebookStroke[] = [];
+  const migratedShapes: NotebookShapeElement[] = [...rawShapes];
+
+  for (const s of rawStrokes) {
+    const converted = tryConvertLegacyShapeStroke(s);
+    if (converted) {
+      migratedShapes.push(converted);
+    } else {
+      keptStrokes.push(s);
+    }
+  }
+
   return {
-    strokes: Array.isArray(entry.strokes) ? entry.strokes : [],
+    strokes: keptStrokes,
+    shapes: migratedShapes,
     stickyNotes: Array.isArray(entry.stickyNotes) ? entry.stickyNotes : [],
     stickers: Array.isArray(entry.stickers) ? entry.stickers : [],
     textBoxes: Array.isArray(entry.textBoxes) ? entry.textBoxes : [],
@@ -82,6 +185,7 @@ export function getPageAnnotations(
       typeof entry.showDateHeader === 'boolean' ? entry.showDateHeader : undefined,
     headerTopic: typeof entry.headerTopic === 'string' ? entry.headerTopic : undefined,
     headerDate: typeof entry.headerDate === 'string' ? entry.headerDate : undefined,
+    bookmarked: typeof entry.bookmarked === 'boolean' ? entry.bookmarked : undefined,
   };
 }
 
@@ -94,6 +198,7 @@ export function savePageAnnotations(
   const key = makePageKey(notebookId, pageNumber);
   const isEmpty =
     annotations.strokes.length === 0 &&
+    (annotations.shapes?.length || 0) === 0 &&
     annotations.stickyNotes.length === 0 &&
     annotations.stickers.length === 0 &&
     (annotations.textBoxes?.length || 0) === 0 &&
@@ -103,7 +208,8 @@ export function savePageAnnotations(
     annotations.paperColorOverride === undefined &&
     annotations.showDateHeader === undefined &&
     !annotations.headerTopic &&
-    !annotations.headerDate;
+    !annotations.headerDate &&
+    !annotations.bookmarked;
 
   const nextPages = { ...store.pages };
   if (isEmpty) {
@@ -146,6 +252,7 @@ export function getNotebookAnnotationSummary(
   strokeCount: number;
   textCount: number;
   imageCount: number;
+  bookmarkCount: number;
 } {
   let annotatedPages = 0;
   let stickyCount = 0;
@@ -153,17 +260,30 @@ export function getNotebookAnnotationSummary(
   let strokeCount = 0;
   let textCount = 0;
   let imageCount = 0;
+  let bookmarkCount = 0;
 
   const prefix = `${notebookId}::`;
   for (const [key, page] of Object.entries(store.pages)) {
     if (!key.startsWith(prefix) || !page) continue;
-    const strokes = page.strokes?.length || 0;
+    const strokes = (page.strokes?.length || 0) + (page.shapes?.length || 0);
     const stickies = page.stickyNotes?.length || 0;
     const stickers = page.stickers?.length || 0;
     const texts = page.textBoxes?.length || 0;
     const images = page.images?.length || 0;
     const hasHeaderEntry = Boolean(page.headerTopic?.trim() || page.headerDate?.trim());
-    if (strokes > 0 || stickies > 0 || stickers > 0 || texts > 0 || images > 0 || hasHeaderEntry) {
+    const isBookmarked = Boolean(page.bookmarked);
+    if (isBookmarked) {
+      bookmarkCount += 1;
+    }
+    if (
+      strokes > 0 ||
+      stickies > 0 ||
+      stickers > 0 ||
+      texts > 0 ||
+      images > 0 ||
+      hasHeaderEntry ||
+      isBookmarked
+    ) {
       annotatedPages += 1;
       strokeCount += strokes;
       stickyCount += stickies;
@@ -173,7 +293,15 @@ export function getNotebookAnnotationSummary(
     }
   }
 
-  return { annotatedPages, stickyCount, stickerCount, strokeCount, textCount, imageCount };
+  return {
+    annotatedPages,
+    stickyCount,
+    stickerCount,
+    strokeCount,
+    textCount,
+    imageCount,
+    bookmarkCount,
+  };
 }
 
 export interface AnnotatedPageIndexItem {
@@ -184,6 +312,7 @@ export interface AnnotatedPageIndexItem {
   strokeCount: number;
   textCount: number;
   imageCount: number;
+  bookmarked?: boolean;
 }
 
 export function getAllAnnotatedPages(store: NotebookStore): AnnotatedPageIndexItem[] {
@@ -198,10 +327,13 @@ export function getAllAnnotatedPages(store: NotebookStore): AnnotatedPageIndexIt
 
     const stickers = Array.isArray(page.stickers) ? page.stickers : [];
     const stickyNotes = Array.isArray(page.stickyNotes) ? page.stickyNotes : [];
-    const strokeCount = Array.isArray(page.strokes) ? page.strokes.length : 0;
+    const strokeCount =
+      (Array.isArray(page.strokes) ? page.strokes.length : 0) +
+      (Array.isArray(page.shapes) ? page.shapes.length : 0);
     const textCount = Array.isArray(page.textBoxes) ? page.textBoxes.length : 0;
     const imageCount = Array.isArray(page.images) ? page.images.length : 0;
     const hasHeaderEntry = Boolean(page.headerTopic?.trim() || page.headerDate?.trim());
+    const bookmarked = Boolean(page.bookmarked);
 
     if (
       stickers.length > 0 ||
@@ -209,7 +341,8 @@ export function getAllAnnotatedPages(store: NotebookStore): AnnotatedPageIndexIt
       strokeCount > 0 ||
       textCount > 0 ||
       imageCount > 0 ||
-      hasHeaderEntry
+      hasHeaderEntry ||
+      bookmarked
     ) {
       result.push({
         notebookId,
@@ -219,6 +352,7 @@ export function getAllAnnotatedPages(store: NotebookStore): AnnotatedPageIndexIt
         strokeCount,
         textCount,
         imageCount,
+        bookmarked,
       });
     }
   }
@@ -268,6 +402,18 @@ function normalizePageAnnotations(raw: unknown): PageAnnotations | null {
     strokes: Array.isArray(entry.strokes)
       ? entry.strokes.filter(
           (s) => s && typeof s === 'object' && Array.isArray(s.points)
+        )
+      : [],
+    shapes: Array.isArray(entry.shapes)
+      ? entry.shapes.filter(
+          (sh) =>
+            sh &&
+            typeof sh === 'object' &&
+            typeof sh.id === 'string' &&
+            (sh.kind === 'line' ||
+              sh.kind === 'arrow' ||
+              sh.kind === 'rect' ||
+              sh.kind === 'ellipse')
         )
       : [],
     stickyNotes: Array.isArray(entry.stickyNotes)
@@ -326,7 +472,107 @@ function normalizePageAnnotations(raw: unknown): PageAnnotations | null {
       typeof entry.headerDate === 'string' && entry.headerDate.length > 0
         ? entry.headerDate
         : undefined,
+    bookmarked: typeof entry.bookmarked === 'boolean' ? entry.bookmarked : undefined,
   };
+}
+
+export function duplicateNotebookPageAnnotations(
+  store: NotebookStore,
+  notebookId: string,
+  sourcePageNumber: number,
+  oldTotalPages: number,
+  isBuiltInBlank: boolean = false
+): { store: NotebookStore; newPageNumber: number } {
+  const nextPages = { ...store.pages };
+  const newTotalPages = oldTotalPages + 1;
+  const newPageNumber = sourcePageNumber + 1;
+
+  // Shift pages above sourcePageNumber up by 1 (iterate top-down so keys aren't overwritten)
+  for (let p = oldTotalPages; p >= newPageNumber; p--) {
+    const oldKey = makePageKey(notebookId, p);
+    const destKey = makePageKey(notebookId, p + 1);
+    if (nextPages[oldKey]) {
+      nextPages[destKey] = nextPages[oldKey];
+    } else {
+      delete nextPages[destKey];
+    }
+  }
+
+  // Deep-clone source page annotations with fresh element IDs
+  const srcAnn = getPageAnnotations(store, notebookId, sourcePageNumber);
+  const now = Date.now();
+  const clonedAnn: PageAnnotations = {
+    ...srcAnn,
+    strokes: (srcAnn.strokes || []).map((s, idx) => ({
+      ...s,
+      id: `strk-dup-${now}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
+      points: s.points.map((pt) => ({ ...pt })),
+    })),
+    shapes: (srcAnn.shapes || []).map((sh, idx) => ({
+      ...sh,
+      id: `shp-dup-${now}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
+      createdAt: now + idx,
+    })),
+    stickyNotes: (srcAnn.stickyNotes || []).map((n, idx) => ({
+      ...n,
+      id: `sticky-dup-${now}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
+      createdAt: now + idx,
+    })),
+    stickers: (srcAnn.stickers || []).map((s, idx) => ({
+      ...s,
+      id: `stk-dup-${now}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
+    })),
+    textBoxes: (srcAnn.textBoxes || []).map((t, idx) => ({
+      ...t,
+      id: `txt-dup-${now}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
+      runs: t.runs ? t.runs.map((r) => ({ ...r })) : undefined,
+      createdAt: now + idx,
+    })),
+    images: (srcAnn.images || []).map((img, idx) => ({
+      ...img,
+      id: `img-dup-${now}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
+      createdAt: now + idx,
+    })),
+  };
+
+  const isEmptyClone =
+    clonedAnn.strokes.length === 0 &&
+    (clonedAnn.shapes?.length || 0) === 0 &&
+    clonedAnn.stickyNotes.length === 0 &&
+    clonedAnn.stickers.length === 0 &&
+    (clonedAnn.textBoxes?.length || 0) === 0 &&
+    (clonedAnn.images?.length || 0) === 0 &&
+    clonedAnn.rotationOverride === undefined &&
+    clonedAnn.templateOverride === undefined &&
+    clonedAnn.paperColorOverride === undefined &&
+    clonedAnn.showDateHeader === undefined &&
+    !clonedAnn.headerTopic &&
+    !clonedAnn.headerDate &&
+    !clonedAnn.bookmarked;
+
+  const newKey = makePageKey(notebookId, newPageNumber);
+  if (isEmptyClone) {
+    delete nextPages[newKey];
+  } else {
+    nextPages[newKey] = clonedAnn;
+  }
+
+  const nextBlankCounts = { ...(store.blankPageCountByBook ?? {}) };
+  if (isBuiltInBlank) {
+    nextBlankCounts[notebookId] = newTotalPages;
+  }
+
+  const nextStore: NotebookStore = {
+    ...store,
+    pages: nextPages,
+    lastPageByBook: {
+      ...store.lastPageByBook,
+      [notebookId]: newPageNumber,
+    },
+    blankPageCountByBook: nextBlankCounts,
+  };
+  saveNotebookStore(nextStore);
+  return { store: nextStore, newPageNumber };
 }
 
 export function restoreNotebookStoreFromBackup(imported: unknown): NotebookStore | null {

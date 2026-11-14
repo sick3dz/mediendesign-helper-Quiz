@@ -13,10 +13,29 @@ export type NotebookTool =
   | 'highlighter'
   | 'pen'
   | 'eraser'
+  | 'lasso'
   | 'text'
   | 'image'
   | 'sticky'
   | 'sticker';
+
+export type NotebookDrawShape = 'freehand' | 'line' | 'arrow' | 'rect' | 'ellipse';
+
+export type NotebookShapeKind = 'line' | 'arrow' | 'rect' | 'ellipse';
+
+export interface NotebookShapeElement {
+  id: string;
+  kind: NotebookShapeKind;
+  tool: 'pen' | 'highlighter';
+  color: string;
+  width: number; // normalized width in % of page width
+  x1: number; // 0..100 (% of page width)
+  y1: number; // 0..100 (% of page height)
+  x2: number; // 0..100 (% of page width)
+  y2: number; // 0..100 (% of page height)
+  filled?: boolean;
+  createdAt?: number;
+}
 
 export type StickyColor = 'yellow' | 'pink' | 'mint' | 'blue' | 'cream' | 'lavender';
 
@@ -115,6 +134,7 @@ export interface NotebookSticker {
 
 export interface PageAnnotations {
   strokes: NotebookStroke[];
+  shapes?: NotebookShapeElement[];
   stickyNotes: NotebookStickyNote[];
   stickers: NotebookSticker[];
   textBoxes?: NotebookTextBox[];
@@ -125,6 +145,7 @@ export interface PageAnnotations {
   showDateHeader?: boolean;
   headerTopic?: string;
   headerDate?: string;
+  bookmarked?: boolean;
 }
 
 export interface NotebookStore {

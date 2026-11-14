@@ -636,6 +636,52 @@ export async function reorderCustomNotebookPages(
   }
 }
 
+export async function duplicateCustomNotebookPage(
+  notebookId: string,
+  pageNumber: number
+): Promise<{ notebook: NotebookDocument; newPageNumber: number } | null> {
+  const db = await openDatabase();
+  try {
+    const tx = db.transaction(STORE_NOTEBOOKS, 'readwrite');
+    const store = tx.objectStore(STORE_NOTEBOOKS);
+    const existing = await txPromise<NotebookDocument | undefined>(store.get(notebookId));
+    if (!existing || !existing.customPages || existing.customPages.length === 0) {
+      return null;
+    }
+
+    const srcIdx = Math.max(
+      0,
+      Math.min(existing.customPages.length - 1, pageNumber - 1)
+    );
+    const sourcePage = existing.customPages[srcIdx];
+    const clonedPage: CustomNotebookPage = {
+      ...sourcePage,
+      id: `pg-dup-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      pageNumber: srcIdx + 2,
+    };
+
+    const nextPages = [...existing.customPages];
+    nextPages.splice(srcIdx + 1, 0, clonedPage);
+    const normalizedPages = nextPages.map((pg, idx) => ({
+      ...pg,
+      pageNumber: idx + 1,
+    }));
+
+    const updated: NotebookDocument = {
+      ...existing,
+      customPages: normalizedPages,
+      totalPages: normalizedPages.length,
+      updatedAt: Date.now(),
+    };
+
+    store.put(updated);
+    await transactionDone(tx);
+    return { notebook: updated, newPageNumber: srcIdx + 2 };
+  } finally {
+    db.close();
+  }
+}
+
 export async function deleteCustomNotebook(notebookId: string): Promise<void> {
   const db = await openDatabase();
   try {

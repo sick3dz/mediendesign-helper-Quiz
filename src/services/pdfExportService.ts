@@ -3,6 +3,7 @@ import {
   BlankPageTemplate,
   BlankPaperColor,
   NotebookDocument,
+  NotebookShapeElement,
   NotebookStore,
   NotebookTextBox,
   PageAnnotations,
@@ -243,10 +244,13 @@ export async function exportNotebookAsPdf(
     // 2b. Render Annotations onto canvas using exact page dimensions
     const uiScale = canvasW / 1240;
 
-    // 2a. Smooth/pressure Pen strokes
+    // 2a. Smooth/pressure Pen strokes & Pen Shapes
     const allStrokes = annotations.strokes || [];
     const highlighterStrokes = allStrokes.filter((s) => s.tool === 'highlighter');
     const penStrokes = allStrokes.filter((s) => s.tool === 'pen');
+    const allShapes = annotations.shapes || [];
+    const penShapes = allShapes.filter((sh) => sh.tool !== 'highlighter');
+    const highlighterShapes = allShapes.filter((sh) => sh.tool === 'highlighter');
 
     for (const stroke of penStrokes) {
       if (
@@ -260,6 +264,13 @@ export async function exportNotebookAsPdf(
           multiply: false,
         });
       }
+    }
+
+    for (const shape of penShapes) {
+      drawShapeToCanvas(ctx, shape, canvasW, canvasH, {
+        alpha: 0.96,
+        multiply: false,
+      });
     }
 
     // 2b. Embedded Images
@@ -283,9 +294,15 @@ export async function exportNotebookAsPdf(
       drawTextBoxToCanvas(ctx, box, canvasW, canvasH, uiScale, effectivePaperColor);
     }
 
-    // 2e. Highlighter strokes in foreground above Freitext, Fotos & Stickers (multiply blend)
+    // 2e. Highlighter strokes & Highlighter shapes in foreground above Freitext, Fotos & Stickers (multiply blend)
     for (const stroke of highlighterStrokes) {
       drawSmoothStrokeToCanvas(ctx, stroke, canvasW, canvasH, {
+        alpha: 0.42,
+        multiply: true,
+      });
+    }
+    for (const shape of highlighterShapes) {
+      drawShapeToCanvas(ctx, shape, canvasW, canvasH, {
         alpha: 0.42,
         multiply: true,
       });
@@ -378,6 +395,85 @@ function drawBlankHeaderEntriesToCanvas(
     ctx.clip();
     ctx.fillText(headerDate.trim(), metrics.datumInputLeft + padX, metrics.textBaselineY);
     ctx.restore();
+  }
+
+  ctx.restore();
+}
+
+function drawShapeToCanvas(
+  ctx: CanvasRenderingContext2D,
+  shape: NotebookShapeElement,
+  canvasW: number,
+  canvasH: number,
+  opts: { alpha: number; multiply: boolean }
+): void {
+  const x1 = (shape.x1 / 100) * canvasW;
+  const y1 = (shape.y1 / 100) * canvasH;
+  const x2 = (shape.x2 / 100) * canvasW;
+  const y2 = (shape.y2 / 100) * canvasH;
+
+  ctx.save();
+  if (opts.multiply) {
+    ctx.globalCompositeOperation = 'multiply';
+  }
+  ctx.strokeStyle = shape.color;
+  ctx.lineWidth = Math.max(1.2, (shape.width / 100) * canvasW);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  if (shape.kind === 'line') {
+    ctx.globalAlpha = opts.alpha;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  } else if (shape.kind === 'arrow') {
+    ctx.globalAlpha = opts.alpha;
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const len = Math.hypot(dx, dy);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    if (len >= 4) {
+      const headLen = Math.min(canvasW * 0.034, Math.max(canvasW * 0.014, len * 0.24));
+      const angle = Math.atan2(dy, dx);
+      const wingAngle = Math.PI / 6.2;
+      const w1x = x2 - headLen * Math.cos(angle - wingAngle);
+      const w1y = y2 - headLen * Math.sin(angle - wingAngle);
+      const w2x = x2 - headLen * Math.cos(angle + wingAngle);
+      const w2y = y2 - headLen * Math.sin(angle + wingAngle);
+      ctx.moveTo(w1x, w1y);
+      ctx.lineTo(x2, y2);
+      ctx.lineTo(w2x, w2y);
+    }
+    ctx.stroke();
+  } else if (shape.kind === 'rect') {
+    const rx = Math.min(x1, x2);
+    const ry = Math.min(y1, y2);
+    const rw = Math.abs(x2 - x1);
+    const rh = Math.abs(y2 - y1);
+    if (shape.filled) {
+      ctx.fillStyle = shape.color;
+      ctx.globalAlpha = shape.tool === 'highlighter' ? 0.16 : 0.12;
+      ctx.fillRect(rx, ry, rw, rh);
+    }
+    ctx.globalAlpha = opts.alpha;
+    ctx.strokeRect(rx, ry, rw, rh);
+  } else if (shape.kind === 'ellipse') {
+    const cx = (x1 + x2) / 2;
+    const cy = (y1 + y2) / 2;
+    const rx = Math.abs(x2 - x1) / 2;
+    const ry = Math.abs(y2 - y1) / 2;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    if (shape.filled) {
+      ctx.fillStyle = shape.color;
+      ctx.globalAlpha = shape.tool === 'highlighter' ? 0.16 : 0.12;
+      ctx.fill();
+    }
+    ctx.globalAlpha = opts.alpha;
+    ctx.stroke();
   }
 
   ctx.restore();

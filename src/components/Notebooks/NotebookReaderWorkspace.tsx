@@ -38,6 +38,13 @@ import {
   Search,
   Calendar,
   Plus,
+  Bookmark,
+  Copy,
+  Lasso,
+  Minus,
+  ArrowUpRight,
+  Square,
+  Circle,
 } from 'lucide-react';
 import { exportNotebookAsPdf } from '../../services/pdfExportService';
 import {
@@ -45,6 +52,7 @@ import {
   BlankPaperColor,
   CustomNotebookPage,
   NotebookDocument,
+  NotebookDrawShape,
   NotebookEraserMode,
   NotebookEraserTarget,
   NotebookImageElement,
@@ -105,6 +113,7 @@ interface Props {
     fromPage: number,
     toPage: number
   ) => Promise<void> | void;
+  onDuplicatePage?: (notebook: NotebookDocument, pageNumber: number) => Promise<void> | void;
   onChangePageLayout?: (
     notebook: NotebookDocument,
     pageNumber: number,
@@ -246,6 +255,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   onPageChange,
   onDeletePage,
   onMovePage,
+  onDuplicatePage,
   onChangePageLayout,
   onQuickAddBlankPage,
   onOpenAppendPages,
@@ -289,6 +299,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const [penWidth, setPenWidth] = useState<number>(0.42);
   const [highlighterColor, setHighlighterColor] = useState<string>(HIGHLIGHTER_COLORS[0].color);
   const [highlighterWidth, setHighlighterWidth] = useState<number>(2.4);
+  const [drawShape, setDrawShape] = useState<NotebookDrawShape>('freehand');
   const [eraserMode, setEraserMode] = useState<NotebookEraserMode>('whole');
   const [eraserWidth, setEraserWidth] = useState<number>(3.2);
   const [eraserTarget, setEraserTarget] = useState<NotebookEraserTarget>('all');
@@ -314,6 +325,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const [zoom, setZoom] = useState<number>(() => macSettings.defaultNotebookZoom);
   const [showThumbnails, setShowThumbnails] = useState<boolean>(false);
   const [sidebarTab, setSidebarTab] = useState<'pages' | 'stickers' | 'notes'>('pages');
+  const [pageSidebarFilter, setPageSidebarFilter] = useState<'all' | 'bookmarked'>('all');
   const [noteSearchQuery, setNoteSearchQuery] = useState<string>('');
   const [isEditingPageNum, setIsEditingPageNum] = useState<boolean>(false);
   const [pageJumpInput, setPageJumpInput] = useState<string>('');
@@ -325,6 +337,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const [confirmDeletePageNum, setConfirmDeletePageNum] = useState<number | null>(null);
   const [isDeletingPage, setIsDeletingPage] = useState<boolean>(false);
   const [isReorderingPage, setIsReorderingPage] = useState<boolean>(false);
+  const [isDuplicatingPage, setIsDuplicatingPage] = useState<boolean>(false);
   const [dragSourcePageNum, setDragSourcePageNum] = useState<number | null>(null);
   const [dragOverPageNum, setDragOverPageNum] = useState<number | null>(null);
   const [layoutAppliedAllNotice, setLayoutAppliedAllNotice] = useState<boolean>(false);
@@ -339,6 +352,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const [isStageCropOpen, setIsStageCropOpen] = useState<boolean>(false);
   const [hasStageSelection, setHasStageSelection] = useState<boolean>(false);
   const [deleteSelectionSignal, setDeleteSelectionSignal] = useState<number>(0);
+  const [duplicateSelectionSignal, setDuplicateSelectionSignal] = useState<number>(0);
   const [clearSelectionSignal, setClearSelectionSignal] = useState<number>(0);
   const userToggledPencilRef = useRef<boolean>(false);
   const isMac = isMacLikePlatform();
@@ -502,6 +516,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     handleCommitAnnotations(
       {
         strokes: [],
+        shapes: [],
         stickyNotes: [],
         stickers: [],
         textBoxes: [],
@@ -566,6 +581,33 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
       });
     } finally {
       setIsReorderingPage(false);
+    }
+  };
+
+  const handleToggleBookmarkPage = (pageNum: number) => {
+    const targetAnn = getPageAnnotations(store, notebook.id, pageNum);
+    const nextBookmarked = !targetAnn.bookmarked ? true : undefined;
+    const nextAnn: PageAnnotations = {
+      ...targetAnn,
+      bookmarked: nextBookmarked,
+    };
+    if (pageNum === currentPage) {
+      handleCommitAnnotations(nextAnn, true);
+    } else {
+      onUpdatePageAnnotations(notebook.id, pageNum, nextAnn);
+    }
+  };
+
+  const handleDuplicatePageInSidebar = async (pageNum: number) => {
+    if (!onDuplicatePage || isDuplicatingPage || isDeletingPage || isReorderingPage) return;
+    setIsDuplicatingPage(true);
+    setConfirmDeletePageNum(null);
+    try {
+      await onDuplicatePage(notebook, pageNum);
+      setUndoStack([]);
+      setRedoStack([]);
+    } finally {
+      setIsDuplicatingPage(false);
     }
   };
 
@@ -882,7 +924,16 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
       return;
     }
 
-    // Delete selected image, text box or sticker: Backspace / Delete
+    // Duplicate selected element or lasso selection: Cmd+D / Ctrl+D
+    if (mod && !e.altKey && !e.shiftKey && keyLower === 'd') {
+      if (hasStageSelection) {
+        e.preventDefault();
+        setDuplicateSelectionSignal((s) => s + 1);
+      }
+      return;
+    }
+
+    // Delete selected image, text box, sticker or lasso strokes: Backspace / Delete
     if (!mod && !e.altKey && !e.shiftKey && (e.key === 'Backspace' || e.key === 'Delete')) {
       if (hasStageSelection) {
         e.preventDefault();
@@ -891,7 +942,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
       return;
     }
 
-    // Single-key tool switching (1–7): first press switches cleanly, pressing again toggles options
+    // Single-key tool switching (1–8): first press switches cleanly, pressing again toggles options
     if (!mod && !e.altKey && !e.shiftKey) {
       const toolByKey: Record<string, NotebookTool> = {
         '1': 'hand',
@@ -901,6 +952,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
         '5': 'text',
         '6': 'sticky',
         '7': 'sticker',
+        '8': 'lasso',
       };
       const targetTool = toolByKey[e.key];
       if (targetTool) {
@@ -1006,7 +1058,20 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const canMovePages =
     Boolean(onMovePage) && (Boolean(notebook.isCustom) || isBuiltInBlankPad);
 
-  const canEditPages = canDeletePages || canMovePages;
+  const canDuplicatePages =
+    Boolean(onDuplicatePage) && (Boolean(notebook.isCustom) || isBuiltInBlankPad);
+
+  const canEditPages = canDeletePages || canMovePages || canDuplicatePages;
+
+  const bookmarkedPageCount = useMemo(() => {
+    let count = 0;
+    for (let p = 1; p <= totalPages; p++) {
+      if (getPageAnnotations(store, notebook.id, p).bookmarked) {
+        count++;
+      }
+    }
+    return count;
+  }, [store, notebook.id, totalPages]);
 
   const canShowLayoutPanel =
     Boolean(onChangePageLayout) && (isCurrentPageBlankLayout || blankPageCountInBook > 0);
@@ -1025,6 +1090,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
 
   const pageAnnotationCount =
     currentAnnotations.strokes.length +
+    (currentAnnotations.shapes?.length || 0) +
     currentAnnotations.stickyNotes.length +
     currentAnnotations.stickers.length +
     (currentAnnotations.textBoxes?.length || 0) +
@@ -1270,6 +1336,27 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
               </button>
             </div>
 
+            <button
+              type="button"
+              onClick={() => handleToggleBookmarkPage(currentPage)}
+              aria-pressed={Boolean(currentAnnotations.bookmarked)}
+              className={`p-2 rounded-xl border transition-colors cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center shrink-0 ${
+                currentAnnotations.bookmarked
+                  ? 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800'
+                  : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`}
+              title={
+                currentAnnotations.bookmarked
+                  ? `Lesezeichen für Seite ${currentPage} entfernen`
+                  : `Lesezeichen für Seite ${currentPage} setzen`
+              }
+              aria-label="Lesezeichen umschalten"
+            >
+              <Bookmark
+                className={`w-4 h-4 ${currentAnnotations.bookmarked ? 'fill-current' : ''}`}
+              />
+            </button>
+
             {(isBuiltInBlankPad || notebook.isCustom) && onQuickAddBlankPage && (
               <button
                 type="button"
@@ -1401,6 +1488,19 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             >
               <Eraser className="w-4 h-4" />
               <span className="hidden md:inline">Radierer</span>
+            </button>
+
+            <button
+              onClick={() => selectTool('lasso')}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[38px] whitespace-nowrap shrink-0 ${
+                activeTool === 'lasso'
+                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+              }`}
+              title="Lasso-Auswahl: Handschrift-Striche einkreisen, verschieben, umfärben oder duplizieren (8)"
+            >
+              <Lasso className="w-4 h-4" />
+              <span className="hidden md:inline">Lasso</span>
             </button>
 
             <button
@@ -1655,6 +1755,40 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                     {highlighterWidth.toFixed(1)}
                   </span>
                 </label>
+                <span className="text-slate-300 dark:text-slate-700">|</span>
+                <div className="flex items-center gap-1" role="group" aria-label="Zeichenform">
+                  <span className="font-semibold text-slate-600 dark:text-slate-300 mr-0.5">
+                    Form:
+                  </span>
+                  {(
+                    [
+                      { id: 'freehand', label: 'Freihand', icon: PenTool },
+                      { id: 'line', label: 'Linie', icon: Minus },
+                      { id: 'arrow', label: 'Pfeil', icon: ArrowUpRight },
+                      { id: 'rect', label: 'Kasten', icon: Square },
+                      { id: 'ellipse', label: 'Kreis', icon: Circle },
+                    ] as const
+                  ).map((shapeOpt) => {
+                    const IconComp = shapeOpt.icon;
+                    const active = drawShape === shapeOpt.id;
+                    return (
+                      <button
+                        key={shapeOpt.id}
+                        type="button"
+                        onClick={() => setDrawShape(shapeOpt.id)}
+                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                          active
+                            ? 'bg-indigo-600 text-white shadow-2xs'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
+                        }`}
+                        title={`Form-Modus: ${shapeOpt.label}`}
+                      >
+                        <IconComp className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{shapeOpt.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -1698,6 +1832,40 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                     {penWidth.toFixed(2)}
                   </span>
                 </label>
+                <span className="text-slate-300 dark:text-slate-700">|</span>
+                <div className="flex items-center gap-1" role="group" aria-label="Zeichenform">
+                  <span className="font-semibold text-slate-600 dark:text-slate-300 mr-0.5">
+                    Form:
+                  </span>
+                  {(
+                    [
+                      { id: 'freehand', label: 'Freihand', icon: PenTool },
+                      { id: 'line', label: 'Linie', icon: Minus },
+                      { id: 'arrow', label: 'Pfeil', icon: ArrowUpRight },
+                      { id: 'rect', label: 'Kasten', icon: Square },
+                      { id: 'ellipse', label: 'Kreis', icon: Circle },
+                    ] as const
+                  ).map((shapeOpt) => {
+                    const IconComp = shapeOpt.icon;
+                    const active = drawShape === shapeOpt.id;
+                    return (
+                      <button
+                        key={shapeOpt.id}
+                        type="button"
+                        onClick={() => setDrawShape(shapeOpt.id)}
+                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                          active
+                            ? 'bg-indigo-600 text-white shadow-2xs'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
+                        }`}
+                        title={`Form-Modus: ${shapeOpt.label}`}
+                      >
+                        <IconComp className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{shapeOpt.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -2488,6 +2656,35 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                   </div>
                 )}
 
+                {/* Bookmark Filter Bar in Pages Sidebar */}
+                <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setPageSidebarFilter('all')}
+                    className={`flex-1 py-1 px-2 rounded-md text-[10px] font-bold transition-colors cursor-pointer tabular-nums ${
+                      pageSidebarFilter === 'all'
+                        ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    Alle ({totalPages})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPageSidebarFilter('bookmarked')}
+                    className={`flex-1 inline-flex items-center justify-center gap-1 py-1 px-2 rounded-md text-[10px] font-bold transition-colors cursor-pointer tabular-nums ${
+                      pageSidebarFilter === 'bookmarked'
+                        ? 'bg-white dark:bg-slate-900 text-rose-600 dark:text-rose-400 shadow-2xs'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-400'
+                    }`}
+                  >
+                    <Bookmark
+                      className={`w-3 h-3 ${bookmarkedPageCount > 0 ? 'fill-current' : ''}`}
+                    />
+                    <span>Lesezeichen ({bookmarkedPageCount})</span>
+                  </button>
+                </div>
+
                 {isEditPagesOpen && confirmDeletePageNum !== null && (
                   <div className="sticky top-1 z-20 p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950 border border-rose-200 dark:border-rose-800 shadow-md space-y-2">
                     <div className="text-[11px] font-bold text-rose-900 dark:text-rose-200 leading-snug">
@@ -2517,255 +2714,335 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-2.5">
-                  {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pageNum) => {
-                    const pageAnn = getPageAnnotations(store, notebook.id, pageNum);
-                    const hasAny =
-                      pageAnn.strokes.length > 0 ||
-                      pageAnn.stickyNotes.length > 0 ||
-                      pageAnn.stickers.length > 0 ||
-                      (pageAnn.textBoxes?.length || 0) > 0 ||
-                      (pageAnn.images?.length || 0) > 0 ||
-                      Boolean(pageAnn.headerTopic?.trim() || pageAnn.headerDate?.trim());
-                    const imgMeta =
-                      notebook.sourceType === 'foto-skript'
-                        ? notebook.imagePages?.[pageNum - 1]
-                        : undefined;
-                    const customMeta =
-                      notebook.sourceType === 'eigenes-heft' || notebook.sourceType === 'blatt-blanko'
-                        ? notebook.customPages?.[pageNum - 1]
-                        : undefined;
-                    const isDeleteTarget = isEditPagesOpen && confirmDeletePageNum === pageNum;
-                    const isDraggableCard =
-                      isEditPagesOpen && canMovePages && totalPages > 1 && !isReorderingPage && !isDeletingPage;
-                    const isDraggingThis = dragSourcePageNum === pageNum;
-                    const isDropTarget =
-                      isEditPagesOpen &&
-                      dragOverPageNum === pageNum &&
-                      dragSourcePageNum !== null &&
-                      dragSourcePageNum !== pageNum;
+                {pageSidebarFilter === 'bookmarked' && bookmarkedPageCount === 0 ? (
+                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-center space-y-1.5">
+                    <Bookmark className="w-5 h-5 text-rose-500 mx-auto" />
+                    <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                      Noch keine Lesezeichen gesetzt
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                      Klicke oben neben der Seitenzahl oder direkt auf einer Seitenvorschau auf das Lesezeichen-Symbol, um wichtige Seiten hier zu sammeln.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {Array.from({ length: totalPages }, (_, idx) => idx + 1)
+                      .filter((pageNum) =>
+                        pageSidebarFilter === 'bookmarked'
+                          ? Boolean(getPageAnnotations(store, notebook.id, pageNum).bookmarked)
+                          : true
+                      )
+                      .map((pageNum) => {
+                        const pageAnn = getPageAnnotations(store, notebook.id, pageNum);
+                        const hasAny =
+                          pageAnn.strokes.length > 0 ||
+                          (pageAnn.shapes?.length || 0) > 0 ||
+                          pageAnn.stickyNotes.length > 0 ||
+                          pageAnn.stickers.length > 0 ||
+                          (pageAnn.textBoxes?.length || 0) > 0 ||
+                          (pageAnn.images?.length || 0) > 0 ||
+                          Boolean(pageAnn.headerTopic?.trim() || pageAnn.headerDate?.trim());
+                        const imgMeta =
+                          notebook.sourceType === 'foto-skript'
+                            ? notebook.imagePages?.[pageNum - 1]
+                            : undefined;
+                        const customMeta =
+                          notebook.sourceType === 'eigenes-heft' || notebook.sourceType === 'blatt-blanko'
+                            ? notebook.customPages?.[pageNum - 1]
+                            : undefined;
+                        const isDeleteTarget = isEditPagesOpen && confirmDeletePageNum === pageNum;
+                        const isDraggableCard =
+                          isEditPagesOpen && canMovePages && totalPages > 1 && !isReorderingPage && !isDeletingPage;
+                        const isDraggingThis = dragSourcePageNum === pageNum;
+                        const isDropTarget =
+                          isEditPagesOpen &&
+                          dragOverPageNum === pageNum &&
+                          dragSourcePageNum !== null &&
+                          dragSourcePageNum !== pageNum;
 
-                    return (
-                      <div
-                        key={pageNum}
-                        draggable={isDraggableCard}
-                        onDragStart={(e) => {
-                          if (!isDraggableCard) {
-                            e.preventDefault();
-                            return;
-                          }
-                          setDragSourcePageNum(pageNum);
-                          setDragOverPageNum(null);
-                          e.dataTransfer.effectAllowed = 'move';
-                          e.dataTransfer.setData('text/plain', String(pageNum));
-                        }}
-                        onDragOver={(e) => {
-                          if (!isDraggableCard || dragSourcePageNum === null) return;
-                          e.preventDefault();
-                          e.dataTransfer.dropEffect = 'move';
-                          if (dragOverPageNum !== pageNum) {
-                            setDragOverPageNum(pageNum);
-                          }
-                        }}
-                        onDragLeave={() => {
-                          if (dragOverPageNum === pageNum) {
-                            setDragOverPageNum(null);
-                          }
-                        }}
-                        onDrop={(e) => {
-                          if (!isDraggableCard) return;
-                          e.preventDefault();
-                          const rawFrom = e.dataTransfer.getData('text/plain');
-                          const parsedFrom = parseInt(rawFrom, 10);
-                          const sourcePage =
-                            dragSourcePageNum ??
-                            (Number.isFinite(parsedFrom) ? parsedFrom : null);
-                          setDragSourcePageNum(null);
-                          setDragOverPageNum(null);
-                          if (sourcePage && sourcePage !== pageNum) {
-                            handleMovePageInSidebar(sourcePage, pageNum);
-                          }
-                        }}
-                        onDragEnd={() => {
-                          setDragSourcePageNum(null);
-                          setDragOverPageNum(null);
-                        }}
-                        className={`group relative flex flex-col rounded-xl border transition-all ${
-                          isDraggingThis
-                            ? 'opacity-45 scale-95 border-indigo-400'
-                            : isDropTarget
-                            ? 'border-indigo-500 ring-2 ring-indigo-500 bg-indigo-50/80 dark:bg-indigo-950/60 scale-[1.02]'
-                            : isDeleteTarget
-                            ? 'border-rose-500 bg-rose-50/70 dark:bg-rose-950/30 ring-2 ring-rose-500/30'
-                            : currentPage === pageNum
-                            ? 'border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/40 ring-2 ring-indigo-500/30'
-                            : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                        } ${isDraggableCard ? 'cursor-grab active:cursor-grabbing' : ''}`}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => goToPage(pageNum)}
-                          className="w-full flex flex-col items-center gap-1 p-1.5 cursor-pointer"
-                        >
-                          <div className="w-full aspect-[3/4] rounded-md overflow-hidden bg-white border border-slate-200 dark:border-slate-700 relative">
-                            {notebook.sourceType === 'foto-skript' && imgMeta ? (
-                              (() => {
-                                const thumbRot =
-                                  pageAnn.rotationOverride !== undefined
-                                    ? pageAnn.rotationOverride
-                                    : imgMeta.defaultRotation ?? 0;
-                                const rotClass =
-                                  thumbRot === 90
-                                    ? 'rotate-90 scale-125'
-                                    : thumbRot === 180
-                                    ? 'rotate-180'
-                                    : thumbRot === 270
-                                    ? '-rotate-90 scale-125'
-                                    : '';
-                                return (
-                                  <img
-                                    src={imgMeta.imageUrl}
-                                    alt={`Seite ${pageNum}`}
-                                    referrerPolicy="no-referrer"
-                                    className={`w-full h-full object-cover object-top pointer-events-none ${rotClass}`}
-                                  />
-                                );
-                              })()
-                            ) : (notebook.sourceType === 'eigenes-heft' ||
-                                notebook.sourceType === 'blatt-blanko') &&
-                              customMeta ? (
-                              <CustomPageThumbnail
-                                page={customMeta}
-                                templateOverride={pageAnn.templateOverride}
-                                paperColorOverride={pageAnn.paperColorOverride}
-                                showDateHeaderOverride={pageAnn.showDateHeader}
-                                rotation={
-                                  pageAnn.rotationOverride !== undefined
-                                    ? pageAnn.rotationOverride
-                                    : customMeta.defaultRotation ?? 0
-                                }
-                              />
-                            ) : notebook.sourceType === 'blatt-blanko' ? (
-                              <img
-                                src={
-                                  renderBlankTemplateToDataUrl(
-                                    pageAnn.templateOverride ?? 'blank',
-                                    pageAnn.rotationOverride ?? 0,
-                                    220,
-                                    pageAnn.paperColorOverride ?? 'white',
-                                    Boolean(pageAnn.showDateHeader)
-                                  ).dataUrl
-                                }
-                                alt={`Blatt Blanko ${pageNum}`}
-                                className="w-full h-full object-cover object-top pointer-events-none"
-                              />
-                            ) : notebook.pdfUrl ? (
-                              <PdfPageThumbnail
-                                pdfUrl={notebook.pdfUrl}
-                                pageNumber={pageNum}
-                                isActive={currentPage === pageNum}
-                              />
-                            ) : null}
-
-                            {pageAnn.stickers.length > 0 ? (
-                              <div className="absolute bottom-1 left-1 flex flex-wrap gap-0.5 max-w-[90%]">
-                                {pageAnn.stickers.slice(0, 3).map((stk) => {
-                                  const preset = NOTEBOOK_STICKERS.find((p) => p.type === stk.type);
-                                  return preset ? (
-                                    <span
-                                      key={stk.id}
-                                      className="px-1 py-0.2 rounded bg-white/95 text-[10px] shadow-xs"
-                                      title={preset.label}
-                                    >
-                                      {preset.symbol}
-                                    </span>
-                                  ) : null;
-                                })}
-                              </div>
-                            ) : null}
-
-                            {hasAny && (
-                              <span
-                                className="absolute top-1 right-1 px-1 py-0.2 rounded bg-amber-400 text-amber-950 text-[9px] font-extrabold shadow-xs"
-                                title="Seite enthält Notizen oder Markierungen"
-                              >
-                                Notiz
-                              </span>
-                            )}
-                          </div>
-
-                          {!isEditPagesOpen && (
-                            <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 tabular-nums">
-                              {pageNum}
-                            </span>
-                          )}
-                        </button>
-
-                        {isEditPagesOpen && (
-                          <div className="flex items-center justify-between gap-1 px-1.5 pb-1.5 pt-0.5">
-                            {canMovePages && totalPages > 1 ? (
-                              <button
-                                type="button"
-                                disabled={pageNum <= 1 || isReorderingPage || isDeletingPage}
-                                onClick={() => handleMovePageInSidebar(pageNum, pageNum - 1)}
-                                aria-label={`Seite ${pageNum} nach vorne verschieben`}
-                                title="Nach vorne verschieben"
-                                className="w-6 h-6 rounded-md flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-slate-700 dark:text-slate-200 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
-                              >
-                                <ChevronLeft className="w-3.5 h-3.5" />
-                              </button>
-                            ) : (
-                              <span className="w-6" aria-hidden="true" />
-                            )}
-
-                            <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">
-                              {totalPages > 1 && canMovePages && (
-                                <GripVertical className="w-2.5 h-2.5 text-slate-400" />
-                              )}
-                              <span>{pageNum}</span>
-                            </span>
-
-                            {canMovePages && totalPages > 1 ? (
-                              <button
-                                type="button"
-                                disabled={pageNum >= totalPages || isReorderingPage || isDeletingPage}
-                                onClick={() => handleMovePageInSidebar(pageNum, pageNum + 1)}
-                                aria-label={`Seite ${pageNum} nach hinten verschieben`}
-                                title="Nach hinten verschieben"
-                                className="w-6 h-6 rounded-md flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-slate-700 dark:text-slate-200 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
-                              >
-                                <ChevronRight className="w-3.5 h-3.5" />
-                              </button>
-                            ) : (
-                              <span className="w-6" aria-hidden="true" />
-                            )}
-                          </div>
-                        )}
-
-                        {isEditPagesOpen && canDeletePages && totalPages > 1 && (
-                          <button
-                            type="button"
-                            disabled={isDeletingPage || isReorderingPage}
-                            onClick={() =>
-                              setConfirmDeletePageNum((prev) =>
-                                prev === pageNum ? null : pageNum
-                              )
-                            }
-                            aria-label={`Seite ${pageNum} löschen`}
-                            title={`Seite ${pageNum} löschen`}
-                            className={`absolute top-2.5 left-2.5 z-10 w-6 h-6 rounded-full flex items-center justify-center border shadow-xs transition-all cursor-pointer ${
-                              isDeleteTarget
-                                ? 'bg-rose-600 text-white border-rose-600'
-                                : 'bg-white/95 dark:bg-slate-900/95 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:text-rose-600 hover:border-rose-300'
-                            }`}
+                        return (
+                          <div
+                            key={pageNum}
+                            draggable={isDraggableCard}
+                            onDragStart={(e) => {
+                              if (!isDraggableCard) {
+                                e.preventDefault();
+                                return;
+                              }
+                              setDragSourcePageNum(pageNum);
+                              setDragOverPageNum(null);
+                              e.dataTransfer.effectAllowed = 'move';
+                              e.dataTransfer.setData('text/plain', String(pageNum));
+                            }}
+                            onDragOver={(e) => {
+                              if (!isDraggableCard || dragSourcePageNum === null) return;
+                              e.preventDefault();
+                              e.dataTransfer.dropEffect = 'move';
+                              if (dragOverPageNum !== pageNum) {
+                                setDragOverPageNum(pageNum);
+                              }
+                            }}
+                            onDragLeave={() => {
+                              if (dragOverPageNum === pageNum) {
+                                setDragOverPageNum(null);
+                              }
+                            }}
+                            onDrop={(e) => {
+                              if (!isDraggableCard) return;
+                              e.preventDefault();
+                              const rawFrom = e.dataTransfer.getData('text/plain');
+                              const parsedFrom = parseInt(rawFrom, 10);
+                              const sourcePage =
+                                dragSourcePageNum ??
+                                (Number.isFinite(parsedFrom) ? parsedFrom : null);
+                              setDragSourcePageNum(null);
+                              setDragOverPageNum(null);
+                              if (sourcePage && sourcePage !== pageNum) {
+                                handleMovePageInSidebar(sourcePage, pageNum);
+                              }
+                            }}
+                            onDragEnd={() => {
+                              setDragSourcePageNum(null);
+                              setDragOverPageNum(null);
+                            }}
+                            className={`group relative flex flex-col rounded-xl border transition-all ${
+                              isDraggingThis
+                                ? 'opacity-45 scale-95 border-indigo-400'
+                                : isDropTarget
+                                ? 'border-indigo-500 ring-2 ring-indigo-500 bg-indigo-50/80 dark:bg-indigo-950/60 scale-[1.02]'
+                                : isDeleteTarget
+                                ? 'border-rose-500 bg-rose-50/70 dark:bg-rose-950/30 ring-2 ring-rose-500/30'
+                                : currentPage === pageNum
+                                ? 'border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/40 ring-2 ring-indigo-500/30'
+                                : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                            } ${isDraggableCard ? 'cursor-grab active:cursor-grabbing' : ''}`}
                           >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                            <button
+                              type="button"
+                              onClick={() => goToPage(pageNum)}
+                              className="w-full flex flex-col items-center gap-1 p-1.5 cursor-pointer"
+                            >
+                              <div className="w-full aspect-[3/4] rounded-md overflow-hidden bg-white border border-slate-200 dark:border-slate-700 relative">
+                                {notebook.sourceType === 'foto-skript' && imgMeta ? (
+                                  (() => {
+                                    const thumbRot =
+                                      pageAnn.rotationOverride !== undefined
+                                        ? pageAnn.rotationOverride
+                                        : imgMeta.defaultRotation ?? 0;
+                                    const rotClass =
+                                      thumbRot === 90
+                                        ? 'rotate-90 scale-125'
+                                        : thumbRot === 180
+                                        ? 'rotate-180'
+                                        : thumbRot === 270
+                                        ? '-rotate-90 scale-125'
+                                        : '';
+                                    return (
+                                      <img
+                                        src={imgMeta.imageUrl}
+                                        alt={`Seite ${pageNum}`}
+                                        referrerPolicy="no-referrer"
+                                        className={`w-full h-full object-cover object-top pointer-events-none ${rotClass}`}
+                                      />
+                                    );
+                                  })()
+                                ) : (notebook.sourceType === 'eigenes-heft' ||
+                                    notebook.sourceType === 'blatt-blanko') &&
+                                  customMeta ? (
+                                  <CustomPageThumbnail
+                                    page={customMeta}
+                                    templateOverride={pageAnn.templateOverride}
+                                    paperColorOverride={pageAnn.paperColorOverride}
+                                    showDateHeaderOverride={pageAnn.showDateHeader}
+                                    rotation={
+                                      pageAnn.rotationOverride !== undefined
+                                        ? pageAnn.rotationOverride
+                                        : customMeta.defaultRotation ?? 0
+                                    }
+                                  />
+                                ) : notebook.sourceType === 'blatt-blanko' ? (
+                                  <img
+                                    src={
+                                      renderBlankTemplateToDataUrl(
+                                        pageAnn.templateOverride ?? 'blank',
+                                        pageAnn.rotationOverride ?? 0,
+                                        220,
+                                        pageAnn.paperColorOverride ?? 'white',
+                                        Boolean(pageAnn.showDateHeader)
+                                      ).dataUrl
+                                    }
+                                    alt={`Blatt Blanko ${pageNum}`}
+                                    className="w-full h-full object-cover object-top pointer-events-none"
+                                  />
+                                ) : notebook.pdfUrl ? (
+                                  <PdfPageThumbnail
+                                    pdfUrl={notebook.pdfUrl}
+                                    pageNumber={pageNum}
+                                    isActive={currentPage === pageNum}
+                                  />
+                                ) : null}
+
+                                {pageAnn.stickers.length > 0 ? (
+                                  <div className="absolute bottom-1 left-1 flex flex-wrap gap-0.5 max-w-[90%]">
+                                    {pageAnn.stickers.slice(0, 3).map((stk) => {
+                                      const preset = NOTEBOOK_STICKERS.find((p) => p.type === stk.type);
+                                      return preset ? (
+                                        <span
+                                          key={stk.id}
+                                          className="px-1 py-0.2 rounded bg-white/95 text-[10px] shadow-xs"
+                                          title={preset.label}
+                                        >
+                                          {preset.symbol}
+                                        </span>
+                                      ) : null;
+                                    })}
+                                  </div>
+                                ) : null}
+
+                                {hasAny && (
+                                  <span
+                                    className="absolute bottom-1 right-1 px-1 py-0.2 rounded bg-amber-400 text-amber-950 text-[9px] font-extrabold shadow-xs"
+                                    title="Seite enthält Notizen oder Markierungen"
+                                  >
+                                    Notiz
+                                  </span>
+                                )}
+                              </div>
+
+                              {!isEditPagesOpen && (
+                                <div className="w-full flex items-center justify-between px-1">
+                                  <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 tabular-nums">
+                                    {pageNum}
+                                  </span>
+                                  {canDuplicatePages && (
+                                    <span
+                                      role="button"
+                                      tabIndex={0}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDuplicatePageInSidebar(pageNum);
+                                      }}
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          handleDuplicatePageInSidebar(pageNum);
+                                        }
+                                      }}
+                                      title={`Seite ${pageNum} samt Notizen duplizieren`}
+                                      className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-0.5 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-300 transition-opacity"
+                                    >
+                                      <Copy className="w-3 h-3" />
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </button>
+
+                            {/* Bookmark Toggle Pin on Thumbnail */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleBookmarkPage(pageNum);
+                              }}
+                              title={
+                                pageAnn.bookmarked
+                                  ? `Lesezeichen von Seite ${pageNum} entfernen`
+                                  : `Lesezeichen auf Seite ${pageNum} setzen`
+                              }
+                              aria-label={`Lesezeichen Seite ${pageNum}`}
+                              className={`absolute top-2.5 right-2.5 z-10 w-6 h-6 rounded-full flex items-center justify-center border shadow-xs transition-all cursor-pointer ${
+                                pageAnn.bookmarked
+                                  ? 'bg-rose-600 text-white border-rose-600 opacity-100'
+                                  : 'bg-white/95 dark:bg-slate-900/95 text-slate-500 border-slate-200 dark:border-slate-700 opacity-0 group-hover:opacity-100 hover:text-rose-600'
+                              }`}
+                            >
+                              <Bookmark
+                                className={`w-3 h-3 ${pageAnn.bookmarked ? 'fill-current' : ''}`}
+                              />
+                            </button>
+
+                            {isEditPagesOpen && (
+                              <div className="flex items-center justify-between gap-1 px-1.5 pb-1.5 pt-0.5">
+                                {canMovePages && totalPages > 1 ? (
+                                  <button
+                                    type="button"
+                                    disabled={pageNum <= 1 || isReorderingPage || isDeletingPage}
+                                    onClick={() => handleMovePageInSidebar(pageNum, pageNum - 1)}
+                                    aria-label={`Seite ${pageNum} nach vorne verschieben`}
+                                    title="Nach vorne verschieben"
+                                    className="w-6 h-6 rounded-md flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-slate-700 dark:text-slate-200 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
+                                  >
+                                    <ChevronLeft className="w-3.5 h-3.5" />
+                                  </button>
+                                ) : (
+                                  <span className="w-6" aria-hidden="true" />
+                                )}
+
+                                <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-slate-700 dark:text-slate-200 tabular-nums">
+                                  {totalPages > 1 && canMovePages && (
+                                    <GripVertical className="w-2.5 h-2.5 text-slate-400" />
+                                  )}
+                                  <span>{pageNum}</span>
+                                </span>
+
+                                <div className="flex items-center gap-0.5">
+                                  {canDuplicatePages && (
+                                    <button
+                                      type="button"
+                                      disabled={isDuplicatingPage || isReorderingPage || isDeletingPage}
+                                      onClick={() => handleDuplicatePageInSidebar(pageNum)}
+                                      aria-label={`Seite ${pageNum} duplizieren`}
+                                      title={`Seite ${pageNum} samt Notizen duplizieren`}
+                                      className="w-6 h-6 rounded-md flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
+                                    >
+                                      <Copy className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                  {canMovePages && totalPages > 1 ? (
+                                    <button
+                                      type="button"
+                                      disabled={pageNum >= totalPages || isReorderingPage || isDeletingPage}
+                                      onClick={() => handleMovePageInSidebar(pageNum, pageNum + 1)}
+                                      aria-label={`Seite ${pageNum} nach hinten verschieben`}
+                                      title="Nach hinten verschieben"
+                                      className="w-6 h-6 rounded-md flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-slate-700 dark:text-slate-200 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
+                                    >
+                                      <ChevronRight className="w-3.5 h-3.5" />
+                                    </button>
+                                  ) : (
+                                    <span className="w-6" aria-hidden="true" />
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                            {isEditPagesOpen && canDeletePages && totalPages > 1 && (
+                              <button
+                                type="button"
+                                disabled={isDeletingPage || isReorderingPage}
+                                onClick={() =>
+                                  setConfirmDeletePageNum((prev) =>
+                                    prev === pageNum ? null : pageNum
+                                  )
+                                }
+                                aria-label={`Seite ${pageNum} löschen`}
+                                title={`Seite ${pageNum} löschen`}
+                                className={`absolute top-2.5 left-2.5 z-10 w-6 h-6 rounded-full flex items-center justify-center border shadow-xs transition-all cursor-pointer ${
+                                  isDeleteTarget
+                                    ? 'bg-rose-600 text-white border-rose-600'
+                                    : 'bg-white/95 dark:bg-slate-900/95 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:text-rose-600 hover:border-rose-300'
+                                }`}
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
 
                 {(isBuiltInBlankPad || notebook.isCustom) && onQuickAddBlankPage && (
                   <button
@@ -2989,6 +3266,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             penWidth={penWidth}
             highlighterColor={highlighterColor}
             highlighterWidth={highlighterWidth}
+            drawShape={drawShape}
             eraserMode={eraserMode}
             eraserWidth={eraserWidth}
             eraserTarget={eraserTarget}
@@ -3011,6 +3289,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             blockCanvasContextMenu={macSettings.blockCanvasContextMenu}
             selectedImageSignal={selectedImageSignal}
             deleteSelectionSignal={deleteSelectionSignal}
+            duplicateSelectionSignal={duplicateSelectionSignal}
             clearSelectionSignal={clearSelectionSignal}
             onSelectionChange={setHasStageSelection}
             onCropModalOpenChange={setIsStageCropOpen}
@@ -3033,21 +3312,22 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
       {(!isFullscreen || !isToolbarCollapsed) && (
         <div className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-3 sm:px-4 py-1.5 flex items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-slate-400 shrink-0">
           <div className="truncate">
-            {pencilOnlyMode && (activeTool === 'pen' || activeTool === 'highlighter' || activeTool === 'eraser')
+            {pencilOnlyMode && (activeTool === 'pen' || activeTool === 'highlighter' || activeTool === 'eraser' || activeTool === 'lasso')
               ? 'Apple Pencil Schutz aktiv: Nur der Stift zeichnet – Finger scrollen & zoomen ohne Fehlstriche.'
               : (
                 <>
-                  {activeTool === 'hand' && 'Hand-Modus: Bilder, Textfelder, Klebezettel & Sticker verschieben, skalieren oder antippen.'}
-                  {activeTool === 'highlighter' && `Textmarker aktiv: Direkt über wichtige Textstellen streichen. Tipp: ${shiftLabel}gedrückt halten = gerade Linie.`}
-                  {activeTool === 'pen' && `Stift aktiv: Handschriftliche Notizen oder Unterstreichungen zeichnen. Tipp: ${shiftLabel}gedrückt halten = gerade Linie.`}
+                  {activeTool === 'hand' && `Hand-Modus: Formen, Fotos, Texte & Sticker anklicken, verschieben oder skalieren (${cmdLabel}D = Duplizieren).`}
+                  {activeTool === 'highlighter' && `Textmarker aktiv (${drawShape === 'freehand' ? 'Freihand' : `Form: ${drawShape}`}): ${drawShape === 'freehand' ? `Direkt über wichtige Stellen ziehen (${shiftLabel}gedrückt = gerade Linie).` : 'Form aufziehen – danach jederzeit anklickbar & skalierbar.'}`}
+                  {activeTool === 'pen' && `Stift aktiv (${drawShape === 'freehand' ? 'Freihand' : `Form: ${drawShape}`}): ${drawShape === 'freehand' ? `Handschrift schreiben (${shiftLabel}gedrückt = gerade Linie).` : 'Form aufziehen – danach jederzeit anklickbar, verschiebbar & skalierbar.'}`}
                   {activeTool === 'eraser' &&
                     (eraserMode === 'partial'
                       ? `Teil-Radierer aktiv: Radiert präzise nur den überstrichenen Abschnitt weg${
                           eraserTarget === 'highlighter-only' ? ' (nur Textmarker)' : ''
-                        }.`
+                        } – Formen sind vor dem Radierer geschützt.`
                       : `Objekt-Radierer aktiv: Entfernt bei Berührung den gesamten Strich${
                           eraserTarget === 'highlighter-only' ? ' (nur Textmarker)' : ''
-                        }.`)}
+                        } – Formen sind vor dem Radierer geschützt.`)}
+                  {activeTool === 'lasso' && `Lasso-Werkzeug aktiv: Handschrift-Striche einkreisen, um sie gemeinsam zu verschieben, umzufärben oder mit ${cmdLabel}D zu duplizieren.`}
                   {activeTool === 'text' && 'Text-Werkzeug aktiv: Auf die gewünschte Stelle tippen, um direkt Text einzugeben.'}
                   {activeTool === 'sticky' && 'Klebezettel aktiv: Tippe auf eine Textstelle, um ein Post-it anzuheften.'}
                   {activeTool === 'sticker' && 'Sticker aktiv: Tippe auf die gewünschte Stelle zum Aufkleben.'}

@@ -9,6 +9,7 @@ import {
 import {
   deleteNotebookAnnotations,
   deleteNotebookPageAnnotations,
+  duplicateNotebookPageAnnotations,
   getPageAnnotations,
   loadNotebookStore,
   reorderNotebookPageAnnotations,
@@ -20,6 +21,7 @@ import {
   cleanupUnusedEmbeddedMedia,
   deleteCustomNotebook,
   deleteCustomNotebookPage,
+  duplicateCustomNotebookPage,
   listCustomNotebooks,
   reorderCustomNotebookPages,
   updateCustomPageTemplate,
@@ -339,6 +341,40 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
     setStore(nextStore);
   };
 
+  const handleDuplicatePage = async (notebook: NotebookDocument, pageNumber: number) => {
+    const latestStore = loadNotebookStore();
+    const isBuiltInBlank = !notebook.isCustom && notebook.sourceType === 'blatt-blanko';
+    const oldTotalPages = isBuiltInBlank
+      ? Math.max(1, latestStore.blankPageCountByBook?.[notebook.id] ?? notebook.totalPages)
+      : notebook.totalPages;
+
+    if (pageNumber < 1 || pageNumber > oldTotalPages) return;
+
+    if (notebook.isCustom) {
+      const res = await duplicateCustomNotebookPage(notebook.id, pageNumber);
+      if (res) {
+        setCustomNotebooks((prev) =>
+          prev.map((b) => (b.id === res.notebook.id ? res.notebook : b))
+        );
+        setSelection((prev) =>
+          prev && prev.notebook.id === res.notebook.id
+            ? { ...prev, notebook: res.notebook }
+            : prev
+        );
+      }
+    }
+
+    const { store: nextStore, newPageNumber } = duplicateNotebookPageAnnotations(
+      latestStore,
+      notebook.id,
+      pageNumber,
+      oldTotalPages,
+      isBuiltInBlank
+    );
+    setStore(nextStore);
+    setJumpSignal((prev) => ({ page: newPageNumber, seq: (prev?.seq ?? 0) + 1 }));
+  };
+
   const handleModalCompleted = ({
     notebook,
     jumpToPage,
@@ -387,6 +423,7 @@ export const NotebooksContainer: React.FC<Props> = ({ onBack, backupVersion = 0 
           onPageChange={handlePageChange}
           onDeletePage={handleDeletePage}
           onMovePage={handleMovePage}
+          onDuplicatePage={handleDuplicatePage}
           onChangePageLayout={handleChangePageLayout}
           onQuickAddBlankPage={handleQuickAddBlankPage}
           onOpenAppendPages={

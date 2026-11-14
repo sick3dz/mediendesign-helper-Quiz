@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import {
   ArrowLeft,
   BookOpen,
+  Bookmark,
   FileText,
   Image as ImageIcon,
   Search,
@@ -51,6 +52,7 @@ type FilterMode =
   | 'foto-skript'
   | 'pdf-dokument'
   | 'annotated'
+  | 'bookmarked'
   | 'stickers';
 
 const PdfCoverThumb: React.FC<{ pdfUrl: string; pageNumber?: number; title: string }> = ({
@@ -210,6 +212,7 @@ export const NotebookLibraryView: React.FC<Props> = ({
       if (filter === 'foto-skript' && doc.sourceType !== 'foto-skript') return false;
       if (filter === 'pdf-dokument' && doc.sourceType !== 'pdf-dokument') return false;
       if (filter === 'annotated' && !hasNotes) return false;
+      if (filter === 'bookmarked' && summary.bookmarkCount === 0) return false;
 
       if (!q) return true;
       const hasNoteMatch = (noteHitsByBook.get(doc.id)?.length ?? 0) > 0;
@@ -264,12 +267,18 @@ export const NotebookLibraryView: React.FC<Props> = ({
     let stickies = 0;
     let stickers = 0;
     let strokes = 0;
+    let bookmarks = 0;
     for (const doc of allNotebooks) {
-      pages += doc.totalPages;
+      const effectiveTotal =
+        !doc.isCustom && doc.sourceType === 'blatt-blanko'
+          ? store.blankPageCountByBook?.[doc.id] ?? doc.totalPages
+          : doc.totalPages;
+      pages += effectiveTotal;
       const sum = getNotebookAnnotationSummary(store, doc.id);
       stickies += sum.stickyCount;
       stickers += sum.stickerCount;
       strokes += sum.strokeCount;
+      bookmarks += sum.bookmarkCount;
     }
     return {
       books: allNotebooks.length,
@@ -277,6 +286,7 @@ export const NotebookLibraryView: React.FC<Props> = ({
       stickies,
       stickers,
       strokes,
+      bookmarks,
     };
   }, [allNotebooks, store]);
 
@@ -305,6 +315,14 @@ export const NotebookLibraryView: React.FC<Props> = ({
             <span>{totalTotals.books} Hefte</span>
             <span aria-hidden="true">·</span>
             <span>{totalTotals.pages} Seiten</span>
+            {totalTotals.bookmarks > 0 && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span className="text-rose-600 dark:text-rose-400 font-semibold">
+                  {totalTotals.bookmarks} Lesezeichen
+                </span>
+              </>
+            )}
             {totalTotals.stickers > 0 && (
               <>
                 <span aria-hidden="true">·</span>
@@ -363,6 +381,13 @@ export const NotebookLibraryView: React.FC<Props> = ({
               { id: 'foto-skript', label: 'Foto-Skripte' },
               { id: 'pdf-dokument', label: 'Original-PDFs' },
               { id: 'annotated', label: 'Mit Notizen' },
+              {
+                id: 'bookmarked',
+                label:
+                  totalTotals.bookmarks > 0
+                    ? `Lesezeichen (${totalTotals.bookmarks})`
+                    : 'Lesezeichen',
+              },
               {
                 id: 'stickers',
                 label:
@@ -447,7 +472,12 @@ export const NotebookLibraryView: React.FC<Props> = ({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {stickerOverviewItems.map((entry) => (
+              {stickerOverviewItems.map((entry) => {
+                const entryEffectivePages =
+                  !entry.doc.isCustom && entry.doc.sourceType === 'blatt-blanko'
+                    ? store.blankPageCountByBook?.[entry.doc.id] ?? entry.doc.totalPages
+                    : entry.doc.totalPages;
+                return (
                 <button
                   key={`${entry.notebookId}::${entry.pageNumber}`}
                   onClick={() => onSelectNotebook(entry.doc, entry.pageNumber)}
@@ -459,7 +489,7 @@ export const NotebookLibraryView: React.FC<Props> = ({
                         <span>{entry.doc.category}</span>
                         <span aria-hidden="true">·</span>
                         <span>
-                          Seite {entry.pageNumber} / {entry.doc.totalPages}
+                          Seite {entry.pageNumber} / {entryEffectivePages}
                         </span>
                       </div>
                       <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
@@ -500,7 +530,8 @@ export const NotebookLibraryView: React.FC<Props> = ({
                     )}
                   </div>
                 </button>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -659,6 +690,18 @@ export const NotebookLibraryView: React.FC<Props> = ({
                         <span>
                           {effectiveTotalPages} {effectiveTotalPages === 1 ? 'Seite' : 'Seiten'}
                         </span>
+                        {summary.bookmarkCount > 0 && (
+                          <>
+                            <span aria-hidden="true">·</span>
+                            <span
+                              className="inline-flex items-center gap-0.5 text-rose-600 dark:text-rose-400 font-semibold"
+                              title={`${summary.bookmarkCount} Lesezeichen in diesem Heft`}
+                            >
+                              <Bookmark className="w-3.5 h-3.5 fill-current shrink-0" />
+                              <span>{summary.bookmarkCount}</span>
+                            </span>
+                          </>
+                        )}
                         {hasSavedNotes && (
                           <>
                             <span aria-hidden="true">·</span>

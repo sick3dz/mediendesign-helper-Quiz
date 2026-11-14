@@ -13,13 +13,22 @@ import {
   Underline,
   Strikethrough,
   ChevronDown,
+  Copy,
+  CalendarCheck,
+  Minus,
+  ArrowUpRight,
+  Square,
+  Circle,
 } from 'lucide-react';
 import {
   BlankPageTemplate,
   NotebookDocument,
+  NotebookDrawShape,
   NotebookEraserMode,
   NotebookEraserTarget,
   NotebookImageElement,
+  NotebookShapeElement,
+  NotebookShapeKind,
   NotebookSticker,
   NotebookStickerType,
   NotebookStickyNote,
@@ -34,7 +43,9 @@ import {
 } from '../../types/notebook';
 import {
   BlankPaperPalette,
+  HIGHLIGHTER_COLORS,
   NOTEBOOK_STICKERS,
+  PEN_COLORS,
   STICKY_NOTE_STYLES,
 } from '../../data/notebooksData';
 import {
@@ -69,6 +80,7 @@ interface Props {
   penWidth: number;
   highlighterColor: string;
   highlighterWidth: number;
+  drawShape?: NotebookDrawShape;
   eraserMode?: NotebookEraserMode;
   eraserWidth?: number;
   eraserTarget?: NotebookEraserTarget;
@@ -91,6 +103,7 @@ interface Props {
   blockCanvasContextMenu?: boolean;
   selectedImageSignal?: { id: string; seq: number };
   deleteSelectionSignal?: number;
+  duplicateSelectionSignal?: number;
   clearSelectionSignal?: number;
   onSelectionChange?: (hasSelection: boolean) => void;
   onCropModalOpenChange?: (isOpen: boolean) => void;
@@ -379,6 +392,363 @@ function eraseStrokePartially(
   return { pieces, modified: true };
 }
 
+function buildShapePoints(
+  shape: NotebookDrawShape,
+  start: StrokePoint,
+  end: StrokePoint,
+  isoYFactor: number = 0.707
+): StrokePoint[] {
+  const safeIso = isoYFactor > 0.05 ? isoYFactor : 0.707;
+  const x1 = +start.x.toFixed(2);
+  const y1 = +start.y.toFixed(2);
+  const x2 = +end.x.toFixed(2);
+  const y2 = +end.y.toFixed(2);
+
+  if (shape === 'line') {
+    return [
+      { x: x1, y: y1 },
+      { x: x2, y: y2 },
+    ];
+  }
+
+  if (shape === 'arrow') {
+    const dx = x2 - x1;
+    const dyIso = (y2 - y1) / safeIso;
+    const len = Math.hypot(dx, dyIso);
+    if (len < 0.4) {
+      return [
+        { x: x1, y: y1 },
+        { x: x2, y: y2 },
+      ];
+    }
+    const headLen = Math.min(3.4, Math.max(1.4, len * 0.24));
+    const angle = Math.atan2(dyIso, dx);
+    const wingAngle = Math.PI / 6.2; // ~29°
+    const w1x = +(x2 - headLen * Math.cos(angle - wingAngle)).toFixed(2);
+    const w1y = +(y2 - headLen * Math.sin(angle - wingAngle) * safeIso).toFixed(2);
+    const w2x = +(x2 - headLen * Math.cos(angle + wingAngle)).toFixed(2);
+    const w2y = +(y2 - headLen * Math.sin(angle + wingAngle) * safeIso).toFixed(2);
+    // Repeated corner points ensure buildSmoothSvgPath draws crisp corners
+    return [
+      { x: x1, y: y1 },
+      { x: x1, y: y1 },
+      { x: x2, y: y2 },
+      { x: x2, y: y2 },
+      { x: w1x, y: w1y },
+      { x: w1x, y: w1y },
+      { x: x2, y: y2 },
+      { x: x2, y: y2 },
+      { x: w2x, y: w2y },
+      { x: w2x, y: w2y },
+    ];
+  }
+
+  if (shape === 'rect') {
+    const minX = +Math.min(x1, x2).toFixed(2);
+    const maxX = +Math.max(x1, x2).toFixed(2);
+    const minY = +Math.min(y1, y2).toFixed(2);
+    const maxY = +Math.max(y1, y2).toFixed(2);
+    return [
+      { x: minX, y: minY },
+      { x: minX, y: minY },
+      { x: maxX, y: minY },
+      { x: maxX, y: minY },
+      { x: maxX, y: maxY },
+      { x: maxX, y: maxY },
+      { x: minX, y: maxY },
+      { x: minX, y: maxY },
+      { x: minX, y: minY },
+      { x: minX, y: minY },
+    ];
+  }
+
+  if (shape === 'ellipse') {
+    const cx = (x1 + x2) / 2;
+    const cy = (y1 + y2) / 2;
+    const rx = Math.abs(x2 - x1) / 2;
+    const ry = Math.abs(y2 - y1) / 2;
+    const steps = 36;
+    const pts: StrokePoint[] = [];
+    for (let i = 0; i <= steps; i++) {
+      const theta = (i / steps) * Math.PI * 2;
+      pts.push({
+        x: +(cx + rx * Math.cos(theta)).toFixed(2),
+        y: +(cy + ry * Math.sin(theta)).toFixed(2),
+      });
+    }
+    return pts;
+  }
+
+  return [start, end];
+}
+
+function renderVectorShapeSvg(
+  shape: NotebookShapeElement,
+  aspectRatio: number,
+  strokeOpacity: number,
+  isInteractive: boolean,
+  onSelectAndStartMove?: (e: React.PointerEvent<SVGElement>) => void
+): React.ReactNode {
+  const safeIso = aspectRatio > 0.05 ? aspectRatio : 0.707;
+  const hitWidth = Math.max(2.6, shape.width + 1.8);
+  const hitPointerEvents: React.CSSProperties['pointerEvents'] = isInteractive
+    ? shape.filled && (shape.kind === 'rect' || shape.kind === 'ellipse')
+      ? 'all'
+      : 'stroke'
+    : 'none';
+
+  const handleHitDown = (e: React.PointerEvent<SVGElement>) => {
+    if (!isInteractive || !onSelectAndStartMove) return;
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    e.stopPropagation();
+    onSelectAndStartMove(e);
+  };
+
+  if (shape.kind === 'line') {
+    return (
+      <g key={shape.id}>
+        <line
+          x1={shape.x1}
+          y1={shape.y1}
+          x2={shape.x2}
+          y2={shape.y2}
+          stroke={shape.color}
+          strokeWidth={shape.width}
+          strokeOpacity={strokeOpacity}
+          strokeLinecap="round"
+        />
+        {isInteractive && (
+          <line
+            x1={shape.x1}
+            y1={shape.y1}
+            x2={shape.x2}
+            y2={shape.y2}
+            stroke="transparent"
+            strokeWidth={hitWidth}
+            strokeLinecap="round"
+            style={{ pointerEvents: hitPointerEvents, cursor: 'move' }}
+            onPointerDown={handleHitDown}
+          />
+        )}
+      </g>
+    );
+  }
+
+  if (shape.kind === 'arrow') {
+    const dx = shape.x2 - shape.x1;
+    const dyIso = (shape.y2 - shape.y1) / safeIso;
+    const len = Math.hypot(dx, dyIso);
+    const headLen = Math.min(3.6, Math.max(1.4, len * 0.24, shape.width * 2.2));
+    const angle = Math.atan2(dyIso, dx);
+    const wingAngle = Math.PI / 6.2;
+    const w1x = +(shape.x2 - headLen * Math.cos(angle - wingAngle)).toFixed(2);
+    const w1y = +(shape.y2 - headLen * Math.sin(angle - wingAngle) * safeIso).toFixed(2);
+    const w2x = +(shape.x2 - headLen * Math.cos(angle + wingAngle)).toFixed(2);
+    const w2y = +(shape.y2 - headLen * Math.sin(angle + wingAngle) * safeIso).toFixed(2);
+    const headPoints = `${w1x},${w1y} ${shape.x2},${shape.y2} ${w2x},${w2y}`;
+
+    return (
+      <g key={shape.id}>
+        <line
+          x1={shape.x1}
+          y1={shape.y1}
+          x2={shape.x2}
+          y2={shape.y2}
+          stroke={shape.color}
+          strokeWidth={shape.width}
+          strokeOpacity={strokeOpacity}
+          strokeLinecap="round"
+        />
+        {len >= 0.35 && (
+          <polyline
+            points={headPoints}
+            fill="none"
+            stroke={shape.color}
+            strokeWidth={shape.width}
+            strokeOpacity={strokeOpacity}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        )}
+        {isInteractive && (
+          <>
+            <line
+              x1={shape.x1}
+              y1={shape.y1}
+              x2={shape.x2}
+              y2={shape.y2}
+              stroke="transparent"
+              strokeWidth={hitWidth}
+              strokeLinecap="round"
+              style={{ pointerEvents: 'stroke', cursor: 'move' }}
+              onPointerDown={handleHitDown}
+            />
+            {len >= 0.35 && (
+              <polyline
+                points={headPoints}
+                fill="none"
+                stroke="transparent"
+                strokeWidth={hitWidth}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ pointerEvents: 'stroke', cursor: 'move' }}
+                onPointerDown={handleHitDown}
+              />
+            )}
+          </>
+        )}
+      </g>
+    );
+  }
+
+  if (shape.kind === 'rect') {
+    const minX = Math.min(shape.x1, shape.x2);
+    const minY = Math.min(shape.y1, shape.y2);
+    const w = Math.max(0.2, Math.abs(shape.x2 - shape.x1));
+    const h = Math.max(0.2, Math.abs(shape.y2 - shape.y1));
+
+    return (
+      <g key={shape.id}>
+        <rect
+          x={minX}
+          y={minY}
+          width={w}
+          height={h}
+          rx={0.25}
+          ry={0.25}
+          fill={shape.filled ? shape.color : 'none'}
+          fillOpacity={shape.filled ? (shape.tool === 'highlighter' ? 0.24 : 0.14) : 0}
+          stroke={shape.color}
+          strokeWidth={shape.width}
+          strokeOpacity={strokeOpacity}
+          strokeLinejoin="round"
+        />
+        {isInteractive && (
+          <rect
+            x={minX}
+            y={minY}
+            width={w}
+            height={h}
+            fill={shape.filled ? 'transparent' : 'none'}
+            stroke="transparent"
+            strokeWidth={hitWidth}
+            style={{ pointerEvents: hitPointerEvents, cursor: 'move' }}
+            onPointerDown={handleHitDown}
+          />
+        )}
+      </g>
+    );
+  }
+
+  // 'ellipse'
+  const cx = (shape.x1 + shape.x2) / 2;
+  const cy = (shape.y1 + shape.y2) / 2;
+  const rx = Math.max(0.1, Math.abs(shape.x2 - shape.x1) / 2);
+  const ry = Math.max(0.1, Math.abs(shape.y2 - shape.y1) / 2);
+
+  return (
+    <g key={shape.id}>
+      <ellipse
+        cx={cx}
+        cy={cy}
+        rx={rx}
+        ry={ry}
+        fill={shape.filled ? shape.color : 'none'}
+        fillOpacity={shape.filled ? (shape.tool === 'highlighter' ? 0.24 : 0.14) : 0}
+        stroke={shape.color}
+        strokeWidth={shape.width}
+        strokeOpacity={strokeOpacity}
+      />
+      {isInteractive && (
+        <ellipse
+          cx={cx}
+          cy={cy}
+          rx={rx}
+          ry={ry}
+          fill={shape.filled ? 'transparent' : 'none'}
+          stroke="transparent"
+          strokeWidth={hitWidth}
+          style={{ pointerEvents: hitPointerEvents, cursor: 'move' }}
+          onPointerDown={handleHitDown}
+        />
+      )}
+    </g>
+  );
+}
+
+function isPointInPolygon(pt: StrokePoint, polygon: StrokePoint[]): boolean {
+  if (polygon.length < 3) return false;
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].x;
+    const yi = polygon[i].y;
+    const xj = polygon[j].x;
+    const yj = polygon[j].y;
+    const intersect =
+      yi > pt.y !== yj > pt.y &&
+      pt.x < ((xj - xi) * (pt.y - yi)) / (yj - yi + 1e-9) + xi;
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+function isStrokeSelectedByLasso(
+  stroke: NotebookStroke,
+  lassoPts: StrokePoint[],
+  isoYFactor: number = 0.707
+): boolean {
+  if (stroke.points.length === 0 || lassoPts.length === 0) return false;
+  if (lassoPts.length < 3) {
+    return isPointNearStroke(lassoPts[0], stroke, Math.max(1.6, stroke.width * 0.75), isoYFactor);
+  }
+  // Check if any sample point (or segment midpoint) of the stroke lies inside the lasso polygon
+  for (let i = 0; i < stroke.points.length; i++) {
+    if (isPointInPolygon(stroke.points[i], lassoPts)) return true;
+    if (i < stroke.points.length - 1) {
+      const mid = {
+        x: (stroke.points[i].x + stroke.points[i + 1].x) / 2,
+        y: (stroke.points[i].y + stroke.points[i + 1].y) / 2,
+      };
+      if (isPointInPolygon(mid, lassoPts)) return true;
+    }
+  }
+  // Also allow selecting a stroke by crossing it with the lasso line
+  for (let i = 0; i < lassoPts.length; i += 2) {
+    if (isPointNearStroke(lassoPts[i], stroke, Math.max(0.9, stroke.width * 0.5), isoYFactor)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function getStrokesBounds(
+  strokes: NotebookStroke[]
+): { minX: number; minY: number; maxX: number; maxY: number } | null {
+  if (strokes.length === 0) return null;
+  let minX = 100;
+  let minY = 100;
+  let maxX = 0;
+  let maxY = 0;
+  let hasAny = false;
+  for (const s of strokes) {
+    const pad = Math.max(0.6, s.width * 0.6);
+    for (const pt of s.points) {
+      hasAny = true;
+      if (pt.x - pad < minX) minX = pt.x - pad;
+      if (pt.y - pad < minY) minY = pt.y - pad;
+      if (pt.x + pad > maxX) maxX = pt.x + pad;
+      if (pt.y + pad > maxY) maxY = pt.y + pad;
+    }
+  }
+  if (!hasAny) return null;
+  return {
+    minX: Math.max(0, minX),
+    minY: Math.max(0, minY),
+    maxX: Math.min(100, maxX),
+    maxY: Math.min(100, maxY),
+  };
+}
+
 interface AutoTextItemProps {
   box: NotebookTextBox;
   fontSizePx: number;
@@ -394,12 +764,20 @@ interface AutoTextItemProps {
     patch: Partial<
       Pick<
         NotebookTextBox,
-        'text' | 'runs' | 'color' | 'bold' | 'italic' | 'underline' | 'strikethrough'
+        | 'text'
+        | 'runs'
+        | 'color'
+        | 'fontSize'
+        | 'bold'
+        | 'italic'
+        | 'underline'
+        | 'strikethrough'
       >
     >,
     recordHistory?: boolean
   ) => void;
   onToggleBackground: () => void;
+  onDuplicate: () => void;
   onDelete: () => void;
   onBlurBox: () => void;
 }
@@ -417,6 +795,7 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
   onStartDrag,
   onUpdateBox,
   onToggleBackground,
+  onDuplicate,
   onDelete,
   onBlurBox,
 }) => {
@@ -727,6 +1106,21 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation();
+              onDuplicate();
+            }}
+            title="Textfeld duplizieren (⌘D)"
+            aria-label="Textfeld duplizieren"
+            className="p-1 rounded hover:bg-white/15 text-white cursor-pointer"
+          >
+            <Copy className="w-3.5 h-3.5" />
+          </button>
+
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
               onDelete();
             }}
             title="Textfeld löschen"
@@ -743,7 +1137,7 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
               onPointerDown={(e) => e.stopPropagation()}
               className={`absolute left-0 ${
                 isNearTopEdge ? 'top-full mt-1.5' : 'bottom-full mb-1.5'
-              } p-2 rounded-xl bg-slate-900/95 border border-slate-700/90 shadow-xl flex flex-col gap-2 min-w-[252px] z-30`}
+              } p-2 rounded-xl bg-slate-900/95 border border-slate-700/90 shadow-xl flex flex-col gap-2 min-w-[264px] z-30`}
             >
               <div className="flex items-center justify-between gap-1">
                 <div className="flex items-center gap-1">
@@ -836,6 +1230,58 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
                     : bgStyle === 'paper'
                     ? 'Papier'
                     : 'Transp.'}
+                </button>
+              </div>
+
+              {/* Font Size Adjuster for existing Text Box */}
+              <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t border-white/10">
+                <span className="text-[10px] font-bold text-slate-300">Größe</span>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const nextSize = +Math.max(1.2, box.fontSize - 0.2).toFixed(1);
+                    onUpdateBox({ fontSize: nextSize }, true);
+                  }}
+                  title="Schrift verkleinern"
+                  className="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-100 cursor-pointer"
+                >
+                  A−
+                </button>
+                <input
+                  type="range"
+                  min={1.2}
+                  max={4.0}
+                  step={0.1}
+                  value={box.fontSize}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    onUpdateBox({ fontSize: parseFloat(e.target.value) }, false);
+                  }}
+                  onPointerUp={(e) => {
+                    e.stopPropagation();
+                    onUpdateBox({ fontSize: box.fontSize }, true);
+                  }}
+                  aria-label="Schriftgröße dieses Textfelds"
+                  className="w-24 h-1.5 accent-indigo-500 cursor-pointer"
+                />
+                <span className="text-[10px] font-mono font-bold text-slate-200 tabular-nums min-w-[24px] text-right">
+                  {box.fontSize.toFixed(1)}
+                </span>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const nextSize = +Math.min(4.0, box.fontSize + 0.2).toFixed(1);
+                    onUpdateBox({ fontSize: nextSize }, true);
+                  }}
+                  title="Schrift vergrößern"
+                  className="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-100 cursor-pointer"
+                >
+                  A+
                 </button>
               </div>
 
@@ -1015,6 +1461,7 @@ interface EmbeddedImageItemProps {
   onStartDrag: (e: React.PointerEvent<HTMLElement>) => void;
   onStartResize: (e: React.PointerEvent<HTMLElement>) => void;
   onUpdate: (patch: Partial<Pick<NotebookImageElement, 'widthPct' | 'opacity' | 'rotation'>>) => void;
+  onDuplicate: () => void;
   onDelete: () => void;
   onCrop: () => void;
 }
@@ -1027,6 +1474,7 @@ const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
   onStartDrag,
   onStartResize,
   onUpdate,
+  onDuplicate,
   onDelete,
   onCrop,
 }) => {
@@ -1229,6 +1677,19 @@ const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
             type="button"
             onClick={(e) => {
               e.stopPropagation();
+              onDuplicate();
+            }}
+            title="Foto duplizieren (⌘D)"
+            aria-label="Foto duplizieren"
+            className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer"
+          >
+            <Copy className="w-3 h-3" />
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
               onDelete();
             }}
             title="Bild entfernen"
@@ -1306,6 +1767,7 @@ export const NotebookPageStage: React.FC<Props> = ({
   penWidth,
   highlighterColor,
   highlighterWidth,
+  drawShape = 'freehand',
   eraserMode = 'whole',
   eraserWidth = 3.2,
   eraserTarget = 'all',
@@ -1328,6 +1790,7 @@ export const NotebookPageStage: React.FC<Props> = ({
   blockCanvasContextMenu = true,
   selectedImageSignal,
   deleteSelectionSignal,
+  duplicateSelectionSignal,
   clearSelectionSignal,
   onSelectionChange,
   onCropModalOpenChange,
@@ -1340,9 +1803,12 @@ export const NotebookPageStage: React.FC<Props> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Active stroke drawing state
+  // Active stroke & shape drawing state
   const [draftStroke, setDraftStroke] = useState<NotebookStroke | null>(null);
   const draftStrokeRef = useRef<NotebookStroke | null>(null);
+  const [draftShape, setDraftShape] = useState<NotebookShapeElement | null>(null);
+  const draftShapeRef = useRef<NotebookShapeElement | null>(null);
+  const shapeStartPointRef = useRef<StrokePoint | null>(null);
   const hoverCursorRef = useRef<HTMLDivElement>(null);
   const activePointerIdRef = useRef<number | null>(null);
   const isDrawingRef = useRef(false);
@@ -1352,6 +1818,12 @@ export const NotebookPageStage: React.FC<Props> = ({
   const latestAnnotationsRef = useRef<PageAnnotations>(annotations);
   latestAnnotationsRef.current = annotations;
 
+  // Lasso state for selecting & moving handwriting strokes
+  const [lassoPath, setLassoPath] = useState<StrokePoint[]>([]);
+  const lassoPathRef = useRef<StrokePoint[]>([]);
+  const isLassoDrawingRef = useRef(false);
+  const [selectedStrokeIds, setSelectedStrokeIds] = useState<string[]>([]);
+
   // Newly created sticky notes & text boxes to autofocus
   const [autoFocusStickyId, setAutoFocusStickyId] = useState<string | null>(null);
   const [autoFocusTextId, setAutoFocusTextId] = useState<string | null>(null);
@@ -1359,6 +1831,8 @@ export const NotebookPageStage: React.FC<Props> = ({
   const [selectedTextId, setSelectedTextId] = useState<string | null>(null);
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
   const [selectedStickyId, setSelectedStickyId] = useState<string | null>(null);
+  const [selectedShapeId, setSelectedShapeId] = useState<string | null>(null);
+  const [isHeaderDateFocused, setIsHeaderDateFocused] = useState<boolean>(false);
   const [activeCropImage, setActiveCropImage] = useState<{
     id: string;
     url: string;
@@ -1371,6 +1845,8 @@ export const NotebookPageStage: React.FC<Props> = ({
       setSelectedStickerId(null);
       setSelectedTextId(null);
       setSelectedStickyId(null);
+      setSelectedShapeId(null);
+      setSelectedStrokeIds([]);
     }
   }, [selectedImageSignal]);
 
@@ -1379,17 +1855,265 @@ export const NotebookPageStage: React.FC<Props> = ({
     setSelectedTextId(null);
     setSelectedImageId(null);
     setSelectedStickyId(null);
+    setSelectedShapeId(null);
+    setSelectedStrokeIds([]);
+    setLassoPath([]);
   }, [notebook.id, pageNumber]);
 
   useEffect(() => {
+    if (activeTool !== 'lasso' && activeTool !== 'hand') {
+      setSelectedStrokeIds([]);
+      setLassoPath([]);
+    }
+    if (activeTool === 'eraser' || activeTool === 'lasso') {
+      setSelectedShapeId(null);
+    }
+  }, [activeTool]);
+
+  useEffect(() => {
     onSelectionChange?.(
-      Boolean(selectedImageId || selectedTextId || selectedStickerId || selectedStickyId)
+      Boolean(
+        selectedImageId ||
+          selectedTextId ||
+          selectedStickerId ||
+          selectedStickyId ||
+          selectedShapeId ||
+          selectedStrokeIds.length > 0
+      )
     );
-  }, [selectedImageId, selectedTextId, selectedStickerId, selectedStickyId, onSelectionChange]);
+  }, [
+    selectedImageId,
+    selectedTextId,
+    selectedStickerId,
+    selectedStickyId,
+    selectedShapeId,
+    selectedStrokeIds,
+    onSelectionChange,
+  ]);
 
   useEffect(() => {
     onCropModalOpenChange?.(Boolean(activeCropImage));
   }, [activeCropImage, onCropModalOpenChange]);
+
+  const handleDuplicateShape = useCallback(
+    (id: string) => {
+      const latest = latestAnnotationsRef.current;
+      const src = (latest.shapes || []).find((sh) => sh.id === id);
+      if (!src) return;
+      const newId = `shp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const copy: NotebookShapeElement = {
+        ...src,
+        id: newId,
+        x1: Math.min(98.5, +(src.x1 + 2.5).toFixed(2)),
+        y1: Math.min(98.5, +(src.y1 + 2.5).toFixed(2)),
+        x2: Math.min(98.5, +(src.x2 + 2.5).toFixed(2)),
+        y2: Math.min(98.5, +(src.y2 + 2.5).toFixed(2)),
+        createdAt: Date.now(),
+      };
+      setSelectedShapeId(newId);
+      setSelectedTextId(null);
+      setSelectedImageId(null);
+      setSelectedStickerId(null);
+      setSelectedStickyId(null);
+      setSelectedStrokeIds([]);
+      onCommitAnnotations(
+        {
+          ...latest,
+          shapes: [...(latest.shapes || []), copy],
+        },
+        true
+      );
+    },
+    [onCommitAnnotations]
+  );
+
+  const handleUpdateShape = useCallback(
+    (
+      id: string,
+      patch: Partial<
+        Pick<NotebookShapeElement, 'kind' | 'color' | 'width' | 'filled' | 'x1' | 'y1' | 'x2' | 'y2'>
+      >,
+      recordHistory: boolean = true
+    ) => {
+      const latest = latestAnnotationsRef.current;
+      onCommitAnnotations(
+        {
+          ...latest,
+          shapes: (latest.shapes || []).map((sh) =>
+            sh.id === id ? { ...sh, ...patch } : sh
+          ),
+        },
+        recordHistory
+      );
+    },
+    [onCommitAnnotations]
+  );
+
+  const handleDeleteShape = useCallback(
+    (id: string) => {
+      const latest = latestAnnotationsRef.current;
+      onCommitAnnotations(
+        {
+          ...latest,
+          shapes: (latest.shapes || []).filter((sh) => sh.id !== id),
+        },
+        true
+      );
+      if (selectedShapeId === id) setSelectedShapeId(null);
+    },
+    [onCommitAnnotations, selectedShapeId]
+  );
+
+  const handleDuplicateTextBox = useCallback(
+    (id: string) => {
+      const latest = latestAnnotationsRef.current;
+      const src = (latest.textBoxes || []).find((t) => t.id === id);
+      if (!src) return;
+      const newId = `txt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const copy: NotebookTextBox = {
+        ...src,
+        id: newId,
+        x: Math.min(82, +(src.x + 2.5).toFixed(2)),
+        y: Math.min(90, +(src.y + 2.5).toFixed(2)),
+        runs: src.runs ? src.runs.map((r) => ({ ...r })) : undefined,
+        createdAt: Date.now(),
+      };
+      setSelectedTextId(newId);
+      setSelectedImageId(null);
+      setSelectedStickerId(null);
+      setSelectedStickyId(null);
+      setSelectedShapeId(null);
+      setSelectedStrokeIds([]);
+      onCommitAnnotations(
+        {
+          ...latest,
+          textBoxes: [...(latest.textBoxes || []), copy],
+        },
+        true
+      );
+    },
+    [onCommitAnnotations]
+  );
+
+  const handleDuplicateEmbeddedImage = useCallback(
+    (id: string) => {
+      const latest = latestAnnotationsRef.current;
+      const src = (latest.images || []).find((img) => img.id === id);
+      if (!src) return;
+      const newId = `img-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const copy: NotebookImageElement = {
+        ...src,
+        id: newId,
+        x: Math.min(92, +(src.x + 3).toFixed(2)),
+        y: Math.min(92, +(src.y + 3).toFixed(2)),
+        createdAt: Date.now(),
+      };
+      setSelectedImageId(newId);
+      setSelectedTextId(null);
+      setSelectedStickerId(null);
+      setSelectedStickyId(null);
+      setSelectedShapeId(null);
+      setSelectedStrokeIds([]);
+      onCommitAnnotations(
+        {
+          ...latest,
+          images: [...(latest.images || []), copy],
+        },
+        true
+      );
+    },
+    [onCommitAnnotations]
+  );
+
+  const handleDuplicateSticker = useCallback(
+    (id: string) => {
+      const latest = latestAnnotationsRef.current;
+      const src = latest.stickers.find((s) => s.id === id);
+      if (!src) return;
+      const newId = `stk-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const copy: NotebookSticker = {
+        ...src,
+        id: newId,
+        x: Math.min(92, +(src.x + 3).toFixed(2)),
+        y: Math.min(92, +(src.y + 3).toFixed(2)),
+      };
+      setSelectedStickerId(newId);
+      setSelectedImageId(null);
+      setSelectedTextId(null);
+      setSelectedStickyId(null);
+      setSelectedShapeId(null);
+      setSelectedStrokeIds([]);
+      onCommitAnnotations(
+        {
+          ...latest,
+          stickers: [...latest.stickers, copy],
+        },
+        true
+      );
+    },
+    [onCommitAnnotations]
+  );
+
+  const handleDuplicateSticky = useCallback(
+    (id: string) => {
+      const latest = latestAnnotationsRef.current;
+      const src = latest.stickyNotes.find((n) => n.id === id);
+      if (!src) return;
+      const newId = `sticky-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const copy: NotebookStickyNote = {
+        ...src,
+        id: newId,
+        x: Math.min(82, +(src.x + 3).toFixed(2)),
+        y: Math.min(88, +(src.y + 3).toFixed(2)),
+        createdAt: Date.now(),
+      };
+      setSelectedStickyId(newId);
+      setSelectedImageId(null);
+      setSelectedTextId(null);
+      setSelectedStickerId(null);
+      setSelectedShapeId(null);
+      setSelectedStrokeIds([]);
+      onCommitAnnotations(
+        {
+          ...latest,
+          stickyNotes: [...latest.stickyNotes, copy],
+        },
+        true
+      );
+    },
+    [onCommitAnnotations]
+  );
+
+  const handleDuplicateSelectedStrokes = useCallback(() => {
+    if (selectedStrokeIds.length === 0) return;
+    const latest = latestAnnotationsRef.current;
+    const idSet = new Set(selectedStrokeIds);
+    const selectedStrokes = latest.strokes.filter((s) => idSet.has(s.id));
+    if (selectedStrokes.length === 0) return;
+    const now = Date.now();
+    const newIds: string[] = [];
+    const copies: NotebookStroke[] = selectedStrokes.map((s, idx) => {
+      const newId = `str-dup-${now}-${idx}-${Math.random().toString(36).slice(2, 6)}`;
+      newIds.push(newId);
+      return {
+        ...s,
+        id: newId,
+        points: s.points.map((pt) => ({
+          ...pt,
+          x: Math.min(99.5, +(pt.x + 2.2).toFixed(2)),
+          y: Math.min(99.5, +(pt.y + 2.2).toFixed(2)),
+        })),
+      };
+    });
+    setSelectedStrokeIds(newIds);
+    onCommitAnnotations(
+      {
+        ...latest,
+        strokes: [...latest.strokes, ...copies],
+      },
+      true
+    );
+  }, [selectedStrokeIds, onCommitAnnotations]);
 
   const lastDeleteSignalRef = useRef<number>(deleteSelectionSignal ?? 0);
   useEffect(() => {
@@ -1397,7 +2121,26 @@ export const NotebookPageStage: React.FC<Props> = ({
     if (seq === 0 || seq === lastDeleteSignalRef.current) return;
     lastDeleteSignalRef.current = seq;
     const latest = latestAnnotationsRef.current;
-    if (selectedImageId) {
+    if (selectedStrokeIds.length > 0) {
+      const idSet = new Set(selectedStrokeIds);
+      onCommitAnnotations(
+        {
+          ...latest,
+          strokes: latest.strokes.filter((s) => !idSet.has(s.id)),
+        },
+        true
+      );
+      setSelectedStrokeIds([]);
+    } else if (selectedShapeId) {
+      onCommitAnnotations(
+        {
+          ...latest,
+          shapes: (latest.shapes || []).filter((sh) => sh.id !== selectedShapeId),
+        },
+        true
+      );
+      setSelectedShapeId(null);
+    } else if (selectedImageId) {
       onCommitAnnotations(
         {
           ...latest,
@@ -1436,11 +2179,47 @@ export const NotebookPageStage: React.FC<Props> = ({
     }
   }, [
     deleteSelectionSignal,
+    selectedStrokeIds,
+    selectedShapeId,
     selectedImageId,
     selectedTextId,
     selectedStickerId,
     selectedStickyId,
     onCommitAnnotations,
+  ]);
+
+  const lastDuplicateSignalRef = useRef<number>(duplicateSelectionSignal ?? 0);
+  useEffect(() => {
+    const seq = duplicateSelectionSignal ?? 0;
+    if (seq === 0 || seq === lastDuplicateSignalRef.current) return;
+    lastDuplicateSignalRef.current = seq;
+    if (selectedStrokeIds.length > 0) {
+      handleDuplicateSelectedStrokes();
+    } else if (selectedShapeId) {
+      handleDuplicateShape(selectedShapeId);
+    } else if (selectedImageId) {
+      handleDuplicateEmbeddedImage(selectedImageId);
+    } else if (selectedTextId) {
+      handleDuplicateTextBox(selectedTextId);
+    } else if (selectedStickerId) {
+      handleDuplicateSticker(selectedStickerId);
+    } else if (selectedStickyId) {
+      handleDuplicateSticky(selectedStickyId);
+    }
+  }, [
+    duplicateSelectionSignal,
+    selectedStrokeIds,
+    selectedShapeId,
+    selectedImageId,
+    selectedTextId,
+    selectedStickerId,
+    selectedStickyId,
+    handleDuplicateSelectedStrokes,
+    handleDuplicateShape,
+    handleDuplicateEmbeddedImage,
+    handleDuplicateTextBox,
+    handleDuplicateSticker,
+    handleDuplicateSticky,
   ]);
 
   const lastClearSignalRef = useRef<number>(clearSelectionSignal ?? 0);
@@ -1452,6 +2231,9 @@ export const NotebookPageStage: React.FC<Props> = ({
     setSelectedTextId(null);
     setSelectedStickerId(null);
     setSelectedStickyId(null);
+    setSelectedShapeId(null);
+    setSelectedStrokeIds([]);
+    setLassoPath([]);
   }, [clearSelectionSignal]);
 
   // Dragging state for Sticky Notes, Stickers, Text Boxes & Embedded Images
@@ -1462,6 +2244,30 @@ export const NotebookPageStage: React.FC<Props> = ({
     startClientY: number;
     origX: number;
     origY: number;
+    hasMoved: boolean;
+    origSnapshot: PageAnnotations;
+  } | null>(null);
+
+  // Dragging & endpoint/corner resizing state for Vector Shapes
+  const dragShapeRef = useRef<{
+    id: string;
+    mode: 'move' | 'p1' | 'p2' | 'nw' | 'ne' | 'sw' | 'se';
+    startClientX: number;
+    startClientY: number;
+    origX1: number;
+    origY1: number;
+    origX2: number;
+    origY2: number;
+    hasMoved: boolean;
+    origSnapshot: PageAnnotations;
+  } | null>(null);
+
+  // Dragging state for Lasso-selected handwriting strokes
+  const dragStrokesRef = useRef<{
+    strokeIds: Set<string>;
+    startClientX: number;
+    startClientY: number;
+    origPointsById: Map<string, StrokePoint[]>;
     hasMoved: boolean;
     origSnapshot: PageAnnotations;
   } | null>(null);
@@ -1723,6 +2529,12 @@ export const NotebookPageStage: React.FC<Props> = ({
   ]);
 
   const isDrawTool =
+    activeTool === 'pen' ||
+    activeTool === 'highlighter' ||
+    activeTool === 'eraser' ||
+    activeTool === 'lasso';
+
+  const isBrushHoverTool =
     activeTool === 'pen' || activeTool === 'highlighter' || activeTool === 'eraser';
 
   // Critical iPadOS Safari guard: block browser scroll/callout ONLY for Apple Pencil (stylus)
@@ -1786,7 +2598,7 @@ export const NotebookPageStage: React.FC<Props> = ({
       const indicator = hoverCursorRef.current;
       const stageEl = stageRef.current;
       if (!indicator || !stageEl) return;
-      if (!isDrawTool || pointerType === 'touch') {
+      if (!isBrushHoverTool || pointerType === 'touch') {
         indicator.style.opacity = '0';
         return;
       }
@@ -1801,7 +2613,7 @@ export const NotebookPageStage: React.FC<Props> = ({
       indicator.style.transform = `translate3d(${xPx.toFixed(1)}px, ${yPx.toFixed(1)}px, 0) translate(-50%, -50%)`;
       indicator.style.opacity = getBrushHoverTargetOpacity();
     },
-    [isDrawTool, getBrushHoverTargetOpacity]
+    [isBrushHoverTool, getBrushHoverTargetOpacity]
   );
 
   const hideBrushHover = useCallback(() => {
@@ -1811,10 +2623,10 @@ export const NotebookPageStage: React.FC<Props> = ({
   }, []);
 
   useEffect(() => {
-    if (!isDrawTool && hoverCursorRef.current) {
+    if (!isBrushHoverTool && hoverCursorRef.current) {
       hoverCursorRef.current.style.opacity = '0';
     }
-  }, [isDrawTool]);
+  }, [isBrushHoverTool]);
 
   const handleStagePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     updateBrushHoverPos(e.clientX, e.clientY, e.pointerType);
@@ -1832,11 +2644,13 @@ export const NotebookPageStage: React.FC<Props> = ({
       return;
     }
 
-    // Clear sticker, text, image, and sticky selection on background tap
+    // Clear sticker, text, image, sticky, shape, and lasso selection on background tap
     setSelectedStickerId(null);
     setSelectedTextId(null);
     setSelectedImageId(null);
     setSelectedStickyId(null);
+    setSelectedShapeId(null);
+    setSelectedStrokeIds([]);
 
     const effectiveTool: NotebookTool = isStylusEraser ? 'eraser' : activeTool;
 
@@ -1847,6 +2661,21 @@ export const NotebookPageStage: React.FC<Props> = ({
     const pt = toNormalizedPoint(e.clientX, e.clientY, e.pressure, e.pointerType);
     if (!pt) return;
 
+    if (effectiveTool === 'lasso') {
+      e.preventDefault();
+      activePointerIdRef.current = e.pointerId;
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch {
+        // ignore
+      }
+      isLassoDrawingRef.current = true;
+      const startPt = { x: pt.x, y: pt.y };
+      lassoPathRef.current = [startPt];
+      setLassoPath([startPt]);
+      return;
+    }
+
     if (effectiveTool === 'pen' || effectiveTool === 'highlighter') {
       e.preventDefault();
       activePointerIdRef.current = e.pointerId;
@@ -1856,6 +2685,26 @@ export const NotebookPageStage: React.FC<Props> = ({
         // ignore if unsupported
       }
       isDrawingRef.current = true;
+      shapeStartPointRef.current = { x: pt.x, y: pt.y };
+
+      if (drawShape !== 'freehand') {
+        const newShape: NotebookShapeElement = {
+          id: `shp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          kind: drawShape,
+          tool: effectiveTool,
+          color: effectiveTool === 'pen' ? penColor : highlighterColor,
+          width: effectiveTool === 'pen' ? penWidth : highlighterWidth,
+          x1: +pt.x.toFixed(2),
+          y1: +pt.y.toFixed(2),
+          x2: +pt.x.toFixed(2),
+          y2: +pt.y.toFixed(2),
+          filled: false,
+          createdAt: Date.now(),
+        };
+        draftShapeRef.current = newShape;
+        setDraftShape(newShape);
+        return;
+      }
 
       const newStroke: NotebookStroke = {
         id: `str-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -2010,7 +2859,104 @@ export const NotebookPageStage: React.FC<Props> = ({
 
   const handleStagePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     updateBrushHoverPos(e.clientX, e.clientY, e.pointerType);
-    // Handle resizing of embedded page image first
+
+    // Handle moving or resizing of a selected Vector Shape first
+    if (dragShapeRef.current && stageRef.current) {
+      e.preventDefault();
+      const rect = stageRef.current.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+      const dxPct = ((e.clientX - dragShapeRef.current.startClientX) / rect.width) * 100;
+      const dyPct = ((e.clientY - dragShapeRef.current.startClientY) / rect.height) * 100;
+      if (Math.abs(dxPct) > 0.06 || Math.abs(dyPct) > 0.06) {
+        dragShapeRef.current.hasMoved = true;
+      }
+      const { id, mode, origX1, origY1, origX2, origY2 } = dragShapeRef.current;
+      const clampCoord = (v: number) => Math.max(0.4, Math.min(99.6, +v.toFixed(2)));
+
+      let nextX1 = origX1;
+      let nextY1 = origY1;
+      let nextX2 = origX2;
+      let nextY2 = origY2;
+
+      if (mode === 'move') {
+        const minOrigX = Math.min(origX1, origX2);
+        const maxOrigX = Math.max(origX1, origX2);
+        const minOrigY = Math.min(origY1, origY2);
+        const maxOrigY = Math.max(origY1, origY2);
+        const clampedDx = Math.max(0.4 - minOrigX, Math.min(99.6 - maxOrigX, dxPct));
+        const clampedDy = Math.max(0.4 - minOrigY, Math.min(99.6 - maxOrigY, dyPct));
+        nextX1 = +(origX1 + clampedDx).toFixed(2);
+        nextY1 = +(origY1 + clampedDy).toFixed(2);
+        nextX2 = +(origX2 + clampedDx).toFixed(2);
+        nextY2 = +(origY2 + clampedDy).toFixed(2);
+      } else if (mode === 'p1') {
+        nextX1 = clampCoord(origX1 + dxPct);
+        nextY1 = clampCoord(origY1 + dyPct);
+      } else if (mode === 'p2') {
+        nextX2 = clampCoord(origX2 + dxPct);
+        nextY2 = clampCoord(origY2 + dyPct);
+      } else if (mode === 'nw') {
+        nextX1 = clampCoord(origX1 + dxPct);
+        nextY1 = clampCoord(origY1 + dyPct);
+      } else if (mode === 'ne') {
+        nextX2 = clampCoord(origX2 + dxPct);
+        nextY1 = clampCoord(origY1 + dyPct);
+      } else if (mode === 'sw') {
+        nextX1 = clampCoord(origX1 + dxPct);
+        nextY2 = clampCoord(origY2 + dyPct);
+      } else if (mode === 'se') {
+        nextX2 = clampCoord(origX2 + dxPct);
+        nextY2 = clampCoord(origY2 + dyPct);
+      }
+
+      onCommitAnnotations(
+        {
+          ...latestAnnotationsRef.current,
+          shapes: (latestAnnotationsRef.current.shapes || []).map((sh) =>
+            sh.id === id
+              ? { ...sh, x1: nextX1, y1: nextY1, x2: nextX2, y2: nextY2 }
+              : sh
+          ),
+        },
+        false
+      );
+      return;
+    }
+
+    // Handle dragging of Lasso-selected strokes
+    if (dragStrokesRef.current && stageRef.current) {
+      e.preventDefault();
+      const rect = stageRef.current.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+      const dxPct = ((e.clientX - dragStrokesRef.current.startClientX) / rect.width) * 100;
+      const dyPct = ((e.clientY - dragStrokesRef.current.startClientY) / rect.height) * 100;
+      if (Math.abs(dxPct) > 0.06 || Math.abs(dyPct) > 0.06) {
+        dragStrokesRef.current.hasMoved = true;
+      }
+      const { strokeIds, origPointsById } = dragStrokesRef.current;
+      const nextStrokes = latestAnnotationsRef.current.strokes.map((s) => {
+        if (!strokeIds.has(s.id)) return s;
+        const origPts = origPointsById.get(s.id) ?? s.points;
+        return {
+          ...s,
+          points: origPts.map((pt) => ({
+            ...pt,
+            x: Math.max(0.2, Math.min(99.8, +(pt.x + dxPct).toFixed(2))),
+            y: Math.max(0.2, Math.min(99.8, +(pt.y + dyPct).toFixed(2))),
+          })),
+        };
+      });
+      onCommitAnnotations(
+        {
+          ...latestAnnotationsRef.current,
+          strokes: nextStrokes,
+        },
+        false
+      );
+      return;
+    }
+
+    // Handle resizing of embedded page image
     if (resizeImageRef.current && stageRef.current) {
       e.preventDefault();
       const rect = stageRef.current.getBoundingClientRect();
@@ -2108,12 +3054,76 @@ export const NotebookPageStage: React.FC<Props> = ({
       return;
     }
 
+    if (isLassoDrawingRef.current) {
+      e.preventDefault();
+      const pt = toNormalizedPoint(e.clientX, e.clientY, e.pressure, e.pointerType);
+      if (!pt) return;
+      const pts = lassoPathRef.current;
+      const last = pts[pts.length - 1];
+      if (!last || Math.hypot(pt.x - last.x, pt.y - last.y) >= 0.35) {
+        const nextPts = [...pts, { x: pt.x, y: pt.y }];
+        lassoPathRef.current = nextPts;
+        setLassoPath(nextPts);
+      }
+      return;
+    }
+
+    if (isDrawingRef.current && draftShapeRef.current) {
+      e.preventDefault();
+      const rawStart =
+        shapeStartPointRef.current ?? {
+          x: draftShapeRef.current.x1,
+          y: draftShapeRef.current.y1,
+        };
+      const rawEnd = toNormalizedPoint(e.clientX, e.clientY, e.pressure, e.pointerType);
+      if (rawStart && rawEnd) {
+        let endX = rawEnd.x;
+        let endY = rawEnd.y;
+        const rect = stageRef.current?.getBoundingClientRect();
+        const kind = draftShapeRef.current.kind;
+        if (
+          (kind === 'line' || kind === 'arrow') &&
+          e.shiftKey &&
+          rect &&
+          rect.width > 0 &&
+          rect.height > 0
+        ) {
+          const dxPx = ((rawEnd.x - rawStart.x) / 100) * rect.width;
+          const dyPx = ((rawEnd.y - rawStart.y) / 100) * rect.height;
+          const distPx = Math.hypot(dxPx, dyPx);
+          if (distPx > 4) {
+            const angleDeg = (Math.atan2(dyPx, dxPx) * 180) / Math.PI;
+            const nearest45 = Math.round(angleDeg / 45) * 45;
+            const rad = (nearest45 * Math.PI) / 180;
+            endX = Math.max(
+              0,
+              Math.min(100, rawStart.x + ((Math.cos(rad) * distPx) / rect.width) * 100)
+            );
+            endY = Math.max(
+              0,
+              Math.min(100, rawStart.y + ((Math.sin(rad) * distPx) / rect.height) * 100)
+            );
+          }
+        }
+        const updatedShape: NotebookShapeElement = {
+          ...draftShapeRef.current,
+          x1: +rawStart.x.toFixed(2),
+          y1: +rawStart.y.toFixed(2),
+          x2: +endX.toFixed(2),
+          y2: +endY.toFixed(2),
+        };
+        draftShapeRef.current = updatedShape;
+        setDraftShape(updatedShape);
+      }
+      return;
+    }
+
     if (isDrawingRef.current && draftStrokeRef.current) {
       e.preventDefault();
 
-      // Shift-hold straight line mode (with subtle 0° / 45° / 90° snap)
+      // Shift-hold straight line while in freehand mode
       if (e.shiftKey) {
-        const rawStart = draftStrokeRef.current.points[0];
+        const rawStart = shapeStartPointRef.current ?? draftStrokeRef.current.points[0];
         const rawEnd = toNormalizedPoint(e.clientX, e.clientY, e.pressure, e.pointerType);
         if (rawStart && rawEnd) {
           let endX = rawEnd.x;
@@ -2126,7 +3136,7 @@ export const NotebookPageStage: React.FC<Props> = ({
             if (distPx > 4) {
               const angleDeg = (Math.atan2(dyPx, dxPx) * 180) / Math.PI;
               const nearest45 = Math.round(angleDeg / 45) * 45;
-              if (Math.abs(angleDeg - nearest45) <= 5.5) {
+              if (Math.abs(angleDeg - nearest45) <= 6.5) {
                 const rad = (nearest45 * Math.PI) / 180;
                 endX = Math.max(
                   0,
@@ -2139,12 +3149,16 @@ export const NotebookPageStage: React.FC<Props> = ({
               }
             }
           }
+          const currentAspect = surface ? surface.width / surface.height : 0.707;
+          const shapePts = buildShapePoints(
+            'line',
+            rawStart,
+            { x: endX, y: endY },
+            currentAspect
+          );
           const updatedStroke: NotebookStroke = {
             ...draftStrokeRef.current,
-            points: [
-              { x: rawStart.x, y: rawStart.y },
-              { x: endX, y: endY },
-            ],
+            points: shapePts,
           };
           draftStrokeRef.current = updatedStroke;
           setDraftStroke(updatedStroke);
@@ -2231,6 +3245,56 @@ export const NotebookPageStage: React.FC<Props> = ({
   };
 
   const handleStagePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (dragShapeRef.current) {
+      const dragSession = dragShapeRef.current;
+      dragShapeRef.current = null;
+      try {
+        stageRef.current?.releasePointerCapture(e.pointerId);
+      } catch {
+        // ignore
+      }
+      if (dragSession.hasMoved) {
+        const latest = latestAnnotationsRef.current;
+        const normalizedShapes = (latest.shapes || []).map((sh) => {
+          if (sh.id !== dragSession.id) return sh;
+          if (sh.kind === 'rect' || sh.kind === 'ellipse') {
+            return {
+              ...sh,
+              x1: Math.min(sh.x1, sh.x2),
+              y1: Math.min(sh.y1, sh.y2),
+              x2: Math.max(sh.x1, sh.x2),
+              y2: Math.max(sh.y1, sh.y2),
+            };
+          }
+          return sh;
+        });
+        onCommitAnnotations(
+          { ...latest, shapes: normalizedShapes },
+          true,
+          dragSession.origSnapshot
+        );
+      }
+      return;
+    }
+
+    if (dragStrokesRef.current) {
+      const dragSession = dragStrokesRef.current;
+      dragStrokesRef.current = null;
+      try {
+        stageRef.current?.releasePointerCapture(e.pointerId);
+      } catch {
+        // ignore
+      }
+      if (dragSession.hasMoved) {
+        onCommitAnnotations(
+          latestAnnotationsRef.current,
+          true,
+          dragSession.origSnapshot
+        );
+      }
+      return;
+    }
+
     if (resizeImageRef.current) {
       const resizeSession = resizeImageRef.current;
       resizeImageRef.current = null;
@@ -2272,8 +3336,65 @@ export const NotebookPageStage: React.FC<Props> = ({
     }
     activePointerIdRef.current = null;
 
+    if (isLassoDrawingRef.current) {
+      isLassoDrawingRef.current = false;
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // ignore
+      }
+      const loop = lassoPathRef.current;
+      lassoPathRef.current = [];
+      setLassoPath([]);
+      const currentAspect = surface ? surface.width / surface.height : 0.707;
+      const matchedIds = latestAnnotationsRef.current.strokes
+        .filter((s) => isStrokeSelectedByLasso(s, loop, currentAspect))
+        .map((s) => s.id);
+      setSelectedStrokeIds(matchedIds);
+      return;
+    }
+
+    if (isDrawingRef.current && draftShapeRef.current) {
+      isDrawingRef.current = false;
+      shapeStartPointRef.current = null;
+      const completed = draftShapeRef.current;
+      draftShapeRef.current = null;
+      setDraftShape(null);
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // ignore
+      }
+      const span = Math.hypot(completed.x2 - completed.x1, completed.y2 - completed.y1);
+      if (span < 0.45) {
+        return;
+      }
+      const finalShape: NotebookShapeElement =
+        completed.kind === 'rect' || completed.kind === 'ellipse'
+          ? {
+              ...completed,
+              x1: Math.min(completed.x1, completed.x2),
+              y1: Math.min(completed.y1, completed.y2),
+              x2: Math.max(completed.x1, completed.x2),
+              y2: Math.max(completed.y1, completed.y2),
+            }
+          : completed;
+
+      setSelectedShapeId(finalShape.id);
+      onCommitAnnotations(
+        {
+          ...latestAnnotationsRef.current,
+          shapes: [...(latestAnnotationsRef.current.shapes || []), finalShape],
+        },
+        true,
+        latestAnnotationsRef.current
+      );
+      return;
+    }
+
     if (isDrawingRef.current && draftStrokeRef.current) {
       isDrawingRef.current = false;
+      shapeStartPointRef.current = null;
       const completed = draftStrokeRef.current;
       draftStrokeRef.current = null;
       setDraftStroke(null);
@@ -2319,6 +3440,18 @@ export const NotebookPageStage: React.FC<Props> = ({
         stickyNotes: annotations.stickyNotes.map((n) => (n.id === id ? { ...n, text } : n)),
       },
       false
+    );
+  };
+
+  const handleStickyColorChange = (id: string, color: StickyColor) => {
+    onCommitAnnotations(
+      {
+        ...annotations,
+        stickyNotes: annotations.stickyNotes.map((n) =>
+          n.id === id ? { ...n, color } : n
+        ),
+      },
+      true
     );
   };
 
@@ -2397,10 +3530,39 @@ export const NotebookPageStage: React.FC<Props> = ({
     if (selectedImageId === id) setSelectedImageId(null);
   };
 
+  const handleRecolorSelectedStrokes = (color: string) => {
+    if (selectedStrokeIds.length === 0) return;
+    const latest = latestAnnotationsRef.current;
+    const idSet = new Set(selectedStrokeIds);
+    onCommitAnnotations(
+      {
+        ...latest,
+        strokes: latest.strokes.map((s) =>
+          idSet.has(s.id) ? { ...s, color } : s
+        ),
+      },
+      true
+    );
+  };
+
+  const handleDeleteSelectedStrokes = () => {
+    if (selectedStrokeIds.length === 0) return;
+    const latest = latestAnnotationsRef.current;
+    const idSet = new Set(selectedStrokeIds);
+    onCommitAnnotations(
+      {
+        ...latest,
+        strokes: latest.strokes.filter((s) => !idSet.has(s.id)),
+      },
+      true
+    );
+    setSelectedStrokeIds([]);
+  };
+
   const getTextBoxSignature = (box: NotebookTextBox): string => {
     const base = getBoxBaseStyle(box);
     const runs = getEffectiveRuns(box);
-    return `${serializeRunsSignature(runs, base)}|${box.text}|${base.color}|${base.bold}|${base.italic}|${base.underline}|${base.strikethrough}`;
+    return `${serializeRunsSignature(runs, base)}|${box.text}|${box.fontSize}|${base.color}|${base.bold}|${base.italic}|${base.underline}|${base.strikethrough}`;
   };
 
   const handleUpdateTextBoxRich = (
@@ -2408,7 +3570,14 @@ export const NotebookPageStage: React.FC<Props> = ({
     patch: Partial<
       Pick<
         NotebookTextBox,
-        'text' | 'runs' | 'color' | 'bold' | 'italic' | 'underline' | 'strikethrough'
+        | 'text'
+        | 'runs'
+        | 'color'
+        | 'fontSize'
+        | 'bold'
+        | 'italic'
+        | 'underline'
+        | 'strikethrough'
       >
     >,
     recordHistory: boolean = false
@@ -2568,6 +3737,7 @@ export const NotebookPageStage: React.FC<Props> = ({
   };
 
   const handleHeaderFieldFocus = (field: 'topic' | 'date') => {
+    if (field === 'date') setIsHeaderDateFocused(true);
     const latest = latestAnnotationsRef.current;
     preEditHeaderSnapshotRef.current = {
       field,
@@ -2588,6 +3758,7 @@ export const NotebookPageStage: React.FC<Props> = ({
   };
 
   const handleHeaderFieldBlur = (field: 'topic' | 'date') => {
+    if (field === 'date') setIsHeaderDateFocused(false);
     const session = preEditHeaderSnapshotRef.current;
     if (!session || session.field !== field) return;
     preEditHeaderSnapshotRef.current = null;
@@ -2597,6 +3768,30 @@ export const NotebookPageStage: React.FC<Props> = ({
     if (currentVal !== session.startValue) {
       onCommitAnnotations(latest, true, session.snapshot);
     }
+  };
+
+  const handleFillTodayHeaderDate = () => {
+    const todayFormatted = new Date().toLocaleDateString('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+    const latest = latestAnnotationsRef.current;
+    const baseSnapshot =
+      preEditHeaderSnapshotRef.current?.field === 'date'
+        ? preEditHeaderSnapshotRef.current.snapshot
+        : latest;
+    preEditHeaderSnapshotRef.current = null;
+    onCommitAnnotations(
+      {
+        ...latest,
+        headerDate: todayFormatted,
+      },
+      true,
+      baseSnapshot
+    );
+    setIsHeaderDateFocused(false);
+    headerDateInputRef.current?.blur();
   };
 
   const isBlankSurfacePage =
@@ -2633,8 +3828,55 @@ export const NotebookPageStage: React.FC<Props> = ({
   const highlighterStrokes = allStrokes.filter((s) => s.tool === 'highlighter');
   const penStrokes = allStrokes.filter((s) => s.tool === 'pen');
 
+  const allShapes = draftShape
+    ? [...(annotations.shapes || []), draftShape]
+    : annotations.shapes || [];
+
+  const highlighterShapes = allShapes.filter((sh) => sh.tool === 'highlighter');
+  const penShapes = allShapes.filter((sh) => sh.tool === 'pen');
+
+  const isShapeInteractive =
+    !draftShape &&
+    (activeTool === 'hand' || activeTool === 'pen' || activeTool === 'highlighter');
+
+  const selectedShape =
+    selectedShapeId && activeTool !== 'eraser' && activeTool !== 'lasso'
+      ? (annotations.shapes || []).find((sh) => sh.id === selectedShapeId) ?? null
+      : null;
+
+  const startShapeDragSession = (
+    shape: NotebookShapeElement,
+    mode: 'move' | 'p1' | 'p2' | 'nw' | 'ne' | 'sw' | 'se',
+    e: React.PointerEvent<Element>
+  ) => {
+    setSelectedShapeId(shape.id);
+    setSelectedImageId(null);
+    setSelectedTextId(null);
+    setSelectedStickerId(null);
+    setSelectedStickyId(null);
+    setSelectedStrokeIds([]);
+    try {
+      stageRef.current?.setPointerCapture(e.pointerId);
+    } catch {
+      // ignore
+    }
+    const isBoxKind = shape.kind === 'rect' || shape.kind === 'ellipse';
+    dragShapeRef.current = {
+      id: shape.id,
+      mode,
+      startClientX: e.clientX,
+      startClientY: e.clientY,
+      origX1: isBoxKind ? Math.min(shape.x1, shape.x2) : shape.x1,
+      origY1: isBoxKind ? Math.min(shape.y1, shape.y2) : shape.y1,
+      origX2: isBoxKind ? Math.max(shape.x1, shape.x2) : shape.x2,
+      origY2: isBoxKind ? Math.max(shape.y1, shape.y2) : shape.y2,
+      hasMoved: false,
+      origSnapshot: latestAnnotationsRef.current,
+    };
+  };
+
   const cursorClass =
-    activeTool === 'pen' || activeTool === 'highlighter'
+    activeTool === 'pen' || activeTool === 'highlighter' || activeTool === 'lasso'
       ? 'cursor-crosshair'
       : activeTool === 'eraser'
       ? 'cursor-cell'
@@ -2652,6 +3894,13 @@ export const NotebookPageStage: React.FC<Props> = ({
       : activeTool === 'eraser'
       ? Math.max(6, (eraserWidth / 100) * displayWidth)
       : 0;
+
+  const selectedStrokesBounds =
+    selectedStrokeIds.length > 0
+      ? getStrokesBounds(
+          annotations.strokes.filter((s) => selectedStrokeIds.includes(s.id))
+        )
+      : null;
 
   return (
     <div className="flex justify-center items-start min-h-full py-4 sm:py-6 px-2 sm:px-6">
@@ -2776,34 +4025,75 @@ export const NotebookPageStage: React.FC<Props> = ({
                     className={sharedClass}
                   />
 
-                  <input
-                    ref={headerDateInputRef}
-                    type="text"
-                    value={annotations.headerDate ?? ''}
-                    placeholder={isDrawTool ? undefined : 'TT.MM.JJJJ'}
-                    aria-label="Datum dieser Seite"
-                    tabIndex={isDrawTool ? -1 : 0}
-                    onPointerDown={(e) => {
-                      if (isDrawTool) return;
-                      e.stopPropagation();
-                    }}
-                    onFocus={() => handleHeaderFieldFocus('date')}
-                    onChange={(e) => handleHeaderFieldChange('date', e.target.value)}
-                    onBlur={() => handleHeaderFieldBlur('date')}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        e.currentTarget.blur();
-                      }
-                    }}
+                  <div
                     style={{
-                      ...sharedStyle,
+                      top: `${inputTop}px`,
                       left: `${headerMetrics.datumInputLeft}px`,
                       width: `${datumW}px`,
+                      height: `${inputH}px`,
                     }}
-                    className={sharedClass}
-                  />
+                    className={`absolute group/datum ${
+                      isDrawTool ? 'pointer-events-none' : 'pointer-events-auto'
+                    }`}
+                  >
+                    <input
+                      ref={headerDateInputRef}
+                      type="text"
+                      value={annotations.headerDate ?? ''}
+                      placeholder={isDrawTool ? undefined : 'TT.MM.JJJJ'}
+                      aria-label="Datum dieser Seite"
+                      tabIndex={isDrawTool ? -1 : 0}
+                      onPointerDown={(e) => {
+                        if (isDrawTool) return;
+                        e.stopPropagation();
+                      }}
+                      onFocus={() => handleHeaderFieldFocus('date')}
+                      onChange={(e) => handleHeaderFieldChange('date', e.target.value)}
+                      onBlur={() => handleHeaderFieldBlur('date')}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          e.currentTarget.blur();
+                        }
+                      }}
+                      style={{
+                        height: `${inputH}px`,
+                        fontSize: `${headerMetrics.fontPx}px`,
+                        lineHeight: 1.1,
+                        fontFamily: 'system-ui, -apple-system, sans-serif',
+                        WebkitUserSelect: isDrawTool ? 'none' : 'text',
+                        userSelect: isDrawTool ? 'none' : 'text',
+                      }}
+                      className={`w-full rounded-xs px-1 font-medium text-slate-800 placeholder:text-slate-400/75 bg-transparent transition-colors focus:outline-hidden ${
+                        isDrawTool
+                          ? 'pointer-events-none select-none'
+                          : 'hover:bg-slate-900/[0.04] focus:bg-white/80 focus:ring-1 focus:ring-indigo-500/70'
+                      }`}
+                    />
+
+                    {/* Quick "Heute" button when focused or hovered */}
+                    {!isDrawTool && (
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFillTodayHeaderDate();
+                        }}
+                        title="Heutiges Datum eintragen"
+                        className={`absolute right-0 -bottom-6 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-900/95 hover:bg-indigo-600 text-white text-[10px] font-bold shadow-md transition-opacity cursor-pointer z-20 ${
+                          isHeaderDateFocused
+                            ? 'opacity-100 pointer-events-auto'
+                            : 'opacity-0 group-hover/datum:opacity-100 pointer-events-none group-hover/datum:pointer-events-auto'
+                        }`}
+                      >
+                        <CalendarCheck className="w-3 h-3" />
+                        <span>Heute</span>
+                      </button>
+                    )}
+                  </div>
                 </>
               );
             })()}
@@ -2823,6 +4113,8 @@ export const NotebookPageStage: React.FC<Props> = ({
                 setSelectedTextId(null);
                 setSelectedStickerId(null);
                 setSelectedStickyId(null);
+                setSelectedShapeId(null);
+                setSelectedStrokeIds([]);
               }}
               onStartDrag={(e) => {
                 try {
@@ -2863,6 +4155,7 @@ export const NotebookPageStage: React.FC<Props> = ({
                 }
               }}
               onUpdate={(patch) => handleUpdateEmbeddedImage(imgEl.id, patch)}
+              onDuplicate={() => handleDuplicateEmbeddedImage(imgEl.id)}
               onDelete={() => handleDeleteEmbeddedImage(imgEl.id)}
             />
           ))}
@@ -2900,7 +4193,7 @@ export const NotebookPageStage: React.FC<Props> = ({
           />
         )}
 
-        {/* Layer 2: Smooth Vector Pen Ink SVG */}
+        {/* Layer 2: Smooth Vector Pen Ink & Editable Pen Shapes SVG */}
         <svg
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
@@ -2936,6 +4229,15 @@ export const NotebookPageStage: React.FC<Props> = ({
                 />
               );
             })}
+            {penShapes.map((shape) =>
+              renderVectorShapeSvg(
+                shape,
+                aspectRatio,
+                0.96,
+                isShapeInteractive,
+                (e) => startShapeDragSession(shape, 'move', e)
+              )
+            )}
           </g>
         </svg>
 
@@ -2967,6 +4269,8 @@ export const NotebookPageStage: React.FC<Props> = ({
                   setSelectedImageId(null);
                   setSelectedTextId(null);
                   setSelectedStickyId(null);
+                  setSelectedShapeId(null);
+                  setSelectedStrokeIds([]);
                   try {
                     stageRef.current?.setPointerCapture(e.pointerId);
                   } catch {}
@@ -3071,6 +4375,19 @@ export const NotebookPageStage: React.FC<Props> = ({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
+                        handleDuplicateSticker(sticker.id);
+                      }}
+                      title="Sticker duplizieren (⌘D)"
+                      aria-label="Sticker duplizieren"
+                      className="w-5 h-5 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
                         handleDeleteSticker(sticker.id);
                       }}
                       title="Sticker entfernen"
@@ -3137,6 +4454,8 @@ export const NotebookPageStage: React.FC<Props> = ({
                   setSelectedImageId(null);
                   setSelectedStickerId(null);
                   setSelectedStickyId(null);
+                  setSelectedShapeId(null);
+                  setSelectedStrokeIds([]);
                 }}
                 onFocusBox={() => handleTextBoxFocus(box.id)}
                 onClearAutoFocus={() => {
@@ -3161,6 +4480,7 @@ export const NotebookPageStage: React.FC<Props> = ({
                   handleUpdateTextBoxRich(box.id, patch, recordHistory)
                 }
                 onToggleBackground={() => handleToggleTextBoxBg(box.id)}
+                onDuplicate={() => handleDuplicateTextBox(box.id)}
                 onDelete={() => handleDeleteTextBox(box.id)}
                 onBlurBox={() => handleTextBoxBlur(box.id)}
               />
@@ -3168,7 +4488,7 @@ export const NotebookPageStage: React.FC<Props> = ({
           })}
         </div>
 
-        {/* Layer 3.8: Foreground Highlighter SVG (above Freitext, Fotos & Stickers, below Klebezettel) */}
+        {/* Layer 3.8: Foreground Highlighter & Highlighter Shapes SVG (above Freitext, Fotos & Stickers, below Klebezettel) */}
         <svg
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
@@ -3187,7 +4507,374 @@ export const NotebookPageStage: React.FC<Props> = ({
               strokeLinejoin="round"
             />
           ))}
+          {highlighterShapes.map((shape) =>
+            renderVectorShapeSvg(
+              shape,
+              aspectRatio,
+              0.45,
+              isShapeInteractive,
+              (e) => startShapeDragSession(shape, 'move', e)
+            )
+          )}
         </svg>
+
+        {/* Layer 3.85: Interactive Selection Handles & Floating Edit Toolbar for Selected Shape */}
+        {selectedShape && (
+          <div className="absolute inset-0 z-[29] pointer-events-none">
+            {(() => {
+              const minX = Math.min(selectedShape.x1, selectedShape.x2);
+              const maxX = Math.max(selectedShape.x1, selectedShape.x2);
+              const minY = Math.min(selectedShape.y1, selectedShape.y2);
+              const maxY = Math.max(selectedShape.y1, selectedShape.y2);
+              const centerX = Math.max(18, Math.min(82, (minX + maxX) / 2));
+              const showBelow = minY < 16;
+              const toolbarAnchorY = showBelow ? Math.min(92, maxY + 2.2) : Math.max(2, minY - 2.2);
+              const isLineLike =
+                selectedShape.kind === 'line' || selectedShape.kind === 'arrow';
+              const colorPalette =
+                selectedShape.tool === 'highlighter' ? HIGHLIGHTER_COLORS : PEN_COLORS;
+
+              return (
+                <>
+                  {isLineLike ? (
+                    <>
+                      <svg
+                        viewBox="0 0 100 100"
+                        preserveAspectRatio="none"
+                        className="absolute inset-0 w-full h-full pointer-events-none"
+                      >
+                        <line
+                          x1={selectedShape.x1}
+                          y1={selectedShape.y1}
+                          x2={selectedShape.x2}
+                          y2={selectedShape.y2}
+                          stroke="#4f46e5"
+                          strokeWidth={0.32}
+                          strokeDasharray="1.1 0.8"
+                        />
+                      </svg>
+                      {/* Start Endpoint Handle (p1) */}
+                      <div
+                        style={{
+                          left: `${selectedShape.x1}%`,
+                          top: `${selectedShape.y1}%`,
+                        }}
+                        onPointerDown={(e) => {
+                          e.stopPropagation();
+                          startShapeDragSession(selectedShape, 'p1', e);
+                        }}
+                        title="Startpunkt ziehen zum Anpassen"
+                        className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-indigo-600 shadow-md pointer-events-auto cursor-grab active:cursor-grabbing hover:scale-125 transition-transform"
+                      />
+                      {/* End Endpoint Handle (p2) */}
+                      <div
+                        style={{
+                          left: `${selectedShape.x2}%`,
+                          top: `${selectedShape.y2}%`,
+                        }}
+                        onPointerDown={(e) => {
+                          e.stopPropagation();
+                          startShapeDragSession(selectedShape, 'p2', e);
+                        }}
+                        title="Endpunkt ziehen zum Anpassen"
+                        className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-indigo-600 border-2 border-white shadow-md pointer-events-auto cursor-grab active:cursor-grabbing hover:scale-125 transition-transform"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      {/* Dashed Bounding Frame for Rect / Ellipse */}
+                      <div
+                        style={{
+                          left: `${minX}%`,
+                          top: `${minY}%`,
+                          width: `${Math.max(0.8, maxX - minX)}%`,
+                          height: `${Math.max(0.8, maxY - minY)}%`,
+                        }}
+                        className="absolute border-2 border-dashed border-indigo-500 rounded-xs pointer-events-none"
+                      />
+                      {/* 4 Corner Resize Handles (nw, ne, sw, se) */}
+                      {(
+                        [
+                          { mode: 'nw' as const, x: minX, y: minY, cursor: 'cursor-nwse-resize' },
+                          { mode: 'ne' as const, x: maxX, y: minY, cursor: 'cursor-nesw-resize' },
+                          { mode: 'sw' as const, x: minX, y: maxY, cursor: 'cursor-nesw-resize' },
+                          { mode: 'se' as const, x: maxX, y: maxY, cursor: 'cursor-nwse-resize' },
+                        ]
+                      ).map((h) => (
+                        <div
+                          key={h.mode}
+                          style={{ left: `${h.x}%`, top: `${h.y}%` }}
+                          onPointerDown={(e) => {
+                            e.stopPropagation();
+                            startShapeDragSession(selectedShape, h.mode, e);
+                          }}
+                          title="Ecke ziehen zum Skalieren"
+                          className={`absolute -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-indigo-600 shadow-md pointer-events-auto ${h.cursor} hover:scale-125 transition-transform`}
+                        />
+                      ))}
+                    </>
+                  )}
+
+                  {/* Floating Shape Edit Toolbar */}
+                  <div
+                    style={{
+                      left: `${centerX}%`,
+                      top: `${toolbarAnchorY}%`,
+                    }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className={`absolute -translate-x-1/2 ${
+                      showBelow ? '' : '-translate-y-full'
+                    } flex flex-wrap items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900/95 text-white shadow-xl border border-slate-700/90 text-[10px] font-bold whitespace-nowrap z-40 pointer-events-auto cursor-default`}
+                  >
+                    {/* Shape Kind Switcher */}
+                    <div className="flex items-center gap-0.5 bg-white/10 rounded-lg p-0.5">
+                      {(
+                        [
+                          { id: 'line' as NotebookShapeKind, label: 'Linie', Icon: Minus },
+                          { id: 'arrow' as NotebookShapeKind, label: 'Pfeil', Icon: ArrowUpRight },
+                          { id: 'rect' as NotebookShapeKind, label: 'Kasten', Icon: Square },
+                          { id: 'ellipse' as NotebookShapeKind, label: 'Kreis', Icon: Circle },
+                        ]
+                      ).map(({ id, label, Icon }) => {
+                        const active = selectedShape.kind === id;
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleUpdateShape(selectedShape.id, { kind: id }, true);
+                            }}
+                            title={`Form ändern: ${label}`}
+                            className={`px-1.5 py-1 rounded-md flex items-center gap-1 transition-colors cursor-pointer ${
+                              active
+                                ? 'bg-indigo-600 text-white'
+                                : 'text-slate-300 hover:text-white hover:bg-white/10'
+                            }`}
+                          >
+                            <Icon className="w-3 h-3" />
+                            <span className="hidden sm:inline">{label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Fill toggle for Rect & Ellipse */}
+                    {(selectedShape.kind === 'rect' || selectedShape.kind === 'ellipse') && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUpdateShape(
+                            selectedShape.id,
+                            { filled: !selectedShape.filled },
+                            true
+                          );
+                        }}
+                        title="Farbfüllung ein-/ausschalten"
+                        className={`px-2 py-1 rounded-lg border transition-colors cursor-pointer ${
+                          selectedShape.filled
+                            ? 'bg-indigo-600 border-indigo-400 text-white'
+                            : 'bg-white/10 border-white/15 text-slate-300 hover:text-white'
+                        }`}
+                      >
+                        Füllung
+                      </button>
+                    )}
+
+                    <span className="text-slate-600">|</span>
+
+                    {/* Color Swatches */}
+                    <div className="flex items-center gap-1">
+                      {colorPalette.slice(0, 6).map((sw) => {
+                        const isColorActive =
+                          selectedShape.color.toLowerCase() === sw.color.toLowerCase();
+                        return (
+                          <button
+                            key={sw.id}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleUpdateShape(selectedShape.id, { color: sw.color }, true);
+                            }}
+                            title={`Farbe: ${sw.label}`}
+                            style={{ backgroundColor: sw.color }}
+                            className={`w-3.5 h-3.5 rounded-full border transition-transform cursor-pointer ${
+                              isColorActive
+                                ? 'border-white scale-125 ring-1 ring-indigo-400'
+                                : 'border-white/40 hover:scale-110'
+                            }`}
+                          />
+                        );
+                      })}
+                    </div>
+
+                    <span className="text-slate-600">|</span>
+
+                    {/* Stroke Width Slider */}
+                    <div className="flex items-center gap-1.5" title="Linienstärke der Form">
+                      <span className="text-slate-400">Dicke</span>
+                      <input
+                        type="range"
+                        min={selectedShape.tool === 'highlighter' ? 0.8 : 0.16}
+                        max={selectedShape.tool === 'highlighter' ? 6.0 : 2.2}
+                        step={selectedShape.tool === 'highlighter' ? 0.1 : 0.04}
+                        value={selectedShape.width}
+                        onChange={(e) => {
+                          const nextW = parseFloat(e.target.value);
+                          if (!Number.isNaN(nextW)) {
+                            handleUpdateShape(selectedShape.id, { width: nextW }, false);
+                          }
+                        }}
+                        onPointerUp={(e) => {
+                          const nextW = parseFloat((e.target as HTMLInputElement).value);
+                          if (!Number.isNaN(nextW)) {
+                            handleUpdateShape(selectedShape.id, { width: nextW }, true);
+                          }
+                        }}
+                        className="w-14 h-1.5 accent-indigo-500 cursor-pointer"
+                      />
+                    </div>
+
+                    <span className="text-slate-600">|</span>
+
+                    {/* Duplicate & Delete */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDuplicateShape(selectedShape.id);
+                      }}
+                      title="Form duplizieren (⌘D)"
+                      aria-label="Form duplizieren"
+                      className="p-1 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center cursor-pointer"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteShape(selectedShape.id);
+                      }}
+                      title="Form löschen (⌫)"
+                      aria-label="Form löschen"
+                      className="p-1 rounded bg-rose-500/80 hover:bg-rose-500 text-white flex items-center justify-center cursor-pointer"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        )}
+
+        {/* Layer 3.9: Lasso Loop Preview & Selected Strokes Interactive Bounding Box */}
+        {lassoPath.length >= 2 && (
+          <svg
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            className="absolute inset-0 w-full h-full pointer-events-none z-[29]"
+          >
+            <path
+              d={`${buildSmoothSvgPath(lassoPath)} Z`}
+              fill="rgba(79, 70, 229, 0.08)"
+              stroke="#4f46e5"
+              strokeWidth={0.35}
+              strokeDasharray="1.1 0.8"
+            />
+          </svg>
+        )}
+
+        {selectedStrokesBounds && !isLassoDrawingRef.current && (
+          <div
+            style={{
+              left: `${selectedStrokesBounds.minX}%`,
+              top: `${selectedStrokesBounds.minY}%`,
+              width: `${Math.max(2, selectedStrokesBounds.maxX - selectedStrokesBounds.minX)}%`,
+              height: `${Math.max(2, selectedStrokesBounds.maxY - selectedStrokesBounds.minY)}%`,
+            }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              try {
+                stageRef.current?.setPointerCapture(e.pointerId);
+              } catch {}
+              const idSet = new Set(selectedStrokeIds);
+              const origPointsById = new Map<string, StrokePoint[]>();
+              for (const s of latestAnnotationsRef.current.strokes) {
+                if (idSet.has(s.id)) {
+                  origPointsById.set(
+                    s.id,
+                    s.points.map((pt) => ({ ...pt }))
+                  );
+                }
+              }
+              dragStrokesRef.current = {
+                strokeIds: idSet,
+                startClientX: e.clientX,
+                startClientY: e.clientY,
+                origPointsById,
+                hasMoved: false,
+                origSnapshot: latestAnnotationsRef.current,
+              };
+            }}
+            title="Ziehen, um markierte Striche gemeinsam zu verschieben"
+            className="absolute z-[29] pointer-events-auto border-2 border-dashed border-indigo-500 bg-indigo-500/[0.06] rounded-md cursor-move"
+          >
+            {/* Floating Action Bar for Lasso Selection */}
+            <div
+              onPointerDown={(e) => e.stopPropagation()}
+              className={`absolute left-1/2 -translate-x-1/2 ${
+                selectedStrokesBounds.minY < 14 ? 'top-full mt-2' : 'bottom-full mb-2'
+              } flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900/95 text-white shadow-xl border border-slate-700/90 text-[10px] font-bold whitespace-nowrap z-40 cursor-default`}
+            >
+              <span className="text-indigo-300 tabular-nums">
+                {selectedStrokeIds.length} {selectedStrokeIds.length === 1 ? 'Strich' : 'Striche'}
+              </span>
+              <span className="text-slate-600">|</span>
+              <div className="flex items-center gap-1">
+                {PEN_COLORS.slice(0, 6).map((sw) => (
+                  <button
+                    key={sw.id}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRecolorSelectedStrokes(sw.color);
+                    }}
+                    title={`Farbe ändern: ${sw.label}`}
+                    style={{ backgroundColor: sw.color }}
+                    className="w-3.5 h-3.5 rounded-full border border-white/50 hover:scale-110 transition-transform cursor-pointer"
+                  />
+                ))}
+              </div>
+              <span className="text-slate-600">|</span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDuplicateSelectedStrokes();
+                }}
+                title="Auswahl duplizieren (⌘D)"
+                className="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 flex items-center gap-1 cursor-pointer"
+              >
+                <Copy className="w-3 h-3" />
+                <span>Duplizieren</span>
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteSelectedStrokes();
+                }}
+                title="Auswahl löschen (⌫)"
+                className="p-1 rounded bg-rose-500/80 hover:bg-rose-500 text-white flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Layer 4: Interactive Sticky Notes (Klebezettel / Post-its) */}
         <div className="absolute inset-0 z-30 pointer-events-none">
@@ -3202,6 +4889,8 @@ export const NotebookPageStage: React.FC<Props> = ({
               setSelectedImageId(null);
               setSelectedTextId(null);
               setSelectedStickerId(null);
+              setSelectedShapeId(null);
+              setSelectedStrokeIds([]);
             };
 
             return (
@@ -3269,7 +4958,7 @@ export const NotebookPageStage: React.FC<Props> = ({
                       isStickySelected && !isDrawTool ? 'ring-2 ring-indigo-500' : ''
                     }`}
                   >
-                    {/* Header Drag Bar */}
+                    {/* Header Drag Bar with Color Switcher & Duplicate */}
                     <div
                       onPointerDown={(e) => {
                         if (isDrawTool) return;
@@ -3291,11 +4980,48 @@ export const NotebookPageStage: React.FC<Props> = ({
                       }}
                       className={`px-2 py-1 ${theme.headerBg} flex items-center justify-between gap-1 cursor-grab active:cursor-grabbing`}
                     >
-                      <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider opacity-80">
-                        <GripHorizontal className="w-3.5 h-3.5" />
-                        <span>Klebezettel</span>
+                      <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider opacity-85">
+                        <GripHorizontal className="w-3.5 h-3.5 shrink-0" />
+                        <div
+                          onPointerDown={(e) => e.stopPropagation()}
+                          className="flex items-center gap-1 ml-0.5"
+                        >
+                          {(Object.keys(STICKY_NOTE_STYLES) as StickyColor[]).map((colorKey) => {
+                            const st = STICKY_NOTE_STYLES[colorKey];
+                            const active = note.color === colorKey;
+                            return (
+                              <button
+                                key={colorKey}
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  selectThisSticky();
+                                  handleStickyColorChange(note.id, colorKey);
+                                }}
+                                title={`Klebezettel-Farbe: ${st.label}`}
+                                aria-label={`Farbe ${st.label}`}
+                                className={`w-3 h-3 rounded-full ${st.pinColor} border border-black/25 transition-transform cursor-pointer ${
+                                  active ? 'scale-125 ring-1 ring-slate-900' : 'opacity-75 hover:opacity-100'
+                                }`}
+                              />
+                            );
+                          })}
+                        </div>
                       </div>
                       <div className="flex items-center gap-0.5">
+                        <button
+                          type="button"
+                          onPointerDown={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDuplicateSticky(note.id);
+                          }}
+                          title="Klebezettel duplizieren (⌘D)"
+                          aria-label="Klebezettel duplizieren"
+                          className="p-1 rounded hover:bg-black/10 transition-colors cursor-pointer"
+                        >
+                          <Copy className="w-3 h-3" />
+                        </button>
                         <button
                           type="button"
                           onPointerDown={(e) => e.stopPropagation()}
@@ -3348,7 +5074,7 @@ export const NotebookPageStage: React.FC<Props> = ({
         </div>
 
         {/* Layer 5: True-Scale Brush & Eraser Hover Circle on Mac / Desktop */}
-        {isDrawTool && (
+        {isBrushHoverTool && (
           <div
             ref={hoverCursorRef}
             aria-hidden="true"
