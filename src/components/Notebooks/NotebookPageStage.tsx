@@ -17,6 +17,8 @@ import {
 import {
   BlankPageTemplate,
   NotebookDocument,
+  NotebookEraserMode,
+  NotebookEraserTarget,
   NotebookImageElement,
   NotebookSticker,
   NotebookStickerType,
@@ -67,6 +69,9 @@ interface Props {
   penWidth: number;
   highlighterColor: string;
   highlighterWidth: number;
+  eraserMode?: NotebookEraserMode;
+  eraserWidth?: number;
+  eraserTarget?: NotebookEraserTarget;
   textColor: string;
   textSize: number;
   textBackgroundStyle: TextBoxBackgroundStyle;
@@ -207,21 +212,171 @@ function pointToSegmentDistSq(
   return (px - projX) * (px - projX) + (py - projY) * (py - projY);
 }
 
-function isPointNearStroke(pt: StrokePoint, stroke: NotebookStroke, radius: number): boolean {
+function isPointNearStroke(
+  pt: StrokePoint,
+  stroke: NotebookStroke,
+  radius: number,
+  isoYFactor: number = 0.707
+): boolean {
   const rSq = radius * radius;
   const pts = stroke.points;
+  const safeIso = isoYFactor > 0.05 ? isoYFactor : 0.707;
+  const ptScaledY = pt.y / safeIso;
   if (pts.length === 0) return false;
   if (pts.length === 1) {
     const dx = pt.x - pts[0].x;
-    const dy = pt.y - pts[0].y;
+    const dy = ptScaledY - pts[0].y / safeIso;
     return dx * dx + dy * dy <= rSq;
   }
   for (let i = 0; i < pts.length - 1; i++) {
-    if (pointToSegmentDistSq(pt.x, pt.y, pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y) <= rSq) {
+    if (
+      pointToSegmentDistSq(
+        pt.x,
+        ptScaledY,
+        pts[i].x,
+        pts[i].y / safeIso,
+        pts[i + 1].x,
+        pts[i + 1].y / safeIso
+      ) <= rSq
+    ) {
       return true;
     }
   }
   return false;
+}
+
+function interpolateStrokePoint(a: StrokePoint, b: StrokePoint, t: number): StrokePoint {
+  const clamped = Math.max(0, Math.min(1, t));
+  const x = +(a.x + (b.x - a.x) * clamped).toFixed(2);
+  const y = +(a.y + (b.y - a.y) * clamped).toFixed(2);
+  if (typeof a.p === 'number' || typeof b.p === 'number') {
+    const pa = a.p ?? 0.5;
+    const pb = b.p ?? 0.5;
+    return { x, y, p: +(pa + (pb - pa) * clamped).toFixed(2) };
+  }
+  return { x, y };
+}
+
+function eraseStrokePartially(
+  stroke: NotebookStroke,
+  center: StrokePoint,
+  eraserRadius: number,
+  isoYFactor: number = 0.707
+): { pieces: NotebookStroke[]; modified: boolean } {
+  const pts = stroke.points;
+  const safeIso = isoYFactor > 0.05 ? isoYFactor : 0.707;
+  const effectiveR = Math.max(0.35, eraserRadius);
+  const rSq = effectiveR * effectiveR;
+
+  if (!isPointNearStroke(center, stroke, effectiveR + stroke.width * 0.35, safeIso)) {
+    return { pieces: [stroke], modified: false };
+  }
+
+  if (pts.length <= 1) {
+    return { pieces: [], modified: true };
+  }
+
+  const cx = center.x;
+  const cy = center.y / safeIso;
+  const chains: StrokePoint[][] = [];
+  let currentChain: StrokePoint[] = [];
+
+  const pushPointToChain = (pt: StrokePoint) => {
+    const last = currentChain[currentChain.length - 1];
+    if (!last || Math.hypot(pt.x - last.x, (pt.y - last.y) / safeIso) > 0.03) {
+      currentChain.push(pt);
+    }
+  };
+
+  const flushChain = () => {
+    if (currentChain.length >= 2) {
+      let totalLen = 0;
+      for (let i = 0; i < currentChain.length - 1; i++) {
+        totalLen += Math.hypot(
+          currentChain[i + 1].x - currentChain[i].x,
+          (currentChain[i + 1].y - currentChain[i].y) / safeIso
+        );
+      }
+      if (totalLen >= 0.14) {
+        chains.push(currentChain);
+      }
+    }
+    currentChain = [];
+  };
+
+  for (let i = 0; i < pts.length - 1; i++) {
+    const pA = pts[i];
+    const pB = pts[i + 1];
+    const ax = pA.x - cx;
+    const ay = pA.y / safeIso - cy;
+    const bx = pB.x - cx;
+    const by = pB.y / safeIso - cy;
+    const dx = bx - ax;
+    const dy = by - ay;
+    const aCoef = dx * dx + dy * dy;
+
+    if (aCoef < 1e-7) {
+      if (ax * ax + ay * ay > rSq) {
+        pushPointToChain(pA);
+      } else {
+        flushChain();
+      }
+      continue;
+    }
+
+    const bCoef = 2 * (ax * dx + ay * dy);
+    const cCoef = ax * ax + ay * ay - rSq;
+    const disc = bCoef * bCoef - 4 * aCoef * cCoef;
+
+    if (disc <= 0) {
+      // Entire segment is outside eraser circle
+      pushPointToChain(pA);
+      pushPointToChain(pB);
+      continue;
+    }
+
+    const sqrtDisc = Math.sqrt(disc);
+    const t1 = (-bCoef - sqrtDisc) / (2 * aCoef);
+    const t2 = (-bCoef + sqrtDisc) / (2 * aCoef);
+
+    if (t2 <= 0 || t1 >= 1) {
+      // No intersection within [0, 1]
+      pushPointToChain(pA);
+      pushPointToChain(pB);
+      continue;
+    }
+
+    // Outside sub-segment before entering circle: [0, t1]
+    if (t1 > 0.001) {
+      pushPointToChain(pA);
+      pushPointToChain(interpolateStrokePoint(pA, pB, t1));
+    }
+    // We entered the eraser circle -> close current chain
+    flushChain();
+
+    // Outside sub-segment after exiting circle: [t2, 1]
+    if (t2 < 0.999) {
+      pushPointToChain(interpolateStrokePoint(pA, pB, t2));
+      pushPointToChain(pB);
+    }
+  }
+
+  flushChain();
+
+  if (chains.length === 1 && chains[0].length === pts.length) {
+    return { pieces: [stroke], modified: false };
+  }
+
+  const pieces: NotebookStroke[] = chains.map((chainPts, idx) => ({
+    ...stroke,
+    id:
+      idx === 0 && chains.length === 1
+        ? stroke.id
+        : `${stroke.id}-p${idx}-${Math.random().toString(36).slice(2, 6)}`,
+    points: chainPts,
+  }));
+
+  return { pieces, modified: true };
 }
 
 interface AutoTextItemProps {
@@ -1151,6 +1306,9 @@ export const NotebookPageStage: React.FC<Props> = ({
   penWidth,
   highlighterColor,
   highlighterWidth,
+  eraserMode = 'whole',
+  eraserWidth = 3.2,
+  eraserTarget = 'all',
   textColor,
   textSize,
   textBackgroundStyle,
@@ -1185,6 +1343,7 @@ export const NotebookPageStage: React.FC<Props> = ({
   // Active stroke drawing state
   const [draftStroke, setDraftStroke] = useState<NotebookStroke | null>(null);
   const draftStrokeRef = useRef<NotebookStroke | null>(null);
+  const hoverCursorRef = useRef<HTMLDivElement>(null);
   const activePointerIdRef = useRef<number | null>(null);
   const isDrawingRef = useRef(false);
   const isErasingRef = useRef(false);
@@ -1615,7 +1774,50 @@ export const NotebookPageStage: React.FC<Props> = ({
     []
   );
 
+  const getBrushHoverTargetOpacity = useCallback((): string => {
+    if (activeTool === 'pen') return '0.88';
+    if (activeTool === 'highlighter') return '0.52';
+    if (activeTool === 'eraser') return '0.9';
+    return '0';
+  }, [activeTool]);
+
+  const updateBrushHoverPos = useCallback(
+    (clientX: number, clientY: number, pointerType: string) => {
+      const indicator = hoverCursorRef.current;
+      const stageEl = stageRef.current;
+      if (!indicator || !stageEl) return;
+      if (!isDrawTool || pointerType === 'touch') {
+        indicator.style.opacity = '0';
+        return;
+      }
+      const rect = stageEl.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+      const xPx = clientX - rect.left;
+      const yPx = clientY - rect.top;
+      if (xPx < 0 || yPx < 0 || xPx > rect.width || yPx > rect.height) {
+        indicator.style.opacity = '0';
+        return;
+      }
+      indicator.style.transform = `translate3d(${xPx.toFixed(1)}px, ${yPx.toFixed(1)}px, 0) translate(-50%, -50%)`;
+      indicator.style.opacity = getBrushHoverTargetOpacity();
+    },
+    [isDrawTool, getBrushHoverTargetOpacity]
+  );
+
+  const hideBrushHover = useCallback(() => {
+    if (hoverCursorRef.current) {
+      hoverCursorRef.current.style.opacity = '0';
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isDrawTool && hoverCursorRef.current) {
+      hoverCursorRef.current.style.opacity = '0';
+    }
+  }, [isDrawTool]);
+
   const handleStagePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    updateBrushHoverPos(e.clientX, e.clientY, e.pointerType);
     // Only handle primary button / touch / stylus (allow Apple Pencil eraser button 5 / 32)
     const isStylusEraser = e.pointerType === 'pen' && (e.button === 5 || e.buttons === 32);
     if (e.button !== 0 && e.pointerType === 'mouse') return;
@@ -1679,13 +1881,40 @@ export const NotebookPageStage: React.FC<Props> = ({
       erasedAnyRef.current = false;
       preEraseSnapshotRef.current = latestAnnotationsRef.current;
 
-      const remaining = latestAnnotationsRef.current.strokes.filter(
-        (s) => !isPointNearStroke(pt, s, Math.max(2.2, s.width * 0.8))
-      );
-      if (remaining.length !== latestAnnotationsRef.current.strokes.length) {
+      const currentAspect = surface ? surface.width / surface.height : 0.707;
+      const radius = Math.max(0.5, eraserWidth / 2);
+      const currentStrokes = latestAnnotationsRef.current.strokes;
+      let changed = false;
+      const nextStrokes: NotebookStroke[] = [];
+
+      for (const s of currentStrokes) {
+        if (eraserTarget === 'highlighter-only' && s.tool !== 'highlighter') {
+          nextStrokes.push(s);
+          continue;
+        }
+        if (eraserMode === 'partial') {
+          const res = eraseStrokePartially(s, pt, radius, currentAspect);
+          if (res.modified) changed = true;
+          nextStrokes.push(...res.pieces);
+        } else {
+          const hit = isPointNearStroke(
+            pt,
+            s,
+            Math.max(radius, s.width * 0.55),
+            currentAspect
+          );
+          if (hit) {
+            changed = true;
+          } else {
+            nextStrokes.push(s);
+          }
+        }
+      }
+
+      if (changed) {
         erasedAnyRef.current = true;
         onCommitAnnotations(
-          { ...latestAnnotationsRef.current, strokes: remaining },
+          { ...latestAnnotationsRef.current, strokes: nextStrokes },
           false
         );
       }
@@ -1780,6 +2009,7 @@ export const NotebookPageStage: React.FC<Props> = ({
   };
 
   const handleStagePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    updateBrushHoverPos(e.clientX, e.clientY, e.pointerType);
     // Handle resizing of embedded page image first
     if (resizeImageRef.current && stageRef.current) {
       e.preventDefault();
@@ -1960,13 +2190,40 @@ export const NotebookPageStage: React.FC<Props> = ({
       e.preventDefault();
       const pt = toNormalizedPoint(e.clientX, e.clientY, e.pressure, e.pointerType);
       if (!pt) return;
-      const remaining = latestAnnotationsRef.current.strokes.filter(
-        (s) => !isPointNearStroke(pt, s, Math.max(2.2, s.width * 0.8))
-      );
-      if (remaining.length !== latestAnnotationsRef.current.strokes.length) {
+      const currentAspect = surface ? surface.width / surface.height : 0.707;
+      const radius = Math.max(0.5, eraserWidth / 2);
+      const currentStrokes = latestAnnotationsRef.current.strokes;
+      let changed = false;
+      const nextStrokes: NotebookStroke[] = [];
+
+      for (const s of currentStrokes) {
+        if (eraserTarget === 'highlighter-only' && s.tool !== 'highlighter') {
+          nextStrokes.push(s);
+          continue;
+        }
+        if (eraserMode === 'partial') {
+          const res = eraseStrokePartially(s, pt, radius, currentAspect);
+          if (res.modified) changed = true;
+          nextStrokes.push(...res.pieces);
+        } else {
+          const hit = isPointNearStroke(
+            pt,
+            s,
+            Math.max(radius, s.width * 0.55),
+            currentAspect
+          );
+          if (hit) {
+            changed = true;
+          } else {
+            nextStrokes.push(s);
+          }
+        }
+      }
+
+      if (changed) {
         erasedAnyRef.current = true;
         onCommitAnnotations(
-          { ...latestAnnotationsRef.current, strokes: remaining },
+          { ...latestAnnotationsRef.current, strokes: nextStrokes },
           false
         );
       }
@@ -2387,14 +2644,28 @@ export const NotebookPageStage: React.FC<Props> = ({
       ? 'cursor-copy'
       : 'cursor-default';
 
+  const brushDiameterPx =
+    activeTool === 'pen'
+      ? Math.max(2, (penWidth / 100) * displayWidth)
+      : activeTool === 'highlighter'
+      ? Math.max(4, (highlighterWidth / 100) * displayWidth)
+      : activeTool === 'eraser'
+      ? Math.max(6, (eraserWidth / 100) * displayWidth)
+      : 0;
+
   return (
     <div className="flex justify-center items-start min-h-full py-4 sm:py-6 px-2 sm:px-6">
       <div
         ref={stageRef}
+        onPointerEnter={(e) => updateBrushHoverPos(e.clientX, e.clientY, e.pointerType)}
         onPointerDown={handleStagePointerDown}
         onPointerMove={handleStagePointerMove}
         onPointerUp={handleStagePointerUp}
-        onPointerCancel={handleStagePointerUp}
+        onPointerCancel={(e) => {
+          hideBrushHover();
+          handleStagePointerUp(e);
+        }}
+        onPointerLeave={hideBrushHover}
         onContextMenu={(e) => {
           if (isDrawTool || pencilOnlyMode || (blockCanvasContextMenu && activeTool !== 'hand')) {
             e.preventDefault();
@@ -3075,6 +3346,40 @@ export const NotebookPageStage: React.FC<Props> = ({
             );
           })}
         </div>
+
+        {/* Layer 5: True-Scale Brush & Eraser Hover Circle on Mac / Desktop */}
+        {isDrawTool && (
+          <div
+            ref={hoverCursorRef}
+            aria-hidden="true"
+            style={{
+              left: 0,
+              top: 0,
+              width: `${brushDiameterPx}px`,
+              height: `${brushDiameterPx}px`,
+              opacity: 0,
+              transform: 'translate3d(-9999px, -9999px, 0)',
+              backgroundColor:
+                activeTool === 'pen'
+                  ? penColor
+                  : activeTool === 'highlighter'
+                  ? highlighterColor
+                  : eraserMode === 'partial'
+                  ? 'rgba(244, 63, 94, 0.22)'
+                  : 'rgba(244, 63, 94, 0.12)',
+              borderColor:
+                activeTool === 'eraser'
+                  ? 'rgba(225, 29, 72, 0.9)'
+                  : 'rgba(15, 23, 42, 0.55)',
+              borderStyle:
+                activeTool === 'eraser' && eraserMode === 'whole' ? 'dashed' : 'solid',
+              borderWidth: activeTool === 'eraser' ? '1.5px' : '1px',
+              boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.85)',
+              mixBlendMode: activeTool === 'highlighter' ? 'multiply' : 'normal',
+            }}
+            className="absolute rounded-full pointer-events-none z-50 transition-[width,height] duration-75"
+          />
+        )}
       </div>
     </div>
   );

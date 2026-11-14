@@ -22,6 +22,10 @@ export type StickyColor = 'yellow' | 'pink' | 'mint' | 'blue' | 'cream' | 'laven
 
 export type TextBoxBackgroundStyle = 'white' | 'paper' | 'transparent';
 
+export type NotebookEraserMode = 'whole' | 'partial';
+
+export type NotebookEraserTarget = 'all' | 'highlighter-only';
+
 export type NotebookStickerType =
   | 'merksatz'
   | 'wichtig'

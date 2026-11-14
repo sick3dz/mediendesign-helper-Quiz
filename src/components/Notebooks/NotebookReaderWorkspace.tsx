@@ -45,6 +45,8 @@ import {
   BlankPaperColor,
   CustomNotebookPage,
   NotebookDocument,
+  NotebookEraserMode,
+  NotebookEraserTarget,
   NotebookImageElement,
   NotebookStickerType,
   NotebookStore,
@@ -280,13 +282,16 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   // Active Tool & Sub-options (Classic GoodNotes)
   const [activeTool, setActiveTool] = useState<NotebookTool>('hand');
   const [openToolPopover, setOpenToolPopover] = useState<
-    'highlighter' | 'pen' | 'text' | 'sticky' | 'sticker' | null
+    'highlighter' | 'pen' | 'eraser' | 'text' | 'sticky' | 'sticker' | null
   >(null);
 
   const [penColor, setPenColor] = useState<string>(PEN_COLORS[0].color);
   const [penWidth, setPenWidth] = useState<number>(0.42);
   const [highlighterColor, setHighlighterColor] = useState<string>(HIGHLIGHTER_COLORS[0].color);
   const [highlighterWidth, setHighlighterWidth] = useState<number>(2.4);
+  const [eraserMode, setEraserMode] = useState<NotebookEraserMode>('whole');
+  const [eraserWidth, setEraserWidth] = useState<number>(3.2);
+  const [eraserTarget, setEraserTarget] = useState<NotebookEraserTarget>('all');
   const [textColor, setTextColor] = useState<string>(PEN_COLORS[1].color);
   const [textSize, setTextSize] = useState<number>(2.0);
   const [textBackgroundStyle, setTextBackgroundStyle] =
@@ -705,6 +710,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     if (
       tool === 'highlighter' ||
       tool === 'pen' ||
+      tool === 'eraser' ||
       tool === 'text' ||
       tool === 'sticky' ||
       tool === 'sticker'
@@ -903,6 +909,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
         const hasPopover =
           targetTool === 'highlighter' ||
           targetTool === 'pen' ||
+          targetTool === 'eraser' ||
           targetTool === 'text' ||
           targetTool === 'sticky' ||
           targetTool === 'sticker';
@@ -1390,7 +1397,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                   ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
                   : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
               }`}
-              title="Radierer für Stift & Textmarker (4)"
+              title="Radierer (4 – nochmal tippen für Ganzer Strich / Teil-Radierer & Größe)"
             >
               <Eraser className="w-4 h-4" />
               <span className="hidden md:inline">Radierer</span>
@@ -1618,25 +1625,36 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                   onSelectColor={setHighlighterColor}
                 />
                 <span className="text-slate-300 dark:text-slate-700">|</span>
-                <div className="flex items-center gap-1">
-                  {[
-                    { label: 'Schmal', w: 1.5 },
-                    { label: 'Mittel', w: 2.4 },
-                    { label: 'Breit', w: 3.8 },
-                  ].map((opt) => (
-                    <button
-                      key={opt.label}
-                      onClick={() => setHighlighterWidth(opt.w)}
-                      className={`px-2.5 py-1 rounded-lg font-semibold cursor-pointer transition-colors ${
-                        highlighterWidth === opt.w
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200'
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
+                <label className="flex items-center gap-2.5 font-semibold text-slate-600 dark:text-slate-300">
+                  <span>Dicke:</span>
+                  <input
+                    type="range"
+                    min={0.8}
+                    max={5.5}
+                    step={0.1}
+                    value={highlighterWidth}
+                    onChange={(e) => setHighlighterWidth(+Number(e.target.value).toFixed(1))}
+                    className="w-24 sm:w-32 accent-indigo-600 cursor-pointer"
+                    aria-label="Textmarker-Strichdicke"
+                  />
+                  <span
+                    className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center shrink-0 overflow-hidden"
+                    title={`Aktuelle Markerdicke: ${highlighterWidth.toFixed(1)}`}
+                  >
+                    <span
+                      className="rounded-full border border-slate-900/20 dark:border-white/30 shrink-0 transition-all duration-75"
+                      style={{
+                        width: `${Math.max(4, Math.min(26, (highlighterWidth / 100) * fitWidth * zoom))}px`,
+                        height: `${Math.max(4, Math.min(26, (highlighterWidth / 100) * fitWidth * zoom))}px`,
+                        backgroundColor: highlighterColor,
+                        opacity: 0.55,
+                      }}
+                    />
+                  </span>
+                  <span className="tabular-nums font-bold text-slate-800 dark:text-slate-100 min-w-[32px] text-right">
+                    {highlighterWidth.toFixed(1)}
+                  </span>
+                </label>
               </div>
             )}
 
@@ -1651,25 +1669,133 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                   onSelectColor={setPenColor}
                 />
                 <span className="text-slate-300 dark:text-slate-700">|</span>
-                <div className="flex items-center gap-1">
-                  {[
-                    { label: 'Fein', w: 0.28 },
-                    { label: 'Normal', w: 0.42 },
-                    { label: 'Kräftig', w: 0.72 },
-                  ].map((opt) => (
-                    <button
-                      key={opt.label}
-                      onClick={() => setPenWidth(opt.w)}
-                      className={`px-2.5 py-1 rounded-lg font-semibold cursor-pointer transition-colors ${
-                        penWidth === opt.w
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200'
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
+                <label className="flex items-center gap-2.5 font-semibold text-slate-600 dark:text-slate-300">
+                  <span>Dicke:</span>
+                  <input
+                    type="range"
+                    min={0.15}
+                    max={1.4}
+                    step={0.05}
+                    value={penWidth}
+                    onChange={(e) => setPenWidth(+Number(e.target.value).toFixed(2))}
+                    className="w-24 sm:w-32 accent-indigo-600 cursor-pointer"
+                    aria-label="Stift-Strichdicke"
+                  />
+                  <span
+                    className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center shrink-0 overflow-hidden"
+                    title={`Aktuelle Stiftdicke: ${penWidth.toFixed(2)}`}
+                  >
+                    <span
+                      className="rounded-full border border-slate-900/20 dark:border-white/30 shrink-0 transition-all duration-75"
+                      style={{
+                        width: `${Math.max(2, Math.min(22, (penWidth / 100) * fitWidth * zoom))}px`,
+                        height: `${Math.max(2, Math.min(22, (penWidth / 100) * fitWidth * zoom))}px`,
+                        backgroundColor: penColor,
+                      }}
+                    />
+                  </span>
+                  <span className="tabular-nums font-bold text-slate-800 dark:text-slate-100 min-w-[34px] text-right">
+                    {penWidth.toFixed(2)}
+                  </span>
+                </label>
+              </div>
+            )}
+
+            {openToolPopover === 'eraser' && (
+              <div className="flex flex-wrap items-center gap-3 text-xs">
+                <span className="font-semibold text-slate-600 dark:text-slate-300">
+                  Radierer-Modus:
+                </span>
+                <div
+                  className="inline-flex items-center gap-1 p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800"
+                  role="group"
+                  aria-label="Radierer-Modus"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setEraserMode('whole')}
+                    className={`px-2.5 py-1 rounded-lg font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+                      eraserMode === 'whole'
+                        ? 'bg-indigo-600 text-white shadow-2xs'
+                        : 'text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                    title="Löscht bei Berührung den gesamten zusammenhängenden Strich"
+                  >
+                    Ganzer Strich
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEraserMode('partial')}
+                    className={`px-2.5 py-1 rounded-lg font-semibold cursor-pointer transition-colors whitespace-nowrap ${
+                      eraserMode === 'partial'
+                        ? 'bg-indigo-600 text-white shadow-2xs'
+                        : 'text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                    title="Radiert präzise nur den überstrichenen Teil eines Strichs weg"
+                  >
+                    Teil-Radierer
+                  </button>
                 </div>
+
+                <span className="text-slate-300 dark:text-slate-700">|</span>
+
+                <label className="flex items-center gap-2.5 font-semibold text-slate-600 dark:text-slate-300">
+                  <span>Größe:</span>
+                  <input
+                    type="range"
+                    min={1.0}
+                    max={8.0}
+                    step={0.2}
+                    value={eraserWidth}
+                    onChange={(e) => setEraserWidth(+Number(e.target.value).toFixed(1))}
+                    className="w-24 sm:w-32 accent-indigo-600 cursor-pointer"
+                    aria-label="Radierer-Größe"
+                  />
+                  <span
+                    className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center shrink-0 overflow-hidden"
+                    title={`Aktuelle Radierer-Größe: ${eraserWidth.toFixed(1)}`}
+                  >
+                    <span
+                      className="rounded-full shrink-0 transition-all duration-75"
+                      style={{
+                        width: `${Math.max(5, Math.min(26, (eraserWidth / 100) * fitWidth * zoom))}px`,
+                        height: `${Math.max(5, Math.min(26, (eraserWidth / 100) * fitWidth * zoom))}px`,
+                        backgroundColor:
+                          eraserMode === 'partial'
+                            ? 'rgba(244, 63, 94, 0.24)'
+                            : 'rgba(244, 63, 94, 0.12)',
+                        borderColor: 'rgba(225, 29, 72, 0.85)',
+                        borderStyle: eraserMode === 'whole' ? 'dashed' : 'solid',
+                        borderWidth: '1.5px',
+                      }}
+                    />
+                  </span>
+                  <span className="tabular-nums font-bold text-slate-800 dark:text-slate-100 min-w-[30px] text-right">
+                    {eraserWidth.toFixed(1)}
+                  </span>
+                </label>
+
+                <span className="text-slate-300 dark:text-slate-700">|</span>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setEraserTarget((prev) =>
+                      prev === 'all' ? 'highlighter-only' : 'all'
+                    )
+                  }
+                  aria-pressed={eraserTarget === 'highlighter-only'}
+                  className={`px-2.5 py-1 rounded-lg font-semibold border transition-colors cursor-pointer whitespace-nowrap ${
+                    eraserTarget === 'highlighter-only'
+                      ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-700'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-transparent hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                  title="Wenn aktiv, werden nur Textmarker-Markierungen radiert und Stift-Notizen geschützt"
+                >
+                  {eraserTarget === 'highlighter-only'
+                    ? 'Nur Textmarker aktiv'
+                    : 'Nur Textmarker'}
+                </button>
               </div>
             )}
 
@@ -2863,6 +2989,9 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             penWidth={penWidth}
             highlighterColor={highlighterColor}
             highlighterWidth={highlighterWidth}
+            eraserMode={eraserMode}
+            eraserWidth={eraserWidth}
+            eraserTarget={eraserTarget}
             textColor={textColor}
             textSize={textSize}
             textBackgroundStyle={textBackgroundStyle}
@@ -2911,7 +3040,14 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                   {activeTool === 'hand' && 'Hand-Modus: Bilder, Textfelder, Klebezettel & Sticker verschieben, skalieren oder antippen.'}
                   {activeTool === 'highlighter' && `Textmarker aktiv: Direkt über wichtige Textstellen streichen. Tipp: ${shiftLabel}gedrückt halten = gerade Linie.`}
                   {activeTool === 'pen' && `Stift aktiv: Handschriftliche Notizen oder Unterstreichungen zeichnen. Tipp: ${shiftLabel}gedrückt halten = gerade Linie.`}
-                  {activeTool === 'eraser' && 'Radierer aktiv: Über unerwünschte Stift- oder Markerzüge fahren.'}
+                  {activeTool === 'eraser' &&
+                    (eraserMode === 'partial'
+                      ? `Teil-Radierer aktiv: Radiert präzise nur den überstrichenen Abschnitt weg${
+                          eraserTarget === 'highlighter-only' ? ' (nur Textmarker)' : ''
+                        }.`
+                      : `Objekt-Radierer aktiv: Entfernt bei Berührung den gesamten Strich${
+                          eraserTarget === 'highlighter-only' ? ' (nur Textmarker)' : ''
+                        }.`)}
                   {activeTool === 'text' && 'Text-Werkzeug aktiv: Auf die gewünschte Stelle tippen, um direkt Text einzugeben.'}
                   {activeTool === 'sticky' && 'Klebezettel aktiv: Tippe auf eine Textstelle, um ein Post-it anzuheften.'}
                   {activeTool === 'sticker' && 'Sticker aktiv: Tippe auf die gewünschte Stelle zum Aufkleben.'}
