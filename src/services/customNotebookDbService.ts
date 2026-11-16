@@ -836,7 +836,7 @@ export function renderBlankTemplateToDataUrl(
   const outW = isQuarter ? baseH : baseW;
   const outH = isQuarter ? baseW : baseH;
 
-  const cacheKey = `${template}::${palette.id}::${showDateHeader ? 'hdr1' : 'hdr0'}::${normalizedRot}::${outW}`;
+  const cacheKey = `${template}::${palette.id}::${showDateHeader ? 'hdr1' : 'hdr0'}::${normalizedRot}::${outW}::v2`;
   const cached = blankSurfaceCache.get(cacheKey);
   if (cached) {
     return { dataUrl: cached, width: outW, height: outH };
@@ -853,23 +853,20 @@ export function renderBlankTemplateToDataUrl(
   ctx.fillStyle = palette.bgHex;
   ctx.fillRect(0, 0, outW, outH);
 
-  ctx.save();
-  ctx.translate(outW / 2, outH / 2);
-  ctx.rotate((normalizedRot * Math.PI) / 180);
-  ctx.translate(-baseW / 2, -baseH / 2);
-
-  const linedStep = Math.round(baseW / 26); // ~47px on 1240px A4
-  const linedLeftMargin = Math.round(baseW * 0.115);
+  // Draw lined, grid, dotted & header upright across outW x outH so landscape note pages
+  // keep horizontal writing lines and an upright top Thema/Datum header.
+  const linedStep = Math.round(outW / 26);
+  const linedLeftMargin = Math.round(outW * 0.115);
 
   if (showDateHeader) {
-    const headerFontPx = Math.max(11, Math.round(baseW * 0.016));
+    const headerFontPx = Math.max(11, Math.round(outW * 0.016));
     const headerTextY = Math.round(linedStep * 1.25);
     const leftStart =
       template === 'lined'
         ? linedLeftMargin + Math.round(linedStep * 0.35)
-        : Math.round(baseW * 0.065);
-    const dateColX = Math.round(baseW * 0.7);
-    const rightEnd = Math.round(baseW * 0.935);
+        : Math.round(outW * 0.065);
+    const dateColX = Math.round(outW * 0.7);
+    const rightEnd = Math.round(outW * 0.935);
 
     ctx.save();
     ctx.font = `600 ${headerFontPx}px system-ui, -apple-system, sans-serif`;
@@ -889,9 +886,9 @@ export function renderBlankTemplateToDataUrl(
     ctx.lineWidth = 1.4;
     ctx.globalAlpha = 0.9;
     ctx.beginPath();
-    ctx.moveTo(leftStart + themaW + Math.round(baseW * 0.012), headerTextY + 2);
-    ctx.lineTo(dateColX - Math.round(baseW * 0.028), headerTextY + 2);
-    ctx.moveTo(dateColX + datumW + Math.round(baseW * 0.012), headerTextY + 2);
+    ctx.moveTo(leftStart + themaW + Math.round(outW * 0.012), headerTextY + 2);
+    ctx.lineTo(dateColX - Math.round(outW * 0.028), headerTextY + 2);
+    ctx.moveTo(dateColX + datumW + Math.round(outW * 0.012), headerTextY + 2);
     ctx.lineTo(rightEnd, headerTextY + 2);
     ctx.stroke();
 
@@ -901,11 +898,11 @@ export function renderBlankTemplateToDataUrl(
     ctx.globalAlpha = 0.65;
     ctx.beginPath();
     ctx.moveTo(
-      template === 'lined' ? 0 : Math.round(baseW * 0.055),
+      template === 'lined' ? 0 : Math.round(outW * 0.055),
       dividerY
     );
     ctx.lineTo(
-      template === 'lined' ? baseW : Math.round(baseW * 0.945),
+      template === 'lined' ? outW : Math.round(outW * 0.945),
       dividerY
     );
     ctx.stroke();
@@ -915,7 +912,7 @@ export function renderBlankTemplateToDataUrl(
   if (template === 'lined') {
     const step = linedStep;
     const topMargin = showDateHeader ? step * 2.65 : step * 2.2;
-    const bottomMargin = baseH - step * 1.4;
+    const bottomMargin = outH - step * 1.4;
     const leftMargin = linedLeftMargin;
 
     ctx.strokeStyle = palette.lineHex;
@@ -923,7 +920,7 @@ export function renderBlankTemplateToDataUrl(
     for (let y = topMargin; y <= bottomMargin; y += step) {
       ctx.beginPath();
       ctx.moveTo(0, Math.round(y) + 0.5);
-      ctx.lineTo(baseW, Math.round(y) + 0.5);
+      ctx.lineTo(outW, Math.round(y) + 0.5);
       ctx.stroke();
     }
 
@@ -932,42 +929,40 @@ export function renderBlankTemplateToDataUrl(
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(leftMargin, 0);
-    ctx.lineTo(leftMargin, baseH);
+    ctx.lineTo(leftMargin, outH);
     ctx.stroke();
   } else if (template === 'grid') {
-    const step = Math.round(baseW / 32); // crisp 5mm square feel
+    const step = Math.round(outW / 32);
     const margin = step;
     const topStart = showDateHeader ? step * 3 : margin;
 
     ctx.strokeStyle = palette.gridHex;
     ctx.lineWidth = 1.3;
-    for (let x = margin; x <= baseW - margin; x += step) {
+    for (let x = margin; x <= outW - margin; x += step) {
       ctx.beginPath();
       ctx.moveTo(Math.round(x) + 0.5, topStart);
-      ctx.lineTo(Math.round(x) + 0.5, baseH - margin);
+      ctx.lineTo(Math.round(x) + 0.5, outH - margin);
       ctx.stroke();
     }
-    for (let y = topStart; y <= baseH - margin; y += step) {
+    for (let y = topStart; y <= outH - margin; y += step) {
       ctx.beginPath();
       ctx.moveTo(margin, Math.round(y) + 0.5);
-      ctx.lineTo(baseW - margin, Math.round(y) + 0.5);
+      ctx.lineTo(outW - margin, Math.round(y) + 0.5);
       ctx.stroke();
     }
   } else if (template === 'dotted') {
-    const step = Math.round(baseW / 28);
+    const step = Math.round(outW / 28);
     const margin = Math.round(step * 1.3);
     const topStart = showDateHeader ? margin + step * 2 : margin;
     ctx.fillStyle = palette.dotHex;
-    for (let y = topStart; y <= baseH - margin; y += step) {
-      for (let x = margin; x <= baseW - margin; x += step) {
+    for (let y = topStart; y <= outH - margin; y += step) {
+      for (let x = margin; x <= outW - margin; x += step) {
         ctx.beginPath();
         ctx.arc(x, y, 1.8, 0, Math.PI * 2);
         ctx.fill();
       }
     }
   }
-
-  ctx.restore();
 
   const dataUrl = canvas.toDataURL('image/png');
   blankSurfaceCache.set(cacheKey, dataUrl);

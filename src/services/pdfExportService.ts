@@ -344,28 +344,20 @@ export async function exportNotebookAsPdf(
 function drawBlankHeaderEntriesToCanvas(
   ctx: CanvasRenderingContext2D,
   template: BlankPageTemplate,
-  rotation: number,
+  _rotation: number,
   canvasW: number,
-  canvasH: number,
+  _canvasH: number,
   headerTopic?: string,
   headerDate?: string
 ): void {
-  const normRot = ((rotation % 360) + 360) % 360;
-  const isQuarter = normRot === 90 || normRot === 270;
-  const baseW = isQuarter ? canvasH : canvasW;
-  const baseH = isQuarter ? canvasW : canvasH;
-  const metrics = getBlankHeaderLayoutMetrics(template, baseW);
+  const metrics = getBlankHeaderLayoutMetrics(template, canvasW);
 
   ctx.save();
-  ctx.translate(canvasW / 2, canvasH / 2);
-  ctx.rotate((normRot * Math.PI) / 180);
-  ctx.translate(-baseW / 2, -baseH / 2);
-
   ctx.font = `500 ${metrics.fontPx}px system-ui, -apple-system, sans-serif`;
   ctx.fillStyle = '#1e293b';
   ctx.textBaseline = 'alphabetic';
 
-  const padX = Math.max(3, baseW * 0.004);
+  const padX = Math.max(3, canvasW * 0.004);
   const clipTop = Math.max(0, metrics.textBaselineY - metrics.fontPx * 1.35);
   const clipH = metrics.fontPx * 1.75;
 

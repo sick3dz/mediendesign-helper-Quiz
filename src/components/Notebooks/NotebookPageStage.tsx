@@ -3808,17 +3808,12 @@ export const NotebookPageStage: React.FC<Props> = ({
       (customPage?.kind === 'blank' ? Boolean(customPage.showDateHeader) : false)
     : false;
 
-  const normHeaderRot = ((effectiveRotation % 360) + 360) % 360;
-  const isQuarterHeaderRot = normHeaderRot === 90 || normHeaderRot === 270;
-
   const aspectRatio = surface ? surface.width / surface.height : 0.707;
   const displayWidth = Math.max(260, Math.round(fitWidth * zoom));
   const displayHeight = Math.round(displayWidth / aspectRatio);
 
-  const headerPaperW = isQuarterHeaderRot ? displayHeight : displayWidth;
-  const headerPaperH = isQuarterHeaderRot ? displayWidth : displayHeight;
   const headerMetrics = effectiveShowDateHeader
-    ? getBlankHeaderLayoutMetrics(effectiveBlankTemplate, headerPaperW)
+    ? getBlankHeaderLayoutMetrics(effectiveBlankTemplate, displayWidth)
     : null;
 
   const allStrokes = draftStroke
@@ -3957,16 +3952,7 @@ export const NotebookPageStage: React.FC<Props> = ({
 
         {/* Layer 1.2: Editable Thema & Datum Header Fields on Blank Note Pages */}
         {effectiveShowDateHeader && headerMetrics && !isLoading && !loadError && (
-          <div
-            style={{
-              left: '50%',
-              top: '50%',
-              width: `${headerPaperW}px`,
-              height: `${headerPaperH}px`,
-              transform: `translate(-50%, -50%) rotate(${normHeaderRot}deg)`,
-            }}
-            className="absolute pointer-events-none z-[8]"
-          >
+          <div className="absolute inset-0 pointer-events-none z-[8]">
             {(() => {
               const inputH = Math.max(18, Math.round(headerMetrics.fontPx * 1.5));
               const inputTop =

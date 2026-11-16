@@ -1,11 +1,13 @@
 import {
   BlankPageTemplate,
   BlankPaperColor,
+  NotebookImageElement,
   NotebookShapeElement,
   NotebookSticker,
   NotebookStickyNote,
   NotebookStore,
   NotebookStroke,
+  NotebookTextBox,
   PageAnnotations,
 } from '../types/notebook';
 
@@ -821,3 +823,82 @@ export function searchNotebookNotes(
 
   return hits;
 }
+
+export function rotatePageAnnotations90CW(
+  annotations: PageAnnotations,
+  nextRotation: number
+): PageAnnotations {
+  const clampPct = (v: number, min = 0, max = 100) =>
+    +Math.max(min, Math.min(max, v)).toFixed(2);
+
+  const rotatedStrokes: NotebookStroke[] = (annotations.strokes || []).map((stroke) => ({
+    ...stroke,
+    points: stroke.points.map((pt) => ({
+      ...pt,
+      x: clampPct(100 - pt.y, 0, 100),
+      y: clampPct(pt.x, 0, 100),
+    })),
+  }));
+
+  const rotatedShapes: NotebookShapeElement[] = (annotations.shapes || []).map((sh) => {
+    const nx1 = clampPct(100 - sh.y1, 0, 100);
+    const ny1 = clampPct(sh.x1, 0, 100);
+    const nx2 = clampPct(100 - sh.y2, 0, 100);
+    const ny2 = clampPct(sh.x2, 0, 100);
+    if (sh.kind === 'rect' || sh.kind === 'ellipse') {
+      return {
+        ...sh,
+        x1: Math.min(nx1, nx2),
+        y1: Math.min(ny1, ny2),
+        x2: Math.max(nx1, nx2),
+        y2: Math.max(ny1, ny2),
+      };
+    }
+    return {
+      ...sh,
+      x1: nx1,
+      y1: ny1,
+      x2: nx2,
+      y2: ny2,
+    };
+  });
+
+  const rotatedImages: NotebookImageElement[] = (annotations.images || []).map((img) => ({
+    ...img,
+    x: clampPct(100 - img.y, 2, 95),
+    y: clampPct(img.x, 2, 95),
+    rotation: (((img.rotation ?? 0) + 90) % 360 + 360) % 360,
+  }));
+
+  const rotatedStickers: NotebookSticker[] = (annotations.stickers || []).map((stk) => ({
+    ...stk,
+    x: clampPct(100 - stk.y, 4, 94),
+    y: clampPct(stk.x, 4, 94),
+  }));
+
+  const rotatedStickies: NotebookStickyNote[] = (annotations.stickyNotes || []).map(
+    (note) => ({
+      ...note,
+      x: clampPct(100 - note.y, 3, 82),
+      y: clampPct(note.x, 3, 88),
+    })
+  );
+
+  const rotatedTextBoxes: NotebookTextBox[] = (annotations.textBoxes || []).map((box) => ({
+    ...box,
+    x: clampPct(100 - box.y, 3, 82),
+    y: clampPct(box.x, 3, 90),
+  }));
+
+  return {
+    ...annotations,
+    rotationOverride: nextRotation,
+    strokes: rotatedStrokes,
+    shapes: rotatedShapes,
+    images: rotatedImages,
+    stickers: rotatedStickers,
+    stickyNotes: rotatedStickies,
+    textBoxes: rotatedTextBoxes,
+  };
+}
+

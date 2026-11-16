@@ -75,6 +75,7 @@ import {
 import {
   getPageAnnotations,
   loadNotebookStore,
+  rotatePageAnnotations90CW,
   searchNotebookNotes,
 } from '../../services/notebookStorageService';
 import { getPdfThumbnailDataUrl } from '../../services/pdfRenderService';
@@ -507,7 +508,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
         : imageMeta?.defaultRotation ?? customMeta?.defaultRotation ?? 0;
     const nextRot = (currentRot + 90) % 360;
     handleCommitAnnotations(
-      { ...currentAnnotations, rotationOverride: nextRot },
+      rotatePageAnnotations90CW(currentAnnotations, nextRot),
       true
     );
   };
