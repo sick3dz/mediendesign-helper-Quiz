@@ -106,6 +106,8 @@ interface Props {
   deleteSelectionSignal?: number;
   duplicateSelectionSignal?: number;
   clearSelectionSignal?: number;
+  copySelectionSignal?: number;
+  pasteSelectionSignal?: number;
   onSelectionChange?: (hasSelection: boolean) => void;
   onCropModalOpenChange?: (isOpen: boolean) => void;
   onStylusDetected?: () => void;
@@ -901,6 +903,8 @@ interface AutoTextItemProps {
         | 'italic'
         | 'underline'
         | 'strikethrough'
+        | 'lineHeight'
+        | 'rotation'
       >
     >,
     recordHistory?: boolean
@@ -1173,7 +1177,11 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
   return (
     <div
       ref={wrapperRef}
-      style={{ left: `${box.x}%`, top: `${box.y}%` }}
+      style={{
+        left: `${box.x}%`,
+        top: `${box.y}%`,
+        transform: `rotate(${box.rotation || 0}deg)`,
+      }}
       onPointerDown={(e) => {
         if (e.shiftKey) {
           onShiftPointerDown(e);
@@ -1425,6 +1433,80 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
                   className="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-100 cursor-pointer"
                 >
                   A+
+                </button>
+              </div>
+
+              {/* Line Spacing Adjuster */}
+              <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t border-white/10">
+                <span className="text-[10px] font-bold text-slate-300">Abstand</span>
+                {(['1.0', '1.25', '1.5', '1.75', '2.0'] as const).map((lhStr) => {
+                  const val = parseFloat(lhStr);
+                  const active = (box.lineHeight || 1.4) === val;
+                  return (
+                    <button
+                      key={lhStr}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onUpdateBox({ lineHeight: val }, true);
+                      }}
+                      title={`Zeilenabstand ${lhStr}`}
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-colors cursor-pointer ${
+                        active
+                          ? 'bg-indigo-500 text-white'
+                          : 'bg-white/10 hover:bg-white/20 text-slate-200'
+                      }`}
+                    >
+                      {lhStr}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Rotation Adjuster */}
+              <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t border-white/10">
+                <span className="text-[10px] font-bold text-slate-300">Drehung</span>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const nextRot = ((box.rotation || 0) - 15 + 360) % 360;
+                    onUpdateBox({ rotation: nextRot }, true);
+                  }}
+                  title="15° gegen den Uhrzeigersinn drehen"
+                  className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-200 cursor-pointer"
+                >
+                  −15°
+                </button>
+                <span className="text-[10px] font-mono font-bold text-slate-200 tabular-nums">
+                  {box.rotation || 0}°
+                </span>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const nextRot = ((box.rotation || 0) + 15) % 360;
+                    onUpdateBox({ rotation: nextRot }, true);
+                  }}
+                  title="15° im Uhrzeigersinn drehen"
+                  className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-200 cursor-pointer"
+                >
+                  +15°
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onUpdateBox({ rotation: 0 }, true);
+                  }}
+                  title="Rotation zurücksetzen"
+                  className="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-400 hover:text-slate-200 cursor-pointer"
+                >
+                  0°
                 </button>
               </div>
 
@@ -1954,6 +2036,8 @@ export const NotebookPageStage: React.FC<Props> = ({
   deleteSelectionSignal,
   duplicateSelectionSignal,
   clearSelectionSignal,
+  copySelectionSignal,
+  pasteSelectionSignal,
   onSelectionChange,
   onCropModalOpenChange,
   onStylusDetected,
@@ -2771,6 +2855,124 @@ export const NotebookPageStage: React.FC<Props> = ({
     clearMultiSelection();
     setLassoPath([]);
   }, [clearSelectionSignal, clearMultiSelection]);
+
+  const clipboardRef = useRef<{
+    strokes: NotebookStroke[];
+    shapes: NotebookShapeElement[];
+    textBoxes: NotebookTextBox[];
+    stickyNotes: NotebookStickyNote[];
+    stickers: NotebookSticker[];
+    images: NotebookImageElement[];
+  } | null>(null);
+
+  const lastCopySignalRef = useRef<number>(copySelectionSignal ?? 0);
+  useEffect(() => {
+    const seq = copySelectionSignal ?? 0;
+    if (seq === 0 || seq === lastCopySignalRef.current) return;
+    lastCopySignalRef.current = seq;
+    const latest = latestAnnotationsRef.current;
+    const sStroke = new Set(selectedStrokeIds);
+    const sShape = new Set(selectedShapeIds);
+    const sText = new Set(selectedTextBoxIds);
+    const sSticky = new Set(selectedStickyIds);
+    const sSticker = new Set(selectedStickerIds);
+    const sImage = new Set(selectedImageIds);
+
+    clipboardRef.current = {
+      strokes: latest.strokes.filter((s) => sStroke.has(s.id)),
+      shapes: (latest.shapes || []).filter((sh) => sShape.has(sh.id)),
+      textBoxes: (latest.textBoxes || []).filter((t) => sText.has(t.id)),
+      stickyNotes: latest.stickyNotes.filter((n) => sSticky.has(n.id)),
+      stickers: latest.stickers.filter((stk) => sSticker.has(stk.id)),
+      images: (latest.images || []).filter((img) => sImage.has(img.id)),
+    };
+  }, [
+    copySelectionSignal,
+    selectedStrokeIds,
+    selectedShapeIds,
+    selectedTextBoxIds,
+    selectedStickyIds,
+    selectedStickerIds,
+    selectedImageIds,
+  ]);
+
+  const lastPasteSignalRef = useRef<number>(pasteSelectionSignal ?? 0);
+  useEffect(() => {
+    const seq = pasteSelectionSignal ?? 0;
+    if (seq === 0 || seq === lastPasteSignalRef.current) return;
+    lastPasteSignalRef.current = seq;
+    const clip = clipboardRef.current;
+    if (!clip) return;
+    const latest = latestAnnotationsRef.current;
+    const offset = 3.0;
+
+    const newStrokes: NotebookStroke[] = clip.strokes.map((s) => ({
+      ...s,
+      id: `str-p-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      points: s.points.map((pt) => ({
+        ...pt,
+        x: Math.min(96, +(pt.x + offset).toFixed(2)),
+        y: Math.min(96, +(pt.y + offset).toFixed(2)),
+      })),
+    }));
+
+    const newShapes: NotebookShapeElement[] = clip.shapes.map((sh) => ({
+      ...sh,
+      id: `shp-p-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      x1: Math.min(96, +(sh.x1 + offset).toFixed(2)),
+      y1: Math.min(96, +(sh.y1 + offset).toFixed(2)),
+      x2: Math.min(96, +(sh.x2 + offset).toFixed(2)),
+      y2: Math.min(96, +(sh.y2 + offset).toFixed(2)),
+    }));
+
+    const newTextBoxes: NotebookTextBox[] = clip.textBoxes.map((t) => ({
+      ...t,
+      id: `txt-p-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      x: Math.min(96, +(t.x + offset).toFixed(2)),
+      y: Math.min(96, +(t.y + offset).toFixed(2)),
+    }));
+
+    const newStickies: NotebookStickyNote[] = clip.stickyNotes.map((n) => ({
+      ...n,
+      id: `stk-p-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      x: Math.min(96, +(n.x + offset).toFixed(2)),
+      y: Math.min(96, +(n.y + offset).toFixed(2)),
+    }));
+
+    const newStickers: NotebookSticker[] = clip.stickers.map((stk) => ({
+      ...stk,
+      id: `stk-p-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      x: Math.min(96, +(stk.x + offset).toFixed(2)),
+      y: Math.min(96, +(stk.y + offset).toFixed(2)),
+    }));
+
+    const newImages: NotebookImageElement[] = clip.images.map((img) => ({
+      ...img,
+      id: `img-p-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      x: Math.min(96, +(img.x + offset).toFixed(2)),
+      y: Math.min(96, +(img.y + offset).toFixed(2)),
+    }));
+
+    onCommitAnnotations(
+      {
+        ...latest,
+        strokes: [...latest.strokes, ...newStrokes],
+        shapes: [...(latest.shapes || []), ...newShapes],
+        textBoxes: [...(latest.textBoxes || []), ...newTextBoxes],
+        stickyNotes: [...latest.stickyNotes, ...newStickies],
+        stickers: [...latest.stickers, ...newStickers],
+        images: [...(latest.images || []), ...newImages],
+      },
+      true
+    );
+
+    setSelectedStrokeIds(newStrokes.map((s) => s.id));
+    setSelectedShapeIds(newShapes.map((sh) => sh.id));
+    setSelectedTextBoxIds(newTextBoxes.map((t) => t.id));
+    setSelectedStickyIds(newStickies.map((n) => n.id));
+    setSelectedStickerIds(newStickers.map((stk) => stk.id));
+    setSelectedImageIds(newImages.map((img) => img.id));
+  }, [pasteSelectionSignal, onCommitAnnotations]);
 
   // Dragging state for Sticky Notes, Stickers, Text Boxes & Embedded Images
   const dragItemRef = useRef<{

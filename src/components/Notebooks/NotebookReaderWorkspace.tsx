@@ -356,6 +356,8 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const [deleteSelectionSignal, setDeleteSelectionSignal] = useState<number>(0);
   const [duplicateSelectionSignal, setDuplicateSelectionSignal] = useState<number>(0);
   const [clearSelectionSignal, setClearSelectionSignal] = useState<number>(0);
+  const [copySelectionSignal, setCopySelectionSignal] = useState<number>(0);
+  const [pasteSelectionSignal, setPasteSelectionSignal] = useState<number>(0);
   const userToggledPencilRef = useRef<boolean>(false);
   const isMac = isMacLikePlatform();
   const cmdLabel = isMac ? '⌘' : 'Strg+';
@@ -935,6 +937,22 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
       return;
     }
 
+    // Copy selected elements: Cmd+C / Ctrl+C
+    if (mod && !e.altKey && !e.shiftKey && (keyLower === 'c' || e.code === 'KeyC')) {
+      if (hasStageSelection) {
+        e.preventDefault();
+        setCopySelectionSignal((s) => s + 1);
+      }
+      return;
+    }
+
+    // Paste elements: Cmd+V / Ctrl+V
+    if (mod && !e.altKey && !e.shiftKey && (keyLower === 'v' || e.code === 'KeyV')) {
+      e.preventDefault();
+      setPasteSelectionSignal((s) => s + 1);
+      return;
+    }
+
     // Delete selected elements: Backspace / Delete (and Cmd+Backspace on Mac)
     if (
       !e.altKey &&
@@ -1434,8 +1452,9 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             </button>
           </div>
 
-          {/* Center Group: Classic GoodNotes Annotation Tools */}
+          {/* Center Group: Classic GoodNotes Annotation Tools (Structured & Grouped) */}
           <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl overflow-x-auto max-w-full">
+            {/* Group 1: Navigation & Selection */}
             <button
               onClick={() => selectTool('hand')}
               className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[38px] whitespace-nowrap shrink-0 ${
@@ -1447,6 +1466,39 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             >
               <Hand className="w-4 h-4" />
               <span className="hidden md:inline">Hand</span>
+            </button>
+
+            <button
+              onClick={() => selectTool('lasso')}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[38px] whitespace-nowrap shrink-0 ${
+                activeTool === 'lasso'
+                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+              }`}
+              title="Lasso-Auswahl: Handschrift-Striche einkreisen, verschieben, umfärben oder duplizieren (8)"
+            >
+              <Lasso className="w-4 h-4" />
+              <span className="hidden md:inline">Lasso</span>
+            </button>
+
+            <span className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1 shrink-0" />
+
+            {/* Group 2: Inking & Writing */}
+            <button
+              onClick={() => selectTool('pen')}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[38px] whitespace-nowrap shrink-0 ${
+                activeTool === 'pen'
+                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+              }`}
+              title="Freihand-Stift (3 – nochmal tippen für Farbe & Stärke)"
+            >
+              <PenTool className="w-4 h-4" />
+              <span
+                className="w-2.5 h-2.5 rounded-full border border-slate-300 shrink-0"
+                style={{ backgroundColor: penColor }}
+              />
+              <span className="hidden md:inline">Stift</span>
             </button>
 
             <button
@@ -1467,23 +1519,6 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             </button>
 
             <button
-              onClick={() => selectTool('pen')}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[38px] whitespace-nowrap shrink-0 ${
-                activeTool === 'pen'
-                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-              }`}
-              title="Freihand-Stift (3 – nochmal tippen für Farbe & Stärke)"
-            >
-              <PenTool className="w-4 h-4" />
-              <span
-                className="w-2.5 h-2.5 rounded-full border border-slate-300 shrink-0"
-                style={{ backgroundColor: penColor }}
-              />
-              <span className="hidden md:inline">Stift</span>
-            </button>
-
-            <button
               onClick={() => selectTool('eraser')}
               className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[38px] whitespace-nowrap shrink-0 ${
                 activeTool === 'eraser'
@@ -1496,19 +1531,9 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
               <span className="hidden md:inline">Radierer</span>
             </button>
 
-            <button
-              onClick={() => selectTool('lasso')}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[38px] whitespace-nowrap shrink-0 ${
-                activeTool === 'lasso'
-                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-              }`}
-              title="Lasso-Auswahl: Handschrift-Striche einkreisen, verschieben, umfärben oder duplizieren (8)"
-            >
-              <Lasso className="w-4 h-4" />
-              <span className="hidden md:inline">Lasso</span>
-            </button>
+            <span className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1 shrink-0" />
 
+            {/* Group 3: Text & Media */}
             <button
               onClick={() => selectTool('text')}
               className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[38px] whitespace-nowrap shrink-0 ${
@@ -1550,6 +1575,9 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
               <span className="hidden sm:inline">Bild</span>
             </button>
 
+            <span className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1 shrink-0" />
+
+            {/* Group 4: Notes & Stickers */}
             <button
               onClick={() => selectTool('sticky')}
               className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[38px] whitespace-nowrap shrink-0 ${
@@ -3362,6 +3390,8 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             deleteSelectionSignal={deleteSelectionSignal}
             duplicateSelectionSignal={duplicateSelectionSignal}
             clearSelectionSignal={clearSelectionSignal}
+            copySelectionSignal={copySelectionSignal}
+            pasteSelectionSignal={pasteSelectionSignal}
             onSelectionChange={setHasStageSelection}
             onCropModalOpenChange={setIsStageCropOpen}
             onStylusDetected={() => {

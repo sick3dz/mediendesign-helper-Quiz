@@ -35,6 +35,7 @@ export interface NotebookShapeElement {
   y2: number; // 0..100 (% of page height)
   filled?: boolean;
   lineStyle?: 'solid' | 'dashed' | 'dotted';
+  rotation?: number; // 0..360 degrees
   createdAt?: number;
 }
 
@@ -75,6 +76,7 @@ export interface NotebookStickyNote {
   color: StickyColor;
   text: string;
   isCollapsed: boolean;
+  rotation?: number; // 0..360 degrees
   createdAt: number;
 }
 
@@ -107,6 +109,9 @@ export interface NotebookTextBox {
   italic?: boolean;
   underline?: boolean;
   strikethrough?: boolean;
+  lineHeight?: number; // e.g. 1.0, 1.2, 1.5, 1.8, 2.0
+  align?: 'left' | 'center' | 'right';
+  rotation?: number; // 0..360 degrees
   hasBackground?: boolean;
   backgroundStyle?: TextBoxBackgroundStyle;
   createdAt: number;
@@ -120,7 +125,7 @@ export interface NotebookImageElement {
   widthPct: number; // 10..95 (% of page width)
   aspectRatio: number; // natural width / height
   opacity?: number; // 0.2..1.0 (default 1)
-  rotation?: number; // 0 | 90 | 180 | 270
+  rotation?: number; // 0 | 90 | 180 | 270 (or 0..360)
   createdAt: number;
 }
 
@@ -131,6 +136,7 @@ export interface NotebookSticker {
   y: number; // 0..100 (% of page height)
   scale?: number; // 0.5..2.0 (default 1)
   opacity?: number; // 0.2..1.0 (default 1)
+  rotation?: number; // 0..360 degrees
 }
 
 export interface PageAnnotations {
