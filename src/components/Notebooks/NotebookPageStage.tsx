@@ -19,6 +19,9 @@ import {
   ArrowUpRight,
   Square,
   Circle,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
 } from 'lucide-react';
 import {
   BlankPageTemplate,
@@ -513,10 +516,17 @@ function renderVectorShapeSvg(
     return undefined;
   };
   const dashArray = getStrokeDashArray(shape.lineStyle, shape.width);
+  const cx = (shape.x1 + shape.x2) / 2;
+  const cy = (shape.y1 + shape.y2) / 2;
+  const rot = shape.rotation ?? 0;
+  const rotTransform =
+    rot !== 0
+      ? `translate(${cx} ${cy}) scale(1 ${safeIso}) rotate(${rot}) scale(1 ${1 / safeIso}) translate(${-cx} ${-cy})`
+      : undefined;
 
   if (shape.kind === 'line') {
     return (
-      <g key={shape.id}>
+      <g key={shape.id} transform={rotTransform}>
         <line
           x1={shape.x1}
           y1={shape.y1}
@@ -559,7 +569,7 @@ function renderVectorShapeSvg(
     const headPoints = `${w1x},${w1y} ${shape.x2},${shape.y2} ${w2x},${w2y}`;
 
     return (
-      <g key={shape.id}>
+      <g key={shape.id} transform={rotTransform}>
         <line
           x1={shape.x1}
           y1={shape.y1}
@@ -621,7 +631,7 @@ function renderVectorShapeSvg(
     const h = Math.max(0.2, Math.abs(shape.y2 - shape.y1));
 
     return (
-      <g key={shape.id}>
+      <g key={shape.id} transform={rotTransform}>
         <rect
           x={minX}
           y={minY}
@@ -655,13 +665,11 @@ function renderVectorShapeSvg(
   }
 
   // 'ellipse'
-  const cx = (shape.x1 + shape.x2) / 2;
-  const cy = (shape.y1 + shape.y2) / 2;
   const rx = Math.max(0.1, Math.abs(shape.x2 - shape.x1) / 2);
   const ry = Math.max(0.1, Math.abs(shape.y2 - shape.y1) / 2);
 
   return (
-    <g key={shape.id}>
+    <g key={shape.id} transform={rotTransform}>
       <ellipse
         cx={cx}
         cy={cy}
@@ -891,6 +899,11 @@ interface AutoTextItemProps {
   onFocusBox: () => void;
   onClearAutoFocus: () => void;
   onStartDrag: (e: React.PointerEvent<HTMLElement>) => void;
+  onStartRotate: (
+    e: React.PointerEvent<HTMLElement>,
+    centerClientX: number,
+    centerClientY: number
+  ) => void;
   onUpdateBox: (
     patch: Partial<
       Pick<
@@ -904,6 +917,7 @@ interface AutoTextItemProps {
         | 'underline'
         | 'strikethrough'
         | 'lineHeight'
+        | 'align'
         | 'rotation'
       >
     >,
@@ -913,6 +927,15 @@ interface AutoTextItemProps {
   onDuplicate: () => void;
   onDelete: () => void;
   onBlurBox: () => void;
+  onSyncActiveFormatBridge?: (
+    bridge: {
+      boxId: string;
+      activeStyle: ResolvedTextStyle;
+      applyFormatPatch: (patch: Partial<ResolvedTextStyle>) => void;
+      onBeforeNativeColorPicker: () => void;
+      onAfterNativeColorPicker: () => void;
+    } | null
+  ) => void;
 }
 
 const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
@@ -928,11 +951,12 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
   onFocusBox,
   onClearAutoFocus,
   onStartDrag,
+  onStartRotate,
   onUpdateBox,
-  onToggleBackground,
   onDuplicate,
   onDelete,
   onBlurBox,
+  onSyncActiveFormatBridge,
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -942,8 +966,6 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
   const savedOffsetsRef = useRef<{ start: number; end: number; hasSelection: boolean } | null>(null);
   const pendingStyleOverrideRef = useRef<ResolvedTextStyle | null>(null);
 
-  const [isFormatOpen, setIsFormatOpen] = useState<boolean>(false);
-  const [isFocused, setIsFocused] = useState<boolean>(false);
   const [activeTypingStyle, setActiveTypingStyle] = useState<ResolvedTextStyle>(() =>
     getBoxBaseStyle(box)
   );
@@ -980,12 +1002,6 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
       }
     }
   }, [box]);
-
-  useEffect(() => {
-    if (!isSelected && !isFocused) {
-      setIsFormatOpen(false);
-    }
-  }, [isSelected, isFocused]);
 
   useEffect(() => {
     if (autoFocus && editorRef.current) {
@@ -1036,7 +1052,13 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
         el.focus();
       }
 
-      const offsets = getSelectionOffsetsInElement(el) ?? savedOffsetsRef.current;
+      const liveOffsets = getSelectionOffsetsInElement(el);
+      const offsets =
+        liveOffsets && liveOffsets.hasSelection
+          ? liveOffsets
+          : savedOffsetsRef.current && savedOffsetsRef.current.hasSelection
+          ? savedOffsetsRef.current
+          : liveOffsets ?? savedOffsetsRef.current;
       const base = getBoxBaseStyle(box);
       const currentRuns = getEffectiveRuns(box);
 
@@ -1075,6 +1097,40 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
             : activeTypingStyle.strikethrough,
       };
 
+      // If no sub-range is selected and the box already contains text, apply the style change to the whole box so clicking top bar buttons works immediately
+      if (box.text && currentRuns.length > 0) {
+        const nextRuns = applyStyleToRange(
+          currentRuns,
+          0,
+          box.text.length,
+          patch,
+          nextStyle
+        );
+        const nextText = nextRuns.map((r) => r.text).join('');
+        const nextSig = `${serializeRunsSignature(nextRuns, nextStyle)}|${nextText}`;
+        renderRunsIntoElement(el, nextRuns, nextStyle);
+        const caret = offsets ? Math.min(offsets.end, nextText.length) : nextText.length;
+        if (!isPickingNativeColorRef.current) {
+          restoreSelectionOffsetsInElement(el, caret, caret);
+        }
+        lastSyncedSigRef.current = nextSig;
+        pendingStyleOverrideRef.current = nextStyle;
+        setActiveTypingStyle(nextStyle);
+        onUpdateBox(
+          {
+            text: nextText,
+            runs: nextRuns,
+            color: nextStyle.color,
+            bold: nextStyle.bold,
+            italic: nextStyle.italic,
+            underline: nextStyle.underline,
+            strikethrough: nextStyle.strikethrough,
+          },
+          !isPickingNativeColorRef.current
+        );
+        return;
+      }
+
       const caret = offsets ? offsets.start : box.text.length;
       pendingStyleOverrideRef.current = nextStyle;
       setActiveTypingStyle(nextStyle);
@@ -1106,6 +1162,56 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
     },
     [activeTypingStyle, box, onUpdateBox]
   );
+
+  const handleBeforeNativeColorPicker = useCallback(() => {
+    isPickingNativeColorRef.current = true;
+    const el = editorRef.current;
+    if (el) {
+      const off = getSelectionOffsetsInElement(el);
+      if (off) savedOffsetsRef.current = off;
+    }
+  }, []);
+
+  const handleAfterNativeColorPicker = useCallback(() => {
+    isPickingNativeColorRef.current = false;
+    requestAnimationFrame(() => {
+      const el = editorRef.current;
+      if (!el || !isSelected) return;
+      el.focus();
+      const saved = savedOffsetsRef.current;
+      if (!saved) return;
+      if (saved.hasSelection) {
+        restoreSelectionOffsetsInElement(el, saved.start, saved.end);
+      } else if (pendingStyleOverrideRef.current) {
+        renderRunsIntoElement(el, getEffectiveRuns(box), getBoxBaseStyle(box), {
+          offset: saved.start,
+          style: pendingStyleOverrideRef.current,
+        });
+      }
+    });
+  }, [box, isSelected]);
+
+  useEffect(() => {
+    if (!onSyncActiveFormatBridge) return;
+    if (isSelected && !isMultiSelected) {
+      onSyncActiveFormatBridge({
+        boxId: box.id,
+        activeStyle: activeTypingStyle,
+        applyFormatPatch,
+        onBeforeNativeColorPicker: handleBeforeNativeColorPicker,
+        onAfterNativeColorPicker: handleAfterNativeColorPicker,
+      });
+    }
+  }, [
+    isSelected,
+    isMultiSelected,
+    box.id,
+    activeTypingStyle,
+    applyFormatPatch,
+    handleBeforeNativeColorPicker,
+    handleAfterNativeColorPicker,
+    onSyncActiveFormatBridge,
+  ]);
 
   const handleInput = () => {
     const el = editorRef.current;
@@ -1167,12 +1273,9 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
 
   const bgStyle: TextBoxBackgroundStyle =
     box.backgroundStyle ?? ((box.hasBackground ?? true) ? 'white' : 'transparent');
-  const isNearTopEdge = box.y < 20;
-  const hasAnyFormatting =
-    activeTypingStyle.bold ||
-    activeTypingStyle.italic ||
-    activeTypingStyle.underline ||
-    activeTypingStyle.strikethrough;
+  const currentLineHeight = box.lineHeight ?? 1.35;
+  const currentAlign = box.align ?? 'left';
+  const currentRotation = Math.round(box.rotation ?? 0);
 
   return (
     <div
@@ -1180,7 +1283,8 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
       style={{
         left: `${box.x}%`,
         top: `${box.y}%`,
-        transform: `rotate(${box.rotation || 0}deg)`,
+        transform: `rotate(${currentRotation}deg)`,
+        transformOrigin: 'center center',
       }}
       onPointerDown={(e) => {
         if (e.shiftKey) {
@@ -1199,11 +1303,11 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
         isDrawTool ? 'pointer-events-none opacity-95' : 'pointer-events-auto'
       }`}
     >
-      {/* Compact Floating Mini Toolbar on select/hover (hidden when part of multi-selection) */}
+      {/* Slim Non-Overlapping Top Drag & Quick Action Pill (All Formatting is in the Top Bar!) */}
       {!isDrawTool && !isMultiSelected && (
         <div
-          className={`absolute -top-7 left-0 flex items-center gap-0.5 px-1.5 py-0.5 rounded-t-lg bg-slate-900/95 text-white shadow-md transition-opacity z-20 ${
-            isSelected || isFormatOpen
+          className={`absolute -top-6 left-0 flex items-center gap-0.5 px-1 py-0.5 rounded-t-md bg-slate-900/90 text-white shadow-sm transition-opacity z-20 ${
+            isSelected
               ? 'opacity-100'
               : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'
           }`}
@@ -1216,39 +1320,14 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
                 onShiftPointerDown(e);
                 return;
               }
+              onSelect();
               onStartDrag(e);
             }}
             title="Textfeld verschieben"
             aria-label="Textfeld verschieben"
-            className="p-1 rounded hover:bg-white/15 cursor-grab active:cursor-grabbing flex items-center"
+            className="px-1 py-0.5 rounded hover:bg-white/15 cursor-grab active:cursor-grabbing flex items-center gap-0.5"
           >
             <GripHorizontal className="w-3.5 h-3.5" />
-          </button>
-
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsFormatOpen((prev) => !prev);
-            }}
-            title="Schriftformat & Farbe ein-/ausklappen"
-            aria-expanded={isFormatOpen}
-            className={`px-1.5 py-0.5 rounded flex items-center gap-1 text-[11px] font-bold cursor-pointer transition-colors ${
-              isFormatOpen || hasAnyFormatting
-                ? 'bg-indigo-600 text-white'
-                : 'hover:bg-white/15 text-white'
-            }`}
-          >
-            <span>Aa</span>
-            <span
-              className="w-2 h-2 rounded-full border border-white/60 shrink-0"
-              style={{ backgroundColor: activeTypingStyle.color }}
-            />
-            <ChevronDown
-              className={`w-3 h-3 transition-transform ${isFormatOpen ? 'rotate-180' : ''}`}
-            />
           </button>
 
           <button
@@ -1261,9 +1340,9 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
             }}
             title="Textfeld duplizieren (⌘D)"
             aria-label="Textfeld duplizieren"
-            className="p-1 rounded hover:bg-white/15 text-white cursor-pointer"
+            className="p-0.5 rounded hover:bg-white/15 text-white cursor-pointer"
           >
-            <Copy className="w-3.5 h-3.5" />
+            <Copy className="w-3 h-3" />
           </button>
 
           <button
@@ -1276,281 +1355,10 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
             }}
             title="Textfeld löschen"
             aria-label="Textfeld löschen"
-            className="p-1 rounded hover:bg-rose-500/80 text-white cursor-pointer"
+            className="p-0.5 rounded hover:bg-rose-500/80 text-white cursor-pointer"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-3 h-3" />
           </button>
-
-          {/* Collapsible Aa Format Popover */}
-          {isFormatOpen && (
-            <div
-              onMouseDown={(e) => e.preventDefault()}
-              onPointerDown={(e) => e.stopPropagation()}
-              className={`absolute left-0 ${
-                isNearTopEdge ? 'top-full mt-1.5' : 'bottom-full mb-1.5'
-              } p-2 rounded-xl bg-slate-900/95 border border-slate-700/90 shadow-xl flex flex-col gap-2 min-w-[264px] z-30`}
-            >
-              <div className="flex items-center justify-between gap-1">
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      applyFormatPatch({ bold: !activeTypingStyle.bold });
-                    }}
-                    title="Fett (⌘B)"
-                    aria-label="Fett"
-                    aria-pressed={activeTypingStyle.bold}
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer transition-colors ${
-                      activeTypingStyle.bold
-                        ? 'bg-indigo-500 text-white'
-                        : 'bg-white/10 hover:bg-white/20 text-slate-100'
-                    }`}
-                  >
-                    <Bold className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      applyFormatPatch({ italic: !activeTypingStyle.italic });
-                    }}
-                    title="Kursiv (⌘I)"
-                    aria-label="Kursiv"
-                    aria-pressed={activeTypingStyle.italic}
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer transition-colors ${
-                      activeTypingStyle.italic
-                        ? 'bg-indigo-500 text-white'
-                        : 'bg-white/10 hover:bg-white/20 text-slate-100'
-                    }`}
-                  >
-                    <Italic className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      applyFormatPatch({ underline: !activeTypingStyle.underline });
-                    }}
-                    title="Unterstrichen (⌘U)"
-                    aria-label="Unterstrichen"
-                    aria-pressed={activeTypingStyle.underline}
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer transition-colors ${
-                      activeTypingStyle.underline
-                        ? 'bg-indigo-500 text-white'
-                        : 'bg-white/10 hover:bg-white/20 text-slate-100'
-                    }`}
-                  >
-                    <Underline className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      applyFormatPatch({ strikethrough: !activeTypingStyle.strikethrough });
-                    }}
-                    title="Durchgestrichen (⇧⌘X)"
-                    aria-label="Durchgestrichen"
-                    aria-pressed={activeTypingStyle.strikethrough}
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer transition-colors ${
-                      activeTypingStyle.strikethrough
-                        ? 'bg-indigo-500 text-white'
-                        : 'bg-white/10 hover:bg-white/20 text-slate-100'
-                    }`}
-                  >
-                    <Strikethrough className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                <button
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleBackground();
-                  }}
-                  title="Hintergrund wechseln (Weiß / Papier-Ton / Transparent)"
-                  className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-100 cursor-pointer whitespace-nowrap"
-                >
-                  {bgStyle === 'white'
-                    ? 'Weiß'
-                    : bgStyle === 'paper'
-                    ? 'Papier'
-                    : 'Transp.'}
-                </button>
-              </div>
-
-              {/* Font Size Adjuster for existing Text Box */}
-              <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t border-white/10">
-                <span className="text-[10px] font-bold text-slate-300">Größe</span>
-                <button
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const nextSize = +Math.max(1.2, box.fontSize - 0.2).toFixed(1);
-                    onUpdateBox({ fontSize: nextSize }, true);
-                  }}
-                  title="Schrift verkleinern"
-                  className="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-100 cursor-pointer"
-                >
-                  A−
-                </button>
-                <input
-                  type="range"
-                  min={1.2}
-                  max={4.0}
-                  step={0.1}
-                  value={box.fontSize}
-                  onPointerDown={(e) => e.stopPropagation()}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    onUpdateBox({ fontSize: parseFloat(e.target.value) }, false);
-                  }}
-                  onPointerUp={(e) => {
-                    e.stopPropagation();
-                    onUpdateBox({ fontSize: box.fontSize }, true);
-                  }}
-                  aria-label="Schriftgröße dieses Textfelds"
-                  className="w-24 h-1.5 accent-indigo-500 cursor-pointer"
-                />
-                <span className="text-[10px] font-mono font-bold text-slate-200 tabular-nums min-w-[24px] text-right">
-                  {box.fontSize.toFixed(1)}
-                </span>
-                <button
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const nextSize = +Math.min(4.0, box.fontSize + 0.2).toFixed(1);
-                    onUpdateBox({ fontSize: nextSize }, true);
-                  }}
-                  title="Schrift vergrößern"
-                  className="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-100 cursor-pointer"
-                >
-                  A+
-                </button>
-              </div>
-
-              {/* Line Spacing Adjuster */}
-              <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t border-white/10">
-                <span className="text-[10px] font-bold text-slate-300">Abstand</span>
-                {(['1.0', '1.25', '1.5', '1.75', '2.0'] as const).map((lhStr) => {
-                  const val = parseFloat(lhStr);
-                  const active = (box.lineHeight || 1.4) === val;
-                  return (
-                    <button
-                      key={lhStr}
-                      type="button"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onUpdateBox({ lineHeight: val }, true);
-                      }}
-                      title={`Zeilenabstand ${lhStr}`}
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-colors cursor-pointer ${
-                        active
-                          ? 'bg-indigo-500 text-white'
-                          : 'bg-white/10 hover:bg-white/20 text-slate-200'
-                      }`}
-                    >
-                      {lhStr}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Rotation Adjuster */}
-              <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t border-white/10">
-                <span className="text-[10px] font-bold text-slate-300">Drehung</span>
-                <button
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const nextRot = ((box.rotation || 0) - 15 + 360) % 360;
-                    onUpdateBox({ rotation: nextRot }, true);
-                  }}
-                  title="15° gegen den Uhrzeigersinn drehen"
-                  className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-200 cursor-pointer"
-                >
-                  −15°
-                </button>
-                <span className="text-[10px] font-mono font-bold text-slate-200 tabular-nums">
-                  {box.rotation || 0}°
-                </span>
-                <button
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const nextRot = ((box.rotation || 0) + 15) % 360;
-                    onUpdateBox({ rotation: nextRot }, true);
-                  }}
-                  title="15° im Uhrzeigersinn drehen"
-                  className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-200 cursor-pointer"
-                >
-                  +15°
-                </button>
-                <button
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onUpdateBox({ rotation: 0 }, true);
-                  }}
-                  title="Rotation zurücksetzen"
-                  className="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-400 hover:text-slate-200 cursor-pointer"
-                >
-                  0°
-                </button>
-              </div>
-
-              <div className="flex flex-col gap-1 pt-1.5 border-t border-white/10">
-                <ScrollableColorStrip
-                  variant="floating"
-                  preserveTextFocus
-                  selectedColor={activeTypingStyle.color}
-                  onSelectColor={(color) => applyFormatPatch({ color })}
-                  onBeforeNativeColorPicker={() => {
-                    isPickingNativeColorRef.current = true;
-                    const el = editorRef.current;
-                    if (el) {
-                      const off = getSelectionOffsetsInElement(el);
-                      if (off) savedOffsetsRef.current = off;
-                    }
-                  }}
-                  onAfterNativeColorPicker={() => {
-                    isPickingNativeColorRef.current = false;
-                    requestAnimationFrame(() => {
-                      const el = editorRef.current;
-                      if (!el || !isSelected) return;
-                      el.focus();
-                      const saved = savedOffsetsRef.current;
-                      if (!saved) return;
-                      if (saved.hasSelection) {
-                        restoreSelectionOffsetsInElement(el, saved.start, saved.end);
-                      } else if (pendingStyleOverrideRef.current) {
-                        renderRunsIntoElement(
-                          el,
-                          getEffectiveRuns(box),
-                          getBoxBaseStyle(box),
-                          {
-                            offset: saved.start,
-                            style: pendingStyleOverrideRef.current,
-                          }
-                        );
-                      }
-                    });
-                  }}
-                />
-              </div>
-            </div>
-          )}
         </div>
       )}
 
@@ -1558,8 +1366,12 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
         {!box.text && (
           <span
             aria-hidden="true"
-            style={{ fontSize: `${fontSizePx}px`, lineHeight: 1.35 }}
-            className="pointer-events-none select-none absolute left-2 top-1 text-slate-400/75 font-medium"
+            style={{
+              fontSize: `${fontSizePx}px`,
+              lineHeight: currentLineHeight,
+              textAlign: currentAlign,
+            }}
+            className="pointer-events-none select-none absolute inset-x-2 top-1 text-slate-400/75 font-medium"
           >
             Text tippen...
           </span>
@@ -1574,7 +1386,6 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
           onFocus={() => {
             if (isMultiSelected) return;
             isFocusedRef.current = true;
-            setIsFocused(true);
             onSelect();
             onFocusBox();
             syncCursorStyle(false);
@@ -1588,7 +1399,9 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
             e.stopPropagation();
             if (isMultiSelected) {
               onStartDrag(e);
+              return;
             }
+            onSelect();
           }}
           onMouseUp={() => syncCursorStyle(true)}
           onKeyDown={(e) => {
@@ -1620,7 +1433,6 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
               return;
             }
             if (e.key === 'Enter' && !e.shiftKey) {
-              // Insert clean single line break instead of unpredictable browser div blocks when needed
               e.stopPropagation();
             }
           }}
@@ -1648,16 +1460,16 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
               return;
             }
             isFocusedRef.current = false;
-            setIsFocused(false);
             pendingStyleOverrideRef.current = null;
             onBlurBox();
           }}
           style={{
             color: box.color,
             fontSize: `${fontSizePx}px`,
-            lineHeight: 1.35,
+            lineHeight: currentLineHeight,
+            textAlign: currentAlign,
             minWidth: `${Math.max(120, fontSizePx * 7)}px`,
-            minHeight: `${Math.max(24, Math.round(fontSizePx * 1.35 + 8))}px`,
+            minHeight: `${Math.max(24, Math.round(fontSizePx * currentLineHeight + 8))}px`,
             WebkitUserSelect: isDrawTool || isMultiSelected ? 'none' : 'text',
             userSelect: isDrawTool || isMultiSelected ? 'none' : 'text',
             ...(bgStyle === 'paper'
@@ -1682,6 +1494,50 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
           }`}
         />
       </div>
+
+      {/* Bottom Free-Rotation Drag Handle ("unten freies drehen") */}
+      {isSelected && !isDrawTool && !isMultiSelected && (
+        <div
+          onMouseDown={(e) => e.preventDefault()}
+          onPointerDown={(e) => e.stopPropagation()}
+          className="absolute -bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center z-30 select-none"
+        >
+          <div className="w-0.5 h-2.5 bg-indigo-500/80" />
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onPointerDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const el = wrapperRef.current;
+                if (!el) return;
+                const r = el.getBoundingClientRect();
+                onStartRotate(e, r.left + r.width / 2, r.top + r.height / 2);
+              }}
+              title="Mit der Maus ziehen zum freien Drehen (Shift halten für 15°-Schritte)"
+              aria-label="Textfeld frei drehen"
+              className="w-6 h-6 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-md border-2 border-white flex items-center justify-center cursor-grab active:cursor-grabbing transition-transform hover:scale-110"
+            >
+              <RotateCw className="w-3 h-3" />
+            </button>
+            {currentRotation !== 0 && (
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onUpdateBox({ rotation: 0 }, true);
+                }}
+                title="Drehung auf 0° zurücksetzen"
+                className="px-1.5 py-0.5 rounded-full bg-slate-900/90 hover:bg-indigo-600 text-white text-[10px] font-mono font-bold shadow-sm cursor-pointer"
+              >
+                {currentRotation}°
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -2284,7 +2140,19 @@ export const NotebookPageStage: React.FC<Props> = ({
     (
       id: string,
       patch: Partial<
-        Pick<NotebookShapeElement, 'kind' | 'color' | 'width' | 'filled' | 'lineStyle' | 'x1' | 'y1' | 'x2' | 'y2'>
+        Pick<
+          NotebookShapeElement,
+          | 'kind'
+          | 'color'
+          | 'width'
+          | 'filled'
+          | 'lineStyle'
+          | 'x1'
+          | 'y1'
+          | 'x2'
+          | 'y2'
+          | 'rotation'
+        >
       >,
       recordHistory: boolean = true
     ) => {
@@ -2878,6 +2746,12 @@ export const NotebookPageStage: React.FC<Props> = ({
     const sSticker = new Set(selectedStickerIds);
     const sImage = new Set(selectedImageIds);
 
+    if (selectedShapeId) sShape.add(selectedShapeId);
+    if (selectedTextId) sText.add(selectedTextId);
+    if (selectedStickyId) sSticky.add(selectedStickyId);
+    if (selectedStickerId) sSticker.add(selectedStickerId);
+    if (selectedImageId) sImage.add(selectedImageId);
+
     clipboardRef.current = {
       strokes: latest.strokes.filter((s) => sStroke.has(s.id)),
       shapes: (latest.shapes || []).filter((sh) => sShape.has(sh.id)),
@@ -2894,6 +2768,11 @@ export const NotebookPageStage: React.FC<Props> = ({
     selectedStickyIds,
     selectedStickerIds,
     selectedImageIds,
+    selectedShapeId,
+    selectedTextId,
+    selectedStickyId,
+    selectedStickerId,
+    selectedImageId,
   ]);
 
   const lastPasteSignalRef = useRef<number>(pasteSelectionSignal ?? 0);
@@ -2903,6 +2782,15 @@ export const NotebookPageStage: React.FC<Props> = ({
     lastPasteSignalRef.current = seq;
     const clip = clipboardRef.current;
     if (!clip) return;
+    const totalInClip =
+      clip.strokes.length +
+      clip.shapes.length +
+      clip.textBoxes.length +
+      clip.stickyNotes.length +
+      clip.stickers.length +
+      clip.images.length;
+    if (totalInClip === 0) return;
+
     const latest = latestAnnotationsRef.current;
     const offset = 3.0;
 
@@ -2930,6 +2818,7 @@ export const NotebookPageStage: React.FC<Props> = ({
       id: `txt-p-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       x: Math.min(96, +(t.x + offset).toFixed(2)),
       y: Math.min(96, +(t.y + offset).toFixed(2)),
+      runs: t.runs ? t.runs.map((r) => ({ ...r })) : undefined,
     }));
 
     const newStickies: NotebookStickyNote[] = clip.stickyNotes.map((n) => ({
@@ -2966,13 +2855,27 @@ export const NotebookPageStage: React.FC<Props> = ({
       true
     );
 
-    setSelectedStrokeIds(newStrokes.map((s) => s.id));
-    setSelectedShapeIds(newShapes.map((sh) => sh.id));
-    setSelectedTextBoxIds(newTextBoxes.map((t) => t.id));
-    setSelectedStickyIds(newStickies.map((n) => n.id));
-    setSelectedStickerIds(newStickers.map((stk) => stk.id));
-    setSelectedImageIds(newImages.map((img) => img.id));
-  }, [pasteSelectionSignal, onCommitAnnotations]);
+    if (totalInClip === 1 && newStrokes.length === 0) {
+      clearMultiSelection();
+      setSelectedShapeId(newShapes[0]?.id ?? null);
+      setSelectedTextId(newTextBoxes[0]?.id ?? null);
+      setSelectedStickyId(newStickies[0]?.id ?? null);
+      setSelectedStickerId(newStickers[0]?.id ?? null);
+      setSelectedImageId(newImages[0]?.id ?? null);
+    } else {
+      setSelectedShapeId(null);
+      setSelectedTextId(null);
+      setSelectedStickyId(null);
+      setSelectedStickerId(null);
+      setSelectedImageId(null);
+      setSelectedStrokeIds(newStrokes.map((s) => s.id));
+      setSelectedShapeIds(newShapes.map((sh) => sh.id));
+      setSelectedTextBoxIds(newTextBoxes.map((t) => t.id));
+      setSelectedStickyIds(newStickies.map((n) => n.id));
+      setSelectedStickerIds(newStickers.map((stk) => stk.id));
+      setSelectedImageIds(newImages.map((img) => img.id));
+    }
+  }, [pasteSelectionSignal, onCommitAnnotations, clearMultiSelection]);
 
   // Dragging state for Sticky Notes, Stickers, Text Boxes & Embedded Images
   const dragItemRef = useRef<{
@@ -2985,6 +2888,74 @@ export const NotebookPageStage: React.FC<Props> = ({
     hasMoved: boolean;
     origSnapshot: PageAnnotations;
   } | null>(null);
+
+  // Free mouse rotation state for Text Boxes, Stickers, Shapes & Embedded Images
+  const rotateItemRef = useRef<{
+    kind: 'text' | 'sticker' | 'shape' | 'image';
+    id: string;
+    centerClientX: number;
+    centerClientY: number;
+    startPointerAngleDeg: number;
+    origRotation: number;
+    hasRotated: boolean;
+    origSnapshot: PageAnnotations;
+  } | null>(null);
+
+  const startRotateSession = useCallback(
+    (
+      kind: 'text' | 'sticker' | 'shape' | 'image',
+      id: string,
+      origRotation: number,
+      centerClientX: number,
+      centerClientY: number,
+      e: React.PointerEvent<Element>
+    ) => {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        stageRef.current?.setPointerCapture(e.pointerId);
+      } catch {}
+      const startPointerAngleDeg =
+        (Math.atan2(e.clientY - centerClientY, e.clientX - centerClientX) * 180) / Math.PI;
+      rotateItemRef.current = {
+        kind,
+        id,
+        centerClientX,
+        centerClientY,
+        startPointerAngleDeg,
+        origRotation,
+        hasRotated: false,
+        origSnapshot: latestAnnotationsRef.current,
+      };
+    },
+    []
+  );
+
+  const activeTextBridgeRef = useRef<{
+    boxId: string;
+    activeStyle: ResolvedTextStyle;
+    applyFormatPatch: (patch: Partial<ResolvedTextStyle>) => void;
+    onBeforeNativeColorPicker: () => void;
+    onAfterNativeColorPicker: () => void;
+  } | null>(null);
+  const [selectedTextActiveStyle, setSelectedTextActiveStyle] =
+    useState<ResolvedTextStyle | null>(null);
+
+  const handleSyncActiveFormatBridge = useCallback(
+    (
+      bridge: {
+        boxId: string;
+        activeStyle: ResolvedTextStyle;
+        applyFormatPatch: (patch: Partial<ResolvedTextStyle>) => void;
+        onBeforeNativeColorPicker: () => void;
+        onAfterNativeColorPicker: () => void;
+      } | null
+    ) => {
+      activeTextBridgeRef.current = bridge;
+      setSelectedTextActiveStyle(bridge ? bridge.activeStyle : null);
+    },
+    []
+  );
 
   // Dragging & endpoint/corner resizing state for Vector Shapes
   const dragShapeRef = useRef<{
@@ -3933,6 +3904,76 @@ export const NotebookPageStage: React.FC<Props> = ({
       return;
     }
 
+      // Handle free mouse rotation of Text Boxes, Stickers, Shapes, or Embedded Images
+    if (rotateItemRef.current) {
+      e.preventDefault();
+      const session = rotateItemRef.current;
+      const currentAngleDeg =
+        (Math.atan2(e.clientY - session.centerClientY, e.clientX - session.centerClientX) * 180) /
+        Math.PI;
+      const deltaDeg = currentAngleDeg - session.startPointerAngleDeg;
+      let nextRot = Math.round((((session.origRotation + deltaDeg) % 360) + 360) % 360);
+
+      if (e.shiftKey) {
+        nextRot = (Math.round(nextRot / 15) * 15) % 360;
+      } else {
+        for (const cardinal of [0, 90, 180, 270, 360]) {
+          if (Math.abs(nextRot - cardinal) <= 2) {
+            nextRot = cardinal % 360;
+            break;
+          }
+        }
+      }
+
+      if (nextRot !== (((session.origRotation % 360) + 360) % 360)) {
+        session.hasRotated = true;
+      }
+
+      const latest = latestAnnotationsRef.current;
+      if (session.kind === 'text') {
+        onCommitAnnotations(
+          {
+            ...latest,
+            textBoxes: (latest.textBoxes || []).map((t) =>
+              t.id === session.id ? { ...t, rotation: nextRot } : t
+            ),
+          },
+          false
+        );
+      } else if (session.kind === 'sticker') {
+        onCommitAnnotations(
+          {
+            ...latest,
+            stickers: latest.stickers.map((s) =>
+              s.id === session.id ? { ...s, rotation: nextRot } : s
+            ),
+          },
+          false
+        );
+      } else if (session.kind === 'shape') {
+        onCommitAnnotations(
+          {
+            ...latest,
+            shapes: (latest.shapes || []).map((sh) =>
+              sh.id === session.id ? { ...sh, rotation: nextRot } : sh
+            ),
+          },
+          false
+        );
+      } else if (session.kind === 'image') {
+        onCommitAnnotations(
+          {
+            ...latest,
+            images: (latest.images || []).map((img) =>
+              img.id === session.id ? { ...img, rotation: nextRot } : img
+            ),
+          },
+          false
+        );
+      }
+      return;
+    }
+
     // Handle dragging of Sticky Notes, Stickers, Text Boxes, or Embedded Images
     if (dragItemRef.current && stageRef.current) {
       e.preventDefault();
@@ -4362,6 +4403,24 @@ export const NotebookPageStage: React.FC<Props> = ({
       return;
     }
 
+    if (rotateItemRef.current) {
+      const rotateSession = rotateItemRef.current;
+      rotateItemRef.current = null;
+      try {
+        stageRef.current?.releasePointerCapture(e.pointerId);
+      } catch {
+        // ignore
+      }
+      if (rotateSession.hasRotated) {
+        onCommitAnnotations(
+          latestAnnotationsRef.current,
+          true,
+          rotateSession.origSnapshot
+        );
+      }
+      return;
+    }
+
     if (dragItemRef.current) {
       const dragSession = dragItemRef.current;
       dragItemRef.current = null;
@@ -4540,7 +4599,7 @@ export const NotebookPageStage: React.FC<Props> = ({
 
   const handleUpdateSticker = (
     id: string,
-    patch: Partial<Pick<NotebookSticker, 'scale' | 'opacity'>>
+    patch: Partial<Pick<NotebookSticker, 'scale' | 'opacity' | 'rotation'>>
   ) => {
     onCommitAnnotations(
       {
@@ -4627,6 +4686,11 @@ export const NotebookPageStage: React.FC<Props> = ({
         | 'italic'
         | 'underline'
         | 'strikethrough'
+        | 'lineHeight'
+        | 'align'
+        | 'rotation'
+        | 'backgroundStyle'
+        | 'hasBackground'
       >
     >,
     recordHistory: boolean = false
@@ -4891,6 +4955,13 @@ export const NotebookPageStage: React.FC<Props> = ({
       ? (annotations.shapes || []).find((sh) => sh.id === selectedShapeId) ?? null
       : null;
 
+  const selectedTextBox =
+    selectedTextId &&
+    !selectedTextBoxIds.includes(selectedTextId) &&
+    !isDrawTool
+      ? (annotations.textBoxes || []).find((t) => t.id === selectedTextId) ?? null
+      : null;
+
   const startShapeDragSession = (
     shape: NotebookShapeElement,
     mode: 'move' | 'p1' | 'p2' | 'nw' | 'ne' | 'sw' | 'se',
@@ -4952,7 +5023,284 @@ export const NotebookPageStage: React.FC<Props> = ({
       : 0;
 
   return (
-    <div className="flex justify-center items-start min-h-full py-4 sm:py-6 px-2 sm:px-6">
+    <div className="flex flex-col items-center justify-start min-h-full py-4 sm:py-6 px-2 sm:px-6">
+      {/* Top Docked TextBox Formatting Bar (never overlaps the TextBox on the page!) */}
+      {selectedTextBox && (() => {
+        const activeBridge =
+          activeTextBridgeRef.current?.boxId === selectedTextBox.id
+            ? activeTextBridgeRef.current
+            : null;
+        const effectiveStyle: ResolvedTextStyle =
+          activeBridge && selectedTextActiveStyle
+            ? selectedTextActiveStyle
+            : getBoxBaseStyle(selectedTextBox);
+        const bgStyle: TextBoxBackgroundStyle =
+          selectedTextBox.backgroundStyle ??
+          ((selectedTextBox.hasBackground ?? true) ? 'white' : 'transparent');
+        const currentAlign = selectedTextBox.align ?? 'left';
+        const currentLineHeight = selectedTextBox.lineHeight ?? 1.35;
+        const currentRot = Math.round(selectedTextBox.rotation ?? 0);
+
+        const triggerInlineOrBoxPatch = (patch: Partial<ResolvedTextStyle>) => {
+          if (activeBridge) {
+            activeBridge.applyFormatPatch(patch);
+          } else {
+            handleUpdateTextBoxRich(selectedTextBox.id, patch, true);
+          }
+        };
+
+        return (
+          <div
+            onMouseDown={(e) => e.preventDefault()}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="sticky top-2 z-50 mb-3 w-full max-w-[940px] px-3 py-2 rounded-xl bg-slate-900/95 text-white shadow-xl border border-slate-700/90 flex flex-wrap items-center justify-between gap-2 text-xs select-none"
+          >
+            {/* Left Group: Font Style (B/I/U/S) + Alignment + Background */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="px-1.5 py-0.5 rounded bg-indigo-500/20 border border-indigo-400/30 text-[10px] font-bold text-indigo-200 uppercase tracking-wider">
+                Textfeld
+              </span>
+
+              <div className="flex items-center gap-0.5 bg-white/10 rounded-lg p-0.5">
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => triggerInlineOrBoxPatch({ bold: !effectiveStyle.bold })}
+                  title="Fett (⌘B)"
+                  aria-label="Fett"
+                  aria-pressed={effectiveStyle.bold}
+                  className={`w-7 h-7 rounded-md flex items-center justify-center cursor-pointer transition-colors ${
+                    effectiveStyle.bold
+                      ? 'bg-indigo-600 text-white'
+                      : 'hover:bg-white/15 text-slate-200'
+                  }`}
+                >
+                  <Bold className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => triggerInlineOrBoxPatch({ italic: !effectiveStyle.italic })}
+                  title="Kursiv (⌘I)"
+                  aria-label="Kursiv"
+                  aria-pressed={effectiveStyle.italic}
+                  className={`w-7 h-7 rounded-md flex items-center justify-center cursor-pointer transition-colors ${
+                    effectiveStyle.italic
+                      ? 'bg-indigo-600 text-white'
+                      : 'hover:bg-white/15 text-slate-200'
+                  }`}
+                >
+                  <Italic className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => triggerInlineOrBoxPatch({ underline: !effectiveStyle.underline })}
+                  title="Unterstrichen (⌘U)"
+                  aria-label="Unterstrichen"
+                  aria-pressed={effectiveStyle.underline}
+                  className={`w-7 h-7 rounded-md flex items-center justify-center cursor-pointer transition-colors ${
+                    effectiveStyle.underline
+                      ? 'bg-indigo-600 text-white'
+                      : 'hover:bg-white/15 text-slate-200'
+                  }`}
+                >
+                  <Underline className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() =>
+                    triggerInlineOrBoxPatch({ strikethrough: !effectiveStyle.strikethrough })
+                  }
+                  title="Durchgestrichen (⇧⌘X)"
+                  aria-label="Durchgestrichen"
+                  aria-pressed={effectiveStyle.strikethrough}
+                  className={`w-7 h-7 rounded-md flex items-center justify-center cursor-pointer transition-colors ${
+                    effectiveStyle.strikethrough
+                      ? 'bg-indigo-600 text-white'
+                      : 'hover:bg-white/15 text-slate-200'
+                  }`}
+                >
+                  <Strikethrough className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Text Alignment */}
+              <div className="flex items-center gap-0.5 bg-white/10 rounded-lg p-0.5">
+                {(
+                  [
+                    { id: 'left' as const, label: 'Linksbündig', Icon: AlignLeft },
+                    { id: 'center' as const, label: 'Zentriert', Icon: AlignCenter },
+                    { id: 'right' as const, label: 'Rechtsbündig', Icon: AlignRight },
+                  ]
+                ).map(({ id, label, Icon }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() =>
+                      handleUpdateTextBoxRich(selectedTextBox.id, { align: id }, true)
+                    }
+                    title={`Textausrichtung: ${label}`}
+                    aria-label={label}
+                    className={`w-7 h-7 rounded-md flex items-center justify-center cursor-pointer transition-colors ${
+                      currentAlign === id
+                        ? 'bg-indigo-600 text-white'
+                        : 'hover:bg-white/15 text-slate-200'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                  </button>
+                ))}
+              </div>
+
+              {/* Font Size */}
+              <div className="flex items-center gap-1 bg-white/10 rounded-lg px-2 py-1">
+                <span className="text-[10px] font-bold text-slate-300">Größe</span>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    const nextSize = +Math.max(1.2, selectedTextBox.fontSize - 0.2).toFixed(1);
+                    handleUpdateTextBoxRich(selectedTextBox.id, { fontSize: nextSize }, true);
+                  }}
+                  title="Schrift verkleinern"
+                  className="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-100 cursor-pointer"
+                >
+                  A−
+                </button>
+                <input
+                  type="range"
+                  min={1.2}
+                  max={4.0}
+                  step={0.1}
+                  value={selectedTextBox.fontSize}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onChange={(e) =>
+                    handleUpdateTextBoxRich(
+                      selectedTextBox.id,
+                      { fontSize: parseFloat(e.target.value) },
+                      false
+                    )
+                  }
+                  onPointerUp={() =>
+                    handleUpdateTextBoxRich(
+                      selectedTextBox.id,
+                      { fontSize: selectedTextBox.fontSize },
+                      true
+                    )
+                  }
+                  aria-label="Schriftgröße"
+                  className="w-20 h-1.5 accent-indigo-500 cursor-pointer"
+                />
+                <span className="text-[10px] font-mono font-bold text-slate-200 tabular-nums min-w-[22px] text-right">
+                  {selectedTextBox.fontSize.toFixed(1)}
+                </span>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    const nextSize = +Math.min(4.0, selectedTextBox.fontSize + 0.2).toFixed(1);
+                    handleUpdateTextBoxRich(selectedTextBox.id, { fontSize: nextSize }, true);
+                  }}
+                  title="Schrift vergrößern"
+                  className="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-100 cursor-pointer"
+                >
+                  A+
+                </button>
+              </div>
+
+              {/* Line Spacing (Zeilenabstand) */}
+              <div className="flex items-center gap-1 bg-white/10 rounded-lg px-2 py-1">
+                <span className="text-[10px] font-bold text-slate-300">Zeilenabstand</span>
+                {(['1.0', '1.25', '1.5', '1.75', '2.0'] as const).map((lhStr) => {
+                  const val = parseFloat(lhStr);
+                  const active = Math.abs(currentLineHeight - val) < 0.06;
+                  return (
+                    <button
+                      key={lhStr}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() =>
+                        handleUpdateTextBoxRich(selectedTextBox.id, { lineHeight: val }, true)
+                      }
+                      title={`Zeilenabstand ${lhStr}`}
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-colors cursor-pointer ${
+                        active
+                          ? 'bg-indigo-600 text-white'
+                          : 'hover:bg-white/15 text-slate-200'
+                      }`}
+                    >
+                      {lhStr}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Background Toggle */}
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => handleToggleTextBoxBg(selectedTextBox.id)}
+                title="Hintergrund wechseln (Weiß / Papier-Ton / Transparent)"
+                className="px-2 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] font-bold text-slate-100 cursor-pointer whitespace-nowrap"
+              >
+                BG: {bgStyle === 'white' ? 'Weiß' : bgStyle === 'paper' ? 'Papier' : 'Transp.'}
+              </button>
+            </div>
+
+            {/* Right Group: Colors + Rotation Reset + Duplicate & Delete */}
+            <div className="flex items-center gap-2">
+              <ScrollableColorStrip
+                variant="floating"
+                preserveTextFocus
+                selectedColor={effectiveStyle.color}
+                onSelectColor={(color) => triggerInlineOrBoxPatch({ color })}
+                onBeforeNativeColorPicker={() => activeBridge?.onBeforeNativeColorPicker()}
+                onAfterNativeColorPicker={() => activeBridge?.onAfterNativeColorPicker()}
+              />
+
+              {currentRot !== 0 && (
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() =>
+                    handleUpdateTextBoxRich(selectedTextBox.id, { rotation: 0 }, true)
+                  }
+                  title="Drehung auf 0° zurücksetzen"
+                  className="px-2 py-1 rounded-lg bg-indigo-500/30 hover:bg-indigo-600 text-[10px] font-mono font-bold text-white cursor-pointer"
+                >
+                  {currentRot}° → 0°
+                </button>
+              )}
+
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => handleDuplicateTextBox(selectedTextBox.id)}
+                title="Textfeld duplizieren (⌘D)"
+                aria-label="Textfeld duplizieren"
+                className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white cursor-pointer"
+              >
+                <Copy className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => handleDeleteTextBox(selectedTextBox.id)}
+                title="Textfeld löschen"
+                aria-label="Textfeld löschen"
+                className="p-1.5 rounded-lg bg-rose-500/80 hover:bg-rose-500 text-white cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
       <div
         ref={stageRef}
         onPointerEnter={(e) => updateBrushHoverPos(e.clientX, e.clientY, e.pointerType)}
@@ -5180,35 +5528,35 @@ export const NotebookPageStage: React.FC<Props> = ({
                     origSnapshot: latestAnnotationsRef.current,
                   };
                 }}
-              onStartResize={(e) => {
-                try {
-                  stageRef.current?.setPointerCapture(e.pointerId);
-                } catch {}
-                resizeImageRef.current = {
-                  id: imgEl.id,
-                  startClientX: e.clientX,
-                  startClientY: e.clientY,
-                  origWidthPct: imgEl.widthPct,
-                  hasResized: false,
-                  origSnapshot: latestAnnotationsRef.current,
-                };
-              }}
-              onCrop={async () => {
-                const url = await getMediaObjectUrl(imgEl.mediaId);
-                if (url) {
-                  setActiveCropImage({
+                onStartResize={(e) => {
+                  try {
+                    stageRef.current?.setPointerCapture(e.pointerId);
+                  } catch {}
+                  resizeImageRef.current = {
                     id: imgEl.id,
-                    url,
-                    rotation: imgEl.rotation ?? 0,
-                  });
-                }
-              }}
-              onUpdate={(patch) => handleUpdateEmbeddedImage(imgEl.id, patch)}
-              onDuplicate={() => handleDuplicateEmbeddedImage(imgEl.id)}
-              onDelete={() => handleDeleteEmbeddedImage(imgEl.id)}
-            />
-          );
-        })}
+                    startClientX: e.clientX,
+                    startClientY: e.clientY,
+                    origWidthPct: imgEl.widthPct,
+                    hasResized: false,
+                    origSnapshot: latestAnnotationsRef.current,
+                  };
+                }}
+                onCrop={async () => {
+                  const url = await getMediaObjectUrl(imgEl.mediaId);
+                  if (url) {
+                    setActiveCropImage({
+                      id: imgEl.id,
+                      url,
+                      rotation: imgEl.rotation ?? 0,
+                    });
+                  }
+                }}
+                onUpdate={(patch) => handleUpdateEmbeddedImage(imgEl.id, patch)}
+                onDuplicate={() => handleDuplicateEmbeddedImage(imgEl.id)}
+                onDelete={() => handleDeleteEmbeddedImage(imgEl.id)}
+              />
+            );
+          })}
         </div>
 
         {activeCropImage && (
@@ -5300,6 +5648,7 @@ export const NotebookPageStage: React.FC<Props> = ({
             const isSelected = selectedStickerId === sticker.id && !isMultiSelected;
             const currentScale = sticker.scale ?? 1;
             const currentOpacity = sticker.opacity ?? 1;
+            const currentRot = Math.round(sticker.rotation ?? -2);
             const transparencyPct = Math.round((1 - currentOpacity) * 100);
             const showToolbarBelow = sticker.y < 14;
             const toolbarHorizClass =
@@ -5360,7 +5709,7 @@ export const NotebookPageStage: React.FC<Props> = ({
                   <div
                     onPointerDown={(e) => e.stopPropagation()}
                     className={`absolute ${toolbarHorizClass} ${
-                      showToolbarBelow ? 'top-full mt-2.5' : 'bottom-full mb-2.5'
+                      showToolbarBelow ? 'top-full mt-10' : 'bottom-full mb-2.5'
                     } flex items-center gap-1.5 px-2 py-1 rounded-xl bg-slate-900/95 text-white shadow-lg border border-slate-700/80 text-[10px] font-bold whitespace-nowrap z-40 cursor-default`}
                   >
                     <span className="text-slate-400">Größe</span>
@@ -5463,7 +5812,7 @@ export const NotebookPageStage: React.FC<Props> = ({
 
                 <div
                   style={{
-                    transform: `rotate(-2deg) scale(${currentScale})`,
+                    transform: `rotate(${currentRot}deg) scale(${currentScale})`,
                     opacity: currentOpacity,
                   }}
                   className={`relative inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border-2 shadow-sm transition-shadow ${
@@ -5493,6 +5842,54 @@ export const NotebookPageStage: React.FC<Props> = ({
                     </button>
                   )}
                 </div>
+
+                {/* Bottom Free-Rotation Drag Handle for Sticker */}
+                {isSelected && !isDrawTool && (
+                  <div
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="absolute -bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center z-40 select-none"
+                  >
+                    <div className="w-0.5 h-2.5 bg-indigo-500/80" />
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onPointerDown={(e) => {
+                          const stageEl = stageRef.current;
+                          if (!stageEl) return;
+                          const r = stageEl.getBoundingClientRect();
+                          const cx = r.left + (sticker.x / 100) * r.width;
+                          const cy = r.top + (sticker.y / 100) * r.height;
+                          startRotateSession(
+                            'sticker',
+                            sticker.id,
+                            sticker.rotation ?? -2,
+                            cx,
+                            cy,
+                            e
+                          );
+                        }}
+                        title="Mit der Maus ziehen zum freien Drehen (Shift halten für 15°-Schritte)"
+                        aria-label="Sticker frei drehen"
+                        className="w-6 h-6 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-md border-2 border-white flex items-center justify-center cursor-grab active:cursor-grabbing transition-transform hover:scale-110"
+                      >
+                        <RotateCw className="w-3 h-3" />
+                      </button>
+                      {currentRot !== 0 && currentRot !== -2 && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUpdateSticker(sticker.id, { rotation: 0 });
+                          }}
+                          title="Drehung auf 0° zurücksetzen"
+                          className="px-1.5 py-0.5 rounded-full bg-slate-900/90 hover:bg-indigo-600 text-white text-[10px] font-mono font-bold shadow-sm cursor-pointer"
+                        >
+                          {currentRot}°
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -5546,6 +5943,16 @@ export const NotebookPageStage: React.FC<Props> = ({
                     origSnapshot: latestAnnotationsRef.current,
                   };
                 }}
+                onStartRotate={(e, centerClientX, centerClientY) =>
+                  startRotateSession(
+                    'text',
+                    box.id,
+                    box.rotation ?? 0,
+                    centerClientX,
+                    centerClientY,
+                    e
+                  )
+                }
                 onUpdateBox={(patch, recordHistory) =>
                   handleUpdateTextBoxRich(box.id, patch, recordHistory)
                 }
@@ -5553,6 +5960,7 @@ export const NotebookPageStage: React.FC<Props> = ({
                 onDuplicate={() => handleDuplicateTextBox(box.id)}
                 onDelete={() => handleDeleteTextBox(box.id)}
                 onBlurBox={() => handleTextBoxBlur(box.id)}
+                onSyncActiveFormatBridge={handleSyncActiveFormatBridge}
               />
             );
           })}
@@ -5596,13 +6004,16 @@ export const NotebookPageStage: React.FC<Props> = ({
               const maxX = Math.max(selectedShape.x1, selectedShape.x2);
               const minY = Math.min(selectedShape.y1, selectedShape.y2);
               const maxY = Math.max(selectedShape.y1, selectedShape.y2);
-              const centerX = Math.max(18, Math.min(82, (minX + maxX) / 2));
+              const rawCenterX = (minX + maxX) / 2;
+              const rawCenterY = (minY + maxY) / 2;
+              const centerX = Math.max(18, Math.min(82, rawCenterX));
               const showBelow = minY < 16;
-              const toolbarAnchorY = showBelow ? Math.min(92, maxY + 2.2) : Math.max(2, minY - 2.2);
+              const toolbarAnchorY = showBelow ? Math.min(92, maxY + 6.5) : Math.max(2, minY - 2.2);
               const isLineLike =
                 selectedShape.kind === 'line' || selectedShape.kind === 'arrow';
               const colorPalette =
                 selectedShape.tool === 'highlighter' ? HIGHLIGHTER_COLORS : PEN_COLORS;
+              const currentShapeRot = Math.round(selectedShape.rotation ?? 0);
 
               return (
                 <>
@@ -5659,6 +6070,7 @@ export const NotebookPageStage: React.FC<Props> = ({
                           top: `${minY}%`,
                           width: `${Math.max(0.8, maxX - minX)}%`,
                           height: `${Math.max(0.8, maxY - minY)}%`,
+                          transform: currentShapeRot ? `rotate(${currentShapeRot}deg)` : undefined,
                         }}
                         className="absolute border-2 border-dashed border-indigo-500 rounded-xs pointer-events-none"
                       />
@@ -5684,6 +6096,56 @@ export const NotebookPageStage: React.FC<Props> = ({
                       ))}
                     </>
                   )}
+
+                  {/* Bottom Free-Rotation Drag Handle for Selected Shape */}
+                  <div
+                    style={{
+                      left: `${rawCenterX}%`,
+                      top: `${Math.min(96, maxY + 0.5)}%`,
+                    }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="absolute -translate-x-1/2 flex flex-col items-center pointer-events-auto z-40 select-none"
+                  >
+                    <div className="w-0.5 h-2.5 bg-indigo-500/80" />
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onPointerDown={(e) => {
+                          const stageEl = stageRef.current;
+                          if (!stageEl) return;
+                          const r = stageEl.getBoundingClientRect();
+                          const cx = r.left + (rawCenterX / 100) * r.width;
+                          const cy = r.top + (rawCenterY / 100) * r.height;
+                          startRotateSession(
+                            'shape',
+                            selectedShape.id,
+                            selectedShape.rotation ?? 0,
+                            cx,
+                            cy,
+                            e
+                          );
+                        }}
+                        title="Form mit der Maus frei drehen (Shift halten für 15°-Schritte)"
+                        aria-label="Form frei drehen"
+                        className="w-6 h-6 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-md border-2 border-white flex items-center justify-center cursor-grab active:cursor-grabbing transition-transform hover:scale-110"
+                      >
+                        <RotateCw className="w-3 h-3" />
+                      </button>
+                      {currentShapeRot !== 0 && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUpdateShape(selectedShape.id, { rotation: 0 }, true);
+                          }}
+                          title="Drehung auf 0° zurücksetzen"
+                          className="px-1.5 py-0.5 rounded-full bg-slate-900/90 hover:bg-indigo-600 text-white text-[10px] font-mono font-bold shadow-sm cursor-pointer"
+                        >
+                          {currentShapeRot}°
+                        </button>
+                      )}
+                    </div>
+                  </div>
 
                   {/* Floating Shape Edit Toolbar */}
                   <div
