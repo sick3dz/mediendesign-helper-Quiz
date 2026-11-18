@@ -301,6 +301,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
   const [highlighterColor, setHighlighterColor] = useState<string>(HIGHLIGHTER_COLORS[0].color);
   const [highlighterWidth, setHighlighterWidth] = useState<number>(2.4);
   const [drawShape, setDrawShape] = useState<NotebookDrawShape>('freehand');
+  const [shapeLineStyle, setShapeLineStyle] = useState<'solid' | 'dashed' | 'dotted'>('solid');
   const [eraserMode, setEraserMode] = useState<NotebookEraserMode>('whole');
   const [eraserWidth, setEraserWidth] = useState<number>(3.2);
   const [eraserTarget, setEraserTarget] = useState<NotebookEraserTarget>('all');
@@ -1790,6 +1791,38 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                     );
                   })}
                 </div>
+                {drawShape !== 'freehand' && (
+                  <>
+                    <span className="text-slate-300 dark:text-slate-700">|</span>
+                    <div className="flex items-center gap-1" role="group" aria-label="Linienart">
+                      <span className="font-semibold text-slate-600 dark:text-slate-300 mr-0.5">Stil:</span>
+                      {(
+                        [
+                          { id: 'solid', label: 'Durchgezogen' },
+                          { id: 'dashed', label: 'Gestrichelt' },
+                          { id: 'dotted', label: 'Gepunktet' },
+                        ] as const
+                      ).map((styleOpt) => {
+                        const active = shapeLineStyle === styleOpt.id;
+                        return (
+                          <button
+                            key={styleOpt.id}
+                            type="button"
+                            onClick={() => setShapeLineStyle(styleOpt.id)}
+                            className={`px-2 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                              active
+                                ? 'bg-indigo-600 text-white shadow-2xs'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
+                            }`}
+                            title={`Linienart: ${styleOpt.label}`}
+                          >
+                            {styleOpt.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
@@ -1867,6 +1900,38 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
                     );
                   })}
                 </div>
+                {drawShape !== 'freehand' && (
+                  <>
+                    <span className="text-slate-300 dark:text-slate-700">|</span>
+                    <div className="flex items-center gap-1" role="group" aria-label="Linienart">
+                      <span className="font-semibold text-slate-600 dark:text-slate-300 mr-0.5">Stil:</span>
+                      {(
+                        [
+                          { id: 'solid', label: 'Durchgezogen' },
+                          { id: 'dashed', label: 'Gestrichelt' },
+                          { id: 'dotted', label: 'Gepunktet' },
+                        ] as const
+                      ).map((styleOpt) => {
+                        const active = shapeLineStyle === styleOpt.id;
+                        return (
+                          <button
+                            key={styleOpt.id}
+                            type="button"
+                            onClick={() => setShapeLineStyle(styleOpt.id)}
+                            className={`px-2 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                              active
+                                ? 'bg-indigo-600 text-white shadow-2xs'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700'
+                            }`}
+                            title={`Linienart: ${styleOpt.label}`}
+                          >
+                            {styleOpt.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
@@ -3268,6 +3333,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
             highlighterColor={highlighterColor}
             highlighterWidth={highlighterWidth}
             drawShape={drawShape}
+            shapeLineStyle={shapeLineStyle}
             eraserMode={eraserMode}
             eraserWidth={eraserWidth}
             eraserTarget={eraserTarget}

@@ -81,6 +81,7 @@ interface Props {
   highlighterColor: string;
   highlighterWidth: number;
   drawShape?: NotebookDrawShape;
+  shapeLineStyle?: 'solid' | 'dashed' | 'dotted';
   eraserMode?: NotebookEraserMode;
   eraserWidth?: number;
   eraserTarget?: NotebookEraserTarget;
@@ -504,6 +505,13 @@ function renderVectorShapeSvg(
     onSelectAndStartMove(e);
   };
 
+  const getStrokeDashArray = (style?: 'solid' | 'dashed' | 'dotted', width = 1) => {
+    if (style === 'dashed') return `${width * 3.2} ${width * 2.5}`;
+    if (style === 'dotted') return `${width * 0.9} ${width * 2.2}`;
+    return undefined;
+  };
+  const dashArray = getStrokeDashArray(shape.lineStyle, shape.width);
+
   if (shape.kind === 'line') {
     return (
       <g key={shape.id}>
@@ -515,6 +523,7 @@ function renderVectorShapeSvg(
           stroke={shape.color}
           strokeWidth={shape.width}
           strokeOpacity={strokeOpacity}
+          strokeDasharray={dashArray}
           strokeLinecap="round"
         />
         {isInteractive && (
@@ -557,6 +566,7 @@ function renderVectorShapeSvg(
           stroke={shape.color}
           strokeWidth={shape.width}
           strokeOpacity={strokeOpacity}
+          strokeDasharray={dashArray}
           strokeLinecap="round"
         />
         {len >= 0.35 && (
@@ -566,6 +576,7 @@ function renderVectorShapeSvg(
             stroke={shape.color}
             strokeWidth={shape.width}
             strokeOpacity={strokeOpacity}
+            strokeDasharray={dashArray}
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -621,6 +632,7 @@ function renderVectorShapeSvg(
           stroke={shape.color}
           strokeWidth={shape.width}
           strokeOpacity={strokeOpacity}
+          strokeDasharray={dashArray}
           strokeLinejoin="round"
         />
         {isInteractive && (
@@ -658,6 +670,7 @@ function renderVectorShapeSvg(
         stroke={shape.color}
         strokeWidth={shape.width}
         strokeOpacity={strokeOpacity}
+        strokeDasharray={dashArray}
       />
       {isInteractive && (
         <ellipse
@@ -1768,6 +1781,7 @@ export const NotebookPageStage: React.FC<Props> = ({
   highlighterColor,
   highlighterWidth,
   drawShape = 'freehand',
+  shapeLineStyle = 'solid',
   eraserMode = 'whole',
   eraserWidth = 3.2,
   eraserTarget = 'all',
@@ -1931,7 +1945,7 @@ export const NotebookPageStage: React.FC<Props> = ({
     (
       id: string,
       patch: Partial<
-        Pick<NotebookShapeElement, 'kind' | 'color' | 'width' | 'filled' | 'x1' | 'y1' | 'x2' | 'y2'>
+        Pick<NotebookShapeElement, 'kind' | 'color' | 'width' | 'filled' | 'lineStyle' | 'x1' | 'y1' | 'x2' | 'y2'>
       >,
       recordHistory: boolean = true
     ) => {
@@ -2699,6 +2713,7 @@ export const NotebookPageStage: React.FC<Props> = ({
           x2: +pt.x.toFixed(2),
           y2: +pt.y.toFixed(2),
           filled: false,
+          lineStyle: shapeLineStyle ?? 'solid',
           createdAt: Date.now(),
         };
         draftShapeRef.current = newShape;
@@ -4644,6 +4659,39 @@ export const NotebookPageStage: React.FC<Props> = ({
                         );
                       })}
                     </div>
+
+                    {/* Line Style Switcher */}
+                    <div className="flex items-center gap-0.5 bg-white/10 rounded-lg p-0.5">
+                      {(
+                        [
+                          { id: 'solid' as const, label: 'Durchgezogen' },
+                          { id: 'dashed' as const, label: 'Gestrichelt' },
+                          { id: 'dotted' as const, label: 'Gepunktet' },
+                        ]
+                      ).map(({ id, label }) => {
+                        const active = (selectedShape.lineStyle ?? 'solid') === id;
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleUpdateShape(selectedShape.id, { lineStyle: id }, true);
+                            }}
+                            title={`Linienart: ${label}`}
+                            className={`px-1.5 py-0.5 rounded-md transition-colors cursor-pointer ${
+                              active
+                                ? 'bg-indigo-600 text-white'
+                                : 'text-slate-300 hover:text-white hover:bg-white/10'
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <span className="text-slate-600">|</span>
 
                     {/* Fill toggle for Rect & Ellipse */}
                     {(selectedShape.kind === 'rect' || selectedShape.kind === 'ellipse') && (

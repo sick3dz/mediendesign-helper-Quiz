@@ -413,6 +413,16 @@ function drawShapeToCanvas(
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
 
+  const lineStyle = shape.lineStyle ?? 'solid';
+  if (lineStyle === 'dashed') {
+    ctx.setLineDash([ctx.lineWidth * 2.8, ctx.lineWidth * 2.2]);
+  } else if (lineStyle === 'dotted') {
+    ctx.setLineDash([ctx.lineWidth * 0.9, ctx.lineWidth * 1.8]);
+    ctx.lineCap = 'round';
+  } else {
+    ctx.setLineDash([]);
+  }
+
   if (shape.kind === 'line') {
     ctx.globalAlpha = opts.alpha;
     ctx.beginPath();

@@ -34,6 +34,7 @@ export interface NotebookShapeElement {
   x2: number; // 0..100 (% of page width)
   y2: number; // 0..100 (% of page height)
   filled?: boolean;
+  lineStyle?: 'solid' | 'dashed' | 'dotted';
   createdAt?: number;
 }
 
