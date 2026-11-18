@@ -927,7 +927,7 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     }
 
     // Duplicate selected element or lasso selection: Cmd+D / Ctrl+D
-    if (mod && !e.altKey && !e.shiftKey && keyLower === 'd') {
+    if (mod && !e.altKey && !e.shiftKey && (keyLower === 'd' || e.code === 'KeyD')) {
       if (hasStageSelection) {
         e.preventDefault();
         setDuplicateSelectionSignal((s) => s + 1);
@@ -935,8 +935,12 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
       return;
     }
 
-    // Delete selected image, text box, sticker or lasso strokes: Backspace / Delete
-    if (!mod && !e.altKey && !e.shiftKey && (e.key === 'Backspace' || e.key === 'Delete')) {
+    // Delete selected elements: Backspace / Delete (and Cmd+Backspace on Mac)
+    if (
+      !e.altKey &&
+      !e.shiftKey &&
+      (e.key === 'Backspace' || e.key === 'Delete' || e.code === 'Backspace' || e.code === 'Delete')
+    ) {
       if (hasStageSelection) {
         e.preventDefault();
         setDeleteSelectionSignal((s) => s + 1);

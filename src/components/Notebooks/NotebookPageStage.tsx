@@ -716,6 +716,109 @@ function isPointInRect(
   return pt.x >= minX && pt.x <= maxX && pt.y >= minY && pt.y <= maxY;
 }
 
+interface BoxBounds {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+}
+
+function isPointInBox(pt: { x: number; y: number }, box: BoxBounds): boolean {
+  return pt.x >= box.minX && pt.x <= box.maxX && pt.y >= box.minY && pt.y <= box.maxY;
+}
+
+function boxesOverlap(a: BoxBounds, b: BoxBounds): boolean {
+  return a.minX <= b.maxX && a.maxX >= b.minX && a.minY <= b.maxY && a.maxY >= b.minY;
+}
+
+function getShapeBounds(sh: NotebookShapeElement): BoxBounds {
+  const pad = Math.max(0.6, sh.width * 0.6);
+  return {
+    minX: Math.max(0, Math.min(sh.x1, sh.x2) - pad),
+    minY: Math.max(0, Math.min(sh.y1, sh.y2) - pad),
+    maxX: Math.min(100, Math.max(sh.x1, sh.x2) + pad),
+    maxY: Math.min(100, Math.max(sh.y1, sh.y2) + pad),
+  };
+}
+
+function isPointOnShape(
+  pt: { x: number; y: number },
+  sh: NotebookShapeElement,
+  isoYFactor: number = 0.707
+): boolean {
+  const safeIso = isoYFactor > 0.05 ? isoYFactor : 0.707;
+  const hitRadius = Math.max(1.8, sh.width + 1.1);
+  if (sh.kind === 'line' || sh.kind === 'arrow') {
+    const distSq = pointToSegmentDistSq(
+      pt.x,
+      pt.y / safeIso,
+      sh.x1,
+      sh.y1 / safeIso,
+      sh.x2,
+      sh.y2 / safeIso
+    );
+    return distSq <= hitRadius * hitRadius;
+  }
+  const b = getShapeBounds(sh);
+  return (
+    pt.x >= b.minX - 1.0 &&
+    pt.x <= b.maxX + 1.0 &&
+    pt.y >= b.minY - 1.0 &&
+    pt.y <= b.maxY + 1.0
+  );
+}
+
+function getTextBoxBounds(t: NotebookTextBox): BoxBounds {
+  const lines = (t.text || 'Text').split('\n');
+  const maxChars = Math.max(8, ...lines.map((l) => l.length));
+  const estW = Math.min(76, Math.max(14, maxChars * t.fontSize * 0.56 + 3));
+  const estH = Math.min(60, Math.max(4.5, lines.length * t.fontSize * 1.45 + 2));
+  return {
+    minX: Math.max(0, t.x),
+    minY: Math.max(0, t.y),
+    maxX: Math.min(100, t.x + estW),
+    maxY: Math.min(100, t.y + estH),
+  };
+}
+
+function getStickyBounds(n: NotebookStickyNote): BoxBounds {
+  const w = n.isCollapsed ? 15 : 24;
+  const h = n.isCollapsed ? 5 : 17;
+  return {
+    minX: Math.max(0, n.x - 1),
+    minY: Math.max(0, n.y - 1),
+    maxX: Math.min(100, n.x + w),
+    maxY: Math.min(100, n.y + h),
+  };
+}
+
+function getStickerBounds(stk: NotebookSticker): BoxBounds {
+  const scale = stk.scale ?? 1;
+  const hw = 6.5 * scale;
+  const hh = 2.8 * scale;
+  return {
+    minX: Math.max(0, stk.x - hw),
+    minY: Math.max(0, stk.y - hh),
+    maxX: Math.min(100, stk.x + hw),
+    maxY: Math.min(100, stk.y + hh),
+  };
+}
+
+function getImageBounds(img: NotebookImageElement, pageAspect: number = 0.707): BoxBounds {
+  const rot = (((img.rotation ?? 0) % 360) + 360) % 360;
+  const rawAspect = Math.max(0.2, img.aspectRatio || 1.333);
+  const imgAspect = rot === 90 || rot === 270 ? 1 / rawAspect : rawAspect;
+  const heightPct = (img.widthPct / imgAspect) * Math.max(0.2, pageAspect);
+  const hw = img.widthPct / 2;
+  const hh = Math.max(4, heightPct / 2);
+  return {
+    minX: Math.max(0, img.x - hw),
+    minY: Math.max(0, img.y - hh),
+    maxX: Math.min(100, img.x + hw),
+    maxY: Math.min(100, img.y + hh),
+  };
+}
+
 function isStrokeSelectedByLasso(
   stroke: NotebookStroke,
   lassoPts: StrokePoint[],
@@ -779,8 +882,10 @@ interface AutoTextItemProps {
   paperPalette: BlankPaperPalette;
   isDrawTool: boolean;
   isSelected: boolean;
+  isMultiSelected?: boolean;
   autoFocus: boolean;
   onSelect: () => void;
+  onShiftPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
   onFocusBox: () => void;
   onClearAutoFocus: () => void;
   onStartDrag: (e: React.PointerEvent<HTMLElement>) => void;
@@ -812,8 +917,10 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
   paperPalette,
   isDrawTool,
   isSelected,
+  isMultiSelected = false,
   autoFocus,
   onSelect,
+  onShiftPointerDown,
   onFocusBox,
   onClearAutoFocus,
   onStartDrag,
@@ -1068,16 +1175,24 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
       ref={wrapperRef}
       style={{ left: `${box.x}%`, top: `${box.y}%` }}
       onPointerDown={(e) => {
+        if (e.shiftKey) {
+          onShiftPointerDown(e);
+          return;
+        }
         if (isDrawTool) return;
         e.stopPropagation();
+        if (isMultiSelected) {
+          onStartDrag(e);
+          return;
+        }
         onSelect();
       }}
       className={`absolute group max-w-[78%] ${
         isDrawTool ? 'pointer-events-none opacity-95' : 'pointer-events-auto'
       }`}
     >
-      {/* Compact Floating Mini Toolbar on select/hover */}
-      {!isDrawTool && (
+      {/* Compact Floating Mini Toolbar on select/hover (hidden when part of multi-selection) */}
+      {!isDrawTool && !isMultiSelected && (
         <div
           className={`absolute -top-7 left-0 flex items-center gap-0.5 px-1.5 py-0.5 rounded-t-lg bg-slate-900/95 text-white shadow-md transition-opacity z-20 ${
             isSelected || isFormatOpen
@@ -1089,6 +1204,10 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
             type="button"
             onPointerDown={(e) => {
               e.stopPropagation();
+              if (e.shiftKey) {
+                onShiftPointerDown(e);
+                return;
+              }
               onStartDrag(e);
             }}
             title="Textfeld verschieben"
@@ -1365,12 +1484,13 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
         )}
         <div
           ref={editorRef}
-          contentEditable={!isDrawTool}
+          contentEditable={!isDrawTool && !isMultiSelected}
           suppressContentEditableWarning
           role="textbox"
           aria-multiline="true"
           aria-label="Freitextfeld"
           onFocus={() => {
+            if (isMultiSelected) return;
             isFocusedRef.current = true;
             setIsFocused(true);
             onSelect();
@@ -1378,8 +1498,15 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
             syncCursorStyle(false);
           }}
           onPointerDown={(e) => {
+            if (e.shiftKey) {
+              onShiftPointerDown(e);
+              return;
+            }
             if (isDrawTool) return;
             e.stopPropagation();
+            if (isMultiSelected) {
+              onStartDrag(e);
+            }
           }}
           onMouseUp={() => syncCursorStyle(true)}
           onKeyDown={(e) => {
@@ -1449,8 +1576,8 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
             lineHeight: 1.35,
             minWidth: `${Math.max(120, fontSizePx * 7)}px`,
             minHeight: `${Math.max(24, Math.round(fontSizePx * 1.35 + 8))}px`,
-            WebkitUserSelect: isDrawTool ? 'none' : 'text',
-            userSelect: isDrawTool ? 'none' : 'text',
+            WebkitUserSelect: isDrawTool || isMultiSelected ? 'none' : 'text',
+            userSelect: isDrawTool || isMultiSelected ? 'none' : 'text',
             ...(bgStyle === 'paper'
               ? {
                   backgroundColor: paperPalette.bgHex,
@@ -1465,7 +1592,7 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
               ? 'shadow-sm border'
               : 'bg-transparent border border-transparent'
           } ${
-            isSelected && !isDrawTool
+            (isSelected && !isDrawTool) || isMultiSelected
               ? 'ring-2 ring-indigo-500/80 border-indigo-400'
               : !isDrawTool
               ? 'group-hover:border-indigo-300/80'
@@ -1481,7 +1608,9 @@ interface EmbeddedImageItemProps {
   item: NotebookImageElement;
   isInteractive: boolean;
   isSelected: boolean;
+  isMultiSelected?: boolean;
   onSelect: () => void;
+  onShiftPointerDown: (e: React.PointerEvent<HTMLElement>) => void;
   onStartDrag: (e: React.PointerEvent<HTMLElement>) => void;
   onStartResize: (e: React.PointerEvent<HTMLElement>) => void;
   onUpdate: (patch: Partial<Pick<NotebookImageElement, 'widthPct' | 'opacity' | 'rotation'>>) => void;
@@ -1494,7 +1623,9 @@ const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
   item,
   isInteractive,
   isSelected,
+  isMultiSelected = false,
   onSelect,
+  onShiftPointerDown,
   onStartDrag,
   onStartResize,
   onUpdate,
@@ -1592,21 +1723,27 @@ const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
         width: `${item.widthPct}%`,
       }}
       onPointerDown={(e) => {
+        if (e.shiftKey) {
+          onShiftPointerDown(e);
+          return;
+        }
         if (!isInteractive) return;
         e.stopPropagation();
-        onSelect();
+        if (!isMultiSelected) {
+          onSelect();
+        }
         onStartDrag(e);
       }}
       className={`absolute -translate-x-1/2 -translate-y-1/2 group select-none ${
-        isSelected ? 'z-[8]' : 'z-[5]'
+        isSelected || isMultiSelected ? 'z-[8]' : 'z-[5]'
       } ${
         isInteractive
           ? 'pointer-events-auto cursor-grab active:cursor-grabbing'
           : 'pointer-events-none'
       }`}
     >
-      {/* Floating Mini Controls for Selected Image */}
-      {isSelected && isInteractive && (
+      {/* Floating Mini Controls for Selected Image (hidden when part of multi-selection) */}
+      {isSelected && !isMultiSelected && isInteractive && (
         <div
           onPointerDown={(e) => e.stopPropagation()}
           className={`absolute ${toolbarHorizClass} ${
@@ -1728,7 +1865,7 @@ const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
       <div
         style={{ opacity }}
         className={`relative rounded-md overflow-hidden transition-shadow ${
-          isSelected && isInteractive
+          (isSelected && isInteractive) || isMultiSelected
             ? 'ring-2 ring-indigo-500 shadow-md'
             : isInteractive
             ? 'group-hover:ring-2 group-hover:ring-indigo-300'
@@ -1768,7 +1905,7 @@ const EmbeddedImageOverlayItem: React.FC<EmbeddedImageItemProps> = ({
       </div>
 
       {/* Bottom-Right Corner Drag Resize Handle */}
-      {isSelected && isInteractive && (
+      {isSelected && !isMultiSelected && isInteractive && (
         <div
           onPointerDown={(e) => {
             e.stopPropagation();
@@ -1857,11 +1994,16 @@ export const NotebookPageStage: React.FC<Props> = ({
   const [marqueeRect, setMarqueeRect] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
   const isMarqueeDrawingRef = useRef(false);
   const marqueeStartRef = useRef<StrokePoint | null>(null);
+  const shiftTargetOnDownRef = useRef<{
+    kind: 'stroke' | 'shape' | 'text' | 'sticky' | 'sticker' | 'image';
+    id: string;
+  } | null>(null);
   const dragMultiRef = useRef<{
     startClientX: number;
     startClientY: number;
     hasMoved: boolean;
     origSnapshot: PageAnnotations;
+    origBounds: BoxBounds;
   } | null>(null);
 
   const totalSelectedCount =
@@ -1887,6 +2029,85 @@ export const NotebookPageStage: React.FC<Props> = ({
     rotation?: number;
   } | null>(null);
 
+  const clearMultiSelection = useCallback(() => {
+    setSelectedStrokeIds([]);
+    setSelectedShapeIds([]);
+    setSelectedTextBoxIds([]);
+    setSelectedStickyIds([]);
+    setSelectedStickerIds([]);
+    setSelectedImageIds([]);
+  }, []);
+
+  const getSeededMultiSelection = useCallback(() => {
+    const strokes = new Set(selectedStrokeIds);
+    const shapes = new Set(selectedShapeIds);
+    const texts = new Set(selectedTextBoxIds);
+    const stickies = new Set(selectedStickyIds);
+    const stickers = new Set(selectedStickerIds);
+    const images = new Set(selectedImageIds);
+
+    if (selectedShapeId) shapes.add(selectedShapeId);
+    if (selectedTextId) texts.add(selectedTextId);
+    if (selectedStickyId) stickies.add(selectedStickyId);
+    if (selectedStickerId) stickers.add(selectedStickerId);
+    if (selectedImageId) images.add(selectedImageId);
+
+    return { strokes, shapes, texts, stickies, stickers, images };
+  }, [
+    selectedStrokeIds,
+    selectedShapeIds,
+    selectedTextBoxIds,
+    selectedStickyIds,
+    selectedStickerIds,
+    selectedImageIds,
+    selectedShapeId,
+    selectedTextId,
+    selectedStickyId,
+    selectedStickerId,
+    selectedImageId,
+  ]);
+
+  const toggleElementInMultiSelection = useCallback(
+    (
+      kind: 'stroke' | 'shape' | 'text' | 'sticky' | 'sticker' | 'image',
+      id: string
+    ) => {
+      const seeded = getSeededMultiSelection();
+      const targetSet =
+        kind === 'stroke'
+          ? seeded.strokes
+          : kind === 'shape'
+          ? seeded.shapes
+          : kind === 'text'
+          ? seeded.texts
+          : kind === 'sticky'
+          ? seeded.stickies
+          : kind === 'sticker'
+          ? seeded.stickers
+          : seeded.images;
+
+      if (targetSet.has(id)) {
+        targetSet.delete(id);
+      } else {
+        targetSet.add(id);
+      }
+
+      setSelectedShapeId(null);
+      setSelectedTextId(null);
+      setSelectedStickyId(null);
+      setSelectedStickerId(null);
+      setSelectedImageId(null);
+
+      setSelectedStrokeIds(Array.from(seeded.strokes));
+      setSelectedShapeIds(Array.from(seeded.shapes));
+      setSelectedTextBoxIds(Array.from(seeded.texts));
+      setSelectedStickyIds(Array.from(seeded.stickies));
+      setSelectedStickerIds(Array.from(seeded.stickers));
+      setSelectedImageIds(Array.from(seeded.images));
+    },
+    [getSeededMultiSelection]
+  );
+
   useEffect(() => {
     if (selectedImageSignal?.id) {
       setSelectedImageId(selectedImageSignal.id);
@@ -1894,9 +2115,9 @@ export const NotebookPageStage: React.FC<Props> = ({
       setSelectedTextId(null);
       setSelectedStickyId(null);
       setSelectedShapeId(null);
-      setSelectedStrokeIds([]);
+      clearMultiSelection();
     }
-  }, [selectedImageSignal]);
+  }, [selectedImageSignal, clearMultiSelection]);
 
   useEffect(() => {
     setSelectedStickerId(null);
@@ -1904,19 +2125,19 @@ export const NotebookPageStage: React.FC<Props> = ({
     setSelectedImageId(null);
     setSelectedStickyId(null);
     setSelectedShapeId(null);
-    setSelectedStrokeIds([]);
+    clearMultiSelection();
     setLassoPath([]);
-  }, [notebook.id, pageNumber]);
+  }, [notebook.id, pageNumber, clearMultiSelection]);
 
   useEffect(() => {
-    if (activeTool !== 'lasso' && activeTool !== 'hand') {
-      setSelectedStrokeIds([]);
+    if (activeTool === 'eraser') {
+      setSelectedShapeId(null);
+      clearMultiSelection();
       setLassoPath([]);
-    }
-    if (activeTool === 'eraser' || activeTool === 'lasso') {
+    } else if (activeTool === 'lasso') {
       setSelectedShapeId(null);
     }
-  }, [activeTool]);
+  }, [activeTool, clearMultiSelection]);
 
   useEffect(() => {
     onSelectionChange?.(
@@ -1926,7 +2147,7 @@ export const NotebookPageStage: React.FC<Props> = ({
           selectedStickerId ||
           selectedStickyId ||
           selectedShapeId ||
-          selectedStrokeIds.length > 0
+          totalSelectedCount > 0
       )
     );
   }, [
@@ -1935,7 +2156,7 @@ export const NotebookPageStage: React.FC<Props> = ({
     selectedStickerId,
     selectedStickyId,
     selectedShapeId,
-    selectedStrokeIds,
+    totalSelectedCount,
     onSelectionChange,
   ]);
 
@@ -1963,7 +2184,7 @@ export const NotebookPageStage: React.FC<Props> = ({
       setSelectedImageId(null);
       setSelectedStickerId(null);
       setSelectedStickyId(null);
-      setSelectedStrokeIds([]);
+      clearMultiSelection();
       onCommitAnnotations(
         {
           ...latest,
@@ -1972,7 +2193,7 @@ export const NotebookPageStage: React.FC<Props> = ({
         true
       );
     },
-    [onCommitAnnotations]
+    [onCommitAnnotations, clearMultiSelection]
   );
 
   const handleUpdateShape = useCallback(
@@ -2031,7 +2252,7 @@ export const NotebookPageStage: React.FC<Props> = ({
       setSelectedStickerId(null);
       setSelectedStickyId(null);
       setSelectedShapeId(null);
-      setSelectedStrokeIds([]);
+      clearMultiSelection();
       onCommitAnnotations(
         {
           ...latest,
@@ -2040,7 +2261,7 @@ export const NotebookPageStage: React.FC<Props> = ({
         true
       );
     },
-    [onCommitAnnotations]
+    [onCommitAnnotations, clearMultiSelection]
   );
 
   const handleDuplicateEmbeddedImage = useCallback(
@@ -2061,7 +2282,7 @@ export const NotebookPageStage: React.FC<Props> = ({
       setSelectedStickerId(null);
       setSelectedStickyId(null);
       setSelectedShapeId(null);
-      setSelectedStrokeIds([]);
+      clearMultiSelection();
       onCommitAnnotations(
         {
           ...latest,
@@ -2070,7 +2291,7 @@ export const NotebookPageStage: React.FC<Props> = ({
         true
       );
     },
-    [onCommitAnnotations]
+    [onCommitAnnotations, clearMultiSelection]
   );
 
   const handleDuplicateSticker = useCallback(
@@ -2090,7 +2311,7 @@ export const NotebookPageStage: React.FC<Props> = ({
       setSelectedTextId(null);
       setSelectedStickyId(null);
       setSelectedShapeId(null);
-      setSelectedStrokeIds([]);
+      clearMultiSelection();
       onCommitAnnotations(
         {
           ...latest,
@@ -2099,7 +2320,7 @@ export const NotebookPageStage: React.FC<Props> = ({
         true
       );
     },
-    [onCommitAnnotations]
+    [onCommitAnnotations, clearMultiSelection]
   );
 
   const handleDuplicateSticky = useCallback(
@@ -2120,7 +2341,7 @@ export const NotebookPageStage: React.FC<Props> = ({
       setSelectedTextId(null);
       setSelectedStickerId(null);
       setSelectedShapeId(null);
-      setSelectedStrokeIds([]);
+      clearMultiSelection();
       onCommitAnnotations(
         {
           ...latest,
@@ -2129,7 +2350,7 @@ export const NotebookPageStage: React.FC<Props> = ({
         true
       );
     },
-    [onCommitAnnotations]
+    [onCommitAnnotations, clearMultiSelection]
   );
 
   const handleDuplicateSelectedStrokes = useCallback(() => {
@@ -2163,13 +2384,20 @@ export const NotebookPageStage: React.FC<Props> = ({
     );
   }, [selectedStrokeIds, onCommitAnnotations]);
 
-  const multiSelectionBounds = useMemo(() => {
-    if (totalSelectedCount <= 1) return null;
-    let minX = 100, minY = 100, maxX = 0, maxY = 0;
+  const multiSelectionBounds = useMemo((): BoxBounds | null => {
+    if (totalSelectedCount === 0) return null;
+
+    const currentAspect = surface ? surface.width / surface.height : 0.707;
+    let minX = 100,
+      minY = 100,
+      maxX = 0,
+      maxY = 0;
     let hasAny = false;
 
     if (selectedStrokeIds.length > 0) {
-      const b = getStrokesBounds(latestAnnotationsRef.current.strokes.filter(s => selectedStrokeIds.includes(s.id)));
+      const b = getStrokesBounds(
+        annotations.strokes.filter((s) => selectedStrokeIds.includes(s.id))
+      );
       if (b) {
         hasAny = true;
         minX = Math.min(minX, b.minX);
@@ -2178,69 +2406,84 @@ export const NotebookPageStage: React.FC<Props> = ({
         maxY = Math.max(maxY, b.maxY);
       }
     }
-    for (const sh of (latestAnnotationsRef.current.shapes || [])) {
+    for (const sh of annotations.shapes || []) {
       if (selectedShapeIds.includes(sh.id)) {
         hasAny = true;
-        const sx1 = Math.min(sh.x1, sh.x2);
-        const sx2 = Math.max(sh.x1, sh.x2);
-        const sy1 = Math.min(sh.y1, sh.y2);
-        const sy2 = Math.max(sh.y1, sh.y2);
-        minX = Math.min(minX, sx1);
-        minY = Math.min(minY, sy1);
-        maxX = Math.max(maxX, sx2);
-        maxY = Math.max(maxY, sy2);
+        const b = getShapeBounds(sh);
+        minX = Math.min(minX, b.minX);
+        minY = Math.min(minY, b.minY);
+        maxX = Math.max(maxX, b.maxX);
+        maxY = Math.max(maxY, b.maxY);
       }
     }
-    for (const t of (latestAnnotationsRef.current.textBoxes || [])) {
+    for (const t of annotations.textBoxes || []) {
       if (selectedTextBoxIds.includes(t.id)) {
         hasAny = true;
-        minX = Math.min(minX, t.x);
-        minY = Math.min(minY, t.y);
-        maxX = Math.max(maxX, t.x + 18);
-        maxY = Math.max(maxY, t.y + 8);
+        const b = getTextBoxBounds(t);
+        minX = Math.min(minX, b.minX);
+        minY = Math.min(minY, b.minY);
+        maxX = Math.max(maxX, b.maxX);
+        maxY = Math.max(maxY, b.maxY);
       }
     }
-    for (const n of latestAnnotationsRef.current.stickyNotes) {
+    for (const n of annotations.stickyNotes) {
       if (selectedStickyIds.includes(n.id)) {
         hasAny = true;
-        minX = Math.min(minX, n.x);
-        minY = Math.min(minY, n.y);
-        maxX = Math.max(maxX, n.x + 22);
-        maxY = Math.max(maxY, n.y + 16);
+        const b = getStickyBounds(n);
+        minX = Math.min(minX, b.minX);
+        minY = Math.min(minY, b.minY);
+        maxX = Math.max(maxX, b.maxX);
+        maxY = Math.max(maxY, b.maxY);
       }
     }
-    for (const stk of latestAnnotationsRef.current.stickers) {
+    for (const stk of annotations.stickers) {
       if (selectedStickerIds.includes(stk.id)) {
         hasAny = true;
-        minX = Math.min(minX, stk.x - 8);
-        minY = Math.min(minY, stk.y - 4);
-        maxX = Math.max(maxX, stk.x + 16);
-        maxY = Math.max(maxY, stk.y + 8);
+        const b = getStickerBounds(stk);
+        minX = Math.min(minX, b.minX);
+        minY = Math.min(minY, b.minY);
+        maxX = Math.max(maxX, b.maxX);
+        maxY = Math.max(maxY, b.maxY);
       }
     }
-    for (const img of (latestAnnotationsRef.current.images || [])) {
+    for (const img of annotations.images || []) {
       if (selectedImageIds.includes(img.id)) {
         hasAny = true;
-        minX = Math.min(minX, img.x - img.widthPct / 2);
-        minY = Math.min(minY, img.y - 10);
-        maxX = Math.max(maxX, img.x + img.widthPct / 2);
-        maxY = Math.max(maxY, img.y + 15);
+        const b = getImageBounds(img, currentAspect);
+        minX = Math.min(minX, b.minX);
+        minY = Math.min(minY, b.minY);
+        maxX = Math.max(maxX, b.maxX);
+        maxY = Math.max(maxY, b.maxY);
       }
     }
 
     if (!hasAny) return null;
     return {
-      minX: Math.max(0, minX),
-      minY: Math.max(0, minY),
-      maxX: Math.min(100, maxX),
-      maxY: Math.min(100, maxY),
+      minX: Math.max(0, minX - 0.8),
+      minY: Math.max(0, minY - 0.8),
+      maxX: Math.min(100, maxX + 0.8),
+      maxY: Math.min(100, maxY + 0.8),
     };
-  }, [totalSelectedCount, selectedStrokeIds, selectedShapeIds, selectedTextBoxIds, selectedStickyIds, selectedStickerIds, selectedImageIds]);
+  }, [
+    annotations,
+    surface,
+    totalSelectedCount,
+    selectedStrokeIds,
+    selectedShapeIds,
+    selectedTextBoxIds,
+    selectedStickyIds,
+    selectedStickerIds,
+    selectedImageIds,
+  ]);
 
   const handleMultiDuplicate = useCallback(() => {
     if (totalSelectedCount === 0) return;
     const latest = latestAnnotationsRef.current;
     const now = Date.now();
+
+    const b = multiSelectionBounds;
+    const dupDx = b ? Math.max(-2.5, Math.min(2.5, 99 - b.maxX)) || 1.5 : 2.5;
+    const dupDy = b ? Math.max(-2.5, Math.min(2.5, 99 - b.maxY)) || 1.5 : 2.5;
 
     const newStrokeIds: string[] = [];
     const newShapeIds: string[] = [];
@@ -2260,8 +2503,8 @@ export const NotebookPageStage: React.FC<Props> = ({
           id: newId,
           points: s.points.map((pt) => ({
             ...pt,
-            x: Math.min(99.5, +(pt.x + 2.5).toFixed(2)),
-            y: Math.min(99.5, +(pt.y + 2.5).toFixed(2)),
+            x: +(pt.x + dupDx).toFixed(2),
+            y: +(pt.y + dupDy).toFixed(2),
           })),
         };
       });
@@ -2274,10 +2517,10 @@ export const NotebookPageStage: React.FC<Props> = ({
         return {
           ...sh,
           id: newId,
-          x1: Math.min(98.5, +(sh.x1 + 2.5).toFixed(2)),
-          y1: Math.min(98.5, +(sh.y1 + 2.5).toFixed(2)),
-          x2: Math.min(98.5, +(sh.x2 + 2.5).toFixed(2)),
-          y2: Math.min(98.5, +(sh.y2 + 2.5).toFixed(2)),
+          x1: +(sh.x1 + dupDx).toFixed(2),
+          y1: +(sh.y1 + dupDy).toFixed(2),
+          x2: +(sh.x2 + dupDx).toFixed(2),
+          y2: +(sh.y2 + dupDy).toFixed(2),
           createdAt: Date.now(),
         };
       });
@@ -2290,8 +2533,8 @@ export const NotebookPageStage: React.FC<Props> = ({
         return {
           ...t,
           id: newId,
-          x: Math.min(85, +(t.x + 2.5).toFixed(2)),
-          y: Math.min(90, +(t.y + 2.5).toFixed(2)),
+          x: +(t.x + dupDx).toFixed(2),
+          y: +(t.y + dupDy).toFixed(2),
           runs: t.runs ? t.runs.map((r) => ({ ...r })) : undefined,
           createdAt: Date.now(),
         };
@@ -2305,8 +2548,8 @@ export const NotebookPageStage: React.FC<Props> = ({
         return {
           ...n,
           id: newId,
-          x: Math.min(82, +(n.x + 3).toFixed(2)),
-          y: Math.min(88, +(n.y + 3).toFixed(2)),
+          x: +(n.x + dupDx).toFixed(2),
+          y: +(n.y + dupDy).toFixed(2),
           createdAt: Date.now(),
         };
       });
@@ -2319,8 +2562,8 @@ export const NotebookPageStage: React.FC<Props> = ({
         return {
           ...stk,
           id: newId,
-          x: Math.min(92, +(stk.x + 3).toFixed(2)),
-          y: Math.min(92, +(stk.y + 3).toFixed(2)),
+          x: +(stk.x + dupDx).toFixed(2),
+          y: +(stk.y + dupDy).toFixed(2),
         };
       });
 
@@ -2332,8 +2575,8 @@ export const NotebookPageStage: React.FC<Props> = ({
         return {
           ...img,
           id: newId,
-          x: Math.min(92, +(img.x + 3).toFixed(2)),
-          y: Math.min(92, +(img.y + 3).toFixed(2)),
+          x: +(img.x + dupDx).toFixed(2),
+          y: +(img.y + dupDy).toFixed(2),
           createdAt: Date.now(),
         };
       });
@@ -2359,6 +2602,7 @@ export const NotebookPageStage: React.FC<Props> = ({
     );
   }, [
     totalSelectedCount,
+    multiSelectionBounds,
     selectedStrokeIds,
     selectedShapeIds,
     selectedTextBoxIds,
@@ -2386,12 +2630,7 @@ export const NotebookPageStage: React.FC<Props> = ({
       true
     );
 
-    setSelectedStrokeIds([]);
-    setSelectedShapeIds([]);
-    setSelectedTextBoxIds([]);
-    setSelectedStickyIds([]);
-    setSelectedStickerIds([]);
-    setSelectedImageIds([]);
+    clearMultiSelection();
     setSelectedShapeId(null);
     setSelectedTextId(null);
     setSelectedStickyId(null);
@@ -2405,6 +2644,7 @@ export const NotebookPageStage: React.FC<Props> = ({
     selectedStickyIds,
     selectedStickerIds,
     selectedImageIds,
+    clearMultiSelection,
     onCommitAnnotations,
   ]);
 
@@ -2413,22 +2653,12 @@ export const NotebookPageStage: React.FC<Props> = ({
     const seq = deleteSelectionSignal ?? 0;
     if (seq === 0 || seq === lastDeleteSignalRef.current) return;
     lastDeleteSignalRef.current = seq;
-    if (totalSelectedCount > 1) {
+    if (totalSelectedCount > 0) {
       handleMultiDelete();
       return;
     }
     const latest = latestAnnotationsRef.current;
-    if (selectedStrokeIds.length > 0) {
-      const idSet = new Set(selectedStrokeIds);
-      onCommitAnnotations(
-        {
-          ...latest,
-          strokes: latest.strokes.filter((s) => !idSet.has(s.id)),
-        },
-        true
-      );
-      setSelectedStrokeIds([]);
-    } else if (selectedShapeId) {
+    if (selectedShapeId) {
       onCommitAnnotations(
         {
           ...latest,
@@ -2476,7 +2706,8 @@ export const NotebookPageStage: React.FC<Props> = ({
     }
   }, [
     deleteSelectionSignal,
-    selectedStrokeIds,
+    totalSelectedCount,
+    handleMultiDelete,
     selectedShapeId,
     selectedImageId,
     selectedTextId,
@@ -2490,12 +2721,9 @@ export const NotebookPageStage: React.FC<Props> = ({
     const seq = duplicateSelectionSignal ?? 0;
     if (seq === 0 || seq === lastDuplicateSignalRef.current) return;
     lastDuplicateSignalRef.current = seq;
-    if (totalSelectedCount > 1) {
+    if (totalSelectedCount > 0) {
       handleMultiDuplicate();
       return;
-    }
-    if (selectedStrokeIds.length > 0) {
-      handleDuplicateSelectedStrokes();
     } else if (selectedShapeId) {
       handleDuplicateShape(selectedShapeId);
     } else if (selectedImageId) {
@@ -2509,12 +2737,19 @@ export const NotebookPageStage: React.FC<Props> = ({
     }
   }, [
     duplicateSelectionSignal,
+    totalSelectedCount,
     selectedStrokeIds,
+    selectedShapeIds,
+    selectedTextBoxIds,
+    selectedStickyIds,
+    selectedStickerIds,
+    selectedImageIds,
     selectedShapeId,
     selectedImageId,
     selectedTextId,
     selectedStickerId,
     selectedStickyId,
+    handleMultiDuplicate,
     handleDuplicateSelectedStrokes,
     handleDuplicateShape,
     handleDuplicateEmbeddedImage,
@@ -2533,9 +2768,9 @@ export const NotebookPageStage: React.FC<Props> = ({
     setSelectedStickerId(null);
     setSelectedStickyId(null);
     setSelectedShapeId(null);
-    setSelectedStrokeIds([]);
+    clearMultiSelection();
     setLassoPath([]);
-  }, [clearSelectionSignal]);
+  }, [clearSelectionSignal, clearMultiSelection]);
 
   // Dragging state for Sticky Notes, Stickers, Text Boxes & Embedded Images
   const dragItemRef = useRef<{
@@ -2929,6 +3164,101 @@ export const NotebookPageStage: React.FC<Props> = ({
     }
   }, [isBrushHoverTool]);
 
+  const startShiftGesture = (
+    e: React.PointerEvent<Element>,
+    hitTarget?: {
+      kind: 'stroke' | 'shape' | 'text' | 'sticky' | 'sticker' | 'image';
+      id: string;
+    }
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    activePointerIdRef.current = e.pointerId;
+    try {
+      stageRef.current?.setPointerCapture(e.pointerId);
+    } catch {}
+    shiftTargetOnDownRef.current = hitTarget ?? null;
+    isMarqueeDrawingRef.current = true;
+    const ptStart = toNormalizedPoint(e.clientX, e.clientY, e.pressure, e.pointerType);
+    if (ptStart) {
+      marqueeStartRef.current = ptStart;
+      setMarqueeRect({ x1: ptStart.x, y1: ptStart.y, x2: ptStart.x, y2: ptStart.y });
+    }
+  };
+
+  const startMultiDragSession = (e: React.PointerEvent<Element>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    try {
+      stageRef.current?.setPointerCapture(e.pointerId);
+    } catch {}
+    dragMultiRef.current = {
+      startClientX: e.clientX,
+      startClientY: e.clientY,
+      hasMoved: false,
+      origSnapshot: latestAnnotationsRef.current,
+      origBounds: multiSelectionBounds ?? { minX: 2, minY: 2, maxX: 98, maxY: 98 },
+    };
+  };
+
+  const findTopElementAtPoint = (pt: {
+    x: number;
+    y: number;
+  }): {
+    kind: 'stroke' | 'shape' | 'text' | 'sticky' | 'sticker' | 'image';
+    id: string;
+  } | null => {
+    const latest = latestAnnotationsRef.current;
+    const currentAspect = surface ? surface.width / surface.height : 0.707;
+
+    for (let i = latest.stickyNotes.length - 1; i >= 0; i--) {
+      const n = latest.stickyNotes[i];
+      if (isPointInBox(pt, getStickyBounds(n))) {
+        return { kind: 'sticky', id: n.id };
+      }
+    }
+    const shapes = latest.shapes || [];
+    for (let i = shapes.length - 1; i >= 0; i--) {
+      const sh = shapes[i];
+      if (isPointOnShape(pt, sh, currentAspect)) {
+        return { kind: 'shape', id: sh.id };
+      }
+    }
+    for (let i = latest.strokes.length - 1; i >= 0; i--) {
+      const s = latest.strokes[i];
+      if (isPointNearStroke(pt, s, Math.max(1.8, s.width * 0.85), currentAspect)) {
+        return { kind: 'stroke', id: s.id };
+      }
+    }
+    const textBoxes = latest.textBoxes || [];
+    for (let i = textBoxes.length - 1; i >= 0; i--) {
+      const t = textBoxes[i];
+      if (isPointInBox(pt, getTextBoxBounds(t))) {
+        return { kind: 'text', id: t.id };
+      }
+    }
+    for (let i = latest.stickers.length - 1; i >= 0; i--) {
+      const stk = latest.stickers[i];
+      if (isPointInBox(pt, getStickerBounds(stk))) {
+        return { kind: 'sticker', id: stk.id };
+      }
+    }
+    const images = latest.images || [];
+    for (let i = images.length - 1; i >= 0; i--) {
+      const img = images[i];
+      if (isPointInBox(pt, getImageBounds(img, currentAspect))) {
+        return { kind: 'image', id: img.id };
+      }
+    }
+    return null;
+  };
+
   const handleStagePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     updateBrushHoverPos(e.clientX, e.clientY, e.pointerType);
     // Only handle primary button / touch / stylus (allow Apple Pencil eraser button 5 / 32)
@@ -2946,17 +3276,7 @@ export const NotebookPageStage: React.FC<Props> = ({
     }
 
     if (e.shiftKey) {
-      e.preventDefault();
-      activePointerIdRef.current = e.pointerId;
-      try {
-        e.currentTarget.setPointerCapture(e.pointerId);
-      } catch {}
-      isMarqueeDrawingRef.current = true;
-      const ptStart = toNormalizedPoint(e.clientX, e.clientY, e.pressure, e.pointerType);
-      if (ptStart) {
-        marqueeStartRef.current = ptStart;
-        setMarqueeRect({ x1: ptStart.x, y1: ptStart.y, x2: ptStart.x, y2: ptStart.y });
-      }
+      startShiftGesture(e);
       return;
     }
 
@@ -2966,12 +3286,7 @@ export const NotebookPageStage: React.FC<Props> = ({
     setSelectedImageId(null);
     setSelectedStickyId(null);
     setSelectedShapeId(null);
-    setSelectedStrokeIds([]);
-    setSelectedShapeIds([]);
-    setSelectedTextBoxIds([]);
-    setSelectedStickyIds([]);
-    setSelectedStickerIds([]);
-    setSelectedImageIds([]);
+    clearMultiSelection();
 
     const effectiveTool: NotebookTool = isStylusEraser ? 'eraser' : activeTool;
 
@@ -3186,76 +3501,86 @@ export const NotebookPageStage: React.FC<Props> = ({
       e.preventDefault();
       const rect = stageRef.current.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
-      const dxPct = ((e.clientX - dragMultiRef.current.startClientX) / rect.width) * 100;
-      const dyPct = ((e.clientY - dragMultiRef.current.startClientY) / rect.height) * 100;
-      if (Math.abs(dxPct) > 0.06 || Math.abs(dyPct) > 0.06) {
+      const rawDxPct = ((e.clientX - dragMultiRef.current.startClientX) / rect.width) * 100;
+      const rawDyPct = ((e.clientY - dragMultiRef.current.startClientY) / rect.height) * 100;
+      if (Math.abs(rawDxPct) > 0.06 || Math.abs(rawDyPct) > 0.06) {
         dragMultiRef.current.hasMoved = true;
       }
-      const latest = latestAnnotationsRef.current;
-      const strokeIdSet = new Set(selectedStrokeIds);
 
-      const nextStrokes = latest.strokes.map((s) => {
+      const orig = dragMultiRef.current.origSnapshot;
+      const ob = dragMultiRef.current.origBounds;
+      const dxPct = Math.max(0.4 - ob.minX, Math.min(99.6 - ob.maxX, rawDxPct));
+      const dyPct = Math.max(0.4 - ob.minY, Math.min(99.6 - ob.maxY, rawDyPct));
+
+      const strokeIdSet = new Set(selectedStrokeIds);
+      const shapeIdSet = new Set(selectedShapeIds);
+      const textIdSet = new Set(selectedTextBoxIds);
+      const stickyIdSet = new Set(selectedStickyIds);
+      const stickerIdSet = new Set(selectedStickerIds);
+      const imageIdSet = new Set(selectedImageIds);
+
+      const nextStrokes = orig.strokes.map((s) => {
         if (!strokeIdSet.has(s.id)) return s;
         return {
           ...s,
           points: s.points.map((pt) => ({
             ...pt,
-            x: Math.max(0.2, Math.min(99.8, +(pt.x + dxPct).toFixed(2))),
-            y: Math.max(0.2, Math.min(99.8, +(pt.y + dyPct).toFixed(2))),
+            x: +(pt.x + dxPct).toFixed(2),
+            y: +(pt.y + dyPct).toFixed(2),
           })),
         };
       });
 
-      const nextShapes = (latest.shapes || []).map((sh) => {
-        if (!selectedShapeIds.includes(sh.id)) return sh;
+      const nextShapes = (orig.shapes || []).map((sh) => {
+        if (!shapeIdSet.has(sh.id)) return sh;
         return {
           ...sh,
-          x1: Math.max(0.4, Math.min(99.6, +(sh.x1 + dxPct).toFixed(2))),
-          y1: Math.max(0.4, Math.min(99.6, +(sh.y1 + dyPct).toFixed(2))),
-          x2: Math.max(0.4, Math.min(99.6, +(sh.x2 + dxPct).toFixed(2))),
-          y2: Math.max(0.4, Math.min(99.6, +(sh.y2 + dyPct).toFixed(2))),
+          x1: +(sh.x1 + dxPct).toFixed(2),
+          y1: +(sh.y1 + dyPct).toFixed(2),
+          x2: +(sh.x2 + dxPct).toFixed(2),
+          y2: +(sh.y2 + dyPct).toFixed(2),
         };
       });
 
-      const nextTextBoxes = (latest.textBoxes || []).map((t) => {
-        if (!selectedTextBoxIds.includes(t.id)) return t;
+      const nextTextBoxes = (orig.textBoxes || []).map((t) => {
+        if (!textIdSet.has(t.id)) return t;
         return {
           ...t,
-          x: Math.max(2, Math.min(95, +(t.x + dxPct).toFixed(2))),
-          y: Math.max(2, Math.min(95, +(t.y + dyPct).toFixed(2))),
+          x: +(t.x + dxPct).toFixed(2),
+          y: +(t.y + dyPct).toFixed(2),
         };
       });
 
-      const nextStickyNotes = latest.stickyNotes.map((n) => {
-        if (!selectedStickyIds.includes(n.id)) return n;
+      const nextStickyNotes = orig.stickyNotes.map((n) => {
+        if (!stickyIdSet.has(n.id)) return n;
         return {
           ...n,
-          x: Math.max(2, Math.min(95, +(n.x + dxPct).toFixed(2))),
-          y: Math.max(2, Math.min(95, +(n.y + dyPct).toFixed(2))),
+          x: +(n.x + dxPct).toFixed(2),
+          y: +(n.y + dyPct).toFixed(2),
         };
       });
 
-      const nextStickers = latest.stickers.map((stk) => {
-        if (!selectedStickerIds.includes(stk.id)) return stk;
+      const nextStickers = orig.stickers.map((stk) => {
+        if (!stickerIdSet.has(stk.id)) return stk;
         return {
           ...stk,
-          x: Math.max(2, Math.min(95, +(stk.x + dxPct).toFixed(2))),
-          y: Math.max(2, Math.min(95, +(stk.y + dyPct).toFixed(2))),
+          x: +(stk.x + dxPct).toFixed(2),
+          y: +(stk.y + dyPct).toFixed(2),
         };
       });
 
-      const nextImages = (latest.images || []).map((img) => {
-        if (!selectedImageIds.includes(img.id)) return img;
+      const nextImages = (orig.images || []).map((img) => {
+        if (!imageIdSet.has(img.id)) return img;
         return {
           ...img,
-          x: Math.max(2, Math.min(95, +(img.x + dxPct).toFixed(2))),
-          y: Math.max(2, Math.min(95, +(img.y + dyPct).toFixed(2))),
+          x: +(img.x + dxPct).toFixed(2),
+          y: +(img.y + dyPct).toFixed(2),
         };
       });
 
       onCommitAnnotations(
         {
-          ...latest,
+          ...orig,
           strokes: nextStrokes,
           shapes: nextShapes,
           textBoxes: nextTextBoxes,
@@ -3686,37 +4011,84 @@ export const NotebookPageStage: React.FC<Props> = ({
     if (isMarqueeDrawingRef.current && marqueeRect) {
       isMarqueeDrawingRef.current = false;
       const rect = marqueeRect;
+      const downTarget = shiftTargetOnDownRef.current;
+      shiftTargetOnDownRef.current = null;
       setMarqueeRect(null);
       marqueeStartRef.current = null;
+      activePointerIdRef.current = null;
       try {
-        e.currentTarget.releasePointerCapture(e.pointerId);
+        stageRef.current?.releasePointerCapture(e.pointerId);
       } catch {}
 
-      const matchedStrokes = latestAnnotationsRef.current.strokes
-        .filter((s) => s.points.some((pt) => isPointInRect(pt, rect)))
+      const dragSpan = Math.hypot(rect.x2 - rect.x1, rect.y2 - rect.y1);
+      if (dragSpan < 0.85) {
+        const hit = downTarget ?? findTopElementAtPoint({ x: rect.x2, y: rect.y2 });
+        if (hit) {
+          toggleElementInMultiSelection(hit.kind, hit.id);
+        }
+        return;
+      }
+
+      const mBox: BoxBounds = {
+        minX: Math.min(rect.x1, rect.x2),
+        minY: Math.min(rect.y1, rect.y2),
+        maxX: Math.max(rect.x1, rect.x2),
+        maxY: Math.max(rect.y1, rect.y2),
+      };
+      const currentAspect = surface ? surface.width / surface.height : 0.707;
+      const latest = latestAnnotationsRef.current;
+
+      const matchedStrokes = latest.strokes
+        .filter((s) =>
+          s.points.some((pt, idx) => {
+            if (isPointInBox(pt, mBox)) return true;
+            if (idx < s.points.length - 1) {
+              const mid = {
+                x: (pt.x + s.points[idx + 1].x) / 2,
+                y: (pt.y + s.points[idx + 1].y) / 2,
+              };
+              if (isPointInBox(mid, mBox)) return true;
+            }
+            return false;
+          })
+        )
         .map((s) => s.id);
-      const matchedShapes = (latestAnnotationsRef.current.shapes || [])
-        .filter((sh) => isPointInRect({ x: sh.x1, y: sh.y1 }, rect) || isPointInRect({ x: sh.x2, y: sh.y2 }, rect))
+      const matchedShapes = (latest.shapes || [])
+        .filter((sh) => boxesOverlap(getShapeBounds(sh), mBox))
         .map((sh) => sh.id);
-      const matchedTexts = (latestAnnotationsRef.current.textBoxes || [])
-        .filter((t) => isPointInRect({ x: t.x, y: t.y }, rect))
+      const matchedTexts = (latest.textBoxes || [])
+        .filter((t) => boxesOverlap(getTextBoxBounds(t), mBox))
         .map((t) => t.id);
-      const matchedStickies = latestAnnotationsRef.current.stickyNotes
-        .filter((n) => isPointInRect({ x: n.x, y: n.y }, rect))
+      const matchedStickies = latest.stickyNotes
+        .filter((n) => boxesOverlap(getStickyBounds(n), mBox))
         .map((n) => n.id);
-      const matchedStickers = latestAnnotationsRef.current.stickers
-        .filter((stk) => isPointInRect({ x: stk.x, y: stk.y }, rect))
+      const matchedStickers = latest.stickers
+        .filter((stk) => boxesOverlap(getStickerBounds(stk), mBox))
         .map((stk) => stk.id);
-      const matchedImages = (latestAnnotationsRef.current.images || [])
-        .filter((img) => isPointInRect({ x: img.x, y: img.y }, rect))
+      const matchedImages = (latest.images || [])
+        .filter((img) => boxesOverlap(getImageBounds(img, currentAspect), mBox))
         .map((img) => img.id);
 
-      setSelectedStrokeIds((prev) => Array.from(new Set([...prev, ...matchedStrokes])));
-      setSelectedShapeIds((prev) => Array.from(new Set([...prev, ...matchedShapes])));
-      setSelectedTextBoxIds((prev) => Array.from(new Set([...prev, ...matchedTexts])));
-      setSelectedStickyIds((prev) => Array.from(new Set([...prev, ...matchedStickies])));
-      setSelectedStickerIds((prev) => Array.from(new Set([...prev, ...matchedStickers])));
-      setSelectedImageIds((prev) => Array.from(new Set([...prev, ...matchedImages])));
+      const seeded = getSeededMultiSelection();
+      matchedStrokes.forEach((id) => seeded.strokes.add(id));
+      matchedShapes.forEach((id) => seeded.shapes.add(id));
+      matchedTexts.forEach((id) => seeded.texts.add(id));
+      matchedStickies.forEach((id) => seeded.stickies.add(id));
+      matchedStickers.forEach((id) => seeded.stickers.add(id));
+      matchedImages.forEach((id) => seeded.images.add(id));
+
+      setSelectedShapeId(null);
+      setSelectedTextId(null);
+      setSelectedStickyId(null);
+      setSelectedStickerId(null);
+      setSelectedImageId(null);
+
+      setSelectedStrokeIds(Array.from(seeded.strokes));
+      setSelectedShapeIds(Array.from(seeded.shapes));
+      setSelectedTextBoxIds(Array.from(seeded.texts));
+      setSelectedStickyIds(Array.from(seeded.stickies));
+      setSelectedStickerIds(Array.from(seeded.stickers));
+      setSelectedImageIds(Array.from(seeded.images));
       return;
     }
 
@@ -4310,7 +4682,10 @@ export const NotebookPageStage: React.FC<Props> = ({
     (activeTool === 'hand' || activeTool === 'pen' || activeTool === 'highlighter');
 
   const selectedShape =
-    selectedShapeId && activeTool !== 'eraser' && activeTool !== 'lasso'
+    selectedShapeId &&
+    !selectedShapeIds.includes(selectedShapeId) &&
+    activeTool !== 'eraser' &&
+    activeTool !== 'lasso'
       ? (annotations.shapes || []).find((sh) => sh.id === selectedShapeId) ?? null
       : null;
 
@@ -4319,6 +4694,15 @@ export const NotebookPageStage: React.FC<Props> = ({
     mode: 'move' | 'p1' | 'p2' | 'nw' | 'ne' | 'sw' | 'se',
     e: React.PointerEvent<Element>
   ) => {
+    if (e.shiftKey) {
+      startShiftGesture(e, { kind: 'shape', id: shape.id });
+      return;
+    }
+    if (mode === 'move' && selectedShapeIds.includes(shape.id)) {
+      startMultiDragSession(e);
+      return;
+    }
+    clearMultiSelection();
     setSelectedShapeId(shape.id);
     setSelectedImageId(null);
     setSelectedTextId(null);
@@ -4364,13 +4748,6 @@ export const NotebookPageStage: React.FC<Props> = ({
       : activeTool === 'eraser'
       ? Math.max(6, (eraserWidth / 100) * displayWidth)
       : 0;
-
-  const selectedStrokesBounds =
-    selectedStrokeIds.length > 0
-      ? getStrokesBounds(
-          annotations.strokes.filter((s) => selectedStrokeIds.includes(s.id))
-        )
-      : null;
 
   return (
     <div className="flex justify-center items-start min-h-full py-4 sm:py-6 px-2 sm:px-6">
@@ -4563,35 +4940,44 @@ export const NotebookPageStage: React.FC<Props> = ({
 
         {/* Layer 1.5: Interactive Embedded Images (on custom & existing pages) */}
         <div className="absolute inset-0 z-[5] pointer-events-none">
-          {(annotations.images || []).map((imgEl) => (
-            <EmbeddedImageOverlayItem
-              key={imgEl.id}
-              item={imgEl}
-              isInteractive={activeTool === 'hand'}
-              isSelected={selectedImageId === imgEl.id}
-              onSelect={() => {
-                setSelectedImageId(imgEl.id);
-                setSelectedTextId(null);
-                setSelectedStickerId(null);
-                setSelectedStickyId(null);
-                setSelectedShapeId(null);
-                setSelectedStrokeIds([]);
-              }}
-              onStartDrag={(e) => {
-                try {
-                  stageRef.current?.setPointerCapture(e.pointerId);
-                } catch {}
-                dragItemRef.current = {
-                  kind: 'image',
-                  id: imgEl.id,
-                  startClientX: e.clientX,
-                  startClientY: e.clientY,
-                  origX: imgEl.x,
-                  origY: imgEl.y,
-                  hasMoved: false,
-                  origSnapshot: latestAnnotationsRef.current,
-                };
-              }}
+          {(annotations.images || []).map((imgEl) => {
+            const isMultiSelected = selectedImageIds.includes(imgEl.id);
+            return (
+              <EmbeddedImageOverlayItem
+                key={imgEl.id}
+                item={imgEl}
+                isInteractive={!isDrawTool}
+                isSelected={selectedImageId === imgEl.id && !isMultiSelected}
+                isMultiSelected={isMultiSelected}
+                onShiftPointerDown={(e) => startShiftGesture(e, { kind: 'image', id: imgEl.id })}
+                onSelect={() => {
+                  clearMultiSelection();
+                  setSelectedImageId(imgEl.id);
+                  setSelectedTextId(null);
+                  setSelectedStickerId(null);
+                  setSelectedStickyId(null);
+                  setSelectedShapeId(null);
+                  setSelectedStrokeIds([]);
+                }}
+                onStartDrag={(e) => {
+                  if (isMultiSelected) {
+                    startMultiDragSession(e);
+                    return;
+                  }
+                  try {
+                    stageRef.current?.setPointerCapture(e.pointerId);
+                  } catch {}
+                  dragItemRef.current = {
+                    kind: 'image',
+                    id: imgEl.id,
+                    startClientX: e.clientX,
+                    startClientY: e.clientY,
+                    origX: imgEl.x,
+                    origY: imgEl.y,
+                    hasMoved: false,
+                    origSnapshot: latestAnnotationsRef.current,
+                  };
+                }}
               onStartResize={(e) => {
                 try {
                   stageRef.current?.setPointerCapture(e.pointerId);
@@ -4619,7 +5005,8 @@ export const NotebookPageStage: React.FC<Props> = ({
               onDuplicate={() => handleDuplicateEmbeddedImage(imgEl.id)}
               onDelete={() => handleDeleteEmbeddedImage(imgEl.id)}
             />
-          ))}
+          );
+        })}
         </div>
 
         {activeCropImage && (
@@ -4707,7 +5094,8 @@ export const NotebookPageStage: React.FC<Props> = ({
           {annotations.stickers.map((sticker) => {
             const preset = NOTEBOOK_STICKERS.find((p) => p.type === sticker.type);
             if (!preset) return null;
-            const isSelected = selectedStickerId === sticker.id;
+            const isMultiSelected = selectedStickerIds.includes(sticker.id);
+            const isSelected = selectedStickerId === sticker.id && !isMultiSelected;
             const currentScale = sticker.scale ?? 1;
             const currentOpacity = sticker.opacity ?? 1;
             const transparencyPct = Math.round((1 - currentOpacity) * 100);
@@ -4725,7 +5113,18 @@ export const NotebookPageStage: React.FC<Props> = ({
                 style={{ left: `${sticker.x}%`, top: `${sticker.y}%` }}
                 onPointerDown={(e) => {
                   if (isDrawTool) return;
+                  if (e.shiftKey) {
+                    e.stopPropagation();
+                    startShiftGesture(e, { kind: 'sticker', id: sticker.id });
+                    return;
+                  }
+                  if (isMultiSelected) {
+                    e.stopPropagation();
+                    startMultiDragSession(e);
+                    return;
+                  }
                   e.stopPropagation();
+                  clearMultiSelection();
                   setSelectedStickerId(sticker.id);
                   setSelectedImageId(null);
                   setSelectedTextId(null);
@@ -4747,7 +5146,7 @@ export const NotebookPageStage: React.FC<Props> = ({
                   };
                 }}
                 className={`absolute pointer-events-auto -translate-x-1/2 -translate-y-1/2 group select-none ${
-                  isSelected ? 'z-30' : ''
+                  isSelected || isMultiSelected ? 'z-30' : ''
                 } ${
                   isDrawTool
                     ? 'pointer-events-none opacity-90'
@@ -4868,7 +5267,7 @@ export const NotebookPageStage: React.FC<Props> = ({
                   className={`relative inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border-2 shadow-sm transition-shadow ${
                     preset.bgClass
                   } ${preset.borderClass} ${preset.textClass} ${
-                    isSelected ? 'ring-2 ring-indigo-500' : 'hover:ring-2 hover:ring-indigo-300'
+                    isSelected || isMultiSelected ? 'ring-2 ring-indigo-500' : 'hover:ring-2 hover:ring-indigo-300'
                   }`}
                 >
                   <span className="text-sm leading-none">{preset.symbol}</span>
@@ -4876,7 +5275,7 @@ export const NotebookPageStage: React.FC<Props> = ({
                     {preset.shortLabel}
                   </span>
 
-                  {!isSelected && !isDrawTool && (
+                  {!isSelected && !isMultiSelected && !isDrawTool && (
                     <button
                       type="button"
                       onPointerDown={(e) => e.stopPropagation()}
@@ -4901,6 +5300,7 @@ export const NotebookPageStage: React.FC<Props> = ({
         <div className="absolute inset-0 z-[25] pointer-events-none">
           {(annotations.textBoxes || []).map((box) => {
             const fontSizePx = Math.max(11, Math.round((displayWidth * box.fontSize) / 100));
+            const isMultiSelected = selectedTextBoxIds.includes(box.id);
             return (
               <TextBoxOverlayItem
                 key={box.id}
@@ -4908,9 +5308,12 @@ export const NotebookPageStage: React.FC<Props> = ({
                 fontSizePx={fontSizePx}
                 paperPalette={paperPalette}
                 isDrawTool={isDrawTool}
-                isSelected={selectedTextId === box.id}
+                isSelected={selectedTextId === box.id && !isMultiSelected}
+                isMultiSelected={isMultiSelected}
                 autoFocus={autoFocusTextId === box.id}
+                onShiftPointerDown={(e) => startShiftGesture(e, { kind: 'text', id: box.id })}
                 onSelect={() => {
+                  clearMultiSelection();
                   setSelectedTextId(box.id);
                   setSelectedImageId(null);
                   setSelectedStickerId(null);
@@ -4923,6 +5326,10 @@ export const NotebookPageStage: React.FC<Props> = ({
                   if (autoFocusTextId === box.id) setAutoFocusTextId(null);
                 }}
                 onStartDrag={(e) => {
+                  if (isMultiSelected) {
+                    startMultiDragSession(e);
+                    return;
+                  }
                   try {
                     stageRef.current?.setPointerCapture(e.pointerId);
                   } catch {}
@@ -5292,28 +5699,53 @@ export const NotebookPageStage: React.FC<Props> = ({
           </svg>
         )}
 
+        {/* Visual outline highlights for multi-selected shapes */}
+        {selectedShapeIds.length > 0 && (
+          <svg
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            className="absolute inset-0 w-full h-full pointer-events-none z-[31]"
+          >
+            {(annotations.shapes || [])
+              .filter((sh) => selectedShapeIds.includes(sh.id))
+              .map((sh) => {
+                const b = getShapeBounds(sh);
+                return (
+                  <rect
+                    key={`shape-hi-${sh.id}`}
+                    x={b.minX - 0.4}
+                    y={b.minY - 0.4}
+                    width={Math.max(0.8, b.maxX - b.minX + 0.8)}
+                    height={Math.max(0.8, b.maxY - b.minY + 0.8)}
+                    fill="rgba(79, 70, 229, 0.05)"
+                    stroke="#4f46e5"
+                    strokeWidth={0.3}
+                    strokeDasharray="1.1 0.8"
+                    rx={0.6}
+                  />
+                );
+              })}
+          </svg>
+        )}
+
         {/* Multi-Selection Aggregate Bounding Box & Floating Action Bar */}
-        {multiSelectionBounds && totalSelectedCount > 1 && !isLassoDrawingRef.current && (
+        {multiSelectionBounds && totalSelectedCount > 0 && !isLassoDrawingRef.current && (
           <div
             style={{
               left: `${multiSelectionBounds.minX}%`,
               top: `${multiSelectionBounds.minY}%`,
-              width: `${Math.max(3, multiSelectionBounds.maxX - multiSelectionBounds.minX)}%`,
-              height: `${Math.max(3, multiSelectionBounds.maxY - multiSelectionBounds.minY)}%`,
+              width: `${Math.max(2, multiSelectionBounds.maxX - multiSelectionBounds.minX)}%`,
+              height: `${Math.max(2, multiSelectionBounds.maxY - multiSelectionBounds.minY)}%`,
             }}
             onPointerDown={(e) => {
               e.stopPropagation();
-              try {
-                stageRef.current?.setPointerCapture(e.pointerId);
-              } catch {}
-              dragMultiRef.current = {
-                startClientX: e.clientX,
-                startClientY: e.clientY,
-                hasMoved: false,
-                origSnapshot: latestAnnotationsRef.current,
-              };
+              if (e.shiftKey) {
+                startShiftGesture(e);
+                return;
+              }
+              startMultiDragSession(e);
             }}
-            title="Ziehen, um alle markierten Elemente gemeinsam zu verschieben"
+            title="Ziehen, um alle markierten Elemente gemeinsam zu verschieben (Shift halten für Auswahl)"
             className="absolute z-[32] pointer-events-auto border-2 border-dashed border-indigo-500 bg-indigo-500/[0.06] rounded-md cursor-move"
           >
             <div
@@ -5323,8 +5755,29 @@ export const NotebookPageStage: React.FC<Props> = ({
               } flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900/95 text-white shadow-xl border border-slate-700/90 text-[10px] font-bold whitespace-nowrap z-40 cursor-default`}
             >
               <span className="text-indigo-300 tabular-nums">
-                {totalSelectedCount} Elemente markiert
+                {totalSelectedCount}{' '}
+                {totalSelectedCount === 1 ? 'Element markiert' : 'Elemente markiert'}
               </span>
+              {selectedStrokeIds.length > 0 && (
+                <>
+                  <span className="text-slate-600">|</span>
+                  <div className="flex items-center gap-1">
+                    {PEN_COLORS.slice(0, 6).map((sw) => (
+                      <button
+                        key={sw.id}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRecolorSelectedStrokes(sw.color);
+                        }}
+                        title={`Strichfarbe ändern: ${sw.label}`}
+                        style={{ backgroundColor: sw.color }}
+                        className="w-3.5 h-3.5 rounded-full border border-white/50 hover:scale-110 transition-transform cursor-pointer"
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
               <span className="text-slate-600">|</span>
               <button
                 type="button"
@@ -5353,7 +5806,7 @@ export const NotebookPageStage: React.FC<Props> = ({
           </div>
         )}
 
-        {/* Layer 3.9: Lasso Loop Preview & Selected Strokes Interactive Bounding Box */}
+        {/* Layer 3.9: Lasso Loop Preview */}
         {lassoPath.length >= 2 && (
           <svg
             viewBox="0 0 100 100"
@@ -5370,104 +5823,17 @@ export const NotebookPageStage: React.FC<Props> = ({
           </svg>
         )}
 
-        {selectedStrokesBounds && !isLassoDrawingRef.current && (
-          <div
-            style={{
-              left: `${selectedStrokesBounds.minX}%`,
-              top: `${selectedStrokesBounds.minY}%`,
-              width: `${Math.max(2, selectedStrokesBounds.maxX - selectedStrokesBounds.minX)}%`,
-              height: `${Math.max(2, selectedStrokesBounds.maxY - selectedStrokesBounds.minY)}%`,
-            }}
-            onPointerDown={(e) => {
-              e.stopPropagation();
-              try {
-                stageRef.current?.setPointerCapture(e.pointerId);
-              } catch {}
-              const idSet = new Set(selectedStrokeIds);
-              const origPointsById = new Map<string, StrokePoint[]>();
-              for (const s of latestAnnotationsRef.current.strokes) {
-                if (idSet.has(s.id)) {
-                  origPointsById.set(
-                    s.id,
-                    s.points.map((pt) => ({ ...pt }))
-                  );
-                }
-              }
-              dragStrokesRef.current = {
-                strokeIds: idSet,
-                startClientX: e.clientX,
-                startClientY: e.clientY,
-                origPointsById,
-                hasMoved: false,
-                origSnapshot: latestAnnotationsRef.current,
-              };
-            }}
-            title="Ziehen, um markierte Striche gemeinsam zu verschieben"
-            className="absolute z-[29] pointer-events-auto border-2 border-dashed border-indigo-500 bg-indigo-500/[0.06] rounded-md cursor-move"
-          >
-            {/* Floating Action Bar for Lasso Selection */}
-            <div
-              onPointerDown={(e) => e.stopPropagation()}
-              className={`absolute left-1/2 -translate-x-1/2 ${
-                selectedStrokesBounds.minY < 14 ? 'top-full mt-2' : 'bottom-full mb-2'
-              } flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900/95 text-white shadow-xl border border-slate-700/90 text-[10px] font-bold whitespace-nowrap z-40 cursor-default`}
-            >
-              <span className="text-indigo-300 tabular-nums">
-                {selectedStrokeIds.length} {selectedStrokeIds.length === 1 ? 'Strich' : 'Striche'}
-              </span>
-              <span className="text-slate-600">|</span>
-              <div className="flex items-center gap-1">
-                {PEN_COLORS.slice(0, 6).map((sw) => (
-                  <button
-                    key={sw.id}
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRecolorSelectedStrokes(sw.color);
-                    }}
-                    title={`Farbe ändern: ${sw.label}`}
-                    style={{ backgroundColor: sw.color }}
-                    className="w-3.5 h-3.5 rounded-full border border-white/50 hover:scale-110 transition-transform cursor-pointer"
-                  />
-                ))}
-              </div>
-              <span className="text-slate-600">|</span>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDuplicateSelectedStrokes();
-                }}
-                title="Auswahl duplizieren (⌘D)"
-                className="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 flex items-center gap-1 cursor-pointer"
-              >
-                <Copy className="w-3 h-3" />
-                <span>Duplizieren</span>
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteSelectedStrokes();
-                }}
-                title="Auswahl löschen (⌫)"
-                className="p-1 rounded bg-rose-500/80 hover:bg-rose-500 text-white flex items-center justify-center cursor-pointer"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Layer 4: Interactive Sticky Notes (Klebezettel / Post-its) */}
         <div className="absolute inset-0 z-30 pointer-events-none">
           {annotations.stickyNotes.map((note, idx) => {
             const theme = STICKY_NOTE_STYLES[note.color] || STICKY_NOTE_STYLES.yellow;
-            const isStickySelected = selectedStickyId === note.id;
+            const isMultiSelected = selectedStickyIds.includes(note.id);
+            const isStickySelected = selectedStickyId === note.id && !isMultiSelected;
             const previewSnippet = note.text.trim()
               ? note.text.trim().slice(0, 14) + (note.text.trim().length > 14 ? '…' : '')
               : `Notiz ${idx + 1}`;
             const selectThisSticky = () => {
+              clearMultiSelection();
               setSelectedStickyId(note.id);
               setSelectedImageId(null);
               setSelectedTextId(null);
@@ -5482,6 +5848,11 @@ export const NotebookPageStage: React.FC<Props> = ({
                 style={{ left: `${note.x}%`, top: `${note.y}%` }}
                 onPointerDown={(e) => {
                   if (isDrawTool) return;
+                  if (e.shiftKey) {
+                    e.stopPropagation();
+                    startShiftGesture(e, { kind: 'sticky', id: note.id });
+                    return;
+                  }
                   e.stopPropagation();
                   selectThisSticky();
                 }}
@@ -5494,6 +5865,16 @@ export const NotebookPageStage: React.FC<Props> = ({
                   title="Position an Textstelle verschieben"
                   onPointerDown={(e) => {
                     if (isDrawTool) return;
+                    if (e.shiftKey) {
+                      e.stopPropagation();
+                      startShiftGesture(e, { kind: 'sticky', id: note.id });
+                      return;
+                    }
+                    if (isMultiSelected) {
+                      e.stopPropagation();
+                      startMultiDragSession(e);
+                      return;
+                    }
                     e.stopPropagation();
                     selectThisSticky();
                     try {
@@ -5517,13 +5898,20 @@ export const NotebookPageStage: React.FC<Props> = ({
                   /* Collapsed Compact Sticky Flag so underlying script text remains readable */
                   <div
                     className={`mt-0.5 inline-flex items-center gap-1 rounded-lg border shadow-sm overflow-hidden bg-white ${
-                      isStickySelected && !isDrawTool ? 'ring-2 ring-indigo-500' : ''
+                      (isStickySelected && !isDrawTool) || isMultiSelected ? 'ring-2 ring-indigo-500' : ''
                     }`}
                   >
                     <button
                       type="button"
+                      onPointerDown={(e) => {
+                        if (e.shiftKey) {
+                          e.stopPropagation();
+                          startShiftGesture(e, { kind: 'sticky', id: note.id });
+                        }
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (e.shiftKey) return;
                         selectThisSticky();
                         handleToggleStickyCollapse(note.id);
                       }}
@@ -5538,13 +5926,23 @@ export const NotebookPageStage: React.FC<Props> = ({
                   /* Expanded Post-it Note */
                   <div
                     className={`mt-0.5 w-48 sm:w-56 rounded-xl border ${theme.bg} ${theme.border} ${theme.textColor} shadow-lg overflow-hidden transition-shadow ${
-                      isStickySelected && !isDrawTool ? 'ring-2 ring-indigo-500' : ''
+                      (isStickySelected && !isDrawTool) || isMultiSelected ? 'ring-2 ring-indigo-500' : ''
                     }`}
                   >
                     {/* Header Drag Bar with Color Switcher & Duplicate */}
                     <div
                       onPointerDown={(e) => {
                         if (isDrawTool) return;
+                        if (e.shiftKey) {
+                          e.stopPropagation();
+                          startShiftGesture(e, { kind: 'sticky', id: note.id });
+                          return;
+                        }
+                        if (isMultiSelected) {
+                          e.stopPropagation();
+                          startMultiDragSession(e);
+                          return;
+                        }
                         e.stopPropagation();
                         selectThisSticky();
                         try {
@@ -5642,7 +6040,14 @@ export const NotebookPageStage: React.FC<Props> = ({
                         selectThisSticky();
                         handleStickyFocus(note.id);
                       }}
-                      onPointerDown={(e) => e.stopPropagation()}
+                      onPointerDown={(e) => {
+                        if (e.shiftKey) {
+                          e.stopPropagation();
+                          startShiftGesture(e, { kind: 'sticky', id: note.id });
+                        } else {
+                          e.stopPropagation();
+                        }
+                      }}
                       onChange={(e) => handleStickyTextChange(note.id, e.target.value)}
                       onBlur={() => handleStickyBlur(note.id)}
                       placeholder="Notiz an diese Stelle heften..."
