@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import {
   GripHorizontal,
   Minimize2,
@@ -703,6 +703,17 @@ function isPointInPolygon(pt: StrokePoint, polygon: StrokePoint[]): boolean {
     if (intersect) inside = !inside;
   }
   return inside;
+}
+
+function isPointInRect(
+  pt: { x: number; y: number },
+  rect: { x1: number; y1: number; x2: number; y2: number }
+): boolean {
+  const minX = Math.min(rect.x1, rect.x2);
+  const maxX = Math.max(rect.x1, rect.x2);
+  const minY = Math.min(rect.y1, rect.y2);
+  const maxY = Math.max(rect.y1, rect.y2);
+  return pt.x >= minX && pt.x <= maxX && pt.y >= minY && pt.y <= maxY;
 }
 
 function isStrokeSelectedByLasso(
@@ -1837,6 +1848,29 @@ export const NotebookPageStage: React.FC<Props> = ({
   const lassoPathRef = useRef<StrokePoint[]>([]);
   const isLassoDrawingRef = useRef(false);
   const [selectedStrokeIds, setSelectedStrokeIds] = useState<string[]>([]);
+  const [selectedShapeIds, setSelectedShapeIds] = useState<string[]>([]);
+  const [selectedTextBoxIds, setSelectedTextBoxIds] = useState<string[]>([]);
+  const [selectedStickyIds, setSelectedStickyIds] = useState<string[]>([]);
+  const [selectedStickerIds, setSelectedStickerIds] = useState<string[]>([]);
+  const [selectedImageIds, setSelectedImageIds] = useState<string[]>([]);
+
+  const [marqueeRect, setMarqueeRect] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+  const isMarqueeDrawingRef = useRef(false);
+  const marqueeStartRef = useRef<StrokePoint | null>(null);
+  const dragMultiRef = useRef<{
+    startClientX: number;
+    startClientY: number;
+    hasMoved: boolean;
+    origSnapshot: PageAnnotations;
+  } | null>(null);
+
+  const totalSelectedCount =
+    selectedStrokeIds.length +
+    selectedShapeIds.length +
+    selectedTextBoxIds.length +
+    selectedStickyIds.length +
+    selectedStickerIds.length +
+    selectedImageIds.length;
 
   // Newly created sticky notes & text boxes to autofocus
   const [autoFocusStickyId, setAutoFocusStickyId] = useState<string | null>(null);
@@ -2129,11 +2163,260 @@ export const NotebookPageStage: React.FC<Props> = ({
     );
   }, [selectedStrokeIds, onCommitAnnotations]);
 
+  const multiSelectionBounds = useMemo(() => {
+    if (totalSelectedCount <= 1) return null;
+    let minX = 100, minY = 100, maxX = 0, maxY = 0;
+    let hasAny = false;
+
+    if (selectedStrokeIds.length > 0) {
+      const b = getStrokesBounds(latestAnnotationsRef.current.strokes.filter(s => selectedStrokeIds.includes(s.id)));
+      if (b) {
+        hasAny = true;
+        minX = Math.min(minX, b.minX);
+        minY = Math.min(minY, b.minY);
+        maxX = Math.max(maxX, b.maxX);
+        maxY = Math.max(maxY, b.maxY);
+      }
+    }
+    for (const sh of (latestAnnotationsRef.current.shapes || [])) {
+      if (selectedShapeIds.includes(sh.id)) {
+        hasAny = true;
+        const sx1 = Math.min(sh.x1, sh.x2);
+        const sx2 = Math.max(sh.x1, sh.x2);
+        const sy1 = Math.min(sh.y1, sh.y2);
+        const sy2 = Math.max(sh.y1, sh.y2);
+        minX = Math.min(minX, sx1);
+        minY = Math.min(minY, sy1);
+        maxX = Math.max(maxX, sx2);
+        maxY = Math.max(maxY, sy2);
+      }
+    }
+    for (const t of (latestAnnotationsRef.current.textBoxes || [])) {
+      if (selectedTextBoxIds.includes(t.id)) {
+        hasAny = true;
+        minX = Math.min(minX, t.x);
+        minY = Math.min(minY, t.y);
+        maxX = Math.max(maxX, t.x + 18);
+        maxY = Math.max(maxY, t.y + 8);
+      }
+    }
+    for (const n of latestAnnotationsRef.current.stickyNotes) {
+      if (selectedStickyIds.includes(n.id)) {
+        hasAny = true;
+        minX = Math.min(minX, n.x);
+        minY = Math.min(minY, n.y);
+        maxX = Math.max(maxX, n.x + 22);
+        maxY = Math.max(maxY, n.y + 16);
+      }
+    }
+    for (const stk of latestAnnotationsRef.current.stickers) {
+      if (selectedStickerIds.includes(stk.id)) {
+        hasAny = true;
+        minX = Math.min(minX, stk.x - 8);
+        minY = Math.min(minY, stk.y - 4);
+        maxX = Math.max(maxX, stk.x + 16);
+        maxY = Math.max(maxY, stk.y + 8);
+      }
+    }
+    for (const img of (latestAnnotationsRef.current.images || [])) {
+      if (selectedImageIds.includes(img.id)) {
+        hasAny = true;
+        minX = Math.min(minX, img.x - img.widthPct / 2);
+        minY = Math.min(minY, img.y - 10);
+        maxX = Math.max(maxX, img.x + img.widthPct / 2);
+        maxY = Math.max(maxY, img.y + 15);
+      }
+    }
+
+    if (!hasAny) return null;
+    return {
+      minX: Math.max(0, minX),
+      minY: Math.max(0, minY),
+      maxX: Math.min(100, maxX),
+      maxY: Math.min(100, maxY),
+    };
+  }, [totalSelectedCount, selectedStrokeIds, selectedShapeIds, selectedTextBoxIds, selectedStickyIds, selectedStickerIds, selectedImageIds]);
+
+  const handleMultiDuplicate = useCallback(() => {
+    if (totalSelectedCount === 0) return;
+    const latest = latestAnnotationsRef.current;
+    const now = Date.now();
+
+    const newStrokeIds: string[] = [];
+    const newShapeIds: string[] = [];
+    const newTextIds: string[] = [];
+    const newStickyIds: string[] = [];
+    const newStickerIds: string[] = [];
+    const newImageIds: string[] = [];
+
+    const strokeIdSet = new Set(selectedStrokeIds);
+    const duplicatedStrokes = latest.strokes
+      .filter((s) => strokeIdSet.has(s.id))
+      .map((s, idx) => {
+        const newId = `str-dup-${now}-${idx}-${Math.random().toString(36).slice(2, 6)}`;
+        newStrokeIds.push(newId);
+        return {
+          ...s,
+          id: newId,
+          points: s.points.map((pt) => ({
+            ...pt,
+            x: Math.min(99.5, +(pt.x + 2.5).toFixed(2)),
+            y: Math.min(99.5, +(pt.y + 2.5).toFixed(2)),
+          })),
+        };
+      });
+
+    const duplicatedShapes = (latest.shapes || [])
+      .filter((sh) => selectedShapeIds.includes(sh.id))
+      .map((sh, idx) => {
+        const newId = `shp-dup-${now}-${idx}-${Math.random().toString(36).slice(2, 6)}`;
+        newShapeIds.push(newId);
+        return {
+          ...sh,
+          id: newId,
+          x1: Math.min(98.5, +(sh.x1 + 2.5).toFixed(2)),
+          y1: Math.min(98.5, +(sh.y1 + 2.5).toFixed(2)),
+          x2: Math.min(98.5, +(sh.x2 + 2.5).toFixed(2)),
+          y2: Math.min(98.5, +(sh.y2 + 2.5).toFixed(2)),
+          createdAt: Date.now(),
+        };
+      });
+
+    const duplicatedTextBoxes = (latest.textBoxes || [])
+      .filter((t) => selectedTextBoxIds.includes(t.id))
+      .map((t, idx) => {
+        const newId = `txt-dup-${now}-${idx}-${Math.random().toString(36).slice(2, 6)}`;
+        newTextIds.push(newId);
+        return {
+          ...t,
+          id: newId,
+          x: Math.min(85, +(t.x + 2.5).toFixed(2)),
+          y: Math.min(90, +(t.y + 2.5).toFixed(2)),
+          runs: t.runs ? t.runs.map((r) => ({ ...r })) : undefined,
+          createdAt: Date.now(),
+        };
+      });
+
+    const duplicatedStickyNotes = latest.stickyNotes
+      .filter((n) => selectedStickyIds.includes(n.id))
+      .map((n, idx) => {
+        const newId = `sticky-dup-${now}-${idx}-${Math.random().toString(36).slice(2, 6)}`;
+        newStickyIds.push(newId);
+        return {
+          ...n,
+          id: newId,
+          x: Math.min(82, +(n.x + 3).toFixed(2)),
+          y: Math.min(88, +(n.y + 3).toFixed(2)),
+          createdAt: Date.now(),
+        };
+      });
+
+    const duplicatedStickers = latest.stickers
+      .filter((stk) => selectedStickerIds.includes(stk.id))
+      .map((stk, idx) => {
+        const newId = `stk-dup-${now}-${idx}-${Math.random().toString(36).slice(2, 6)}`;
+        newStickerIds.push(newId);
+        return {
+          ...stk,
+          id: newId,
+          x: Math.min(92, +(stk.x + 3).toFixed(2)),
+          y: Math.min(92, +(stk.y + 3).toFixed(2)),
+        };
+      });
+
+    const duplicatedImages = (latest.images || [])
+      .filter((img) => selectedImageIds.includes(img.id))
+      .map((img, idx) => {
+        const newId = `img-dup-${now}-${idx}-${Math.random().toString(36).slice(2, 6)}`;
+        newImageIds.push(newId);
+        return {
+          ...img,
+          id: newId,
+          x: Math.min(92, +(img.x + 3).toFixed(2)),
+          y: Math.min(92, +(img.y + 3).toFixed(2)),
+          createdAt: Date.now(),
+        };
+      });
+
+    setSelectedStrokeIds(newStrokeIds);
+    setSelectedShapeIds(newShapeIds);
+    setSelectedTextBoxIds(newTextIds);
+    setSelectedStickyIds(newStickyIds);
+    setSelectedStickerIds(newStickerIds);
+    setSelectedImageIds(newImageIds);
+
+    onCommitAnnotations(
+      {
+        ...latest,
+        strokes: [...latest.strokes, ...duplicatedStrokes],
+        shapes: [...(latest.shapes || []), ...duplicatedShapes],
+        textBoxes: [...(latest.textBoxes || []), ...duplicatedTextBoxes],
+        stickyNotes: [...latest.stickyNotes, ...duplicatedStickyNotes],
+        stickers: [...latest.stickers, ...duplicatedStickers],
+        images: [...(latest.images || []), ...duplicatedImages],
+      },
+      true
+    );
+  }, [
+    totalSelectedCount,
+    selectedStrokeIds,
+    selectedShapeIds,
+    selectedTextBoxIds,
+    selectedStickyIds,
+    selectedStickerIds,
+    selectedImageIds,
+    onCommitAnnotations,
+  ]);
+
+  const handleMultiDelete = useCallback(() => {
+    if (totalSelectedCount === 0) return;
+    const latest = latestAnnotationsRef.current;
+    const strokeIdSet = new Set(selectedStrokeIds);
+
+    onCommitAnnotations(
+      {
+        ...latest,
+        strokes: latest.strokes.filter((s) => !strokeIdSet.has(s.id)),
+        shapes: (latest.shapes || []).filter((sh) => !selectedShapeIds.includes(sh.id)),
+        textBoxes: (latest.textBoxes || []).filter((t) => !selectedTextBoxIds.includes(t.id)),
+        stickyNotes: latest.stickyNotes.filter((n) => !selectedStickyIds.includes(n.id)),
+        stickers: latest.stickers.filter((stk) => !selectedStickerIds.includes(stk.id)),
+        images: (latest.images || []).filter((img) => !selectedImageIds.includes(img.id)),
+      },
+      true
+    );
+
+    setSelectedStrokeIds([]);
+    setSelectedShapeIds([]);
+    setSelectedTextBoxIds([]);
+    setSelectedStickyIds([]);
+    setSelectedStickerIds([]);
+    setSelectedImageIds([]);
+    setSelectedShapeId(null);
+    setSelectedTextId(null);
+    setSelectedStickyId(null);
+    setSelectedStickerId(null);
+    setSelectedImageId(null);
+  }, [
+    totalSelectedCount,
+    selectedStrokeIds,
+    selectedShapeIds,
+    selectedTextBoxIds,
+    selectedStickyIds,
+    selectedStickerIds,
+    selectedImageIds,
+    onCommitAnnotations,
+  ]);
+
   const lastDeleteSignalRef = useRef<number>(deleteSelectionSignal ?? 0);
   useEffect(() => {
     const seq = deleteSelectionSignal ?? 0;
     if (seq === 0 || seq === lastDeleteSignalRef.current) return;
     lastDeleteSignalRef.current = seq;
+    if (totalSelectedCount > 1) {
+      handleMultiDelete();
+      return;
+    }
     const latest = latestAnnotationsRef.current;
     if (selectedStrokeIds.length > 0) {
       const idSet = new Set(selectedStrokeIds);
@@ -2207,6 +2490,10 @@ export const NotebookPageStage: React.FC<Props> = ({
     const seq = duplicateSelectionSignal ?? 0;
     if (seq === 0 || seq === lastDuplicateSignalRef.current) return;
     lastDuplicateSignalRef.current = seq;
+    if (totalSelectedCount > 1) {
+      handleMultiDuplicate();
+      return;
+    }
     if (selectedStrokeIds.length > 0) {
       handleDuplicateSelectedStrokes();
     } else if (selectedShapeId) {
@@ -2658,6 +2945,21 @@ export const NotebookPageStage: React.FC<Props> = ({
       return;
     }
 
+    if (e.shiftKey) {
+      e.preventDefault();
+      activePointerIdRef.current = e.pointerId;
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch {}
+      isMarqueeDrawingRef.current = true;
+      const ptStart = toNormalizedPoint(e.clientX, e.clientY, e.pressure, e.pointerType);
+      if (ptStart) {
+        marqueeStartRef.current = ptStart;
+        setMarqueeRect({ x1: ptStart.x, y1: ptStart.y, x2: ptStart.x, y2: ptStart.y });
+      }
+      return;
+    }
+
     // Clear sticker, text, image, sticky, shape, and lasso selection on background tap
     setSelectedStickerId(null);
     setSelectedTextId(null);
@@ -2665,6 +2967,11 @@ export const NotebookPageStage: React.FC<Props> = ({
     setSelectedStickyId(null);
     setSelectedShapeId(null);
     setSelectedStrokeIds([]);
+    setSelectedShapeIds([]);
+    setSelectedTextBoxIds([]);
+    setSelectedStickyIds([]);
+    setSelectedStickerIds([]);
+    setSelectedImageIds([]);
 
     const effectiveTool: NotebookTool = isStylusEraser ? 'eraser' : activeTool;
 
@@ -2874,6 +3181,106 @@ export const NotebookPageStage: React.FC<Props> = ({
 
   const handleStagePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     updateBrushHoverPos(e.clientX, e.clientY, e.pointerType);
+
+    if (dragMultiRef.current && stageRef.current) {
+      e.preventDefault();
+      const rect = stageRef.current.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+      const dxPct = ((e.clientX - dragMultiRef.current.startClientX) / rect.width) * 100;
+      const dyPct = ((e.clientY - dragMultiRef.current.startClientY) / rect.height) * 100;
+      if (Math.abs(dxPct) > 0.06 || Math.abs(dyPct) > 0.06) {
+        dragMultiRef.current.hasMoved = true;
+      }
+      const latest = latestAnnotationsRef.current;
+      const strokeIdSet = new Set(selectedStrokeIds);
+
+      const nextStrokes = latest.strokes.map((s) => {
+        if (!strokeIdSet.has(s.id)) return s;
+        return {
+          ...s,
+          points: s.points.map((pt) => ({
+            ...pt,
+            x: Math.max(0.2, Math.min(99.8, +(pt.x + dxPct).toFixed(2))),
+            y: Math.max(0.2, Math.min(99.8, +(pt.y + dyPct).toFixed(2))),
+          })),
+        };
+      });
+
+      const nextShapes = (latest.shapes || []).map((sh) => {
+        if (!selectedShapeIds.includes(sh.id)) return sh;
+        return {
+          ...sh,
+          x1: Math.max(0.4, Math.min(99.6, +(sh.x1 + dxPct).toFixed(2))),
+          y1: Math.max(0.4, Math.min(99.6, +(sh.y1 + dyPct).toFixed(2))),
+          x2: Math.max(0.4, Math.min(99.6, +(sh.x2 + dxPct).toFixed(2))),
+          y2: Math.max(0.4, Math.min(99.6, +(sh.y2 + dyPct).toFixed(2))),
+        };
+      });
+
+      const nextTextBoxes = (latest.textBoxes || []).map((t) => {
+        if (!selectedTextBoxIds.includes(t.id)) return t;
+        return {
+          ...t,
+          x: Math.max(2, Math.min(95, +(t.x + dxPct).toFixed(2))),
+          y: Math.max(2, Math.min(95, +(t.y + dyPct).toFixed(2))),
+        };
+      });
+
+      const nextStickyNotes = latest.stickyNotes.map((n) => {
+        if (!selectedStickyIds.includes(n.id)) return n;
+        return {
+          ...n,
+          x: Math.max(2, Math.min(95, +(n.x + dxPct).toFixed(2))),
+          y: Math.max(2, Math.min(95, +(n.y + dyPct).toFixed(2))),
+        };
+      });
+
+      const nextStickers = latest.stickers.map((stk) => {
+        if (!selectedStickerIds.includes(stk.id)) return stk;
+        return {
+          ...stk,
+          x: Math.max(2, Math.min(95, +(stk.x + dxPct).toFixed(2))),
+          y: Math.max(2, Math.min(95, +(stk.y + dyPct).toFixed(2))),
+        };
+      });
+
+      const nextImages = (latest.images || []).map((img) => {
+        if (!selectedImageIds.includes(img.id)) return img;
+        return {
+          ...img,
+          x: Math.max(2, Math.min(95, +(img.x + dxPct).toFixed(2))),
+          y: Math.max(2, Math.min(95, +(img.y + dyPct).toFixed(2))),
+        };
+      });
+
+      onCommitAnnotations(
+        {
+          ...latest,
+          strokes: nextStrokes,
+          shapes: nextShapes,
+          textBoxes: nextTextBoxes,
+          stickyNotes: nextStickyNotes,
+          stickers: nextStickers,
+          images: nextImages,
+        },
+        false
+      );
+      return;
+    }
+
+    if (isMarqueeDrawingRef.current && marqueeStartRef.current && stageRef.current) {
+      e.preventDefault();
+      const ptCurrent = toNormalizedPoint(e.clientX, e.clientY, e.pressure, e.pointerType);
+      if (ptCurrent) {
+        setMarqueeRect({
+          x1: marqueeStartRef.current.x,
+          y1: marqueeStartRef.current.y,
+          x2: ptCurrent.x,
+          y2: ptCurrent.y,
+        });
+      }
+      return;
+    }
 
     // Handle moving or resizing of a selected Vector Shape first
     if (dragShapeRef.current && stageRef.current) {
@@ -3260,6 +3667,59 @@ export const NotebookPageStage: React.FC<Props> = ({
   };
 
   const handleStagePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (dragMultiRef.current) {
+      const session = dragMultiRef.current;
+      dragMultiRef.current = null;
+      try {
+        stageRef.current?.releasePointerCapture(e.pointerId);
+      } catch {}
+      if (session.hasMoved) {
+        onCommitAnnotations(
+          latestAnnotationsRef.current,
+          true,
+          session.origSnapshot
+        );
+      }
+      return;
+    }
+
+    if (isMarqueeDrawingRef.current && marqueeRect) {
+      isMarqueeDrawingRef.current = false;
+      const rect = marqueeRect;
+      setMarqueeRect(null);
+      marqueeStartRef.current = null;
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {}
+
+      const matchedStrokes = latestAnnotationsRef.current.strokes
+        .filter((s) => s.points.some((pt) => isPointInRect(pt, rect)))
+        .map((s) => s.id);
+      const matchedShapes = (latestAnnotationsRef.current.shapes || [])
+        .filter((sh) => isPointInRect({ x: sh.x1, y: sh.y1 }, rect) || isPointInRect({ x: sh.x2, y: sh.y2 }, rect))
+        .map((sh) => sh.id);
+      const matchedTexts = (latestAnnotationsRef.current.textBoxes || [])
+        .filter((t) => isPointInRect({ x: t.x, y: t.y }, rect))
+        .map((t) => t.id);
+      const matchedStickies = latestAnnotationsRef.current.stickyNotes
+        .filter((n) => isPointInRect({ x: n.x, y: n.y }, rect))
+        .map((n) => n.id);
+      const matchedStickers = latestAnnotationsRef.current.stickers
+        .filter((stk) => isPointInRect({ x: stk.x, y: stk.y }, rect))
+        .map((stk) => stk.id);
+      const matchedImages = (latestAnnotationsRef.current.images || [])
+        .filter((img) => isPointInRect({ x: img.x, y: img.y }, rect))
+        .map((img) => img.id);
+
+      setSelectedStrokeIds((prev) => Array.from(new Set([...prev, ...matchedStrokes])));
+      setSelectedShapeIds((prev) => Array.from(new Set([...prev, ...matchedShapes])));
+      setSelectedTextBoxIds((prev) => Array.from(new Set([...prev, ...matchedTexts])));
+      setSelectedStickyIds((prev) => Array.from(new Set([...prev, ...matchedStickies])));
+      setSelectedStickerIds((prev) => Array.from(new Set([...prev, ...matchedStickers])));
+      setSelectedImageIds((prev) => Array.from(new Set([...prev, ...matchedImages])));
+      return;
+    }
+
     if (dragShapeRef.current) {
       const dragSession = dragShapeRef.current;
       dragShapeRef.current = null;
@@ -4801,6 +5261,95 @@ export const NotebookPageStage: React.FC<Props> = ({
                 </>
               );
             })()}
+          </div>
+        )}
+
+        {/* Marquee Selection Rectangle Overlay */}
+        {marqueeRect && (
+          <svg
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            className="absolute inset-0 w-full h-full pointer-events-none z-[35]"
+          >
+            {(() => {
+              const x1 = Math.min(marqueeRect.x1, marqueeRect.x2);
+              const y1 = Math.min(marqueeRect.y1, marqueeRect.y2);
+              const w = Math.abs(marqueeRect.x2 - marqueeRect.x1);
+              const h = Math.abs(marqueeRect.y2 - marqueeRect.y1);
+              return (
+                <rect
+                  x={x1}
+                  y={y1}
+                  width={w}
+                  height={h}
+                  fill="rgba(79, 70, 229, 0.08)"
+                  stroke="#4f46e5"
+                  strokeWidth={0.35}
+                  strokeDasharray="1.1 0.8"
+                />
+              );
+            })()}
+          </svg>
+        )}
+
+        {/* Multi-Selection Aggregate Bounding Box & Floating Action Bar */}
+        {multiSelectionBounds && totalSelectedCount > 1 && !isLassoDrawingRef.current && (
+          <div
+            style={{
+              left: `${multiSelectionBounds.minX}%`,
+              top: `${multiSelectionBounds.minY}%`,
+              width: `${Math.max(3, multiSelectionBounds.maxX - multiSelectionBounds.minX)}%`,
+              height: `${Math.max(3, multiSelectionBounds.maxY - multiSelectionBounds.minY)}%`,
+            }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              try {
+                stageRef.current?.setPointerCapture(e.pointerId);
+              } catch {}
+              dragMultiRef.current = {
+                startClientX: e.clientX,
+                startClientY: e.clientY,
+                hasMoved: false,
+                origSnapshot: latestAnnotationsRef.current,
+              };
+            }}
+            title="Ziehen, um alle markierten Elemente gemeinsam zu verschieben"
+            className="absolute z-[32] pointer-events-auto border-2 border-dashed border-indigo-500 bg-indigo-500/[0.06] rounded-md cursor-move"
+          >
+            <div
+              onPointerDown={(e) => e.stopPropagation()}
+              className={`absolute left-1/2 -translate-x-1/2 ${
+                multiSelectionBounds.minY < 14 ? 'top-full mt-2' : 'bottom-full mb-2'
+              } flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900/95 text-white shadow-xl border border-slate-700/90 text-[10px] font-bold whitespace-nowrap z-40 cursor-default`}
+            >
+              <span className="text-indigo-300 tabular-nums">
+                {totalSelectedCount} Elemente markiert
+              </span>
+              <span className="text-slate-600">|</span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleMultiDuplicate();
+                }}
+                title="Auswahl duplizieren (⌘D)"
+                className="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 flex items-center gap-1 cursor-pointer"
+              >
+                <Copy className="w-3 h-3" />
+                <span>Duplizieren</span>
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleMultiDelete();
+                }}
+                title="Auswahl löschen (⌫)"
+                className="p-1 rounded bg-rose-500/80 hover:bg-rose-500 text-white flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
           </div>
         )}
 
