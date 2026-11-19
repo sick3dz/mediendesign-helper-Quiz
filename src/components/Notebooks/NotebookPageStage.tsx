@@ -1019,6 +1019,21 @@ const TextBoxOverlayItem: React.FC<AutoTextItemProps> = ({
     }
   }, [autoFocus, box, onClearAutoFocus]);
 
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      const el = editorRef.current;
+      if (!el || !isFocusedRef.current) return;
+      const offsets = getSelectionOffsetsInElement(el);
+      if (offsets) {
+        savedOffsetsRef.current = offsets;
+      }
+    };
+    document.addEventListener('selectionchange', handleSelectionChange);
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+    };
+  }, []);
+
   const syncCursorStyle = useCallback(
     (clearPendingOverride: boolean) => {
       const el = editorRef.current;
