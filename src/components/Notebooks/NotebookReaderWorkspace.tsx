@@ -715,19 +715,66 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
     setPendingCropQueue((prev) => [...prev, ...queued]);
   }, []);
 
-  // Clipboard image paste support (Ctrl+V / Cmd+V)
+  const hasInternalClipboardRef = useRef(false);
+  const lastInternalCopyTokenRef = useRef<string | null>(null);
+  const pasteFallbackTimerRef = useRef<number | null>(null);
+  const isPasteBlockedByModalRef = useRef(false);
+  isPasteBlockedByModalRef.current = Boolean(
+    activePendingCrop || isStageCropOpen || showDisplaySettingsModal || showShortcutsModal
+  );
+
+  // Clipboard paste support (Ctrl+V / Cmd+V) for BOTH external OS images and copied notebook elements
   useEffect(() => {
-    const onPaste = (e: ClipboardEvent) => {
-      const target = e.target as HTMLElement | null;
+    const isEditableTarget = (el: HTMLElement | null): boolean => {
+      if (!el) return false;
       if (
-        target &&
-        (target.tagName === 'TEXTAREA' ||
-          target.tagName === 'INPUT' ||
-          target.isContentEditable)
+        el.tagName === 'TEXTAREA' ||
+        el.tagName === 'SELECT' ||
+        el.isContentEditable ||
+        Boolean(el.closest?.('[contenteditable="true"]'))
       ) {
+        return true;
+      }
+      if (el.tagName === 'INPUT') {
+        const type = (el as HTMLInputElement).type;
+        return !['range', 'checkbox', 'radio', 'button', 'file'].includes(type);
+      }
+      return false;
+    };
+
+    const onPaste = (e: ClipboardEvent) => {
+      if (pasteFallbackTimerRef.current !== null) {
+        window.clearTimeout(pasteFallbackTimerRef.current);
+        pasteFallbackTimerRef.current = null;
+      }
+
+      if (isPasteBlockedByModalRef.current) {
         return;
       }
-      const items = Array.from(e.clipboardData?.items ?? []);
+
+      const target = e.target as HTMLElement | null;
+      const activeEl =
+        typeof document !== 'undefined' ? (document.activeElement as HTMLElement | null) : null;
+      if (isEditableTarget(target) || isEditableTarget(activeEl)) {
+        return;
+      }
+
+      const clipboardData = e.clipboardData;
+      const plainText = clipboardData?.getData('text/plain') || '';
+
+      // If the OS clipboard explicitly matches our internal copy marker, paste the copied Hefte elements
+      if (
+        hasInternalClipboardRef.current &&
+        lastInternalCopyTokenRef.current &&
+        plainText === lastInternalCopyTokenRef.current
+      ) {
+        e.preventDefault();
+        setPasteSelectionSignal((s) => s + 1);
+        return;
+      }
+
+      // Check for external images / screenshots in clipboard items and files
+      const items = Array.from(clipboardData?.items ?? []);
       const files: File[] = [];
       for (const item of items) {
         if (item.type.startsWith('image/')) {
@@ -735,13 +782,38 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
           if (f) files.push(f);
         }
       }
+      if (files.length === 0 && clipboardData?.files && clipboardData.files.length > 0) {
+        for (const f of Array.from(clipboardData.files)) {
+          if (
+            f.type.startsWith('image/') ||
+            /\.(png|jpe?g|gif|webp|svg|bmp|heic|heif|avif)$/i.test(f.name)
+          ) {
+            files.push(f);
+          }
+        }
+      }
+
       if (files.length > 0) {
         e.preventDefault();
         handleFilesSelectedForInsert(files);
+        return;
+      }
+
+      // Otherwise, if the user copied internal Hefte elements, paste them
+      if (hasInternalClipboardRef.current) {
+        e.preventDefault();
+        setPasteSelectionSignal((s) => s + 1);
       }
     };
+
     window.addEventListener('paste', onPaste);
-    return () => window.removeEventListener('paste', onPaste);
+    return () => {
+      window.removeEventListener('paste', onPaste);
+      if (pasteFallbackTimerRef.current !== null) {
+        window.clearTimeout(pasteFallbackTimerRef.current);
+        pasteFallbackTimerRef.current = null;
+      }
+    };
   }, [handleFilesSelectedForInsert]);
 
   const goToPage = (pageNum: number) => {
@@ -942,14 +1014,30 @@ export const NotebookReaderWorkspace: React.FC<Props> = ({
       if (hasStageSelection) {
         e.preventDefault();
         setCopySelectionSignal((s) => s + 1);
+        hasInternalClipboardRef.current = true;
+        const markerToken = `__HEFTE_INTERNAL_CLIPBOARD__:${Date.now()}`;
+        lastInternalCopyTokenRef.current = markerToken;
+        if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+          navigator.clipboard.writeText(markerToken).catch(() => {});
+        }
       }
       return;
     }
 
     // Paste elements: Cmd+V / Ctrl+V
+    // Do NOT call e.preventDefault() here so the browser fires the native 'paste' event
+    // (which carries OS clipboard images & screenshots). Only schedule a short fallback
+    // for internal elements in case a browser suppresses 'paste' on an empty OS clipboard.
     if (mod && !e.altKey && !e.shiftKey && (keyLower === 'v' || e.code === 'KeyV')) {
-      e.preventDefault();
-      setPasteSelectionSignal((s) => s + 1);
+      if (hasInternalClipboardRef.current) {
+        if (pasteFallbackTimerRef.current !== null) {
+          window.clearTimeout(pasteFallbackTimerRef.current);
+        }
+        pasteFallbackTimerRef.current = window.setTimeout(() => {
+          pasteFallbackTimerRef.current = null;
+          setPasteSelectionSignal((s) => s + 1);
+        }, 80);
+      }
       return;
     }
 

@@ -2855,6 +2855,7 @@ export const NotebookPageStage: React.FC<Props> = ({
       id: `img-p-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       x: Math.min(96, +(img.x + offset).toFixed(2)),
       y: Math.min(96, +(img.y + offset).toFixed(2)),
+      createdAt: Date.now(),
     }));
 
     onCommitAnnotations(
