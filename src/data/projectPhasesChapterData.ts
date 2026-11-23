@@ -241,10 +241,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           moduleId: 'projphase-1',
           question: 'Welche drei konkreten Ressourcen-Kategorien stehen bei Projekten in der Regel nur in begrenztem Maße zur Verfügung?',
           options: [
-            { id: 'a', text: 'Projektmitarbeiter (Personal), finanzielle Mittel (Budget) und technische Betriebsmittel (Maschinen, Software & Material)', isCorrect: true, explanation: 'Korrekt! Genau diese drei Säulen nennt das IHK-Skript unter "Begrenzte Ressourcen".' },
-            { id: 'b', text: 'Allgemeine Büroausstattung wie Schreibtischlampen, Kaffeemaschinen und Raumluftbefeuchter im Agenturgebäude', isCorrect: false, explanation: 'Falsch: Das sind allgemeine Arbeitsplatzbedingungen, keine Projektressourcen im engeren Sinne.' },
-            { id: 'c', text: 'Ausschließliche persönliche Rücklagen des Projektleiters ohne jeglichen Einbezug von betrieblichem Unternehmenskapital', isCorrect: false, explanation: 'Falsch: Das Projektbudget ist fest eingeplantes Unternehmenskapital.' },
-            { id: 'd', text: 'Unbegrenzte Serverkapazitäten in externen Cloud-Netzwerken und vollautomatisierte KI-Rechenzentren', isCorrect: false, explanation: 'Falsch: Ressourcen sind immer limitiert und müssen budgetiert werden.' }
+            { id: 'a', text: 'Projektmitarbeiter, finanzielle Mittel sowie technische Betriebsmittel wie Maschinen, Software und Material', isCorrect: true, explanation: 'Korrekt! Personal (Projektmitarbeiter), Budget (finanzielle Mittel) und technische Betriebsmittel (Maschinen, Software & Material) bilden die drei Säulen begrenzter Ressourcen.' },
+            { id: 'b', text: 'Allgemeine Betriebsmittel der Gebäudeverwaltung wie Büroräume, Beleuchtung und Klimatechnik am Unternehmensstandort', isCorrect: false, explanation: 'Falsch: Das sind allgemeine Rahmenbedingungen des Betriebs, keine spezifisch budgetierten Projektressourcen.' },
+            { id: 'c', text: 'Ausschließlich externe Fremdleistungen von Dienstleistern sowie langfristig gebundene Rücklagen der Geschäftsleitung', isCorrect: false, explanation: 'Falsch: Auch internes Personal, interne Maschinen und das reguläre Projektbudget zählen zu den begrenzten Ressourcen.' },
+            { id: 'd', text: 'Unlimitierte Rechenkapazitäten in externen Cloud-Umgebungen sowie jederzeit frei abrufbare Freelancer-Pools', isCorrect: false, explanation: 'Falsch: Projektressourcen sind stets limitiert und müssen verbindlich geplant und budgetiert werden.' }
           ]
         },
         {
@@ -255,8 +255,8 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           options: [
             { id: 'a', text: 'Weil viele Aktivitäten schwer im Voraus planbar sind, von vorgelagerten Schritten abhängen und Änderungen auftreten können', isCorrect: true, explanation: 'Richtig! Die Neuartigkeit und Komplexität führen unvermeidlich zu Planungsunsicherheiten und Risiken.' },
             { id: 'b', text: 'Weil Projekte grundsätzlich ohne verbindliche Leistungsvereinbarungen und ohne Terminabsprachen durchgeführt werden', isCorrect: false, explanation: 'Falsch: Gesetzliche und vertragliche Grundlagen gelten unverändert.' },
-            { id: 'c', text: 'Weil technische Produktionsmittel wie Druckmaschinen und Belichter bei neuen Vorhaben grundsätzlich versagen', isCorrect: false, explanation: 'Risiken resultieren aus der Komplexität des Vorhabens, nicht aus pauschalem Maschinenausfall.' },
-            { id: 'd', text: 'Weil das Deutsche Institut für Normung (DIN) für jedes geführte Medienprojekt ein bewusstes Scheitern vorschreibt', isCorrect: false, explanation: 'Völlig abwegig: Normen dienen dem Erfolg und der Qualitätssicherung.' }
+            { id: 'c', text: 'Weil technische Produktionsmittel wie Druckmaschinen und Belichter bei neuen Vorhaben grundsätzlich ausfallen', isCorrect: false, explanation: 'Risiken resultieren aus der Komplexität und Neuartigkeit des Vorhabens, nicht aus pauschalem Maschinenausfall.' },
+            { id: 'd', text: 'Weil die Projektmanagement-Norm für jedes komplexe Medienprojekt eine feste Ausfallquote im Risikoplan vorschreibt', isCorrect: false, explanation: 'Falsch: Normen wie die DIN 69901 dienen der Risikosteuerung und Qualitätssicherung, nicht festen Ausfallquoten.' }
           ]
         }
       ],
@@ -268,10 +268,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           question: '[IHK-Fallanalyse] Eine Großdruckerei beschließt die Anschaffung und Inbetriebnahme einer hochmodernen 8-Farben-Offsetmaschine. Der Werkstattleiter meint: „Das ist kein Projekt, sondern reines Tagesgeschäft.“ Wie ist dies nach den 7 Projektmerkmalen zu bewerten?',
           scenario: 'Ein Auszubildender soll im Fachgespräch begründen, warum eine Maschineneinführung als Projekt geführt werden muss.',
           options: [
-            { id: 'a', text: 'Die Aussage ist falsch: Die Maschineneinführung ist einmalig, neuartig, komplex (Schulung, Profile, Fundament), zeitlich befristet, budgetiert und birgt hohe Risiken – somit ein echtes Projekt', isCorrect: true, explanation: 'Exakt! Auch im Skript genannt: Die Einführung einer neuen Druckmaschine ist ein Paradebeispiel für ein Investitions- und Organisationsprojekt.' },
-            { id: 'b', text: 'Die Aussage ist richtig: Da der Einkauf ohnehin laufend Maschinenersatzteile bestellt, gilt jede neue Produktionsanlage als reines operatives Tagesgeschäft', isCorrect: false, explanation: 'Falsch: Eine Neuanlage greift tief in den gesamten Betrieb ein und erfüllt alle 7 Kriterien.' },
+            { id: 'a', text: 'Die Aussage ist falsch: Die Maschineneinführung ist einmalig, neuartig, komplex, zeitlich befristet, budgetiert und risikobehaftet – also ein echtes Projekt', isCorrect: true, explanation: 'Exakt! Durch Schulungen, Farbprofile, Fundamentanpassungen und Budgetbindung erfüllt die Einführung einer neuen Druckmaschine alle Projektkriterien.' },
+            { id: 'b', text: 'Die Aussage ist richtig: Da der Einkauf laufend Ersatzteile und Verbrauchsmaterial beschafft, gehört jede Produktionsanlage zum operativen Tagesgeschäft', isCorrect: false, explanation: 'Falsch: Eine Neuanlage greift tief in den gesamten Betrieb ein und erfüllt alle 7 Kriterien.' },
             { id: 'c', text: 'Es handelt sich nur dann um ein Projekt, wenn die Anlage über ein Leasingmodell finanziert wurde und keine Eigenmittel des Betriebs gebunden werden', isCorrect: false, explanation: 'Falsch: Die Finanzierungsform ändert nichts am Projektcharakter des Vorhabens.' },
-            { id: 'd', text: 'Es ist eine reine Routineaufgabe, da der mechanische Aufbau von Produktionsmaschinen im Offsetdruck gesetzlich von jeder Projektplanung befreit ist', isCorrect: false, explanation: 'Falsch: Ein Maschinenaufbau erfordert intensive Dokumentation und Projektmanagement.' }
+            { id: 'd', text: 'Es ist eine reguläre Linienaufgabe, da der technische Aufbau neuer Produktionsanlagen im Druckbetrieb allein der Instandhaltungsabteilung unterliegt', isCorrect: false, explanation: 'Falsch: Ein Maschinenaufbau betrifft mehrere Fachbereiche und erfordert bereichsübergreifendes Projektmanagement.' }
           ],
           examTip: 'IHK-Tipp: Bei Fallfragen immer die 7 Merkmale abprüfen: Einmalig? Neuartig? Befristet? Budgetgrenze? Hohes Risiko? Wenn ja → PROJEKT!'
         },
@@ -440,10 +440,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           question: '[IHK-Fallanalyse] Nach dem Kickoff-Meeting eines App-Projekts bemerkt die Projektleiterin, dass alle Teammitglieder jede Detailentscheidung bei ihr rückversichern und kaum miteinander sprechen. Wie ist dieses Verhalten nach Tuckman zu bewerten und was ist zu tun?',
           scenario: 'Die Projektleiterin möchte wissen, ob das Team unfähig ist oder ein Phasenphänomen vorliegt.',
           options: [
-            { id: 'a', text: 'Das Team befindet sich in der Forming-Phase (Orientierung/Unsicherheit). Das Verhalten ist normal; die Führungskraft muss aktiv Orientierung, Struktur und Sicherheit geben, anstatt Eigeninitiative vorauszusetzen', isCorrect: true, explanation: 'Exakte IHK-Musterlösung für die Orientierungsphase.' },
-            { id: 'b', text: 'Das Team befindet sich bereits in der Performing-Phase; die Führungskraft muss sich sofort vollständig zurückziehen und jegliche operative Kommunikation unterbinden', isCorrect: false, explanation: 'Falsch: Performing zeichnet sich durch hohe Autonomie und Reife aus, nicht durch Unsicherheit.' },
-            { id: 'c', text: 'Das Team demonstriert verdeckten Widerstand der Storming-Phase; die Projektleitung muss disziplinarische Abmahnungen wegen mangelnder Arbeitsbereitschaft erteilen', isCorrect: false, explanation: 'Falsch: Scheu und Unsicherheit im Forming sind kein böswilliger Widerstand, sondern ein natürlicher Orientierungsprozess.' },
-            { id: 'd', text: 'Es handelt sich um ein methodisch fehlerfreies Adjourning; die Projektleitung muss das Vorhaben sofort beenden und die Mitarbeiter auflösen', isCorrect: false, explanation: 'Falsch: Adjourning ist die Auflösungsphase am Ende des Projekts und nicht der Beginn.' }
+            { id: 'a', text: 'Das Team befindet sich in der Forming-Phase; die Führungskraft sollte aktiv Orientierung, klare Strukturen und Sicherheit bieten, statt Eigeninitiative vorauszusetzen', isCorrect: true, explanation: 'Exakte IHK-Musterlösung für die Orientierungsphase (Forming): Zurückhaltung und Unsicherheit sind normal.' },
+            { id: 'b', text: 'Das Team befindet sich bereits in der Performing-Phase; die Führungskraft sollte sich sofort zurückziehen und operative Detailfragen vollständig dem Team überlassen', isCorrect: false, explanation: 'Falsch: Performing zeichnet sich durch hohe Autonomie und Reife aus, nicht durch Unsicherheit.' },
+            { id: 'c', text: 'Das Team zeigt verdeckten Widerstand der Storming-Phase; die Projektleitung sollte zunächst Einzelgespräche führen und verbindliche Leistungsziele verschärfen', isCorrect: false, explanation: 'Falsch: Scheu und Unsicherheit im Forming sind kein Widerstand der Storming-Phase, sondern ein natürlicher Orientierungsprozess.' },
+            { id: 'd', text: 'Das Team befindet sich im Übergang zur Norming-Phase; die Projektleitung sollte die Moderation abgeben, damit sich spontane Spielregeln ohne Vorgaben herausbilden', isCorrect: false, explanation: 'Falsch: Ohne vorherige Orientierung und Klärung kann sich das Team noch nicht stabil im Norming selbst steuern.' }
           ],
           examTip: 'IHK-Tipp: Bei Fragen nach Teamstart immer prüfen: Gibt die Führungskraft Orientierung? Werden Rollen geklärt? Beides ist in Phase 1 Pflicht!'
         },
@@ -467,10 +467,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           question: '[IHK-Führungsverhalten] Was bedeutet der Grundsatz: „Was in der einen Phase hilft, schadet in der anderen“ für die Führungskraft im Übergang von Forming zu späteren Phasen?',
           scenario: 'Eine Führungskraft möchte ihren Führungsstil über die gesamte Projektlaufzeit unverändert beibehalten.',
           options: [
-            { id: 'a', text: 'Eine Führungskraft, die im Forming klare Vorgaben macht, gibt Sicherheit; würde sie dieselbe dirigistische Kontrolle jedoch in der Performing-Phase beibehalten, würde sie die Autonomie und Motivation des reifen Teams ersticken', isCorrect: true, explanation: 'Richtig! Der Führungsstil muss zwingend mit der Teamreife wachsen (situatives Führen).' },
-            { id: 'b', text: 'In der Forming-Phase ist ausschließliche Laissez-faire-Führung gefordert, während in der Performing-Phase strikte Kontrollen den Arbeitsfluss sichern', isCorrect: false, explanation: 'Genau verkehrt herum: Zu Beginn braucht das Team Struktur; später benötigt es Freiraum.' },
-            { id: 'c', text: 'Führungskräfte müssen in allen Phasen von Forming bis Adjourning exakt denselben autoritären Führungsstil durchsetzen, um Rollenkonflikte zu unterdrücken', isCorrect: false, explanation: 'Starrer Führungsstil verhindert Teamentwicklung und blockiert Motivation.' },
-            { id: 'd', text: 'Situatives Führen bedeutet, die Leitungsrolle nach Abschluss der ersten Arbeitswoche vollständig abzugeben und Entscheidungen dem Zufall zu überlassen', isCorrect: false, explanation: 'Führungskraft bleibt immer verantwortlich für Rahmenbedingungen und Zielerreichung.' }
+            { id: 'a', text: 'Klare Vorgaben geben im Forming wichtige Sicherheit, würden im Performing jedoch Autonomie und Motivation des eingespielten Teams ausbremsen', isCorrect: true, explanation: 'Richtig! Der Führungsstil muss zwingend mit der Teamreife wachsen (situatives Führen).' },
+            { id: 'b', text: 'In der Forming-Phase ist weitgehende Delegation sinnvoll, während in der Performing-Phase enge Vorgaben den hohen Zeitdruck abfangen sollten', isCorrect: false, explanation: 'Genau verkehrt herum: Zu Beginn braucht das Team Struktur; später benötigt es Freiraum.' },
+            { id: 'c', text: 'Führungskräfte sollten von Forming bis Adjourning einen konstant direktiven Führungsstil beibehalten, um Rollenkonflikte dauerhaft zu vermeiden', isCorrect: false, explanation: 'Ein starrer Führungsstil verhindert Teamentwicklung und blockiert Motivation.' },
+            { id: 'd', text: 'Situatives Führen bedeutet, die Leitungsverantwortung nach dem Kick-off komplett an das Team zu delegieren und nur bei Eskalationen einzugreifen', isCorrect: false, explanation: 'Die Führungskraft bleibt dauerhaft für Rahmenbedingungen und Zielerreichung verantwortlich.' }
           ],
           examTip: 'Merke: Situative Führung passt den Führungsstil exakt an die aktuelle Teamphase an!'
         }
@@ -653,10 +653,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           question: '[IHK-Praxisfall: Werbeagentur] Nach 3 Wochen Projektarbeit prallen Frontend-Entwickler und Mediengestalter aufeinander. Die Entwickler beschweren sich über unvollständige Design-Tokens; die Gestalter klagen über mangelnde visuelle Umsetzung. In Meetings rollen die Beteiligten mit den Augen und verlangen von dir als Projektleiter eine Machtentscheidung („Sag denen endlich, wie sie arbeiten sollen!“). Wie handelst du nach dem Phasenmodell professionell?',
           scenario: 'Ein Projektleiter wird von zwei zerstrittenen Lagern im Team aufgefordert, als Schiedsrichter ein inhaltliches Machturteil zu fällen.',
           options: [
-            { id: 'a', text: 'Nicht als Richter ein inhaltliches Machtwort sprechen, sondern den Prozess moderieren: Reibungspunkte in einem Workshop offen ansprechen, Schnittstellen und Rollen verbindlich vereinbaren und die Streitkultur auf die Sachebene lenken', isCorrect: true, explanation: 'Richtig! Storming braucht Moderation und Klärung, kein autoritäres Machtwort.' },
-            { id: 'b', text: 'Sofort einseitig für die Entwickler Partei ergreifen und den Gestaltern androhen, bei weiteren Rückfragen externe Freelancer einzusetzen', isCorrect: false, explanation: 'Einseitige Parteinahme spaltet das Team dauerhaft und zerstört jegliches Vertrauen.' },
-            { id: 'c', text: 'Beide Parteien schriftlich abmahnen und anordnen, dass fachliche Meinungsverschiedenheiten künftig mit disziplinarischen Aktennotizen geahndet werden', isCorrect: false, explanation: 'Rechtlich unzulässig und menschlich destruktiv; Konflikte müssen moderiert werden.' },
-            { id: 'd', text: 'Die Beschwerden vollständig ignorieren und darauf hoffen, dass sich die tiefen Spannungen durch Zeitablauf von selbst auflösen', isCorrect: false, explanation: 'Aussitzen führt zur Verfestigung destruktiver Lagerbildung.' }
+            { id: 'a', text: 'Den Konflikt moderiert auf die Sachebene lenken, Reibungspunkte im Workshop offen ansprechen sowie Schnittstellen und Rollen verbindlich klären', isCorrect: true, explanation: 'Richtig! Im Storming braucht es Moderation und klare Schnittstellen statt eines autoritären Machtworts.' },
+            { id: 'b', text: 'Ein klares Machtwort zugunsten der technischen Umsetzbarkeit sprechen und die Gestaltung anweisen, sich den Vorgaben der Entwicklung unterzuordnen', isCorrect: false, explanation: 'Einseitige Parteinahme spaltet das Team dauerhaft und zerstört das Vertrauen.' },
+            { id: 'c', text: 'Beide Fachbereiche organisatorisch trennen und die Abstimmung künftig ausschließlich schriftlich über die Projektleitung als Vermittler laufen lassen', isCorrect: false, explanation: 'Strikte Trennung verschärft Silodenken und löst den zugrunde liegenden Rollenkonflikt nicht.' },
+            { id: 'd', text: 'Die Spannungen zunächst abwartend beobachten und erst eingreifen, falls konkrete Meilensteine oder vereinbarte Abgabetermine gefährdet werden', isCorrect: false, explanation: 'Aussitzen führt im Storming zur Verfestigung destruktiver Lagerbildung.' }
           ],
           examTip: 'Prüfer-Tipp: Führungskraft = Moderator und Prozessgestalter, nicht inhaltlicher Streitrichter!'
         },
@@ -667,10 +667,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           question: '[IHK-Führungsverhalten] Warum bezeichnet der Führungsleitfaden den Satz: „Ein Team, das lernt, gut zu streiten, ist am Ende stärker als eines, das nie gestritten hat“ als zentralen Erfolgsfaktor?',
           scenario: 'In einer Qualitätsmanagement-Schulung wird diskutiert, ob Konflikte im Projekt grundsätzlich vermieden werden müssen.',
           options: [
-            { id: 'a', text: 'Weil produktiv ausgetragene Konflikte unterschiedliche Perspektiven sichtbar machen, Rollen schärfen und echtes Vertrauen schaffen; Teams ohne Streitkultur bleiben oberflächlich und brechen bei echten Krisen auseinander', isCorrect: true, explanation: 'Richtig! Reife Teams brauchen eine konstruktive, angstfreie Streitkultur.' },
-            { id: 'b', text: 'Weil permanenter Streit im Team die Durchlaufzeiten senkt und die Fehlerquote bei Druckmaschinen technisch eliminiert', isCorrect: false, explanation: 'Streit senkt keine Durchlaufzeiten; es geht um sachliche Klärung komplexer Fragen.' },
-            { id: 'c', text: 'Weil Tuckman Konflikte als formale Pflichtmaßnahme vorschreibt, um leistungsschwache Mitarbeiter vorzeitig kündigen zu können', isCorrect: false, explanation: 'Tuckmans Modell ist ein sozialpsychologisches Entwicklungsmodell, kein Kündigungsinstrument.' },
-            { id: 'd', text: 'Weil Teams, die lautstark streiten, nachweislich keine schriftliche Dokumentation oder Meilensteinplanung mehr benötigen', isCorrect: false, explanation: 'Methodische Planung und Dokumentation bleiben in jeder Projektphase unverzichtbar.' }
+            { id: 'a', text: 'Weil sachlich ausgetragene Konflikte Perspektiven klären, Rollen schärfen und belastbares Vertrauen statt oberflächlicher Scheinharmonie schaffen', isCorrect: true, explanation: 'Richtig! Teams ohne konstruktive Streitkultur bleiben oberflächlich und zerbrechen bei echten Krisen.' },
+            { id: 'b', text: 'Weil kontroverse Diskussionen die Durchlaufzeiten in der Produktion verkürzen und technische Abstimmungsprozesse direkt beschleunigen', isCorrect: false, explanation: 'Konflikte verkürzen Durchlaufzeiten nicht automatisch; ihr Wert liegt in der Klärung von Rollen und Lösungen.' },
+            { id: 'c', text: 'Weil das Storming dazu dient, leistungsschwächere Teammitglieder frühzeitig zu identifizieren und aus dem Projektteam auszusortieren', isCorrect: false, explanation: 'Tuckmans Modell ist ein sozialpsychologisches Entwicklungsmodell, kein Selektionsinstrument.' },
+            { id: 'd', text: 'Weil Teams mit hoher Konfliktbereitschaft weniger formale Abstimmungsregeln und eine deutlich knappere Projektdokumentation benötigen', isCorrect: false, explanation: 'Methodische Planung, Spielregeln und Dokumentation bleiben in jeder Projektphase unverzichtbar.' }
           ],
           examTip: 'IHK-Leitsatz: Konstruktive Streitkultur ist das Fundament für echte Leistungsfähigkeit (Performing)!'
         },
@@ -681,10 +681,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           question: '[IHK-Transfer: Situatives Führen] In der Norming-Phase beginnt dein Team, sich morgens selbstständig abzustimmen, Arbeitsaufträge untereinander aufzuteilen und bei Engpässen kollegial einzuspringen. Welche Gefahr droht, wenn du als Projektleiter weiterhin jede Teilaufgabe minutengenau vorschreibst und tägliche Einzelkontrollen durchführst?',
           scenario: 'Eine Projektleitung hält an striktem Micromanagement fest, obwohl das Team bereits eine solide Kooperationskultur entwickelt hat.',
           options: [
-            { id: 'a', text: 'Die Führungskraft signalisiert Misstrauen, demotiviert das selbstorganisierte Team und blockiert den natürlichen Übergang in die Hochleistungsphase (Performing)', isCorrect: true, explanation: 'Richtig! Micromanagement im Norming zerstört das aufkeimende Wir-Gefühl.' },
-            { id: 'b', text: 'Das Team arbeitet durch die lückenlose Überwachung doppelt so schnell und schließt das Gesamtprojekt in halber Zeit ab', isCorrect: false, explanation: 'Micromanagement senkt die Geschwindigkeit durch bürokratische Kontrollschleifen.' },
-            { id: 'c', text: 'Die DIN 69901-2 verlangt im Norming zwingend die stündliche Einzelkontrolle aller Projektbeteiligten durch den Projektleiter', isCorrect: false, explanation: 'Weder DIN-Norm noch Führungslehre fordern Micromanagement.' },
-            { id: 'd', text: 'Es entsteht kein Schaden, da Mitarbeiter im Medienbetrieb permanente Einzelanweisungen der Eigeninitiative vorziehen', isCorrect: false, explanation: 'Kreative Fachkräfte benötigen Gestaltungsspielräume zur Problemlösung.' }
+            { id: 'a', text: 'Die Führungskraft signalisiert Misstrauen, bremst die Eigenverantwortung aus und blockiert den Übergang in die Performing-Phase', isCorrect: true, explanation: 'Richtig! Micromanagement im Norming zerstört das aufkeimende Wir-Gefühl und verhindert den Schritt in die Hochleistungsphase (Performing).' },
+            { id: 'b', text: 'Das Team gewinnt durch die engmaschige Überwachung an Tempo und schließt kritische Arbeitspakete deutlich schneller ab', isCorrect: false, explanation: 'Micromanagement senkt die Geschwindigkeit durch bürokratische Kontrollschleifen.' },
+            { id: 'c', text: 'Die Projektnorm empfiehlt im Norming eine lückenlose Einzelprüfung aller Zwischenstände, um Qualitätsrisiken zu minimieren', isCorrect: false, explanation: 'Weder die DIN 69901-2 noch die Führungslehre empfehlen Micromanagement im Norming.' },
+            { id: 'd', text: 'Das Verhalten bleibt folgenlos, weil fachlich eingespielte Teams eng geführte Einzelanweisungen als verlässliche Entlastung erleben', isCorrect: false, explanation: 'Fachkräfte benötigen ab dem Norming Gestaltungsspielräume für selbstständige Problemlösungen.' }
           ],
           examTip: 'IHK-Führungsregel: Was im Forming hilft (enge Führung), schadet im Norming (Überkontrolle)!'
         }
@@ -754,10 +754,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           moduleId: 'projphase-4',
           question: 'Welche Kriterien kennzeichnen die Phase 4 (Performing) nach Bruce Tuckman?',
           options: [
-            { id: 'a', text: 'Autonome Selbstorganisation, glasklare Rollen, sachliche Streitkultur ohne Beziehungsgefährdung und ein Synergieeffekt („Flow“), bei dem das Team mehr leistet als die Summe seiner Einzelnen', isCorrect: true, explanation: 'Exakte IHK-Definition der Performing-Phase nach Bruce Tuckman.' },
-            { id: 'b', text: 'Permanente Kontrolle durch den Abteilungsleiter, strikte Einzelarbeit ohne fachlichen Austausch und Verbot von Teammeetings', isCorrect: false, explanation: 'Performing zeichnet sich durch hohe Kooperation und Autonomie aus, nicht durch Isolation.' },
-            { id: 'c', text: 'Vorsichtiges Abtasten, Scheinharmonie aus Angst vor Kritik und ausschließliche Orientierung an formalen Vorgaben', isCorrect: false, explanation: 'Das sind typische Merkmale der Forming-Phase (Orientierung).' },
-            { id: 'd', text: 'Persönliche Machtkämpfe, offene Lagerbildung um Reviere und Infragestellung der Projektleitung bei jeder Entscheidung', isCorrect: false, explanation: 'Das sind klassische Merkmale der Storming-Phase (Konfrontation).' }
+            { id: 'a', text: 'Hohe Selbstorganisation, klare Rollen, sachliche Streitkultur und echte Synergieeffekte bei der gemeinsamen Zielerreichung', isCorrect: true, explanation: 'Exakte IHK-Definition der Performing-Phase nach Bruce Tuckman: Im „Flow“ leistet das Team mehr als die Summe seiner Einzelnen.' },
+            { id: 'b', text: 'Engmaschige Steuerung durch die Projektleitung, klar getrennte Einzelarbeit und standardisierte Einzelabnahmen aller Aufgaben', isCorrect: false, explanation: 'Performing zeichnet sich durch hohe Kooperation und Autonomie aus, nicht durch engmaschige Einzelkontrolle.' },
+            { id: 'c', text: 'Vorsichtiges Abtasten, höfliche Scheinharmonie aus Unsicherheit und starke Orientierung an formalen Vorgaben der Leitung', isCorrect: false, explanation: 'Das sind typische Merkmale der Forming-Phase (Orientierung).' },
+            { id: 'd', text: 'Offene Machtkämpfe um Zuständigkeiten, Lagerbildung im Team und grundsätzliche Infragestellung der Projektziele', isCorrect: false, explanation: 'Das sind klassische Merkmale der Storming-Phase (Konfrontation).' }
           ],
           examTip: 'Merke: Performing = Höchstleistung + Synergie + Selbstorganisation + konstruktive Streitkultur!'
         },
@@ -767,10 +767,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           moduleId: 'projphase-4',
           question: 'Warum ist die Annahme, ein Team bleibe nach Erreichen der Performing-Phase dauerhaft in dieser Hochleistungsphase, ein gravierender Führungsirrtum?',
           options: [
-            { id: 'a', text: 'Weil jede Veränderung der Teamzusammensetzung, neue Aufgaben oder externe Krisen das Team sofort in frühere Phasen (Storming oder Norming) zurückwerfen können', isCorrect: true, explanation: 'Richtig! Teamentwicklung ist dynamisch und kein einmalig abgeschlossener Zustand.' },
-            { id: 'b', text: 'Weil die DIN 69901-2 vorschreibt, dass Performing-Teams nach spätestens 14 Tagen gesetzlich verpflichtet sind, wieder in die Forming-Phase zu wechseln', isCorrect: false, explanation: 'DIN-Normen schreiben keine künstlichen Rückschritte in Phasenmodellen vor.' },
-            { id: 'c', text: 'Weil Teams im Performing automatisch die Arbeit einstellen, sobald alle Zwischenziele erreicht wurden', isCorrect: false, explanation: 'Im Performing arbeitet das Team hochproduktiv an der Zielerreichung weiter.' },
-            { id: 'd', text: 'Weil Bruce Tuckman die Performing-Phase in seiner Revision von 1977 vollständig aus dem Phasenmodell gestrichen hat', isCorrect: false, explanation: 'Tuckman ergänzte 1977 die Phase Adjourning; Performing blieb zentraler Bestandteil.' }
+            { id: 'a', text: 'Weil Veränderungen der Teamzusammensetzung, neue Aufgaben oder Krisen das Team rasch wieder ins Storming oder Norming zurückwerfen können', isCorrect: true, explanation: 'Richtig! Teamentwicklung ist dynamisch und kein einmalig abgeschlossener Zustand.' },
+            { id: 'b', text: 'Weil die Projektmanagement-Norm nach jedem abgeschlossenen Meilenstein eine formale Rückkehr in die Orientierungsphase vorsieht', isCorrect: false, explanation: 'DIN-Normen schreiben keine künstlichen Rückschritte in Teamentwicklungsmodellen vor.' },
+            { id: 'c', text: 'Weil Teams im Performing nach dem Erreichen der ersten Zwischenziele automatisch an Leistungsbereitschaft verlieren', isCorrect: false, explanation: 'Im Performing arbeitet das Team stabil und hochproduktiv weiter, solange die Rahmenbedingungen stimmen.' },
+            { id: 'd', text: 'Weil Bruce Tuckman die Performing-Phase in seiner späteren Erweiterung von 1977 durch das Adjourning ersetzt hat', isCorrect: false, explanation: 'Tuckman ergänzte 1977 die Phase Adjourning; Performing blieb zentraler Bestandteil.' }
           ],
           examTip: 'Merksatz: Veränderungen werfen das Team zurück – das ist kein Versagen, sondern eine notwendige Neu-Justierung!'
         },
@@ -780,10 +780,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           moduleId: 'projphase-4',
           question: 'Wann und warum wurde das ursprüngliche 4-Phasen-Modell von Bruce Tuckman um die fünfte Phase „Adjourning“ erweitert?',
           options: [
-            { id: 'a', text: '1977 durch Bruce Tuckman und Mary Ann Jensen, weil temporäre Projekte ein definiertes Ende haben und die Auflösungsphase für Reflexion und emotionalen Abschluss unverzichtbar ist', isCorrect: true, explanation: 'Historisch und methodisch exakte IHK-Antwort!' },
-            { id: 'b', text: '1965 direkt im Ursprungswerk, um von Beginn an fünf symmetrische Phasen im wissenschaftlichen Diagramm abbilden zu können', isCorrect: false, explanation: '1965 veröffentlichte Tuckman zunächst nur die vier Phasen Forming bis Performing.' },
-            { id: 'c', text: '2009 durch das Deutsche Institut für Normung (DIN), um das Tuckman-Modell mit der DIN 69901-2 harmonisieren zu können', isCorrect: false, explanation: 'Das DIN hat das Tuckman-Modell nicht erweitert; die Erweiterung stammt von Jensen & Tuckman (1977).' },
-            { id: 'd', text: '1985 durch europäische Gewerkschaften, um Urlaubsansprüche nach Projektende tarifvertraglich abzusichern', isCorrect: false, explanation: 'Adjourning ist ein sozialpsychologisches Phasenkonzept und keine Tarifregelung.' }
+            { id: 'a', text: '1977 durch Bruce Tuckman und Mary Ann Jensen, um Reflexion und emotionalen Abschluss zeitlich befristeter Teams abzubilden', isCorrect: true, explanation: 'Historisch und methodisch exakte IHK-Antwort! Temporäre Projekte haben ein definiertes Ende.' },
+            { id: 'b', text: '1965 direkt im Ursprungswerk von Tuckman, um von Beginn an fünf symmetrische Entwicklungsstufen darstellen zu können', isCorrect: false, explanation: '1965 veröffentlichte Tuckman zunächst nur die vier Phasen Forming bis Performing.' },
+            { id: 'c', text: '2009 im Zuge der Überarbeitung der DIN 69901-2, um Teamentwicklung und Projektphasen exakt auf fünf Stufen anzugleichen', isCorrect: false, explanation: 'Das DIN hat das Tuckman-Modell nicht erweitert; die Ergänzung stammt von Jensen & Tuckman (1977).' },
+            { id: 'd', text: '1985 durch die Gesellschaft für Projektmanagement, um das klassische Phasenmodell um die Nachkalkulation zu erweitern', isCorrect: false, explanation: 'Adjourning ist ein sozialpsychologisches Phasenkonzept von Tuckman und Jensen (1977), keine kaufmännische Nachkalkulation.' }
           ],
           examTip: 'IHK-Fakt: Tuckman & Jensen (1977) ergänzten das Modell um die 5. Phase Adjourning (Auflösung)!'
         },
@@ -793,10 +793,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           moduleId: 'projphase-4',
           question: 'Welche langfristige Konsequenz droht für künftige Projekte im Betrieb, wenn das Projektende im Adjourning lieblos übergangen wird („einfach auslaufen lassen“)?',
           options: [
-            { id: 'a', text: 'Erfahrungen gehen verloren (keine Lessons Learned), Mitarbeiter fühlen sich emotional nicht gewürdigt und starten mit Frustration oder Zynismus in künftige Projekte', isCorrect: true, explanation: 'Exakte IHK-Begründung für die Bedeutung des Adjournings!' },
-            { id: 'b', text: 'Die kaufmännische Software blockiert den Rechnungsversand an Kunden, solange das Adjourning nicht im ERP-System quittiert wurde', isCorrect: false, explanation: 'Falsch: Buchhaltungssoftware steuert Faktura unabhängig von internen Teamworkshops.' },
-            { id: 'c', text: 'Alle im Projekt erstellten Druckdaten und Programm-Codes werden automatisch nach 30 Tagen gelöscht', isCorrect: false, explanation: 'Daten bleiben erhalten; das Risiko liegt im Wissensverlust und der Teammotivation.' },
-            { id: 'd', text: 'Die IHK verweigert dem ausbildenden Betrieb die Berechtigung zur Abnahme von Mediengestalter-Prüfungen', isCorrect: false, explanation: 'Adjourning ist eine methodische Best Practice, kein Prüfungszulassungskriterium.' }
+            { id: 'a', text: 'Projekterfahrungen gehen verloren, Leistungen bleiben ungewürdigt und Mitarbeitende starten frustriert in Folgeprojekte', isCorrect: true, explanation: 'Exakte IHK-Begründung für das Adjourning: Ohne Abschluss fehlen Lessons Learned sowie emotionale Anerkennung.' },
+            { id: 'b', text: 'Die kaufmännische Schlussrechnung darf vertragsrechtlich nicht gestellt werden, solange kein Team-Abschlussprotokoll vorliegt', isCorrect: false, explanation: 'Falsch: Die kaufmännische Abrechnung hängt von der Kundenabnahme ab, nicht vom internen Team-Adjourning.' },
+            { id: 'c', text: 'Die im Projekt erstellten Produktionsdaten und Quellcodes können ohne formale Entlastung nicht rechtskonform archiviert werden', isCorrect: false, explanation: 'Technische Archivierung ist möglich; das Risiko liegt im Verlust von Erfahrungswissen und Motivation.' },
+            { id: 'd', text: 'Die Projektbeteiligten können organisatorisch erst nach einer dreimonatigen Sperrfrist wieder neuen Kundenprojekten zugeteilt werden', isCorrect: false, explanation: 'Es gibt keine Sperrfrist; fehlendes Adjourning beeinträchtigt Wissenstransfer und Teammotivation.' }
           ],
           examTip: 'Merksatz: Ein liebloser Abschluss im Adjourning beschädigt das nächste Projekt-Forming!'
         }
@@ -809,10 +809,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           question: '[IHK-Praxisfall: Werbeagentur] Ein eingespieltes Digital-Team befindet sich seit zwei Monaten in der Performing-Phase. Wegen eines neuen Großkunden wird ein zusätzlicher Senior-UX-Designer eingestellt. Bereits in der ersten Woche kommt es zu Kompetenzstreitigkeiten mit dem bisherigen Art Director, Deadlines wackeln und der Teamleiter klagt: „Das Team funktioniert plötzlich überhaupt nicht mehr.“ Wie analysierst du die Situation und welche Führungsempfehlung gibst du?',
           scenario: 'Ein Projektleiter interpretiert das Wiederaufflammen von Reibungen nach einem Neuzugang als Totalversagen des Teams.',
           options: [
-            { id: 'a', text: 'Durch das neue Teammitglied wurde das soziale Gefüge verändert; das Team fällt automatisch ins Storming zurück. Empfehlung: Keine Vorwürfe machen, sondern Rollen und Zuständigkeiten im Team gemeinsam neu abstimmen', isCorrect: true, explanation: 'Exakte IHK-Musterlösung für personelle Veränderungen in reifen Teams.' },
-            { id: 'b', text: 'Den neuen Senior-UX-Designer sofort fristlos kündigen, um die alte Gruppenharmonie der Performing-Phase künstlich wiederherzustellen', isCorrect: false, explanation: 'Unprofessionell: Personelle Wechsel sind normal und erfordern Teamintegration.' },
-            { id: 'c', text: 'Den Art Director disziplinarisch abmahnen, weil er sich dem neuen Mitarbeiter bedingungslos unterordnen muss', isCorrect: false, explanation: 'Einseitige Parteinahme verstärkt Konflikte und ignoriert etablierte Kompetenzen.' },
-            { id: 'd', text: 'Das Projekt sofort stilllegen, da ein Team nach dem Verlassen der Performing-Phase nie wieder produktiv werden kann', isCorrect: false, explanation: 'Teams durchlaufen Phasen zyklisch und erreichen nach kurzer Klärung erneut das Performing.' }
+            { id: 'a', text: 'Der Neuzugang verändert das Teamgefüge und führt zurück ins Storming; Rollen und Zuständigkeiten sollten ohne Vorwürfe gemeinsam neu geklärt werden', isCorrect: true, explanation: 'Exakte IHK-Musterlösung für personelle Veränderungen in reifen Teams.' },
+            { id: 'b', text: 'Den neuen Senior-UX-Designer sofort aus dem Projekt abziehen, um die bisherige Stabilität der Performing-Phase kurzfristig wiederherzustellen', isCorrect: false, explanation: 'Unprofessionell: Personelle Wechsel sind normal und erfordern aktive Teamintegration.' },
+            { id: 'c', text: 'Den Art Director anweisen, die Vorgaben des neuen Spezialisten vorrangig umzusetzen, um Kompetenzstreitigkeiten direkt zu beenden', isCorrect: false, explanation: 'Einseitige Parteinahme verstärkt Konflikte und ignoriert gewachsene Kompetenzen.' },
+            { id: 'd', text: 'Beide Rollen fachlich entkoppeln und den Aufgabenbereich des UX-Designers vollständig isoliert außerhalb des Kernteams bearbeiten lassen', isCorrect: false, explanation: 'Teams durchlaufen Phasen zyklisch und erreichen nach gezielter Rollenklärung erneut das Performing.' }
           ],
           examTip: 'IHK-Prüfungstipp: Personelle Veränderungen = Zwingender Rückfall in frühere Phasen (Neu-Justierung)!'
         },
@@ -823,10 +823,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           question: '[IHK-Führungsverhalten: Servant Leadership] Was bedeutet die Führungsmaxime „Loslassen, aber nicht verschwinden“ für die Projektleitung in der Performing-Phase konkret im Projektalltag?',
           scenario: 'Ein Projektleiter fragt sich, was seine Daseinsberechtigung ist, wenn das Team alle Aufgaben autonom erledigt.',
           options: [
-            { id: 'a', text: 'Die Führungskraft nimmt sich aus operativen Einzelfragen heraus (kein Micromanagement), konzentriert sich auf Rahmenbedingungen, räumt bürokratische Hindernisse aus dem Weg, bleibt als Coach ansprechbar und sorgt für sichtbare Wertschätzung der Teamleistung', isCorrect: true, explanation: 'Richtig! Das ist modernes Servant Leadership im Performing.' },
-            { id: 'b', text: 'Die Führungskraft zieht sich physisch und kommunikativ vollständig aus dem Unternehmen zurück und reagiert weder auf strategische Anfragen noch auf dringende personelle Engpässe', isCorrect: false, explanation: 'Das ist pflichtvergessenes Laissez-faire und kein verantwortungsvolles Führen.' },
-            { id: 'c', text: 'Tägliche mehrstündige Einzelberichte und Kontrolllisten anfordern, um dem reifen Team unmissverständlich zu demonstrieren, wer die eigentliche formale Weisungsbefugnis innehat', isCorrect: false, explanation: 'Micromanagement zerstört Autonomie, Vertrauen und Leistung im Performing.' },
-            { id: 'd', text: 'Alle Teammitglieder anweisen, ihre Gehaltseinstufungen, Urlaubsansprüche und disziplinarischen Bewertungen eigenmächtig ohne Einbezug von Führungskräften auszuhandeln', isCorrect: false, explanation: 'Personalrechtliche Aufgaben verbleiben bei der Linienführung und gehören nicht ins Projektteam.' }
+            { id: 'a', text: 'Aus dem Tagesgeschäft heraushalten, gute Rahmenbedingungen sichern, Hindernisse beseitigen, als Coach ansprechbar bleiben und Leistungen wertschätzen', isCorrect: true, explanation: 'Richtig! Kein Micromanagement, sondern modernes Servant Leadership prägt die Performing-Phase.' },
+            { id: 'b', text: 'Sich vollständig aus dem Projektgeschehen zurückziehen und auch bei strategischen Rückfragen oder personellen Engpässen nicht mehr eingreifen', isCorrect: false, explanation: 'Das ist pflichtvergessenes Laissez-faire und kein verantwortungsvolles Führen.' },
+            { id: 'c', text: 'Eng getaktete Statusberichte und tägliche Kontrolllisten einfordern, um die formale Weisungsbefugnis auch bei hoher Teamreife sichtbar zu halten', isCorrect: false, explanation: 'Micromanagement zerstört Autonomie, Vertrauen und Leistung im Performing.' },
+            { id: 'd', text: 'Sämtliche Personal- und Budgetentscheidungen an das Projektteam übertragen, damit sich die Führungskraft ausschließlich der Kundenakquise widmen kann', isCorrect: false, explanation: 'Rahmenverantwortung und personalrechtliche Aufgaben verbleiben bei der Führungskraft.' }
           ],
           examTip: 'Prüfer-Merksatz: Führung im Performing = Hindernisse räumen, Rahmen sichern, Wertschätzung geben!'
         },
@@ -837,10 +837,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           question: '[IHK-Transfer: Adjourning & ROI] Die Geschäftsführung einer Agentur argumentiert: „Nach erfolgreichem Projektabschluss bringt ein Adjourning-Meeting kein Geld mehr ein. Wir streichen die Nachbesprechung komplett.“ Mit welchen betriebswirtschaftlichen und methodischen Argumenten widerlegst du diese Ansicht als Projektmanager?',
           scenario: 'Ein Einsparungsvorschlag zielt auf die ersatzlose Streichung aller Abschluss- und Retrospektiven-Meetings ab.',
           options: [
-            { id: 'a', text: 'Ein professionelles Adjourning sichert das organisatorische Lernen (Vermeidung wiederkehrender Fehler durch Lessons Learned), würdigt den Mitarbeitereinsatz (Bindung & Motivation) und verhindert, dass enttäuschte Teammitglieder im nächsten Projekt mit Misstrauen und Verunsicherung starten', isCorrect: true, explanation: 'Exakte betriebswirtschaftliche und führungspsychologische IHK-Argumentation!' },
-            { id: 'b', text: 'Die Streichung ist betriebswirtschaftlich geboten, weil Lessons Learned nach IHK-Prüfungsstandards und DIN-Vorgaben grundsätzlich nicht in nachfolgende Kundenprojekte übertragen werden dürfen', isCorrect: false, explanation: 'Falsch: Kontinuierlicher Wissenstransfer ist Kernziel moderner Qualitätsstandards.' },
-            { id: 'c', text: 'Ein formales Adjourning ist im Projektmanagement ausschließlich dann erforderlich, wenn der Kunde die Schlussrechnung bemängelt oder die Projektabnahme vor Gericht verhandelt werden muss', isCorrect: false, explanation: 'Das kaufmännische Mahnwesen hat nichts mit der Teambezogenen Reflexion im Adjourning zu tun.' },
-            { id: 'd', text: 'Im Rahmen des Adjournings müssen primär neue Akquiseverträge unterzeichnet werden, weshalb die Nachbesprechung als reine Vertriebsveranstaltung für den Außendienst zu werten ist', isCorrect: false, explanation: 'Adjourning ist eine interne Teammaßnahme zum Projektabschluss und kein Vertriebsevent.' }
+            { id: 'a', text: 'Ein bewusstes Adjourning sichert Lessons Learned gegen wiederkehrende Fehler, stärkt Motivation durch Wertschätzung und verhindert Frust bei Folgeprojekten', isCorrect: true, explanation: 'Exakte betriebswirtschaftliche und führungspsychologische IHK-Argumentation für ein professionelles Adjourning!' },
+            { id: 'b', text: 'Die Streichung ist betriebswirtschaftlich sinnvoll, weil Erfahrungen aus abgeschlossenen Einzelprojekten ohnehin kaum auf andere Kundenprojekte übertragbar sind', isCorrect: false, explanation: 'Falsch: Kontinuierlicher Wissenstransfer über Projekte hinweg ist ein Kernziel professionellen Projektmanagements.' },
+            { id: 'c', text: 'Ein formales Adjourning ist im Agenturalltag nur dann erforderlich, wenn erhebliche Budgetüberschreitungen oder Konflikte mit dem Auftraggeber aufgetreten sind', isCorrect: false, explanation: 'Auch erfolgreiche Projekte erfordern Reflexion, Wissenstransfer und Würdigung im Adjourning.' },
+            { id: 'd', text: 'Im Adjourning stehen primär Anschlussaufträge und die Nachverhandlung von Zusatzbudgets im Mittelpunkt, sodass die Teilnahme der Fachkräfte entbehrlich ist', isCorrect: false, explanation: 'Adjourning ist eine interne Teammaßnahme zur Reflexion und Entlastung, kein Vertriebstermin.' }
           ],
           examTip: 'IHK-Begründung: Adjourning sichert Wissensmanagement, Mitarbeitermotivation und fehlerfreie Nachfolgeprojekte!'
         }
@@ -942,10 +942,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           moduleId: 'projphase-5',
           question: 'Wie unterscheiden sich Projektmanagementphasen nach DIN 69901-2 von fachlichen Projektphasen?',
           options: [
-            { id: 'a', text: 'Projektmanagementphasen strukturieren Führungs-, Planungs- und Kontrollaufgaben; in den fachlichen Phasen hingegen entsteht das eigentliche inhaltliche Produktergebnis (z. B. Entwurf, Programmierung, Druck)', isCorrect: true, explanation: 'Exakte IHK-Differenzierung nach Christoph Schulze!' },
-            { id: 'b', text: 'Projektmanagementphasen gelten ausschließlich für die Bauwirtschaft, während fachliche Phasen nur in Werbeagenturen zur Anwendung kommen', isCorrect: false, explanation: 'Die DIN 69901-2 ist branchenunabhängig für alle Projektarten gültig.' },
-            { id: 'c', text: 'Es gibt keinen methodischen Unterschied; beide Begriffe sind rechtlich geschützte Synonyme für denselben Arbeitsablauf', isCorrect: false, explanation: 'Management und Facharbeit sind zwei komplementäre Ebenen jedes Projekts.' },
-            { id: 'd', text: 'Fachliche Phasen finden immer vollständig vor Beginn der eigentlichen Projektmanagementphasen statt', isCorrect: false, explanation: 'Fachliche Phasen sind in die steuernden Projektmanagementphasen eingebettet.' }
+            { id: 'a', text: 'Projektmanagementphasen strukturieren Planung, Führung und Kontrolle; fachliche Phasen erzeugen das eigentliche Produktergebnis', isCorrect: true, explanation: 'Exakte IHK-Differenzierung nach Christoph Schulze: In den fachlichen Phasen entstehen z. B. Entwurf, Programmierung oder Druck.' },
+            { id: 'b', text: 'Projektmanagementphasen gelten vor allem für industrielle Großprojekte, während fachliche Phasen typisch für Kreativagenturen sind', isCorrect: false, explanation: 'Die DIN 69901-2 ist branchenunabhängig für alle Projektarten gültig.' },
+            { id: 'c', text: 'Beide Begriffe beschreiben denselben Ablauf aus unterschiedlichen Blickwinkeln und werden in der DIN-Norm synonym verwendet', isCorrect: false, explanation: 'Management und Facharbeit sind zwei klar getrennte, komplementäre Ebenen jedes Projekts.' },
+            { id: 'd', text: 'Fachliche Phasen werden zeitlich stets vor dem Start der formalen Projektmanagementphasen abgeschlossen und freigegeben', isCorrect: false, explanation: 'Fachliche Phasen sind in die steuernden Projektmanagementphasen eingebettet.' }
           ],
           examTip: 'Merke: PM-Phasen managen das Projekt – fachliche Phasen erzeugen das Produkt!'
         },
@@ -1004,10 +1004,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           question: '[IHK-Praxisfall: Werbeagentur] Ein Kunde ruft in der Agentur an und wünscht einen modernen Online-Konfigurator für Drucksachen. Der Junior-Projektleiter weist das Entwicklerteam sofort an, mit der Frontend-Programmierung in React zu beginnen. Nach 4 Wochen stellt sich heraus, dass der Kunde gar kein Backend-Budget hat und die Schnittstellen zur Druckerei völlig ungeklärt sind. Welcher methodische Fehler liegt vor?',
           scenario: 'Ein Projektleiter überspringt Initialisierung und Definition und startet sofort mit fachlicher Facharbeit.',
           options: [
-            { id: 'a', text: 'Verfrühter Sprung in die fachliche Umsetzung: Die Phasen Initialisierung (Machbarkeit/Wirtschaftlichkeit) und Definition (Schnittstellen/Lastenheft) wurden sträflich übergangen', isCorrect: true, explanation: 'Klassischer PM-Fehler: Wer vor der Klärung programmiert, zahlt am Ende drauf.' },
-            { id: 'b', text: 'Der Fehler lag ausschließlich in der falschen Wahl des Frontend-Frameworks (React statt nativer HTML-Programmierung)', isCorrect: false, explanation: 'Die Technologie ist zweitrangig; der methodische Management-Ablauf war fundamental fehlerhaft.' },
-            { id: 'c', text: 'Es liegt kein methodischer Fehler vor, da agiles Projektmanagement grundsätzlich auf jegliche Budget- und Schnittstellenprüfung verzichtet', isCorrect: false, explanation: 'Auch agile Projekte klären vorab Budgetrahmen und grundlegende Machbarkeiten.' },
-            { id: 'd', text: 'Der Junior-Projektleiter hätte vorab prüfen müssen, ob die Druckmaschinen des Kunden mit WLAN ausgestattet sind', isCorrect: false, explanation: 'WLAN-Anbindung an Druckmaschinen ist nicht die Ursache fehlender Schnittstellendefinitionen.' }
+            { id: 'a', text: 'Verfrühter Start der Umsetzung: Initialisierung zur Machbarkeitsprüfung und Definition von Schnittstellen wurden übergangen', isCorrect: true, explanation: 'Klassischer PM-Fehler: Initialisierung (Machbarkeit/Wirtschaftlichkeit) und Definition (Schnittstellen/Lastenheft) müssen vor der Programmierung geklärt sein.' },
+            { id: 'b', text: 'Falsche Technologiewahl in der Entwicklung: Die gewählte Frontend-Architektur ließ sich nicht an das bestehende Shopsystem anbinden', isCorrect: false, explanation: 'Die Technologie ist zweitrangig; der methodische Management-Ablauf war fundamental fehlerhaft.' },
+            { id: 'c', text: 'Kein methodischer Fehler: Bei agilen Webprojekten werden Budgetrahmen und Schnittstellen erst während der Entwicklung ermittelt', isCorrect: false, explanation: 'Auch agile Projekte klären vorab Budgetrahmen, Zielsetzung und grundlegende Machbarkeiten.' },
+            { id: 'd', text: 'Fehlende Abschlusskontrolle: Die Schnittstellenprobleme hätten erst in der Abschlussphase über Nachbesserungen gelöst werden müssen', isCorrect: false, explanation: 'Schnittstellenanforderungen gehören in die Definition vor der Umsetzung, nicht in den Abschluss.' }
           ],
           examTip: 'Prüfer-Tipp: Wer Initialisierung und Definition überspringt, erzeugt zwangsläufig Kostenexplosionen!'
         },
@@ -1018,10 +1018,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           question: '[IHK-Führungsverhalten: DIN 69901-2 vs. Realität] Die DIN 69901-2 listet fünf Phasen auf (Initialisierung bis Abschluss). Ein Projektprüfer behauptet: „Wer diese Phasen nicht streng wie auf einer Einbahnstraße nacheinander abarbeitet, verstößt gegen die Norm.“ Wie begegnest du dieser Aussage fachlich fundiert?',
           scenario: 'In der mündlichen IHK-Prüfung wird über die Starrheit bzw. Flexibilität von Phasenmodellen debattiert.',
           options: [
-            { id: 'a', text: 'Die Behauptung ist falsch: Weder die DIN 69901-2 noch die GPM fordern ein starres Schema. Überschneidungen, Rücksprünge (z. B. von Steuerung zu Planung) und iterative Zyklen sind in der Praxis unverzichtbar', isCorrect: true, explanation: 'Richtig! Phasenmodelle bieten Orientierung, sind aber keine bürokratische Zwangsjacke.' },
-            { id: 'b', text: 'Die Behauptung ist völlig korrekt: Jeder methodische Rücksprung im Projekt führt zum sofortigen Erlöschen aller Qualitätszertifikate', isCorrect: false, explanation: 'Qualitätsmanagement fordert kontrollierte Anpassungen bei Planabweichungen.' },
-            { id: 'c', text: 'Die Behauptung gilt ausschließlich für Printprojekte, während digitale Medienprojekte laut Norm gar keine Phasen kennen', isCorrect: false, explanation: 'Die DIN 69901-2 gilt für Medien-, Software- und Bauprojekte gleichermaßen.' },
-            { id: 'd', text: 'Phasenmodelle müssen nach internationalen Bestimmungen grundsätzlich von hinten nach vorne abgearbeitet werden', isCorrect: false, explanation: 'Das Projekt beginnt logisch mit der Initialisierung und endet mit dem Abschluss.' }
+            { id: 'a', text: 'Falsch: Weder DIN 69901-2 noch GPM verlangen ein starres Schema; Überschneidungen, Rücksprünge und iterative Zyklen sind üblich', isCorrect: true, explanation: 'Richtig! Phasenmodelle bieten Orientierung, sind aber keine bürokratische Zwangsjacke – Rücksprünge (z. B. von Steuerung zu Planung) sind in der Praxis unverzichtbar.' },
+            { id: 'b', text: 'Richtig: Ein sauberer Projektablauf nach DIN 69901-2 setzt voraus, dass jede Phase endgültig ohne Rücksprung abgeschlossen wird', isCorrect: false, explanation: 'Qualitätsmanagement und DIN 69901-2 erlauben ausdrücklich kontrollierte Rücksprünge bei Planabweichungen.' },
+            { id: 'c', text: 'Teilweise richtig: Das strikt sequenzielle Vorgehen gilt für Printprojekte, während digitale Projekte nach DIN keine Phasen nutzen', isCorrect: false, explanation: 'Die DIN 69901-2 gilt für Medien-, Software- und Printprojekte gleichermaßen.' },
+            { id: 'd', text: 'Richtig: Rücksprünge zwischen den Phasen sind erst nach einer formalen Projektabnahme und der Eröffnung eines Folgeprojekts zulässig', isCorrect: false, explanation: 'Anpassungen und Rücksprünge sind regulärer Bestandteil der laufenden Projektsteuerung.' }
           ],
           examTip: 'IHK-Argumentation: Phasen geben Orientierung bei Unsicherheit – sie sind kein bürokratisches Dogma!'
         },
@@ -1032,10 +1032,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           question: '[IHK-Entscheidungskompetenz] Warum gilt die Entscheidung am Ende der Initialisierungsphase als eine der wirtschaftlich wichtigsten Weichenstellungen im gesamten Projektlebenszyklus?',
           scenario: 'Ein Managementboard muss über die Freigabe einer kostspieligen Marketingkampagne entscheiden.',
           options: [
-            { id: 'a', text: 'Weil ein rechtzeitiges „Nein“ in der Initialisierung (Projektidee verwerfen) das Unternehmen vor immensen Fehlinvestitionen schützt, bevor teure Planungs- und Umsetzungskapazitäten gebunden werden', isCorrect: true, explanation: 'Richtig! In der Initialisierung sind die Ausstiegskosten am geringsten.' },
-            { id: 'b', text: 'Weil in der Initialisierungsphase bereits 100 % aller Rechnungen der beteiligten Lieferanten beglichen werden müssen', isCorrect: false, explanation: 'Rechnungen werden phasenbezogen nach Leistungserbringung bezahlt.' },
-            { id: 'c', text: 'Weil nach Abschluss der Initialisierung laut Arbeitsrecht keine Kündigungen von Projektleitern mehr zulässig sind', isCorrect: false, explanation: 'Arbeitsrechtliche Kündigungsfristen sind völlig unabhängig von Projektphasen.' },
-            { id: 'd', text: 'Weil in der Initialisierungsphase bereits die verbindliche Belichtung aller Druckplatten für die Gesamtauflage beauftragt wird', isCorrect: false, explanation: 'Druckplatten werden erst in der Produktionsphase nach Freigabe belichtet.' }
+            { id: 'a', text: 'Weil ein frühes Ablehnen unrentabler Ideen hohe Fehlinvestitionen verhindert, bevor teure Planungs- und Umsetzungskapazitäten gebunden werden', isCorrect: true, explanation: 'Richtig! Ein rechtzeitiges „Nein“ in der Initialisierung hält die Ausstiegskosten am geringsten.' },
+            { id: 'b', text: 'Weil in der Initialisierungsphase bereits sämtliche externen Lieferantenverträge und Fremdleistungen verbindlich bezahlt werden müssen', isCorrect: false, explanation: 'Rechnungen und Fremdleistungen fallen erst phasenbezogen nach Beauftragung und Leistungserbringung an.' },
+            { id: 'c', text: 'Weil das Projektbudget nach Abschluss der Initialisierung vertraglich fixiert ist und später nicht mehr angepasst werden darf', isCorrect: false, explanation: 'Detailbudgetierung erfolgt in Planung und Definition; Anpassungen sind über Change Management möglich.' },
+            { id: 'd', text: 'Weil in der Initialisierungsphase bereits verbindliche Produktionsmittel wie Druckplatten oder Serverlizenzen beschafft werden', isCorrect: false, explanation: 'Produktionsmittel werden erst nach Freigabe in der Umsetzungsphase beschafft.' }
           ],
           examTip: 'Merke: Der Mut zum Projektabbruch in der Initialisierungsphase spart Unternehmen Millionen!'
         }
@@ -1269,10 +1269,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           question: '[IHK-Transfer: Planungsverständnis nach DIN 69901-2] Ein Kollege behauptet: „Eine detaillierte Planung in Phase 3 ist sinnlos, weil in Medienprojekten durch unvorhergesehene Kundenänderungen sowieso kein Plan bis zum Ende hält.“ Welche fundierte Erwiderung trifft den Kern der Norm?',
           scenario: 'Diskussion im Team über den Sinn und Zweck von Projektplänen bei hoher Dynamik.',
           options: [
-            { id: 'a', text: 'Ein Projektplan ist kein starres Gesetz, sondern das unverzichtbare Referenzmodell („Baseline“), an dem Planabweichungen, Budgetrisiken und Terminverzögerungen in Phase 4 überhaupt erst gemessen und gesteuert werden können', isCorrect: true, explanation: 'Exakte IHK-Musterantwort zur Funktion des Projektplans!' },
-            { id: 'b', text: 'Der Kollege hat recht: Pläne werden nur aus formalen Gründen gezeichnet, um dem Kunden bei der Abrechnung eine Arbeitsleistung vorzutäuschen', isCorrect: false, explanation: 'Planung dient der internen Steuerung und Ressourcensicherung, nicht der Täuschung.' },
-            { id: 'c', text: 'In der DIN 69901-2 ist festgeschrieben, dass Kundenänderungen nach Unterzeichnung des Projektplans gesetzlich verboten sind', isCorrect: false, explanation: 'Änderungen sind normal und werden über strukturiertes Change Management gesteuert.' },
-            { id: 'd', text: 'Ein Projektplan verhindert zu 100 %, dass unvorhergesehene Risiken oder personelle Engpässe während der Produktion auftreten können', isCorrect: false, explanation: 'Pläne verhindern Risiken nicht vollständig, ermöglichen aber gezielte Gegenmaßnahmen.' }
+            { id: 'a', text: 'Der Projektplan dient als verbindliche Referenzbasis, an der Abweichungen bei Kosten, Terminen und Leistung in Phase 4 steuerbar werden', isCorrect: true, explanation: 'Exakte IHK-Musterantwort! Als „Baseline“ macht der Projektplan Planabweichungen, Budgetrisiken und Terminverzögerungen überhaupt erst messbar.' },
+            { id: 'b', text: 'Der Projektplan erfüllt vor allem eine formale Nachweispflicht gegenüber dem Auftraggeber, während die Steuerung intuitiv im Team erfolgt', isCorrect: false, explanation: 'Planung dient der konkreten internen Steuerung und Ressourcensicherung, nicht bloßer Formalität.' },
+            { id: 'c', text: 'Durch einen abgestimmten Projektplan nach DIN 69901-2 werden nachträgliche Änderungswünsche des Kunden vertraglich ausgeschlossen', isCorrect: false, explanation: 'Änderungen sind normal und werden über strukturiertes Change Management gesteuert.' },
+            { id: 'd', text: 'Ein detaillierter Projektplan schließt unvorhergesehene Projektrisiken und personelle Engpässe während der Umsetzung zuverlässig aus', isCorrect: false, explanation: 'Pläne verhindern Risiken nicht vollständig, ermöglichen aber gezielte Gegenmaßnahmen.' }
           ],
           examTip: 'Prüfungsargument: Planung ist die unersetzliche Messbasis für jedes Projektcontrolling!'
         },
@@ -1388,10 +1388,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           moduleId: 'projphase-7',
           question: 'Welche Bedingung muss laut Christoph Schulze zwingend erfüllt sein, damit „Lessons Learned“ einen nachhaltigen betriebswirtschaftlichen Nutzen entfalten?',
           options: [
-            { id: 'a', text: 'Erkenntnisse dürfen nicht ausschließlich dokumentiert werden („Datenfriedhof“), sondern müssen auffindbar und tatsächlich in künftigen Projekten nutzbar sein', isCorrect: true, explanation: 'Exakte IHK-Kernbotschaft aus Christoph Schulzes Skript!' },
-            { id: 'b', text: 'Erkenntnisse müssen zwingend von einem externen Wirtschaftsprüfer beglaubigt und öffentlich publiziert werden', isCorrect: false, explanation: 'Lessons Learned sind betriebsinterne Wissensressourcen ohne Notarpflicht.' },
-            { id: 'c', text: 'Erkenntnisse müssen belegen, dass der Kunde für alle aufgetretenen Terminverzögerungen die alleinige Schuld trägt', isCorrect: false, explanation: 'Lessons Learned dienen dem konstruktiven Lernen, nicht der Schuldzuweisung.' },
-            { id: 'd', text: 'Erkenntnisse dürfen ausschließlich mündlich ohne jegliche schriftliche Fixierung an Auszubildende weitergegeben werden', isCorrect: false, explanation: 'Ohne strukturierte Dokumentation und Bereitstellung verpufft das Wissen.' }
+            { id: 'a', text: 'Erkenntnisse dürfen nicht bloß abgelegt werden, sondern müssen auffindbar sein und in künftigen Projekten aktiv genutzt werden', isCorrect: true, explanation: 'Exakte IHK-Kernbotschaft aus Christoph Schulzes Skript: Sonst entsteht lediglich ein ungenutzter „Datenfriedhof“.' },
+            { id: 'b', text: 'Erkenntnisse müssen von einer externen Prüfstelle zertifiziert und für die gesamte Branche öffentlich zugänglich gemacht werden', isCorrect: false, explanation: 'Lessons Learned sind betriebsinterne Wissensressourcen ohne Zertifizierungs- oder Veröffentlichungspflicht.' },
+            { id: 'c', text: 'Erkenntnisse müssen primär rechtssicher dokumentieren, welche Projektbeteiligten für aufgetretene Verzögerungen verantwortlich waren', isCorrect: false, explanation: 'Lessons Learned dienen dem konstruktiven Lernen, nicht der Schuldzuweisung.' },
+            { id: 'd', text: 'Erkenntnisse sollten bewusst ohne schriftliche Ablage ausschließlich informell im Team weitergegeben werden, um Aufwand zu sparen', isCorrect: false, explanation: 'Ohne strukturierte Dokumentation und Bereitstellung verpufft das Wissen.' }
           ],
           examTip: 'Kernbotschaft aus Seite 7: Erfahrungssicherung muss auffindbar und tatsächlich nutzbar sein!'
         },
@@ -1401,10 +1401,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           moduleId: 'projphase-7',
           question: 'Welche vier Kernaufgaben bilden das Pflichtprogramm der Phase 5 (Abschluss) nach DIN 69901-2?',
           options: [
-            { id: 'a', text: 'Projektabschlussbericht, Nachkalkulation, Archivierung der Projektdokumentation und Sicherung gewonnener Erfahrungen (Lessons Learned)', isCorrect: true, explanation: 'Exaktes Pflichtprogramm der Phase 5 nach DIN 69901-2 und Christoph Schulze!' },
-            { id: 'b', text: 'Grobkonzept, Feinkonzept, Screendesign und Programmierung der Frontend-Komponenten', isCorrect: false, explanation: 'Das sind fachliche Produktionsschritte der Umsetzung.' },
-            { id: 'c', text: 'Forming, Storming, Norming und Performing zur Teamentwicklung nach Tuckman', isCorrect: false, explanation: 'Das sind die Phasen der Teamentwicklung, nicht die PM-Abschlussaufgaben.' },
-            { id: 'd', text: 'Bedarfsanalyse, Wirtschaftlichkeitsrechnung, Projektantrag und Machbarkeitsprüfung', isCorrect: false, explanation: 'Das sind Kernaufgaben der Phase 1 (Initialisierung).' }
+            { id: 'a', text: 'Projektabschlussbericht, Nachkalkulation, Archivierung der Dokumentation und Sicherung von Lessons Learned', isCorrect: true, explanation: 'Exaktes Pflichtprogramm der Phase 5 (Abschluss) nach DIN 69901-2 und Christoph Schulze!' },
+            { id: 'b', text: 'Grobkonzept, Feinkonzept, Screendesign sowie die technische Umsetzung und Prüfung der Frontend-Komponenten', isCorrect: false, explanation: 'Das sind fachliche Produktionsschritte der Umsetzung.' },
+            { id: 'c', text: 'Forming, Storming, Norming und Performing zur systematischen Begleitung der Teamentwicklung im Projekt', isCorrect: false, explanation: 'Das sind die Phasen der Teamentwicklung nach Tuckman, nicht die PM-Abschlussaufgaben.' },
+            { id: 'd', text: 'Bedarfsanalyse, Wirtschaftlichkeitsrechnung, Projektantrag sowie eine erste fachliche Machbarkeitsprüfung', isCorrect: false, explanation: 'Das sind Kernaufgaben der Phase 1 (Initialisierung).' }
           ],
           examTip: 'Auswendig lernen für die IHK: Abschlussbericht, Nachkalkulation, Archivierung, Erfahrungssicherung!'
         },
@@ -1421,10 +1421,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
             imageUrl: '/src/assets/images/din69901_pm_cycle_1794249501102.jpg'
           },
           options: [
-            { id: 'a', text: 'Weil das Projektmanagement ein lernendes System ist: Die Erfahrungen aus Phase 5 fließen direkt als Qualitätsverbesserung in künftige Initialisierungsphasen ein', isCorrect: true, explanation: 'Richtig! Der geschlossene Kreislauf sichert kontinuierliche Unternehmensverbesserung.' },
-            { id: 'b', text: 'Weil Projekte nach Vorgabe der DIN-Norm niemals enden dürfen und nach dem Abschluss sofort von vorn beginnen müssen', isCorrect: false, explanation: 'Jedes Projekt endet mit der Entlastung; der Kreislauf betrifft das organisatorische Lernen.' },
-            { id: 'c', text: 'Weil der Kreis optisch an die Farbkreise der Druckvorstufe angelehnt ist und rein dekorativen Zwecken dient', isCorrect: false, explanation: 'Der Kreis symbolisiert den kybernetischen Regelkreis und das Qualitätsmanagement.' },
-            { id: 'd', text: 'Weil in jeder Phase exakt dieselben Mitarbeiter ohne Pause in der gleichen Arbeitskonstellation verbleiben müssen', isCorrect: false, explanation: 'Projektteams werden nach Projektende typischerweise neu zusammengesetzt.' }
+            { id: 'a', text: 'Weil Erfahrungen aus dem Abschluss direkt in die Initialisierung künftiger Projekte einfließen und das System lernfähig halten', isCorrect: true, explanation: 'Richtig! Der geschlossene Kreislauf sichert kontinuierliche Unternehmensverbesserung.' },
+            { id: 'b', text: 'Weil laufende Projekte nach Abschluss unmittelbar in eine neue Durchführungsrunde für dasselbe Teilprodukt übergehen müssen', isCorrect: false, explanation: 'Jedes Projekt endet mit der Entlastung; der Kreislauf betrifft das organisatorische Lernen.' },
+            { id: 'c', text: 'Weil alle fünf Projektmanagementphasen in der Praxis gleichzeitig starten und ohne feste Reihenfolge parallel ablaufen', isCorrect: false, explanation: 'Der Kreis symbolisiert den kybernetischen Regelkreis aus Erfahrungssicherung und künftiger Initialisierung.' },
+            { id: 'd', text: 'Weil Projektteams nach der Norm über mehrere Folgeprojekte hinweg in unveränderter Besetzung weiterarbeiten sollen', isCorrect: false, explanation: 'Projektteams werden nach Projektende typischerweise neu zusammengesetzt.' }
           ],
           examTip: 'Schaubild-Analyse: Der Kreis belegt den kontinuierlichen Erfahrungs- und Qualitätskreislauf!'
         }
@@ -1451,10 +1451,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           question: '[IHK-Transfer: Datenfriedhof vs. gelebte Erfahrungssicherung] Eine Digitalagentur stellt fest, dass in drei aufeinanderfolgenden App-Projekten dieselben Verzögerungen bei der Apple-App-Store-Zulassung auftraten, obwohl jedes Mal ein Abschlussbericht geschrieben wurde. Worin liegt das strukturelle Versäumnis bei der Erfahrungssicherung?',
           scenario: 'Wiederholungsfehler trotz vorhandener Abschlussdokumentation.',
           options: [
-            { id: 'a', text: 'Die Lessons Learned wurden lediglich als statisches Dokument archiviert („Datenfriedhof“), anstatt die Erkenntnisse auffindbar und operativ nutzbar in Standard-Checklisten und Zeitpuffern für Phase 2 & 3 zu verankern', isCorrect: true, explanation: 'Exakter Prüfungsfall zur gelebten Erfahrungssicherung nach Christoph Schulze!' },
-            { id: 'b', text: 'Die Agentur hätte für das Nachfolgeprojekt einen pauschalen Risikoaufschlag von 100 % auf alle Posten kalkulieren müssen', isCorrect: false, explanation: 'Pauschale Mondpreise lösen organisatorische Prozessmängel nicht.' },
-            { id: 'c', text: 'Das Team hätte auf die Programmierung verzichten und dem Kunden stattdessen nur interaktive PDF-Dateien ausliefern sollen', isCorrect: false, explanation: 'PDF-Dateien erfüllen nicht die Anforderungen an eine native mobile Applikation.' },
-            { id: 'd', text: 'Man hätte die Apple-Zulassung einfach in Phase 1 (Initialisierung) vor Beginn jeglicher Programmierung verlegen müssen', isCorrect: false, explanation: 'Apple prüft fertige Binary-Builds und keine bloßen Projektideen.' }
+            { id: 'a', text: 'Die Erkenntnisse wurden nur statisch archiviert, statt sie operativ in Checklisten und Zeitpuffer für Planung und Definition einzubinden', isCorrect: true, explanation: 'Exakter Prüfungsfall nach Christoph Schulze: Statische Berichte bilden einen „Datenfriedhof“, wenn sie nicht in Checklisten und Puffer für Phase 2 & 3 überführt werden.' },
+            { id: 'b', text: 'Die Agentur hätte für Folgeprojekte einen pauschalen Risikoaufschlag auf das Gesamtbudget kalkulieren sollen, um Verzögerungen abzufedern', isCorrect: false, explanation: 'Pauschale Preisaufschläge beheben organisatorische Prozessmängel bei der Terminplanung nicht.' },
+            { id: 'c', text: 'Das Entwicklerteam hätte auf native App-Releases verzichten und stattdessen rein webbasierte Lösungen ohne Store-Freigabe wählen sollen', isCorrect: false, explanation: 'Die Plattformwahl löst das fehlende Lernen aus abgeschlossenen Projekten nicht.' },
+            { id: 'd', text: 'Die App-Store-Prüfung hätte bereits während der Initialisierung angestoßen werden müssen, bevor die eigentliche Umsetzung begann', isCorrect: false, explanation: 'Apple prüft fertige Builds und keine bloßen Projektideen aus Phase 1.' }
           ],
           examTip: 'Prüfungsfalle: Dokumentieren allein reicht nicht – Wissen muss in Arbeitsstandards überführt werden!'
         },
@@ -1465,10 +1465,10 @@ export const PROJECT_PHASES_CHAPTER: Chapter = {
           question: '[IHK-Gesamtsynthese: DIN 69901-2 vs. Tuckman-Modell] In der IHK-Abschlussprüfung wirst du gebeten, die Beziehung zwischen dem prozessualen Phasenmodell nach DIN 69901-2 und dem sozialpsychologischen Phasenmodell nach Bruce Tuckman darzustellen. Welche Synthese ist fachlich makellos?',
           scenario: 'Gegenüberstellung der beiden großen Leitmodelle aus Kapitel 12.',
           options: [
-            { id: 'a', text: 'DIN 69901-2 strukturiert die sachlich-organisatorischen Führungs- und Managementprozesse des Projekts (Was/Wie/Controlling), während Tuckman die zwischenmenschliche Dynamik und Reifung des Projektteams beschreibt (Forming, Storming, Norming, Performing, Adjourning). Beide Dimensionen bedingen sich gegenseitig', isCorrect: true, explanation: 'Brillante IHK-Gesamtsynthese der beiden Modelle!' },
-            { id: 'b', text: 'DIN 69901-2 regelt ausschließlich die agile Softwareentwicklung (Scrum/Kanban), während Bruce Tuckman das klassische sequentielle Wasserfallmodell für den analogen Printbereich normiert hat', isCorrect: false, explanation: 'Beide Modelle sind branchen- und methodenunabhängig einsetzbar.' },
-            { id: 'c', text: 'Das Phasenmodell von Tuckman gilt ausschließlich für Teams in handwerklichen Kleinbetrieben, während die DIN 69901-2 als Norm für IT-Großprojekte in multinationalen Konzernen entwickelt wurde', isCorrect: false, explanation: 'Sozialpsychologie und Projektmanagementnorm gelten für jede Art von Teamarbeit.' },
-            { id: 'd', text: 'Zwischen beiden Konzepten besteht kein sachlicher Unterschied; es handelt sich um zwei wörtlich übersetzte Fassungen desselben europäischen Normenabschnitts für das Qualitätsmanagement', isCorrect: false, explanation: 'Es handelt sich um zwei völlig unterschiedliche, sich ergänzende Modelle (Prozess vs. Mensch).' }
+            { id: 'a', text: 'DIN 69901-2 strukturiert die sachlichen Managementprozesse des Projekts, während Tuckman die zwischenmenschliche Teamreifung beschreibt; beide Ebenen ergänzen sich', isCorrect: true, explanation: 'Brillante IHK-Gesamtsynthese! Prozessual (Was/Wie/Controlling) und sozialpsychologisch (Forming bis Adjourning) bedingen sich gegenseitig.' },
+            { id: 'b', text: 'DIN 69901-2 regelt vorrangig agile Softwareprojekte mit kurzen Sprints, während das Tuckman-Modell speziell für klassische Print- und Medienprojekte entwickelt wurde', isCorrect: false, explanation: 'Beide Modelle sind branchen- und methodenunabhängig einsetzbar.' },
+            { id: 'c', text: 'Das Phasenmodell nach Tuckman richtet sich primär an kleine Fachabteilungen, während die DIN 69901-2 ausschließlich für abteilungsübergreifende Großprojekte gilt', isCorrect: false, explanation: 'Sozialpsychologie und Projektmanagementnorm gelten unabhängig von der Unternehmens- oder Teamgröße.' },
+            { id: 'd', text: 'Beide Modelle betrachten denselben prozessualen Projektablauf von der Idee bis zum Abschluss und unterscheiden sich lediglich in der englischen und deutschen Terminologie', isCorrect: false, explanation: 'Es handelt sich um zwei völlig unterschiedliche, sich ergänzende Modelle (Prozess vs. Teamdynamik).' }
           ],
           examTip: 'Meister-Synthese: DIN 69901-2 = Projekt- & Prozessmanagement; Tuckman = Teamdynamik & Führung!'
         }

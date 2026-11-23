@@ -63,7 +63,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           moduleId: 'ihk-orig-1',
           question: 'Aufgabe 1b (3 Punkte): Was zeichnet medienneutrale Daten bezüglich Farbraum und Format aus?',
           options: [
-            { id: 'a', text: 'Sie liegen im hochauflösenden RGB-Farbraum (z.B. eciRGBv2) in verlustfreien Formaten vor und werden erst beim Export in Ziel-Farbräume konvertiert', isCorrect: true, explanation: 'Richtig! Das schützt vor frühem Farbraumverlust.' },
+            { id: 'a', text: 'Sie liegen im hochauflösenden RGB-Farbraum in verlustfreien Formaten vor und werden erst beim Export in Ziel-Farbräume konvertiert', isCorrect: true, explanation: 'Richtig! Ein großer RGB-Farbraum (z. B. eciRGBv2) schützt vor frühem Farbraumverlust.' },
             { id: 'b', text: 'Sie werden frühzeitig in 8-Bit-Standard-CMYK konvertiert und fest auf ein spezifisches Druckpapier profiliert', isCorrect: false, explanation: 'Falsch. Frühe CMYK-Wandlung beschränkt den Farbraum irreversibel.' },
             { id: 'c', text: 'Sie werden im sRGB-Farbraum als komprimierte JPEG-Dateien abgelegt, um Rendering-Probleme im Browser zu vermeiden', isCorrect: false, explanation: 'sRGB und JPEG bieten keine ausreichenden Reserven für hochwertige Printausgaben.' },
             { id: 'd', text: 'Sie werden als hardwarekalibrierte LAB-Graustufen abgespeichert und erst an der Druckmaschine nachträglich eingefärbt', isCorrect: false, explanation: 'LAB-Graustufen enthalten keine Farbinformationen.' }
@@ -75,7 +75,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           moduleId: 'ihk-orig-1',
           question: 'Aufgabe 1c (4 Punkte): Welche zwei Hauptvorteile bietet die medienneutrale Datenhaltung im Medienbetrieb?',
           options: [
-            { id: 'a', text: '1. Zeitersparnis & Redundanzvermeidung (Single Source of Truth); 2. Maximale Qualitäts- & Zukunftssicherheit für neue Medienkanäle', isCorrect: true, explanation: 'Exakte IHK-Musterlösung für Teilaufgabe c)!' },
+            { id: 'a', text: '1. Zeitersparnis und Redundanzvermeidung durch zentrale Datenpflege; 2. Maximale Qualitäts- und Zukunftssicherheit für neue Medienkanäle', isCorrect: true, explanation: 'Exakte IHK-Musterlösung für Teilaufgabe c) (Single Source of Truth).' },
             { id: 'b', text: '1. Vollständiger Wegfall von Farbprofilen im Workflow; 2. Automatische Reduzierung der Druckfarbkosten durch Druckfarbeneinsparung', isCorrect: false, explanation: 'Farbprofile bleiben unverzichtbar; Druckfarbenkosten sinken dadurch nicht.' },
             { id: 'c', text: '1. Verzicht auf Schriftlizenzierung durch Bildrasterung; 2. Automatische Hardwarekalibrierung aller Endgeräte beim Kunden', isCorrect: false, explanation: 'Medienneutralität ersetzt weder Schriftlizenzen noch Monitorkalibrierungen.' },
             { id: 'd', text: '1. Direkte Wandlung aller Pixelgrafiken in Vektoren; 2. Automatischer Export ohne redaktionelle Korrekturschleifen', isCorrect: false, explanation: 'Pixelbilder werden nicht automatisch zu Vektoren, Freigabeschleifen bleiben nötig.' }
@@ -90,7 +90,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           question: '[IHK Transfer] Eine Werbeagentur soll Bildmaterial für einen gedruckten Produktkatalog (Offset) und eine Mobile-App bereitstellen. Erläutere das optimale Vorgehen nach IHK-Standard.',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 1: Der Kundenbestand soll für die medienneutrale Nutzung neu organisiert werden.',
           options: [
-            { id: 'a', text: 'Das Master-Bild im universellen RGB-Farbraum (eciRGBv2) als verlustfreies TIFF/RAW pflegen und per automatisiertem Export in ISO Coated v2 für Print und sRGB/WebP für Mobile umwandeln', isCorrect: true, explanation: 'Exakte IHK-Meisterlösung!' },
+            { id: 'a', text: 'Das Master-Bild im universellen RGB-Farbraum als verlustfreies TIFF/RAW pflegen und beim Export in ISO Coated v2 oder sRGB/WebP wandeln', isCorrect: true, explanation: 'Exakte IHK-Meisterlösung! Mit einem großen RGB-Master (z. B. eciRGBv2) bleiben alle Farbdetails für Print und Mobile erhalten.' },
             { id: 'b', text: 'Das Bildmaterial direkt im Ausgabefarbraum ISO Coated v2 erfassen und dieselbe CMYK-Datei unverändert für Web und App bereitstellen', isCorrect: false, explanation: 'Falsch. Browser und Apps können CMYK-Farben oft nicht farbkorrekt darstellen.' },
             { id: 'c', text: 'Die Aufnahmen in sRGB mit 72 ppi als Master sichern und vor dem Druck durch bilineare Interpolation auf 300 ppi künstlich hochrechnen', isCorrect: false, explanation: '72 ppi als Master reicht im Offsetdruck qualitativ nicht aus; Interpolation erzeugt Unschärfe.' },
             { id: 'd', text: 'Die Rohdaten ausschließlich im gerätespezifischen Kamera-Farbprofil belassen und ohne Farbkonvertierung an die Kanäle verteilen', isCorrect: false, explanation: 'Kamera-Rohdaten müssen über standardisierte Arbeitsfarbräume aufbereitet werden.' }
@@ -180,7 +180,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           question: '[IHK Original Seite 1] Ein Firmenlogo soll sowohl im Druck als auch im Internet verwendet werden. Erläutere die Eignung der 5 Formate (EPS, GIF, SVG, PNG-24, TIFF).',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 2: Vor- und Nachteile der 5 Formate (je 2 Punkte, gesamt 10 Punkte).',
           options: [
-            { id: 'a', text: 'SVG für Web (Vektor), EPS/TIFF für Print, PNG-24 für Web mit Transparenz; GIF wegen 256-Farben-Beschränkung für hochwertige Logos ungeeignet', isCorrect: true, explanation: 'Vollständige IHK-Musterlösung!' },
+            { id: 'a', text: 'SVG für Web-Vektoren, EPS/TIFF für Print, PNG-24 für Web mit Transparenz; GIF ist wegen 256 Farben für Logos ungeeignet', isCorrect: true, explanation: 'Vollständige IHK-Musterlösung! SVG ist vektorbasiert, PNG-24 liefert Alpha-Transparenz und EPS/TIFF decken den Druck ab.' },
             { id: 'b', text: 'EPS für responsive Smartphone-Websites, SVG ausschließlich für den CMYK-Druck, GIF für farbechte Verläufe und TIFF für Web-Banner', isCorrect: false, explanation: 'EPS wird im modernen Web nicht nativ gerendert; SVG ist der ideale Webstandard.' },
             { id: 'c', text: 'GIF für großformatige Werbebanner, PNG-24 für belichtete Druckplatten, SVG nur für Schwarz-Weiß-Grafiken ohne Kurven', isCorrect: false, explanation: 'GIF skaliert nicht auf Großformaten; Druckplatten werden über PDF/X belichtet.' },
             { id: 'd', text: 'Alle 5 Formate sind für Web und Print technisch identisch einsetzbar, da moderne Ausgabegeräte jedes Format beliebig adaptieren', isCorrect: false, explanation: 'Formate besitzen fundamentale technische Unterschiede in Vektor-/Pixelarchitektur und Farbtiefe.' }
@@ -193,7 +193,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           question: '[IHK Transfer] Warum führt die Platzierung eines GIF-Logos auf einem dunklen Website-Header oft zu einem hässlichen weißen "Säumungs-Rand" (Halo-Effekt)?',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 2: Fehleranalyse bei Transparenzen.',
           options: [
-            { id: 'a', text: 'Weil GIF keine Anti-Aliasing-Transparenz (Alpha-Kanal) unterstützt und Kanten-Pixel gegen den ursprünglichen hellen Hintergrund gerendert wurden', isCorrect: true, explanation: 'Richtig! Durch 1-Bit-Transparenz fehlen weiche Übergangspixel.' },
+            { id: 'a', text: 'Weil GIF keine weiche Anti-Aliasing-Transparenz unterstützt und Kanten-Pixel gegen den hellen Hintergrund gerendert wurden', isCorrect: true, explanation: 'Richtig! GIF kennt keinen Alpha-Kanal, sondern nur 1-Bit-Transparenz ohne weiche Übergangspixel.' },
             { id: 'b', text: 'Weil GIF-Dateien im Browser beim Rendern auf dunklen Hintergründen automatisch ein inverses Farbprofil erzwingen', isCorrect: false, explanation: 'Browser erzwingen kein inverses Farbprofil; das Problem liegt am harten Mattierungs-Rand.' },
             { id: 'c', text: 'Weil der Farbumfang von GIF im RGB-Modus auf 16 Grundfarben beschränkt ist und dunkle Farbtöne automatisch abgeschnitten werden', isCorrect: false, explanation: 'GIF unterstützt bis zu 256 frei definierbare Farben aus dem 24-Bit-Farbraum.' },
             { id: 'd', text: 'Weil GIF-Dateien transparente Bereiche grundsätzlich als hochglänzenden Schmuckfarbenkanal interpretieren', isCorrect: false, explanation: 'GIF kennt keine Schmuckfarbenkanäle, sondern lediglich eine binäre Index-Transparenz.' }
@@ -349,7 +349,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
             highlights: ['8-Bit Dynamik = 256 Stufen', 'Sichtbarer Tonwertabriss', 'Kammbildung im Diagramm']
           },
           options: [
-            { id: 'a', text: 'Durch Spreizung geringer Tonwerte (256 Stufen) entstehen Lücken im Histogramm (Kammbildung); sichtbare Tonwertabrisse/Posterisation sind die Folge', isCorrect: true, explanation: 'Exakte IHK-Erklärung aus Teil c)!' },
+            { id: 'a', text: 'Durch die Spreizung geringer Tonwertstufen entstehen Lücken im Histogramm, was zu sichtbaren Tonwertabrissen und Posterisation führt', isCorrect: true, explanation: 'Exakte IHK-Erklärung aus Teil c): Bei 8 Bit (256 Stufen) entsteht durch starkes Spreizen eine Kammbildung im Histogramm.' },
             { id: 'b', text: 'Zacken im Histogramm belegen eine höhere Schärfe, da Photoshop fehlende Tonwertstufen automatisch mit Nachbarwerten füllt', isCorrect: false, explanation: 'Falsch. Kämme bedeuten fehlende Bilddaten und Tonwertverlust.' },
             { id: 'c', text: 'Kämme im Diagramm zeigen an, dass das Bild für den Zeitungsdruck zu viele Farbkanäle besitzt und gewandelt werden muss', isCorrect: false, explanation: 'Histogramme zeigen die Helligkeitsverteilung pro Kanal, nicht das Druckverfahren.' },
             { id: 'd', text: 'Lücken im Histogramm entstehen ausschließlich durch Staub auf dem Kamerasensor und haben keinen sichtbaren Einfluss', isCorrect: false, explanation: 'Histogrammlücken resultieren aus digitaler Tonwertspreizung bei geringer Bittiefe.' }
@@ -413,7 +413,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           moduleId: 'ihk-orig-5',
           question: 'Aufgabe 5a (4 Punkte): Erläutere zwei grundlegende technische Unterschiede zwischen Vektorgrafiken und Pixelbildern.',
           options: [
-            { id: 'a', text: '1. Vektoren bestehen aus mathematischen Pfaden (auflösungsunabhängig); 2. Pixelbilder bestehen aus einem festen Raster von Farbpixeln (auflösungsabhängig)', isCorrect: true, explanation: 'Richtig! Das entspricht exakt den 4 Punkten aus Teil a).' },
+            { id: 'a', text: '1. Vektoren bestehen aus mathematischen Pfaden und sind auflösungsunabhängig; 2. Pixelbilder bestehen aus einem festen Raster und sind auflösungsabhängig', isCorrect: true, explanation: 'Richtig! Das entspricht exakt den 4 Punkten aus Teil a).' },
             { id: 'b', text: '1. Vektoren unterstützen nur 16 Volltonfarben; 2. Pixelbilder können stufenlos ohne Qualitätsverlust auf beliebige Größen vergrößert werden', isCorrect: false, explanation: 'Falsch herum: Vektoren sind beliebig vergrößerbar, Pixelbilder verpixeln.' },
             { id: 'c', text: '1. Pixelbilder basieren auf Koordinaten und Bézierkurven; 2. Vektorgrafiken bestehen aus einem starren Raster von quadratischen Farbquadraten', isCorrect: false, explanation: 'Begriffe wurden vertauscht: Vektoren nutzen Kurven, Pixel nutzen Raster.' },
             { id: 'd', text: '1. Vektordateien können nur auf Mac-Systemen geöffnet werden; 2. Pixeldateien sind ausschließlich für den Monitordarstellungsmodus reserviert', isCorrect: false, explanation: 'Beide Grafikarten sind plattformunabhängig und im Druck sowie Web einsetzbar.' }
@@ -452,10 +452,10 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           question: '[IHK Transfer] Berechne die effektive Auflösung in ppi, wenn das PNG-Logo (500 Pixel Breite) auf einem Werbebanner mit 200 cm Logobreite gedruckt würde.',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 5: Effektiv-Auflösungsberechnung.',
           options: [
-            { id: 'a', text: '200 cm / 2,54 = 78,74 Zoll -> 500 px / 78,74 Zoll = ca. 6,35 ppi (extremer Qualitätsverlust)', isCorrect: true, explanation: 'Exakter Rechenweg! 6,35 ppi ist völlig unbrauchbar.' },
-            { id: 'b', text: '200 cm * 2,54 = 508 Zoll -> 500 px / 508 Zoll = ca. 0,98 ppi (Rechenfehler durch Multiplikation statt Division)', isCorrect: false, explanation: 'Falsch: 1 Zoll = 2,54 cm, daher muss durch 2,54 geteilt werden.' },
-            { id: 'c', text: '500 px / 200 cm = 2,5 ppi (Rechenfehler durch vergessene Umrechnung von Zentimetern in Zoll)', isCorrect: false, explanation: 'Falsch: ppi bedeutet Pixel per INCH (Zoll), nicht Pixel pro Zentimeter.' },
-            { id: 'd', text: '500 px * 2,54 / 200 cm = ca. 6,35 dpi -> aufgerundet 300 ppi durch RIP-Interpolation', isCorrect: false, explanation: 'Falsch: RIP-Interpolation erhöht nicht die optische Schärfe des Ausgangsbildes.' }
+            { id: 'a', text: '200 cm / 2,54 = 78,74 Zoll -> 500 px / 78,74 Zoll = ca. 6,35 ppi', isCorrect: true, explanation: 'Exakter Rechenweg! Ca. 6,35 ppi führt zu extremem Qualitätsverlust und ist für den Druck unbrauchbar.' },
+            { id: 'b', text: '200 cm * 2,54 = 508 Zoll -> 500 px / 508 Zoll = ca. 0,98 ppi', isCorrect: false, explanation: 'Falsch: Rechenfehler durch Multiplikation statt Division – 1 Zoll = 2,54 cm, daher muss durch 2,54 geteilt werden.' },
+            { id: 'c', text: '500 px / 200 cm = 2,5 ppi', isCorrect: false, explanation: 'Falsch: Umrechnung von Zentimetern in Zoll wurde vergessen. ppi bedeutet Pixel per Inch (Zoll), nicht Pixel pro Zentimeter.' },
+            { id: 'd', text: '500 px * 2,54 / 200 cm = ca. 6,35 dpi -> 300 ppi durch RIP-Interpolation', isCorrect: false, explanation: 'Falsch: RIP-Interpolation erhöht nicht die optische Schärfe des Ausgangsbildes.' }
           ]
         },
         {
@@ -465,7 +465,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           question: '[IHK Transfer] Wann muss eine Vektorgrafik im Produktionsprozess zwingend gerastert (in Pixel gewandelt) werden?',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 5: Rasterungsprozesse.',
           options: [
-            { id: 'a', text: 'Beim finalen Druck-RIP (Raster Image Processor) zur Erzeugung von Druckrastern oder beim Export in Pixelformate für Web-Bitmaps', isCorrect: true, explanation: 'Richtig! Die Belichtungseinheit/Drucker benötigt am Ende Belichtungspixel.' },
+            { id: 'a', text: 'Beim finalen Druck-RIP zur Erzeugung von Druckrastern oder beim Export in Pixelformate für Web-Bitmaps', isCorrect: true, explanation: 'Richtig! Erst der Raster Image Processor (RIP) der Belichtungseinheit oder ein Bitmap-Export wandelt Vektoren in Pixel um.' },
             { id: 'b', text: 'Bereits vor der ersten Skizzenphase im Entwurfsprozess zur Bestimmung der maximal zulässigen Pfadkomplexität', isCorrect: false, explanation: 'Im Entwurf bleiben Pfade voll editierbar als Vektoren.' },
             { id: 'c', text: 'Ausschließlich bei der Archivierung auf externen Festplatten, um den Speicherplatzbedarf von Vektordateien zu senken', isCorrect: false, explanation: 'Vektordateien sind meist kleiner als gerasterte Bitmaps; Vektoren werden archiviert.' },
             { id: 'd', text: 'Beim Versenden der Datei per E-Mail, da E-Mail-Programme vektorbasierte Grafiken generell nicht übertragen können', isCorrect: false, explanation: 'E-Mail-Programme übertragen beliebige Dateiformate unverändert als Anhang.' }
@@ -566,7 +566,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           question: '[IHK Transfer] Welcher Unterschied besteht zwischen einem Scribble und einem Mockup in der Nutzenstiftung für den Entwurfsprozess?',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 6: Visualisierungsebenen.',
           options: [
-            { id: 'a', text: 'Scribbles dienen der schnellen, spontanen Ideenfindung im Team; Mockups zeigen das detaillierte visuelle Endergebnis (Bilder, Farben, Typo) zur Kundenfreigabe', isCorrect: true, explanation: 'Richtig! Grobkonzept (Scribble) vs. Feinkonzept (Mockup).' },
+            { id: 'a', text: 'Scribbles dienen der schnellen Ideenfindung im Team; Mockups zeigen das detaillierte visuelle Endergebnis zur Kundenfreigabe', isCorrect: true, explanation: 'Richtig! Grobkonzept (Scribble) vs. detailliertes Feinkonzept mit Bildern, Farben und Typografie (Mockup).' },
             { id: 'b', text: 'Scribbles stellen voll funktionsfähige Web-Applikationen dar; Mockups sind grobe Handskizzen auf Packpapier ohne Farbinformation', isCorrect: false, explanation: 'Genau umgekehrt: Scribbles sind Handskizzen, Mockups sind detaillierte Gestaltungsmodelle.' },
             { id: 'c', text: 'Scribbles werden ausschließlich mit Vektorprogrammen erstellt; Mockups basieren auf maschinengestützten 3D-Renderings', isCorrect: false, explanation: 'Scribbles entstehen meist analog oder per Stift-Tablet; Mockups sind 2D/3D-Layouts.' },
             { id: 'd', text: 'Scribbles und Mockups sind synonyme Fachbegriffe ohne funktionale oder methodische Differenzierung im Design-Workflow', isCorrect: false, explanation: 'Sie bezeichnen klar voneinander getrennte Phasen im Entwurfsprozess (Grob- vs. Feinentwurf).' }
@@ -609,7 +609,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
             highlights: ['ISO Coated v2 = 300% TAC', 'ISOnewspaper (PSO SNP) = max. 240% TAC', 'Verhinderung von Ablegen & Verschmieren']
           },
           options: [
-            { id: 'a', text: 'Weil Zeitungspapier ungestrichen und stark saugfähig ist; 300% Farbauftrag führt zu starkem Punktzuwachs, Verschmieren und Trocknungsproblemen', isCorrect: true, explanation: 'Exakte IHK-Musterantwort aus Teil a)!' },
+            { id: 'a', text: 'Weil ungestrichenes Zeitungspapier stark saugt und 300 % Farbauftrag zu Punktzuwachs und Verschmieren führt', isCorrect: true, explanation: 'Exakte IHK-Musterantwort aus Teil a): 300 % Gesamtfarbauftrag verursacht auf ungestrichenem Zeitungspapier starken Tonwertzuwachs, Verschmieren und Trocknungsprobleme.' },
             { id: 'b', text: 'Weil ISO Coated v2 ausschließlich monochrome Graustufenbilder ohne Farbseparation unterstützt', isCorrect: false, explanation: 'ISO Coated v2 ist das Standard-Farbprofil für gestrichenen 4-Farb-Offsetdruck.' },
             { id: 'c', text: 'Weil Rotationsdruckmaschinen für Zeitungen grundsätzlich nur RGB-Daten annehmen und CMYK-Profile ablehnen', isCorrect: false, explanation: 'Druckmaschinen arbeiten im 4-Farbdruck immer mit CMYK-Druckfarben.' },
             { id: 'd', text: 'Weil ungestrichenes Zeitungspapier physikalisch keine Druckfarbe aufnehmen kann und sofort reißt', isCorrect: false, explanation: 'Zeitungspapier saugt Tinte extrem stark auf; Überfeuchtung führt zum Reißen.' }
@@ -621,7 +621,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           moduleId: 'ihk-orig-7',
           question: 'Aufgabe 7b (4 Punkte): Beschreibe, wie die Datei einer Anzeige für die Ausgabe auf Zeitungspapier farblich aufbereitet werden sollte.',
           options: [
-            { id: 'a', text: 'Profilkonvertierung in das Zeitungsprofil (z.B. ISOnewspaper/PSO SNP), Begrenzung des Gesamtfarbauftrags auf max. 240% und Berücksichtigung des Punktzuwachses', isCorrect: true, explanation: 'Richtig! Das entspricht den 4 Punkten aus Teil b).' },
+            { id: 'a', text: 'Profilkonvertierung in das Zeitungsprofil, Begrenzung des Gesamtfarbauftrags auf max. 240% und Berücksichtigung des Punktzuwachses', isCorrect: true, explanation: 'Richtig! Konvertierung in ISOnewspaper/PSO SNP mit max. 240% TAC entspricht den 4 Punkten aus Teil b).' },
             { id: 'b', text: 'Erhöhung des Farbauftrags auf 360% durch manuelle Zugabe von Cyan und Magenta in den Tiefen zur Kontraststeigerung', isCorrect: false, explanation: '360% Farbauftrag führt auf Zeitungspapier zu starkem Verschmieren und Durchschlagen.' },
             { id: 'c', text: 'Umwandlung aller Bilddaten in indexierte GIF-Dateien mit standardisierter 256-Farben-Webpalette zur Rauschunterdrückung', isCorrect: false, explanation: 'GIF ist ein Webformat und für hochwertige Zeitungsreproduktionen ungeeignet.' },
             { id: 'd', text: 'Export als unkomprimierte RGB-TIFF-Datei ohne Einbettung von Farbprofilen mit nativer Monitorauflösung von 72 ppi', isCorrect: false, explanation: 'Druckdaten müssen CMYK-separiert sein und 150-200 ppi für Zeitungsdruck aufweisen.' }
@@ -648,7 +648,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           question: '[IHK Original Seite 3] Eine Anzeige liegt im CMYK-Quellfarbraum ISO Coated v2 300% vor. Was passiert bei der Konvertierung in ISOnewspaper26v4 in InDesign/Photoshop?',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 7: Farbprofilkonvertierung im Detail.',
           options: [
-            { id: 'a', text: 'Die Farbwerte in den tiefen Schatten werden so umgerechnet, dass die Summe C+M+Y+K an keiner Stelle 240% überschreitet und der Tonwertzuwachs korrigiert wird', isCorrect: true, explanation: 'Vollständige IHK-Erklärung der Profilkonvertierung!' },
+            { id: 'a', text: 'Die Tiefen werden so umgerechnet, dass der Gesamtfarbauftrag maximal 240 % beträgt und der Punktzuwachs korrigiert wird', isCorrect: true, explanation: 'Vollständige IHK-Erklärung der Profilkonvertierung: C+M+Y+K bleibt an jeder Stelle unter 240 %.' },
             { id: 'b', text: 'Die Pixel werden automatisch in skalierbare Vektorpfade umgewandelt, um die Schärfe im Rotationsdruck zu erhalten', isCorrect: false, explanation: 'Farbprofile konvertieren Farbwerte in Pixeln, wandeln Rasterbilder aber nicht in Vektoren.' },
             { id: 'c', text: 'Sämtliche Farbinformationen in den Schatten werden linear abgeschnitten und durch reines 100% Schwarz ersetzt', isCorrect: false, explanation: 'Das Profil nutzt intelligente Farbreduktion (GCR/UCR) und schneidet Farben nicht hart ab.' },
             { id: 'd', text: 'Die physikalische Bildauflösung wird bei der Profilkonvertierung automatisch von 300 ppi auf 150 ppi halbiert', isCorrect: false, explanation: 'Die Pixelanzahl bleibt erhalten; die Neuberechnung betrifft ausschließlich die CMYK-Farbkanäle.' }
@@ -661,7 +661,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           question: '[IHK Transfer] Warum unterscheidet sich der Punktzuwachs (Dot Gain) auf gestrichenem Bilderdruckpapier (ca. 10-14%) deutlich von ungestrichenem Zeitungspapier (ca. 25-30%)?',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 7: Papierphysik.',
           options: [
-            { id: 'a', text: 'Weil die Tinte auf dem rauen, ungestrichenen Zeitungspapier tief in die Papierfasern einzieht und breitläuft (Kapillareffekt), während gestrichenes Papier ein Wegschlagen verhindert', isCorrect: true, explanation: 'Richtig! Die Beschichtung (Strich) steuert das Saugverhalten.' },
+            { id: 'a', text: 'Weil die Tinte auf ungestrichenem Zeitungspapier stark in die Fasern einzieht und breitläuft, während gestrichenes Papier dies begrenzt', isCorrect: true, explanation: 'Richtig! Der Kapillareffekt des ungestrichenen Papiers verursacht starkes Wegschlagen; der Strich begrenzt das Saugverhalten.' },
             { id: 'b', text: 'Weil Zeitungsdruckereien mit thermischen Laserdruckern arbeiten, die Farbpartikel durch Hitze auf das Doppelte aufblähen', isCorrect: false, explanation: 'Zeitungsdruck erfolgt im Rollenoffset mit flüssigen Druckfarben, nicht mit Laserdruckern.' },
             { id: 'c', text: 'Weil gestrichenes Bilderdruckpapier aus reiner Kunststofffolie besteht und dadurch jegliche Farbaufnahme blockiert', isCorrect: false, explanation: 'Bilderdruckpapier besteht aus Zellstoff mit Kreide-/Bindemittelstrich, nicht aus Plastik.' },
             { id: 'd', text: 'Weil der Punktzuwachs bei beiden Papierarten identisch ist und Unterschiede lediglich auf subjektiver Wahrnehmung beruhen', isCorrect: false, explanation: 'Der Punktzuwachs ist messbar genormt (ISO 12647-2 vs. ISO 12647-3) und physikalisch real.' }
@@ -697,7 +697,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           moduleId: 'ihk-orig-8',
           question: 'Aufgabe 8a (3 Punkte): Erläutere, warum die Trennung von Inhalt und Gestaltung eine wesentliche Voraussetzung für medienneutrale Datenhaltung ist.',
           options: [
-            { id: 'a', text: 'Weil reine Inhaltsdaten dadurch universell in verschiedenen Ausgabekanälen (Print, Web, Newsletter) wiederverwendet werden können, ohne das Layout manuell anzupassen', isCorrect: true, explanation: 'Exakte IHK-Musterantwort aus Teil a)!' },
+            { id: 'a', text: 'Weil reine Inhaltsdaten dadurch universell in verschiedenen Ausgabekanälen wiederverwendet werden können, ohne das Layout anzupassen', isCorrect: true, explanation: 'Exakte IHK-Musterantwort aus Teil a): Inhalte lassen sich flexibel in Print, Web und Newsletter ausspielen.' },
             { id: 'b', text: 'Weil Layouter dadurch keine redaktionellen Texte mehr Korrektur lesen müssen und Satzfehler automatisch entfallen', isCorrect: false, explanation: 'Korrekturlesen bleibt für alle Ausgabekanäle unverzichtbar.' },
             { id: 'c', text: 'Weil Ausgabemedien wie Webseiten ohne Stylesheets grundsätzlich eine höhere Ladegeschwindigkeit und Konversionsrate erzielen', isCorrect: false, explanation: 'Webseiten benötigen CSS zur Darstellung; Inhalt und Layout werden im Code getrennt.' },
             { id: 'd', text: 'Weil Schriften im Offsetdruck nur dann eingebunden werden können, wenn Texte vollständig ohne Formatierung vorliegen', isCorrect: false, explanation: 'Druckschriften werden im PDF eingebettet, unabhängig von der Datentrennung in der Datenbank.' }
@@ -721,7 +721,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           moduleId: 'ihk-orig-8',
           question: 'Aufgabe 8c (4 Punkte): Beschreibe anhand des Beispiels, wie ein und derselbe Inhalt für 2 unterschiedliche Ausgabemedien aufbereitet werden kann.',
           options: [
-            { id: 'a', text: 'Aus der PIM-Datenbank wird der Text für den Print-Katalog in InDesign als CMYK-Layout platziert und für die Website dynamisch per HTML/CSS (sRGB) gerendert', isCorrect: true, explanation: 'Exakte IHK-Beispielantwort aus Teil c)!' },
+            { id: 'a', text: 'Aus der PIM-Datenbank wird der Text für den Print-Katalog in InDesign als CMYK-Layout platziert und fürs Web per HTML/CSS gerendert', isCorrect: true, explanation: 'Exakte IHK-Beispielantwort aus Teil c): Print im CMYK-Layout, Website dynamisch in sRGB.' },
             { id: 'b', text: 'Der Text wird für Print manuell auf Papier ausgedruckt und für den Webshop per Flachbettscanner als Bitmap-Grafik digitalisiert', isCorrect: false, explanation: 'Dies widerspricht jedem modernen medienneutralen Digital-Workflow.' },
             { id: 'c', text: 'Für jeden Ausgabekanal wird ein separater Redakteur beauftragt, der Produktbeschreibungen und Maßangaben jedes Mal neu formuliert', isCorrect: false, explanation: 'Dies erzeugt extremen Personalaufwand, Zeitverzögerungen und fatale Dateninkonsistenzen.' },
             { id: 'd', text: 'Der Inhalt wird ausschließlich im Newsletter versendet; Print-Katalog und Webshop greifen auf statische Platzhaltergrafiken zurück', isCorrect: false, explanation: 'Crossmedia Publishing bedient alle Kanäle konsistent mit echtem Content.' }
@@ -736,7 +736,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           question: '[IHK Original Seite 3] Ein Unternehmen verwaltet tausende Artikel. Welche Rolle spielt ein PIM-System (Product Information Management) im Crossmedia-Workflow?',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 8: Single Source im Medienbetrieb.',
           options: [
-            { id: 'a', text: 'Das PIM-System dient als zentrale Single Source of Truth; Produktänderungen (z.B. Preis/Text) werden einmalig gepflegt und automatisch an Katalog, Webshop und Newsletter verteilt', isCorrect: true, explanation: 'Vollständige IHK-Erklärung der PIM-Funktion!' },
+            { id: 'a', text: 'Es dient als zentrale Datenquelle, in der Produktänderungen einmalig gepflegt und an Katalog, Webshop und Newsletter verteilt werden', isCorrect: true, explanation: 'Vollständige IHK-Erklärung der PIM-Funktion als Single Source of Truth für Preise, Texte und Attribute.' },
             { id: 'b', text: 'Das PIM-System steuert als Maschinensoftware direkt die Farbzonen und Druckplattenbelichter der Druckerei', isCorrect: false, explanation: 'Die Druckmaschinensteuerung erfolgt über CIP4/JDF-Schnittstellen und das Druck-RIP.' },
             { id: 'c', text: 'Ein PIM-System dient ausschließlich dem vektorbasierten Zeichnen von Produktlogos und Konstruktionsplänen', isCorrect: false, explanation: 'Konstruktionspläne entstehen in CAD-Software; PIM verwaltet Produkttexte und -daten.' },
             { id: 'd', text: 'PIM-Systeme verschlüsseln Bilddateien, um den Zugriff von Suchmaschinen auf die Website des Unternehmens zu verhindern', isCorrect: false, explanation: 'PIM-Systeme unterstützen SEO durch strukturierte Bereitstellung relevanter Metadaten.' }
@@ -749,7 +749,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           question: '[IHK Transfer] Warum sollten Layout-Formatierungen (wie Schriftgröße in pt oder CMYK-Farbcodes) NIEMALS direkt in der PIM-Datenbank im Text mithergestellt werden?',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 8: Medienunabhängiges Datenformat.',
           options: [
-            { id: 'a', text: 'Weil Print-Formatierungen (pt/CMYK) im Web/App-Umfeld (rem/px/sRGB) zu Darstellungsfehlern führen; die Aufbereitung muss zwingend im jeweiligen Ausgabemedium erfolgen', isCorrect: true, explanation: 'Richtig! Inhaltsdaten müssen strikt frei von Layout-Codes bleiben.' },
+            { id: 'a', text: 'Weil feste Print-Formatierungen in Web- und App-Kanälen zu Darstellungsfehlern führen und das Layout erst im Zielmedium entsteht', isCorrect: true, explanation: 'Richtig! Print-Einheiten (pt/CMYK) passen nicht zu Web/App-Einheiten (rem/px/sRGB); Inhaltsdaten müssen frei von Layout-Codes bleiben.' },
             { id: 'b', text: 'Weil relationale SQL-Datenbanken keine typografischen Zeichen oder Zahlenwerte dauerhaft abspeichern können', isCorrect: false, explanation: 'Datenbanken speichern Textzeichen und Formatierungscodes problemlos als Strings ab.' },
             { id: 'c', text: 'Weil der Einsatz von CMYK-Farbcodes im World Wide Web durch das W3C-Konsortium ausdrücklich untersagt ist', isCorrect: false, explanation: 'CSS Color Module Level 4 erlaubt theoretisch CMYK-Funktionen, Standard ist sRGB.' },
             { id: 'd', text: 'Weil Formatierungscodes in Datenbanken zu unkontrollierbarem Papierstau an den Bogenoffsetmaschinen führen', isCorrect: false, explanation: 'Papierstau ist ein mechanisches Problem der Papieranlage, keine Folge von Softwarecodes.' }
@@ -793,10 +793,10 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
             highlights: ['18 cm / 2,54 = 7,0866 Zoll', '1800 px / 7,0866 = 254 ppi', '254 ppi < 300 ppi → Reicht nicht!']
           },
           options: [
-            { id: 'a', text: '18 cm / 2,54 = 7,0866 Zoll -> 1800 px / 7,0866 Zoll = ca. 254 ppi (effektive Auflösung)', isCorrect: true, explanation: 'Exakter IHK-Rechenweg für Teil a)!' },
-            { id: 'b', text: '1800 px / 18 cm = 100 ppi (falscher Rechenweg: Umrechnung von Zentimetern in Zoll wurde vergessen)', isCorrect: false, explanation: 'Falsch. ppi bezieht sich auf Zoll (Inch), daher muss durch 2,54 umgerechnet werden.' },
-            { id: 'c', text: '1800 px * 2,54 / 18 cm = 254 dpi (Rechenfehler: Formelansatz mit falscher Einheitenverknüpfung)', isCorrect: false, explanation: 'Falsch: Multiplikation statt Division im falschen Term.' },
-            { id: 'd', text: '18 cm * 2,54 = 45,72 Zoll -> 1800 px / 45,72 Zoll = ca. 39 ppi (fälschliche Multiplikation mit 2,54)', isCorrect: false, explanation: 'Falsch: 18 cm müssen durch 2,54 geteilt werden, um Zoll zu erhalten.' }
+            { id: 'a', text: '18 cm / 2,54 = 7,0866 Zoll -> 1800 px / 7,0866 Zoll = ca. 254 ppi', isCorrect: true, explanation: 'Exakter IHK-Rechenweg für die effektive Auflösung in Teil a)!' },
+            { id: 'b', text: '1800 px / 18 cm = 100 ppi', isCorrect: false, explanation: 'Falsch: Die Umrechnung von Zentimetern in Zoll wurde vergessen. ppi bezieht sich auf Zoll (Inch), daher muss durch 2,54 geteilt werden.' },
+            { id: 'c', text: '1800 px * 2,54 / 18 cm = 254 dpi', isCorrect: false, explanation: 'Falsch: Fehlerhafte Einheitenverknüpfung im Formelansatz – erst 18 cm / 2,54 in Zoll umrechnen, dann Pixel durch Zoll teilen.' },
+            { id: 'd', text: '18 cm * 2,54 = 45,72 Zoll -> 1800 px / 45,72 Zoll = ca. 39 ppi', isCorrect: false, explanation: 'Falsch: Hier wurde fälschlicherweise mit 2,54 multipliziert statt durch 2,54 zu teilen.' }
           ]
         },
         {
@@ -817,10 +817,10 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           moduleId: 'ihk-orig-9',
           question: 'Aufgabe 9c (4 Punkte): Berechne die maximal mögliche Druckbreite in Zentimetern, wenn das Bild (1800 px) mit geforderten 300 ppi gedruckt werden soll.',
           options: [
-            { id: 'a', text: '1800 px / 300 ppi = 6 Zoll -> 6 * 2,54 cm = 15,24 cm maximal mögliche Druckbreite', isCorrect: true, explanation: 'Exakter IHK-Rechenweg für Teil c)!' },
-            { id: 'b', text: '1800 px / 300 ppi = 6 cm (Rechenfehler: Division ergibt Zoll und nicht direkt Zentimeter)', isCorrect: false, explanation: 'Falsch. Umrechnung von Zoll in cm (* 2,54) wurde vergessen.' },
-            { id: 'c', text: '1800 px / (300 / 2,54) = 1800 / 118,11 = 24,00 cm (Rechenfehler durch falschen Quotienten)', isCorrect: false, explanation: 'Falsch: 1800 / 118,11 ergibt ca. 15,24 cm und nicht 24 cm.' },
-            { id: 'd', text: '1800 px / 100 ppi = 18,00 cm (falsch: bei 18 cm Breite beträgt die Auflösung nur 254 ppi)', isCorrect: false, explanation: 'Bei 18 cm Druckbreite wird die geforderte Auflösung von 300 ppi verfehlt.' }
+            { id: 'a', text: '1800 px / 300 ppi = 6 Zoll -> 6 * 2,54 cm = 15,24 cm Druckbreite', isCorrect: true, explanation: 'Exakter IHK-Rechenweg für die maximal mögliche Druckbreite in Teil c)!' },
+            { id: 'b', text: '1800 px / 300 ppi = 6,00 cm Druckbreite', isCorrect: false, explanation: 'Falsch: Die Division 1800 px / 300 ppi ergibt 6 Zoll, nicht Zentimeter – die Umrechnung mit * 2,54 wurde vergessen.' },
+            { id: 'c', text: '1800 px / (300 / 2,54) = 1800 / 118,11 = 24,00 cm Druckbreite', isCorrect: false, explanation: 'Falsch: Rechenfehler durch falschen Quotienten – 1800 / 118,11 ergibt ca. 15,24 cm und nicht 24 cm.' },
+            { id: 'd', text: '1800 px / 100 ppi = 18,00 cm Druckbreite', isCorrect: false, explanation: 'Falsch: Bei 18 cm Druckbreite beträgt die effektive Auflösung nur 254 ppi statt der geforderten 300 ppi.' }
           ]
         }
       ],
@@ -832,10 +832,10 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           question: '[IHK Original Seite 4] Ein Fotograf liefert ein Bild mit 3600 x 2400 Pixeln. Wie breit kann dieses Bild bei 300 ppi ohne Qualitätsverlust im Offsetdruck gedruckt werden?',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 9: Master-Berechnung.',
           options: [
-            { id: 'a', text: '3600 px / 300 ppi = 12 Zoll -> 12 * 2,54 cm = 30,48 cm Druckbreite (z.B. DIN A4 quer)', isCorrect: true, explanation: 'Richtig! Exakte doppelte Maße von Aufgabe 9c.' },
-            { id: 'b', text: '3600 px / 100 ppi = 36 cm (Rechenfehler: Umrechnung von Zentimetern in Zoll wurde ausgelassen)', isCorrect: false, explanation: 'Falsch: Division durch 100 ignoriert die geforderten 300 ppi und den Zollfaktor 2,54.' },
-            { id: 'c', text: '3600 px / 300 ppi = 12 cm (Rechenfehler: Ergebnis in Zoll wurde irrtümlich als Zentimeter gewertet)', isCorrect: false, explanation: 'Falsch: 12 Zoll entsprechen 30,48 cm und nicht 12 cm.' },
-            { id: 'd', text: '3600 px / (300 / 2,54) = ca. 45,72 cm (Rechenfehler durch unkorrekte Bruchrechnung im Nenner)', isCorrect: false, explanation: 'Falsch: Die maximale Druckbreite bei 300 ppi beträgt exakt 30,48 cm.' }
+            { id: 'a', text: '3600 px / 300 ppi = 12 Zoll -> 12 * 2,54 cm = 30,48 cm Druckbreite', isCorrect: true, explanation: 'Richtig! 30,48 cm entspricht ungefähr DIN A4 quer (exakt die doppelte Breite von Aufgabe 9c).' },
+            { id: 'b', text: '3600 px / 100 ppi = 36,00 cm Druckbreite', isCorrect: false, explanation: 'Falsch: Die Umrechnung von Zoll in Zentimeter wurde ausgelassen und fälschlich durch 100 statt 300 ppi geteilt.' },
+            { id: 'c', text: '3600 px / 300 ppi = 12,00 cm Druckbreite', isCorrect: false, explanation: 'Falsch: Das Ergebnis 12 ist in Zoll und wurde irrtümlich als Zentimeter gewertet (12 Zoll = 30,48 cm).' },
+            { id: 'd', text: '3600 px / (300 / 2,54) = ca. 45,72 cm Druckbreite', isCorrect: false, explanation: 'Falsch: Rechenfehler im Bruch – 3600 / 118,11 ergibt exakt 30,48 cm.' }
           ]
         },
         {
@@ -845,7 +845,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           question: '[IHK Transfer] Warum führt das bloße Umrechnen ("Neuberechnen" / Interpolation) eines 254-ppi-Bildes auf 300 ppi in Photoshop zu KEINER echten Qualitätsverbesserung im Druck?',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 9: Interpolation im Druck.',
           options: [
-            { id: 'a', text: 'Weil Photoshop dabei lediglich fehlende Pixel dazuerfindet (errechnet); es werden keine echten Bilddetails oder Schärfeinhalte hinzugefügt', isCorrect: true, explanation: 'Richtig! Interpolation erhöht nur die Dateigröße, nicht die echte Detailzeichnung.' },
+            { id: 'a', text: 'Weil Photoshop dabei lediglich fehlende Pixel rechnerisch ergänzt, ohne echte Bilddetails oder zusätzliche Schärfe zu erzeugen', isCorrect: true, explanation: 'Richtig! Interpolation erhöht nur die Pixel- und Dateigröße, fügt aber keine neuen echten Bilddetails hinzu.' },
             { id: 'b', text: 'Weil die Interpolation im Photoshop-Algorithmus alle Farbkanäle zwingend in eine 1-Bit-Strichgrafik reduziert', isCorrect: false, explanation: 'Interpolation behält Farbinformationen bei, interpoliert aber weichgezeichnete Pixel.' },
             { id: 'c', text: 'Weil Auflösungen von 300 ppi in modernen Druck-RIPs generell nicht verarbeitet werden dürfen', isCorrect: false, explanation: '300 ppi ist der weltweite Standard für qualitativ hochwertige Druckbelichtungen.' },
             { id: 'd', text: 'Weil Photoshop beim Hochrechnen automatisch alle Schärfeinformationen aus den EXIF-Metadaten unwiederbringlich entfernt', isCorrect: false, explanation: 'EXIF-Daten enthalten Metadaten wie Kameraeinstellungen, keine Pixelinformationen.' }
@@ -881,7 +881,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           moduleId: 'ihk-orig-10',
           question: 'Aufgabe 10a (3 Punkte): Nennen Sie drei technische Anforderungen, die bei der Aufbereitung von Bildern für eine Website berücksichtigt werden müssen.',
           options: [
-            { id: 'a', text: '1. Konvertierung von CMYK nach sRGB; 2. Anpassung der Pixelmaße an das Web-Layout; 3. Speichern in komprimiertem Web-Format (WebP/JPEG/AVIF)', isCorrect: true, explanation: 'Exakte IHK-Antwort aus Teil a)!' },
+            { id: 'a', text: '1. Konvertierung von CMYK nach sRGB; 2. Anpassung der Pixelmaße an das Web-Layout; 3. Speichern in komprimiertem Web-Format', isCorrect: true, explanation: 'Exakte IHK-Antwort aus Teil a) (komprimierte Web-Formate wie WebP, JPEG oder AVIF).' },
             { id: 'b', text: '1. Feste Druckauflösung von 300 ppi erzwingen; 2. Speichern im unkomprimierten TIFF; 3. Beibehaltung des Druck-CMYK-Farbraums', isCorrect: false, explanation: 'Das sind klassische Druckanforderungen, die für Webseiten viel zu große Datenmengen erzeugen.' },
             { id: 'c', text: '1. Manuelle Konvertierung in 1-Bit-Strichfilm; 2. Einbettung aller Schnittmarken; 3. Umwandlung aller Pixel in EPS-Vektoren', isCorrect: false, explanation: 'Schnittmarken und Strichfilme gehören in die Druckplattenbelichtung, nicht ins Webdesign.' },
             { id: 'd', text: '1. Löschung aller RGB-Kanäle; 2. Reduzierung auf 16 Web-Sicherheitsfarben; 3. Verdoppelung der Bildmaße für Retina-Displays', isCorrect: false, explanation: 'Web-Sicherheitsfarben sind veraltet; RGB-Kanäle müssen erhalten bleiben.' }
@@ -893,10 +893,10 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           moduleId: 'ihk-orig-10',
           question: 'Aufgabe 10b (3 Punkte): Ein Bild (1300 x 867 Pixel) wird unter Beibehaltung des Seitenverhältnisses auf 960 Pixel Breite reduziert. Berechnen Sie die Bildhöhe in ganzen Pixeln.',
           options: [
-            { id: 'a', text: '867 / 1300 * 960 = 640.24 -> gerundet 640 Pixel Höhe', isCorrect: true, explanation: 'Exakter IHK-Rechenweg für Teil b)!' },
-            { id: 'b', text: '1300 / 960 * 867 = 1174.12 -> gerundet 1174 Pixel Höhe (Seitenverhältnis verkehrt berechnet)', isCorrect: false, explanation: 'Falsch: Bei Verkleinerung der Breite muss auch die Höhe kleiner werden.' },
-            { id: 'c', text: '867 - (1300 - 960) = 527 -> 527 Pixel Höhe (Differenzrechnung statt proportionaler Dreisatz)', isCorrect: false, explanation: 'Falsch: Skalierung erfordert proportionale Division/Multiplikation, keine Subtraktion.' },
-            { id: 'd', text: '960 / 1300 * 867 = 640.24 -> 867 Pixel Höhe (Fehler: Bildhöhe fälschlicherweise unverändert übernommen)', isCorrect: false, explanation: 'Falsch: Die Höhe muss proportional auf 640 Pixel angepasst werden.' }
+            { id: 'a', text: '867 / 1300 * 960 = 640,24 -> gerundet 640 Pixel Höhe', isCorrect: true, explanation: 'Exakter IHK-Rechenweg für Teil b)!' },
+            { id: 'b', text: '1300 / 960 * 867 = 1174,12 -> gerundet 1174 Pixel Höhe', isCorrect: false, explanation: 'Falsch: Seitenverhältnis verkehrt berechnet – bei Verkleinerung der Breite muss auch die Höhe kleiner werden.' },
+            { id: 'c', text: '867 - (1300 - 960) = 527 -> 527 Pixel Höhe', isCorrect: false, explanation: 'Falsch: Differenzrechnung statt proportionalem Dreisatz – Skalierung erfordert Division und Multiplikation, keine Subtraktion.' },
+            { id: 'd', text: '960 / 1300 * 867 = 640,24 -> 867 Pixel Höhe', isCorrect: false, explanation: 'Falsch: Die Bildhöhe wurde fälschlicherweise unverändert übernommen statt proportional auf 640 Pixel angepasst.' }
           ]
         },
         {
@@ -905,7 +905,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           moduleId: 'ihk-orig-10',
           question: 'Aufgabe 10c (4 Punkte): Auf der Startseite eines Erlebnisbauernhofs soll das Motiv (Ferkel-Nahaufnahme) eingesetzt werden. Erläutern Sie, ob dieses Bild dafür geeignet ist.',
           options: [
-            { id: 'a', text: 'Ungeeignet: Makro-Ausschnitt bietet keinen Hof-Kontext (keine Attraktionen/Natur), wirkt durch Schlamm unruhig und bietet keinen Negativraum für Text/Buttons', isCorrect: true, explanation: 'Exakte IHK-Musterbewertung aus Teil c)!' },
+            { id: 'a', text: 'Ungeeignet: Der Makro-Ausschnitt bietet keinen Hof-Kontext, wirkt durch den Schlamm unruhig und lässt keinen Negativraum für Text oder Buttons', isCorrect: true, explanation: 'Exakte IHK-Musterbewertung aus Teil c) – es fehlen Attraktionen/Natur sowie ruhige Textflächen.' },
             { id: 'b', text: 'Hervorragend geeignet: Das Motiv transportiert alle Facetten des Hofes wie Gastronomie, Spielplätze und Übernachtungsangebote auf einen Blick', isCorrect: false, explanation: 'Falsch: Eine Nahaufnahme eines Ferkels zeigt weder das Außengelände noch das Freizeitangebot.' },
             { id: 'c', text: 'Ungeeignet: CMYK-Farbbilder sind in modernen Webbrowsern aus urheberrechtlichen Gründen grundsätzlich gesperrt', isCorrect: false, explanation: 'Falsch: CMYK betrifft Farbdarstellung und nicht Urheberrecht; es geht um die Motivwirkung.' },
             { id: 'd', text: 'Hervorragend geeignet: Die Nahaufnahme verfügt über ausreichend Weißraum am Bildrand zur Platzierung langer Menü-Navigationsleisten', isCorrect: false, explanation: 'Falsch: Das Makro ist randabfallend und extrem detailreich ohne Negativraum.' }
@@ -920,7 +920,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           question: '[IHK Original Seite 4] Das Bild hat im Original TIFF (CMYK, 240 ppi) eine Dateigröße von 4,3 MB. Warum sinkt die Dateigröße nach der Web-Aufbereitung auf ca. 95 KB?',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 10: Dateigrößen-Reduktion.',
           options: [
-            { id: 'a', text: 'Durch Verringerung der Pixelanzahl (1300x867 -> 960x640), Wechsel von 4 CMYK-Kanälen auf 3 RGB-Kanäle und komprimiertes WebP/JPEG-Format', isCorrect: true, explanation: 'Richtig! Alle drei Faktoren reduzieren das Datenvolumen um > 97%.' },
+            { id: 'a', text: 'Durch geringere Pixelanzahl, Wechsel von vier CMYK-Kanälen auf drei RGB-Kanäle und den Einsatz eines komprimierten Web-Formats', isCorrect: true, explanation: 'Richtig! Reduktion von 1300×867 auf 960×640 px, 3 statt 4 Kanäle und WebP/JPEG-Kompression sparen über 97 % Datenmenge.' },
             { id: 'b', text: 'Weil Webserver Bilddateien beim Hochladen automatisch um 95% ihrer visuellen Bildschärfe und Tonwertstufen berauben', isCorrect: false, explanation: 'Webserver komprimieren Dateien nur bei explizit konfigurierten Optimierungs-Pipelines.' },
             { id: 'c', text: 'Weil Monitore technisch maximal 100 KB Bilddaten im Grafikspeicher gleichzeitig puffern und anzeigen können', isCorrect: false, explanation: 'Moderne Grafikkarten verfügen über mehrere Gigabyte Videospeicher.' },
             { id: 'd', text: 'Weil die physikalische ppi-Zahl beim Webspeichern automatisch von 240 ppi auf 0 ppi zurückgesetzt wird', isCorrect: false, explanation: 'Die ppi-Zahl im Datei-Header ist im Web irrelevant; entscheidend sind Pixelmaße und Kompression.' }
@@ -933,7 +933,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           question: '[IHK Transfer] Was versteht man unter dem gestalterischen Begriff "Negativraum" bei der Auswahl eines Hero-Bannerbildes für eine Website?',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 10: UX & Layout im Webdesign.',
           options: [
-            { id: 'a', text: 'Ruhige, schlichte Bildbereiche (z.B. verschwommene Wiese/Himmel), auf denen Überschriften und Call-to-Action-Buttons lesbar platziert werden können', isCorrect: true, explanation: 'Richtig! Ohne Negativraum leidet die Lesbarkeit von Texten im Banner extrem.' },
+            { id: 'a', text: 'Ruhige, schlichte Bildbereiche ohne dominante Details, auf denen Überschriften und Call-to-Action-Buttons gut lesbar platziert werden', isCorrect: true, explanation: 'Richtig! Ruhige Flächen wie Himmel oder unscharfe Wiese sichern die Lesbarkeit von Banner-Texten.' },
             { id: 'b', text: 'Ein fehlerhaft belichtetes fotografisches Filmnegativ, das vor der Webnutzung digital invertiert werden muss', isCorrect: false, explanation: 'Negativraum ist ein kompositorischer Gestaltungsbegriff für unbesetzte Flächen.' },
             { id: 'c', text: 'Einen deckenden schwarzen Zierrahmen um das Banner, der den Bildinhalt von der restlichen Website abgrenzt', isCorrect: false, explanation: 'Ein Rahmen ist ein Begrenzungselement und kein kompositorischer Weißraum/Negativraum.' },
             { id: 'd', text: 'Einen gesperrten Bildbereich mit negativen Farb- und Kontrastwerten, der vom Druck-RIP nicht belichtet werden kann', isCorrect: false, explanation: 'Negative Farbwerte existieren im digitalen Standard-Farbmodell nicht.' }
@@ -988,7 +988,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           moduleId: 'ihk-orig-11',
           question: 'Aufgabe 11b (4 Punkte): Beschreiben Sie, wie sich die vorgenommene Korrektur auf Vierteltöne, Mitteltöne und Dreivierteltöne auswirkt.',
           options: [
-            { id: 'a', text: 'Dreivierteltöne (Schatten im Tunnel) werden stark aufgehellt; Mitteltöne leicht angehoben; Vierteltöne (sonnige Fachwerkhäuser) bleiben unverändert', isCorrect: true, explanation: 'Exakte IHK-Musterantwort aus Teil b)!' },
+            { id: 'a', text: 'Dreivierteltöne werden stark aufgehellt, Mitteltöne leicht angehoben und Vierteltöne bleiben unverändert', isCorrect: true, explanation: 'Exakte IHK-Musterantwort aus Teil b): Schatten im Tunnel werden aufgehellt, während sonnige Fachwerkhäuser geschützt bleiben.' },
             { id: 'b', text: 'Alle drei Tonwertbereiche werden über das gesamte Spektrum hinweg absolut gleichmäßig um 50% aufgehellt', isCorrect: false, explanation: 'Falsch. Die Gradationskurve arbeitet selektiv und nicht linear über alle Tonwerte.' },
             { id: 'c', text: 'Vierteltöne werden komplett in reines Schwarz überführt, während Dreivierteltöne zu reinem Weiß gebleicht werden', isCorrect: false, explanation: 'Falsch. Dies wäre eine extreme Tontrennung (Posterisation).' },
             { id: 'd', text: 'Die selektive Tonwertänderung wirkt sich ausschließlich auf den Cyan-Kanal aus; Gelb und Magenta bleiben unberührt', isCorrect: false, explanation: 'Falsch. Die Tonwertkorrektur wurde auf die Gesamthelligkeit (RGB/Composite) angewendet.' }
@@ -1028,7 +1028,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           question: '[IHK Transfer] Worin unterscheidet sich die Anhebung der Tiefen über die Gradationskurve gegenüber einer bloßen Helligkeitserhöhung des Gesamtbildes?',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 11: Gradation vs. Helligkeit.',
           options: [
-            { id: 'a', text: 'Die Gradationskurve erlaubt selektive Anhebung bestimmter Tonbereiche (Tiefen); bloße Helligkeitserhöhung verschiebt alle Tonwerte linear und brennt die Lichter aus', isCorrect: true, explanation: 'Richtig! Nur die Kurve ermöglicht differenzierte Tonwertsteuerung.' },
+            { id: 'a', text: 'Die Gradationskurve erlaubt das selektive Anheben der Tiefen; eine globale Helligkeitserhöhung verschiebt alle Tonwerte linear und brennt Lichter aus', isCorrect: true, explanation: 'Richtig! Nur die Gradationskurve ermöglicht differenzierte Tonwertsteuerung ohne ausgefressene Lichter.' },
             { id: 'b', text: 'Eine globale Helligkeitserhöhung schützt die Lichter vor Überbelichtung, während die Gradationskurve immer das gesamte Bild gleichmäßig aufhellt', isCorrect: false, explanation: 'Genau umgekehrt: Globale Helligkeit brennt Lichter aus, Gradationskurven bieten selektiven Schutz.' },
             { id: 'c', text: 'Gradationskurven lassen sich ausschließlich auf Graustufenbilder anwenden; für Farbbilder steht nur der lineare Helligkeitsregler zur Verfügung', isCorrect: false, explanation: 'Gradationskurven funktionieren in RGB, CMYK und LAB gleichermaßen für jeden Kanal.' },
             { id: 'd', text: 'Zwischen selektiver Gradationskurven-Anpassung und linearer Helligkeitsverschiebung existiert mathematisch kein messbarer Unterschied', isCorrect: false, explanation: 'Lineare Verschiebung addiert einen Festwert; Kurven nutzen nichtlineare Polynom-Funktionen.' }
@@ -1064,7 +1064,7 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           moduleId: 'ihk-orig-12',
           question: 'Aufgabe 12a (2 Punkte): Erläutern Sie den Begriff "Metadaten" im Zusammenhang mit digitalen Medieninhalten.',
           options: [
-            { id: 'a', text: 'Strukturierte Zusatzinformationen ("Daten über Daten"), die Eigenschaften, Urheberrechte, Inhalte und technische Parameter einer Datei beschreiben', isCorrect: true, explanation: 'Exakte IHK-Definition aus Teil a)!' },
+            { id: 'a', text: 'Strukturierte Zusatzinformationen über eine Datei, die Eigenschaften, Urheberrechte, Inhalte und technische Parameter beschreiben', isCorrect: true, explanation: 'Exakte IHK-Definition aus Teil a): Metadaten sind strukturierte „Daten über Daten“.' },
             { id: 'b', text: 'Die rein physikalische Speicherkapazität und Umdrehungsgeschwindigkeit der im Rechner verbauten Festplatte', isCorrect: false, explanation: 'Hardware-Kennzahlen des Rechners sind keine Metadaten einer Bilddatei.' },
             { id: 'c', text: 'Ein spezielles Softwareprogramm zur hardwarebeschleunigten Retusche von fehlerhaften Bilddaten in der Druckvorstufe', isCorrect: false, explanation: 'Metadaten sind Informationsattribute und kein Anwendungsprogramm.' },
             { id: 'd', text: 'Die gemessene Übertragungsrate und Bandbreite der Internetverbindung zwischen Agenturserver und Druckereiserver', isCorrect: false, explanation: 'Netzwerkbandbreiten betreffen die Infrastruktur, nicht den Dateninhalt der Datei.' }
@@ -1116,10 +1116,10 @@ export const IHK_ORIGINAL_CHAPTER: Chapter = {
           question: '[IHK Transfer] Welcher Standard beschreibt den weltweiten Industrie-Standard für bildbetreffende Metadaten (wie Fotograf, Copyright, Keywords) in Bilddateien?',
           scenario: 'IHK Prüfungszettel Teil 1 - Aufgabe 12: Metadaten-Standards.',
           options: [
-            { id: 'a', text: 'IPTC (International Press Telecommunications Council) & XMP (Extensible Metadata Platform)', isCorrect: true, explanation: 'Richtig! IPTC/XMP ist der weltweite Standard im Medienbereich.' },
-            { id: 'b', text: 'EXIF (Exchangeable Image File Format) & TIFF-Header (nur für primäre Kameradaten, unzureichend für erweiterte Redaktionsdaten)', isCorrect: false, explanation: 'EXIF speichert technische Kameradaten (Blende/Zeit), deckt aber redaktionelle Rechte nicht voll ab.' },
-            { id: 'c', text: 'Dublin Core & Schema.org (primär für semantische Webdokumente, kein nativer Bildmetadatenstandard)', isCorrect: false, explanation: 'Dublin Core und Schema.org sind Webstandards, nicht die primären eingebetteten Bildstandards.' },
-            { id: 'd', text: 'ID3v2 & Vorbis Comment (spezifische Metadatencontainer für digitale Audioproduktionen)', isCorrect: false, explanation: 'ID3 und Vorbis sind Metadatenstandards für Audiodateien (MP3/OGG), nicht für Bilddateien.' }
+            { id: 'a', text: 'IPTC & XMP', isCorrect: true, explanation: 'Richtig! IPTC (International Press Telecommunications Council) und XMP (Extensible Metadata Platform) sind die weltweiten Industriestandards für Bildmetadaten.' },
+            { id: 'b', text: 'EXIF & TIFF-Header', isCorrect: false, explanation: 'EXIF (Exchangeable Image File Format) speichert primär technische Kameradaten wie Blende und Zeit, deckt erweiterte Redaktionsdaten aber nicht vollständig ab.' },
+            { id: 'c', text: 'Dublin Core & Schema.org', isCorrect: false, explanation: 'Dublin Core und Schema.org sind Standards für semantische Webdokumente und kein nativer eingebetteter Bildmetadatenstandard.' },
+            { id: 'd', text: 'ID3v2 & Vorbis Comment', isCorrect: false, explanation: 'ID3v2 und Vorbis Comment sind spezifische Metadatencontainer für digitale Audiodateien (MP3/OGG), nicht für Bilddateien.' }
           ]
         }
       ]

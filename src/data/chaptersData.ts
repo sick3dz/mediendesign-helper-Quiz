@@ -72,10 +72,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-1',
             question: 'Was beschreibt Interaktionsdesign am präzisesten?',
             options: [
-              { id: 'a', text: 'Die rein grafische Erstellung von Logos und Bannern', isCorrect: false, explanation: 'Das ist Grafikdesign.' },
-              { id: 'b', text: 'Die Gestaltung des Verhaltens und der Kommunikation zwischen Mensch und System', isCorrect: true, explanation: 'Exakt! Es geht um das dynamische Verhalten und Dialoge.' },
-              { id: 'c', text: 'Das Programmieren von Datenbanktabellen', isCorrect: false, explanation: 'Das ist Backend-Entwicklung.' },
-              { id: 'd', text: 'Die Druckvorbereitung von Flyern', isCorrect: false, explanation: 'Das ist Druckvorstufe.' }
+              { id: 'a', text: 'Die grafische Gestaltung von Logos, Markenbildern und Drucksachen', isCorrect: false, explanation: 'Das ist klassisches Grafik- bzw. Corporate Design.' },
+              { id: 'b', text: 'Die Gestaltung von Verhalten und Dialog zwischen Mensch und System', isCorrect: true, explanation: 'Exakt! Interaktionsdesign (IxD) gestaltet dynamisches Verhalten, Rückmeldungen und Abläufe.' },
+              { id: 'c', text: 'Die Strukturierung und Implementierung relationaler Datenbanken', isCorrect: false, explanation: 'Das ist Aufgabe der Backend-Entwicklung.' },
+              { id: 'd', text: 'Die technische Farbseparation und Druckvorbereitung für Offsetdruck', isCorrect: false, explanation: 'Das gehört zur Druckvorstufe.' }
             ]
           },
           {
@@ -84,10 +84,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-1',
             question: 'Ein Nutzer bricht einen Kaufvorgang ab, weil der Checkout unverständlich und frustrierend aufgebaut ist. Welche Disziplin ist primär betroffen?',
             options: [
-              { id: 'a', text: 'User Experience (UX) & Interaktionsdesign (IxD)', isCorrect: true, explanation: 'Richtig! Unverständliche Nutzerführung (IxD) führt zu Frustration und schlechtem Gesamterlebnis (UX).' },
-              { id: 'b', text: 'Ausschließlich das Print-Layout', isCorrect: false, explanation: 'Der Checkout ist eine digitale Web-Anwendung.' },
-              { id: 'c', text: 'Die Wahl der Schriftart im Firmenlogo', isCorrect: false, explanation: 'Das Firmenlogo verursacht keinen Abbruch im Checkout-Flow.' },
-              { id: 'd', text: 'Der DNS-Server des Providers', isCorrect: false, explanation: 'Hier liegt ein Usability-Problem vor, kein Infrastruktur-Ausfall.' }
+              { id: 'a', text: 'User Experience und Interaktionsdesign', isCorrect: true, explanation: 'Richtig! Unverständliche Nutzerführung (IxD) führt zu Frustration und einem schlechten Gesamterlebnis (UX).' },
+              { id: 'b', text: 'Druckvorstufe und Print-Layout', isCorrect: false, explanation: 'Der Checkout ist eine digitale Web-Anwendung.' },
+              { id: 'c', text: 'Corporate Design und Wortmarke', isCorrect: false, explanation: 'Das Firmenlogo verursacht keinen Abbruch im Checkout-Flow.' },
+              { id: 'd', text: 'Netzwerk- und Serveradministration', isCorrect: false, explanation: 'Hier liegt ein Usability-Problem vor, kein Infrastruktur-Ausfall.' }
             ],
             examTip: 'Merke: Bricht ein Nutzer frustriert ab, ist die UX negativ beeinflusst.'
           },
@@ -97,10 +97,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-1',
             question: 'Welches typische Arbeitsergebnis liefert ein Interaktionsdesigner (IxD)?',
             options: [
-              { id: 'a', text: 'User Flows, interaktive Klick-Konzepte und Verhaltensspezifikationen', isCorrect: true, explanation: 'Genau! User Flows und Navigationsübergänge sind die Kern-Artefakte des IxD.' },
-              { id: 'b', text: 'Gedruckte Visitenkarten im Offset-Druck', isCorrect: false, explanation: 'Das gehört zum klassischen Print-Design.' },
-              { id: 'c', text: 'Kaufverträge für Server-Hardware', isCorrect: false, explanation: 'Das ist Einkauf/IT-Beschaffung.' },
-              { id: 'd', text: 'Ausschließlich Farbpaletten ohne Klickpfade', isCorrect: false, explanation: 'Farbpaletten allein sind reines Visual/UI-Design.' }
+              { id: 'a', text: 'User Flows, interaktive Klickkonzepte und Verhaltensspezifikationen', isCorrect: true, explanation: 'Genau! User Flows und Navigationsübergänge sind die Kern-Artefakte des IxD.' },
+              { id: 'b', text: 'Druckfertige Geschäftsausstattungen im Bogenoffset-Verfahren', isCorrect: false, explanation: 'Das gehört zum klassischen Print-Design.' },
+              { id: 'c', text: 'Leistungsverzeichnisse für Server- und Netzwerk-Infrastruktur', isCorrect: false, explanation: 'Das ist Aufgabe der IT-Systemintegration bzw. Beschaffung.' },
+              { id: 'd', text: 'Reine Farb- und Typografietafeln ohne Navigations- oder Zustandslogik', isCorrect: false, explanation: 'Farbpaletten allein sind reines Visual/UI-Design.' }
             ]
           }
         ],
@@ -251,10 +251,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-2',
             question: 'Was ist der Leitsatz des Usability-Prinzips "Einfachheit"?',
             options: [
-              { id: 'a', text: 'More is more - zeige alles auf einmal', isCorrect: false, explanation: 'Überfordert Nutzer sofort.' },
-              { id: 'b', text: 'Don\'t make me think (Nutzer sollen nicht überlegen müssen)', isCorrect: true, explanation: 'Genau! Schnelle, intuitive Führung mit minimalem Denkaufwand.' },
-              { id: 'c', text: 'Jede Aktion benötigt mindestens 3 Bestätigungen', isCorrect: false, explanation: 'Das würde Frustration erzeugen.' },
-              { id: 'd', text: 'Animationen vor Verständlichkeit', isCorrect: false, explanation: 'Funktion und Verständlichkeit stehen immer an erster Stelle.' }
+              { id: 'a', text: 'More is more – alle Funktionen direkt sichtbar anbieten', isCorrect: false, explanation: 'Überfordert Nutzer sofort.' },
+              { id: 'b', text: 'Don\'t make me think – sofort intuitiv verständlich führen', isCorrect: true, explanation: 'Genau! Schnelle, intuitive Führung mit minimalem Denkaufwand (Nutzer sollen nicht überlegen müssen).' },
+              { id: 'c', text: 'Safety first – jede Eingabe mehrfach bestätigen lassen', isCorrect: false, explanation: 'Überflüssige Rückfragen erzeugen Frustration statt Einfachheit.' },
+              { id: 'd', text: 'Form over function – markante Effekte vor Klarheit stellen', isCorrect: false, explanation: 'Funktion und Verständlichkeit stehen immer an erster Stelle.' }
             ]
           },
           {
@@ -275,10 +275,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-2',
             question: 'Ein Nutzer löscht versehentlich ein Projekt. Ein Dialog fragt: "Möchtest du wirklich löschen?" und bietet "Rückgängig". Welches Prinzip wird angewandt?',
             options: [
-              { id: 'a', text: 'Fehlertoleranz (Error tolerance)', isCorrect: true, explanation: 'Exakt! Fehlertoleranz schützt vor fatalen Versehen und bietet einen Notausgang.' },
-              { id: 'b', text: 'Social Engineering', isCorrect: false, explanation: 'Social Engineering ist eine Täuschungsmethode von Kriminellen.' },
-              { id: 'c', text: 'Agiles Scrum-Planning', isCorrect: false, explanation: 'Scrum-Planning ist ein Projektmanagement-Meeting.' },
-              { id: 'd', text: 'DNS-Spoofing', isCorrect: false, explanation: 'DNS-Spoofing ist ein Netzwerkangriff.' }
+              { id: 'a', text: 'Fehlertoleranz', isCorrect: true, explanation: 'Exakt! Fehlertoleranz (Error tolerance) schützt vor versehentlichem Datenverlust und bietet einen sicheren Ausweg.' },
+              { id: 'b', text: 'Erwartungskonformität', isCorrect: false, explanation: 'Erwartungskonformität beschreibt konsistentes Verhalten nach gelernten Mustern.' },
+              { id: 'c', text: 'Individualisierbarkeit', isCorrect: false, explanation: 'Individualisierbarkeit erlaubt Nutzern, die Oberfläche an eigene Vorlieben anzupassen.' },
+              { id: 'd', text: 'Lernförderlichkeit', isCorrect: false, explanation: 'Lernförderlichkeit unterstützt beim Erlernen neuer Bedienabläufe.' }
             ]
           },
           {
@@ -287,10 +287,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-2',
             question: 'Warum platzieren fast alle großen Online-Shops den Warenkorb oben rechts im Header?',
             options: [
-              { id: 'a', text: 'Wegen des Usability-Prinzips der externen Konsistenz (gelernte Konvention)', isCorrect: true, explanation: 'Richtig! Externe Konsistenz bedeutet, dass Nutzer vertraute Konventionen aus anderen Systemen wiedererkennen.' },
-              { id: 'b', text: 'Weil Monitore rechts mehr Pixel anzeigen', isCorrect: false, explanation: 'Technisch unbegründet.' },
-              { id: 'c', text: 'Weil das Gesetz zur Barrierefreiheit die Position oben rechts vorschreibt', isCorrect: false, explanation: 'Das Gesetz schreibt keine genaue Button-Position vor.' },
-              { id: 'd', text: 'Reiner Zufall ohne gestalterischen Grund', isCorrect: false, explanation: 'Es ist eine etablierte Usability-Konvention.' }
+              { id: 'a', text: 'Wegen der externen Konsistenz durch gelernte Nutzerkonventionen', isCorrect: true, explanation: 'Richtig! Externe Konsistenz bedeutet, dass Nutzer vertraute Konventionen aus anderen Shops sofort wiedererkennen.' },
+              { id: 'b', text: 'Weil Browser den rechten oberen Bereich technisch schneller laden', isCorrect: false, explanation: 'Technisch unbegründet – das Rendering hängt nicht von der Warenkorb-Position ab.' },
+              { id: 'c', text: 'Weil die Barrierefreiheitsnorm diese Position verbindlich vorgibt', isCorrect: false, explanation: 'Barrierefreiheitsrichtlinien schreiben keine feste Bildschirmposition für Warenkörbe vor.' },
+              { id: 'd', text: 'Weil die westliche Leserichtung rechts oben beginnt und links endet', isCorrect: false, explanation: 'Die westliche Leserichtung beginnt links oben; rechts oben ist eine etablierte E-Commerce-Konvention.' }
             ]
           }
         ],
@@ -472,10 +472,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-3',
             question: 'In einem Webformular ist der "Absenden"-Button grau und deaktiviert, bis alle Pflichtfelder ausgefüllt sind. Welches Norman-Prinzip wird genutzt?',
             options: [
-              { id: 'a', text: 'Constraints (Einschränkungen zur Fehlervermeidung)', isCorrect: true, explanation: 'Richtig! Durch Einschränkung falscher Aktionen werden Fehleingaben unterbunden.' },
-              { id: 'b', text: 'Phishing-Vektor', isCorrect: false, explanation: 'Hat nichts mit IT-Angriffen zu tun.' },
-              { id: 'c', text: 'Low-Fidelity Mockup', isCorrect: false, explanation: 'Das betrifft eine Konzeptionsstufe.' },
-              { id: 'd', text: 'Auditiver Screenreader', isCorrect: false, explanation: 'Ein Screenreader ist ein Hilfsmittel für Blinde.' }
+              { id: 'a', text: 'Constraints', isCorrect: true, explanation: 'Richtig! Constraints (Einschränkungen) verhindern ungültige Aktionen und beugen Fehleingaben vor.' },
+              { id: 'b', text: 'Mapping', isCorrect: false, explanation: 'Mapping beschreibt die räumliche Zuordnung von Bedienelement und Wirkung.' },
+              { id: 'c', text: 'Signifier', isCorrect: false, explanation: 'Signifier sind visuelle Hinweise, die eine mögliche Interaktion anzeigen.' },
+              { id: 'd', text: 'Chunking', isCorrect: false, explanation: 'Chunking gruppiert Informationen in überschaubare Einheiten.' }
             ]
           }
         ],
@@ -591,10 +591,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-4',
             question: 'Was zeigt eine Breadcrumb-Navigation an ("Startseite > Produkte > Schuhe > Sneaker")?',
             options: [
-              { id: 'a', text: 'Den Browserverlauf der letzten 30 Tage', isCorrect: false, explanation: 'Nein, das ist der Browser-History-Verlauf.' },
+              { id: 'a', text: 'Den chronologischen Browserverlauf der letzten besuchten Seiten', isCorrect: false, explanation: 'Nein, das ist die Browser-History, nicht die Seitenhierarchie.' },
               { id: 'b', text: 'Den aktuellen Standort und Pfad innerhalb der Seitenhierarchie', isCorrect: true, explanation: 'Richtig! Breadcrumbs zeigen dem Nutzer, wo er sich in der Tiefe der Website befindet.' },
-              { id: 'c', text: 'Die Ladezeit der aktuellen Seite', isCorrect: false, explanation: 'Hat nichts mit Performance-Metriken zu tun.' },
-              { id: 'd', text: 'Eine Liste aller Cookies', isCorrect: false, explanation: 'Das wäre Datenschutz.' }
+              { id: 'c', text: 'Die technischen Ladezeiten der einzelnen Seitenkomponenten', isCorrect: false, explanation: 'Das sind Performance-Metriken, keine Navigationshilfe.' },
+              { id: 'd', text: 'Die aktiven Sitzungs-Cookies und Tracking-Einstellungen der Domain', isCorrect: false, explanation: 'Das gehört zum Consent-Management, nicht zur Navigation.' }
             ]
           },
           {
@@ -603,10 +603,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-4',
             question: 'Welcher Vorteil zeichnet das Hamburger-Menü (☰) auf mobilen Endgeräten besonders aus?',
             options: [
-              { id: 'a', text: 'Spart wertvollen Bildschirmplatz auf kleinen Displays und bündelt Navigationspunkte', isCorrect: true, explanation: 'Richtig! Auf Smartphones spart das Icon Platz für den Hauptinhalt.' },
-              { id: 'b', text: 'Es erhöht automatisch die Servergeschwindigkeit', isCorrect: false, explanation: 'Kein Einfluss auf Server.' },
-              { id: 'c', text: 'Es ersetzt die Notwendigkeit von Alt-Texten', isCorrect: false, explanation: 'Alt-Texte sind für Bilder Pflicht.' },
-              { id: 'd', text: 'Es verhindert Phishing-Angriffe', isCorrect: false, explanation: 'Hat keinerlei IT-Sicherheitsfunktion.' }
+              { id: 'a', text: 'Es spart Platz auf kleinen Displays und bündelt Navigationspunkte', isCorrect: true, explanation: 'Richtig! Auf Smartphones bleibt so ausreichend Bildschirmfläche für den eigentlichen Hauptinhalt.' },
+              { id: 'b', text: 'Es beschleunigt das Nachladen von Bildern über den Webserver', isCorrect: false, explanation: 'Ein Navigationsmuster hat keinen direkten Einfluss auf die Servergeschwindigkeit.' },
+              { id: 'c', text: 'Es macht die Vergabe von Alternativtexten für Icons überflüssig', isCorrect: false, explanation: 'Auch Icon-Buttons benötigen barrierefreie Beschriftungen (z. B. aria-label).' },
+              { id: 'd', text: 'Es macht sämtliche Unterseiten ohne Klick sofort gleichzeitig sichtbar', isCorrect: false, explanation: 'Genau umgekehrt: Die Navigation wird erst nach dem Klick eingeblendet.' }
             ]
           },
           {
@@ -615,10 +615,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-4',
             question: 'Was ist das primäre Ziel eines optimierten User Flows in einem Online-Shop?',
             options: [
-              { id: 'a', text: 'Den Nutzer auf möglichst viele Werbebanner klicken zu lassen', isCorrect: false, explanation: 'Das frustriert Nutzer extrem.' },
-              { id: 'b', text: 'Den Weg von der Produktauswahl zum erfolgreichen Kauf so reibungslos, klar und fehlerfrei wie möglich zu gestalten', isCorrect: true, explanation: 'Exakt! Reibungslose Zielerreichung minimiert Absprungraten.' },
-              { id: 'c', text: 'Den Quellcode auf unter 100 Zeilen zu komprimieren', isCorrect: false, explanation: 'Nicht Ziel des User Flows.' },
-              { id: 'd', text: 'Ausschließlich Animationen zu demonstrieren', isCorrect: false, explanation: 'Reines Deko-Denken verfehlt Usability.' }
+              { id: 'a', text: 'Besucher durch zusätzliche Zwischenseiten auf möglichst viele Werbeflächen zu leiten', isCorrect: false, explanation: 'Zusätzliche Hürden frustrieren Nutzer und erhöhen die Abbruchrate.' },
+              { id: 'b', text: 'Den Weg von der Produktauswahl zum Kauf möglichst klar und reibungslos zu gestalten', isCorrect: true, explanation: 'Exakt! Eine klare, fehlerfreie Zielerreichung minimiert Absprungraten im Checkout.' },
+              { id: 'c', text: 'Alle Produktkategorien vollständig auf einer einzigen statischen Seite zusammenzufassen', isCorrect: false, explanation: 'Ein User Flow optimiert Abläufe und Schritte, nicht eine überladene Einzelseite.' },
+              { id: 'd', text: 'Möglichst viele visuelle Übergangseffekte zwischen den Bestellschritten einzubauen', isCorrect: false, explanation: 'Reine Dekoration ohne funktionalen Nutzen verschlechtert die Usability.' }
             ]
           }
         ]
@@ -656,10 +656,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-5',
             question: 'Welche Geste wird auf Touch-Geräten typischerweise zum Zoomen verwendet?',
             options: [
-              { id: 'a', text: 'Pinch (Zusammen-/Auseinanderziehen mit zwei Fingern)', isCorrect: true, explanation: 'Richtig! Pinch-to-zoom ist die etablierte Geste zum Zoomen.' },
-              { id: 'b', text: 'Swipe mit einem Finger', isCorrect: false, explanation: 'Swipe dient zum Blättern oder Scrollen.' },
+              { id: 'a', text: 'Pinch', isCorrect: true, explanation: 'Richtig! Pinch (Zusammen- oder Auseinanderziehen mit zwei Fingern) ist die etablierte Zoom-Geste.' },
+              { id: 'b', text: 'Swipe', isCorrect: false, explanation: 'Swipe (Wischen mit einem Finger) dient zum Blättern oder Scrollen.' },
               { id: 'c', text: 'Long Press', isCorrect: false, explanation: 'Long Press öffnet gewöhnlich ein Kontextmenü.' },
-              { id: 'd', text: 'Drag', isCorrect: false, explanation: 'Drag verschiebt Objekte.' }
+              { id: 'd', text: 'Drag', isCorrect: false, explanation: 'Drag verschiebt Objekte auf dem Bildschirm.' }
             ]
           },
           {
@@ -680,10 +680,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-5',
             question: 'Was ist die Funktion einer "Microinteraction" wie z. B. einem hüpfenden Herz beim Klick auf "Like"?',
             options: [
-              { id: 'a', text: 'Sofortiges emotionales und visuelles Feedback geben, dass die Aktion registriert wurde', isCorrect: true, explanation: 'Perfekt! Microinteractions belohnen, bestätigen und geben Orientierung.' },
-              { id: 'b', text: 'Die Datenbankverbindung abbrechen', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'c', text: 'Die IP-Adresse des Nutzers manipulieren', isCorrect: false, explanation: 'Nein.' },
-              { id: 'd', text: 'Einen Spam-Filter umgehen', isCorrect: false, explanation: 'Microinteractions sind UX-Designelemente.' }
+              { id: 'a', text: 'Sofortiges visuelles Feedback geben, dass die Eingabe registriert wurde', isCorrect: true, explanation: 'Perfekt! Microinteractions bestätigen Aktionen unmittelbar, geben Orientierung und fördern positive UX.' },
+              { id: 'b', text: 'Die serverseitige Datenbankabfrage während des Klicks unterbrechen', isCorrect: false, explanation: 'Microinteractions laufen im Frontend ab und brechen keine Datenbanksitzungen ab.' },
+              { id: 'c', text: 'Das gesamte Seitenlayout vollständig neu vom Server nachladen', isCorrect: false, explanation: 'Microinteractions sind kleinteilige Rückmeldungen ohne kompletten Seiten-Reload.' },
+              { id: 'd', text: 'Automatisierte Bot-Anfragen ohne Captcha-Abfrage technisch erkennen', isCorrect: false, explanation: 'Microinteractions sind UX-Feedbackelemente, kein Sicherheitsmechanismus.' }
             ]
           }
         ]
@@ -721,10 +721,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-6',
             question: 'Welche Nielsen-Heuristik greift, wenn ein System einen "Rückgängig machen" (Undo)-Button nach versehentlichem Löschen anbietet?',
             options: [
-              { id: 'a', text: 'Benutzerkontrolle und Freiheit (User control and freedom)', isCorrect: true, explanation: 'Genau! Nutzer brauchen einen "Notausgang" bei Fehlbedienungen.' },
-              { id: 'b', text: 'Minimalistisches Design', isCorrect: false, explanation: 'Minimalistisches Design zielt auf Reduktion von Ballast.' },
-              { id: 'c', text: 'Datenschutz-Grundverordnung', isCorrect: false, explanation: 'Das ist ein Gesetz, keine Nielsen-Heuristik.' },
-              { id: 'd', text: 'Breadcrumb-Architektur', isCorrect: false, explanation: 'Breadcrumb ist ein Navigationsmuster.' }
+              { id: 'a', text: 'Benutzerkontrolle und Freiheit', isCorrect: true, explanation: 'Genau! „User control and freedom“ gibt Nutzern bei Fehlbedienungen einen klaren „Notausgang“.' },
+              { id: 'b', text: 'Ästhetik und minimalistisches Design', isCorrect: false, explanation: 'Minimalistisches Design zielt auf den Verzicht überflüssiger Informationen.' },
+              { id: 'c', text: 'Konsistenz und Standards', isCorrect: false, explanation: 'Konsistenz und Standards sorgen für einheitliche Begriffe und Bedienmuster.' },
+              { id: 'd', text: 'Übereinstimmung von System und realer Welt', isCorrect: false, explanation: 'Diese Heuristik verlangt verständliche Sprache und vertraute Konzepte statt Fachjargon.' }
             ]
           },
           {
@@ -733,10 +733,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-6',
             question: 'Ein Ladebalken mit Prozentangabe beim Datei-Upload erfüllt primär welche Nielsen-Heuristik?',
             options: [
-              { id: 'a', text: 'Sichtbarkeit des Systemstatus (Visibility of system status)', isCorrect: true, explanation: 'Richtig! Der Nutzer wird zu jedem Zeitpunkt darüber informiert, was im System vor sich geht.' },
-              { id: 'b', text: 'Hilfe und Dokumentation', isCorrect: false, explanation: 'Ladebalken ist keine schriftliche Hilfe.' },
-              { id: 'c', text: 'Flexibilität für Profis', isCorrect: false, explanation: 'Ladebalken betrifft alle Nutzer.' },
-              { id: 'd', text: 'Wiedererkennen statt Erinnern', isCorrect: false, explanation: 'Hier geht es um den Echtzeit-Zustand des Systems.' }
+              { id: 'a', text: 'Sichtbarkeit des Systemstatus', isCorrect: true, explanation: 'Richtig! „Visibility of system status“ informiert den Nutzer jederzeit darüber, was im System passiert.' },
+              { id: 'b', text: 'Hilfe und Dokumentation', isCorrect: false, explanation: 'Ein Ladebalken ist eine Statusmeldung, keine schriftliche Hilfe.' },
+              { id: 'c', text: 'Flexibilität und Effizienz', isCorrect: false, explanation: 'Flexibilität richtet sich z. B. an Shortcuts für erfahrene Nutzer.' },
+              { id: 'd', text: 'Wiedererkennen statt Erinnern', isCorrect: false, explanation: 'Hier geht es um den aktuellen Systemzustand, nicht um Gedächtnisentlastung.' }
             ]
           },
           {
@@ -745,10 +745,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-6',
             question: 'Ein Webformular zeigt Vorschläge für Suchbegriffe direkt bei der Texteingabe (Auto-Suggest). Welche Nielsen-Heuristik wird hier angewendet?',
             options: [
-              { id: 'a', text: 'Wiedererkennen statt Erinnern (Recognition rather than recall)', isCorrect: true, explanation: 'Richtig! Der Nutzer muss sich Begriffe nicht aus dem Gedächtnis rufen, sondern wählt aus sichtbaren Vorschlägen.' },
-              { id: 'b', text: 'Minimalistisches Design', isCorrect: false, explanation: 'Minimalistisches Design verzichtet auf unnötige Zierelemente.' },
-              { id: 'c', text: 'Systemstatus-Sichtbarkeit', isCorrect: false, explanation: 'Sichtbarkeit des Systemstatus zeigt z.B. Fortschrittsbalken.' },
-              { id: 'd', text: 'Single Source Publishing', isCorrect: false, explanation: 'Das ist ein medienneutrales Veröffentlichungskonzept.' }
+              { id: 'a', text: 'Wiedererkennen statt Erinnern', isCorrect: true, explanation: 'Richtig! „Recognition rather than recall“: Der Nutzer wählt aus sichtbaren Vorschlägen statt Begriffe auswendig wissen zu müssen.' },
+              { id: 'b', text: 'Ästhetik und minimalistisches Design', isCorrect: false, explanation: 'Minimalistisches Design verzichtet auf unnötige Zierelemente.' },
+              { id: 'c', text: 'Sichtbarkeit des Systemstatus', isCorrect: false, explanation: 'Sichtbarkeit des Systemstatus zeigt z. B. Fortschritts- oder Ladeanzeigen.' },
+              { id: 'd', text: 'Fehlererkennung und -diagnose', isCorrect: false, explanation: 'Diese Heuristik beschreibt verständliche Fehlermeldungen mit Lösungsvorschlägen.' }
             ],
             examTip: 'IHK-Tipp: "Wiedererkennen statt Erinnern" entlastet das Arbeitsgedächtnis durch visuelle Vorschläge und Menüauswahlen.'
           }
@@ -794,9 +794,9 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-7',
             question: 'Welches Gestaltgesetz erklärt, warum Buttons mit derselben Hintergrundfarbe und Form von Nutzern als gleichartige Funktionsteile wahrgenommen werden?',
             options: [
-              { id: 'a', text: 'Gesetz der Ähnlichkeit (Similarity)', isCorrect: true, explanation: 'Richtig! Ähnlich gestaltete Objekte (Farbe, Form, Größe) werden gedanklich zu einer Gruppe verknüpft.' },
-              { id: 'b', text: 'Gesetz der Nähe', isCorrect: false, explanation: 'Gesetz der Nähe bezieht sich auf den räumlichen Abstand.' },
-              { id: 'c', text: 'Gesetz der Geschlossenheit', isCorrect: false, explanation: 'Gesetz der Geschlossenheit vervollständigt unvollständige Konturen.' },
+              { id: 'a', text: 'Gesetz der Ähnlichkeit', isCorrect: true, explanation: 'Richtig! Das Gesetz der Ähnlichkeit (Similarity) verknüpft Objekte gleicher Farbe, Form oder Größe gedanklich zu einer Gruppe.' },
+              { id: 'b', text: 'Gesetz der Nähe', isCorrect: false, explanation: 'Das Gesetz der Nähe bezieht sich auf den räumlichen Abstand.' },
+              { id: 'c', text: 'Gesetz der Geschlossenheit', isCorrect: false, explanation: 'Das Gesetz der Geschlossenheit vervollständigt unvollständige Konturen.' },
               { id: 'd', text: 'Gesetz der Kontinuität', isCorrect: false, explanation: 'Kontinuität folgt durchgehenden Linienverläufen.' }
             ]
           },
@@ -806,10 +806,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'ixd-7',
             question: 'Ein Logo besteht aus unterbrochenen Kreislinien, die unser Gehirn automatisch zu einem vollen Kreis vervollständigt. Welches Gestaltgesetz wirkt hier?',
             options: [
-              { id: 'a', text: 'Gesetz der Geschlossenheit (Closure)', isCorrect: true, explanation: 'Perfekt! Das menschliche Gehirn schließt unvollständige Konturen zu einer bekannten Gesamtform.' },
+              { id: 'a', text: 'Gesetz der Geschlossenheit', isCorrect: true, explanation: 'Perfekt! Beim Gesetz der Geschlossenheit (Closure) ergänzt das Gehirn unvollständige Konturen zu einer Gesamtform.' },
               { id: 'b', text: 'Gesetz des gemeinsamen Schicksals', isCorrect: false, explanation: 'Betrifft sich gemeinsam bewegende Elemente.' },
-              { id: 'c', text: 'Gesetz der Gleichartigkeit', isCorrect: false, explanation: 'Bezieht sich auf ähnliche Form-/Farbmerkmale.' },
-              { id: 'd', text: 'Gesetz des optischen Lärms', isCorrect: false, explanation: 'Kein Gestaltgesetz.' }
+              { id: 'c', text: 'Gesetz der Gleichartigkeit', isCorrect: false, explanation: 'Bezieht sich auf ähnliche Form- oder Farbmerkmale.' },
+              { id: 'd', text: 'Gesetz der räumlichen Nähe', isCorrect: false, explanation: 'Bezieht sich auf den geringen Abstand zwischen Elementen.' }
             ],
             merksatz: 'Gesetz der Geschlossenheit lässt das Gehirn Lücken in Konturen selbstständig auffüllen.'
           }
@@ -872,10 +872,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wf-1',
             question: 'Welches Element gehört typischerweise NICHT in ein Wireframe?',
             options: [
-              { id: 'a', text: 'Grober Platzhalter für den Hauptnavigationsbereich', isCorrect: false, explanation: 'Navigation gehört unbedingt ins Wireframe.' },
-              { id: 'b', text: 'Ausgearbeitete finale Farbverläufe, Retuschen und Branding-Grafiken', isCorrect: true, explanation: 'Richtig! Farben und visuelles Feindesign lenken in dieser Phase nur von Struktur und Funktion ab.' },
-              { id: 'c', text: 'Call-to-Action Platzhalterkasten', isCorrect: false, explanation: 'Der CTA-Platzhalter gehört zur Struktur.' },
-              { id: 'd', text: 'Content-Aufteilung in Text- und Bildblöcke', isCorrect: false, explanation: 'Die Anordnung der Inhaltsblöcke ist der Hauptzweck.' }
+              { id: 'a', text: 'Grober Platzhalter für die Hauptnavigation im Kopfbereich', isCorrect: false, explanation: 'Navigation gehört unbedingt ins Wireframe.' },
+              { id: 'b', text: 'Ausgearbeitete Farbverläufe, Retuschen und finale Grafiken', isCorrect: true, explanation: 'Richtig! Farben und visuelles Feindesign lenken in der Wireframe-Phase nur von Struktur und Funktion ab.' },
+              { id: 'c', text: 'Positionierung und Größe zentraler Call-to-Action-Flächen', isCorrect: false, explanation: 'CTA-Platzhalter gehören zur funktionalen Struktur.' },
+              { id: 'd', text: 'Strukturelle Aufteilung der Seite in Text- und Bildblöcke', isCorrect: false, explanation: 'Die Anordnung der Inhaltsblöcke ist der Hauptzweck eines Wireframes.' }
             ]
           },
           {
@@ -884,10 +884,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wf-1',
             question: 'Warum spart die Erstellung von Wireframes im Projektverlauf erhebliche Kosten?',
             options: [
-              { id: 'a', text: 'Weil Korrekturen an Struktur und Navigation auf Papier oder in Boxen schnell und billig sind, bevor Code programmiert wird', isCorrect: true, explanation: 'Exakt! Späte Änderungen im fertigen Code kosten ein Vielfaches.' },
-              { id: 'b', text: 'Weil man sich die Programmierung komplett sparen kann', isCorrect: false, explanation: 'Programmierung ist trotzdem nötig.' },
-              { id: 'c', text: 'Weil Wireframes automatisch DSGVO-konform sind', isCorrect: false, explanation: 'Kein Zusammenhang.' },
-              { id: 'd', text: 'Weil man keine Bilder mehr lizensieren muss', isCorrect: false, explanation: 'Im späteren Mockup werden Bilder gebraucht.' }
+              { id: 'a', text: 'Weil Struktur- und Navigationsfehler schnell korrigiert werden, bevor Code entsteht', isCorrect: true, explanation: 'Exakt! Späte Änderungen im fertig programmierten Code kosten ein Vielfaches.' },
+              { id: 'b', text: 'Weil Wireframes direkt ohne weitere Entwicklung als fertige Website exportiert werden', isCorrect: false, explanation: 'Programmierung bleibt notwendig; Wireframes sind nur der Bauplan.' },
+              { id: 'c', text: 'Weil durch Wireframes spätere Barrierefreiheits- und Browsertests vollständig entfallen', isCorrect: false, explanation: 'Qualitäts- und Barrierefreiheitstests bleiben dennoch erforderlich.' },
+              { id: 'd', text: 'Weil Wireframes bereits alle Bildlizenzen und finalen Druckdaten automatisch enthalten', isCorrect: false, explanation: 'Bildmaterial und Feindesign folgen erst im späteren Mockup.' }
             ]
           },
           {
@@ -896,10 +896,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wf-1',
             question: 'In welchen Farben werden Wireframes typischerweise gestaltet?',
             options: [
-              { id: 'a', text: 'In Schwarz-Weiß und Graustufen mit klaren geometrischen Boxen', isCorrect: true, explanation: 'Richtig! Graustufen verhindern, dass Stakeholder über Farbgeschmäcker diskutieren statt über Struktur.' },
-              { id: 'b', text: 'Ausschließlich in grellen Neonfarben', isCorrect: false, explanation: 'Nein, das würde massiv ablenken.' },
-              { id: 'c', text: 'In den finalen CI-Farben des Kunden', isCorrect: false, explanation: 'Das gehört erst ins spätere Mockup.' },
-              { id: 'd', text: 'Immer mit goldenem Hintergrund', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'In Schwarz-Weiß und Graustufen mit schlichten Platzhaltern', isCorrect: true, explanation: 'Richtig! Graustufen verhindern, dass Stakeholder über Farbgeschmäcker statt über Struktur diskutieren.' },
+              { id: 'b', text: 'In kontrastreichen Signalfarben zur Markierung aller Module', isCorrect: false, explanation: 'Grelle Farben würden von der Informationsarchitektur ablenken.' },
+              { id: 'c', text: 'In den verbindlichen Corporate-Design-Farben des Auftraggebers', isCorrect: false, explanation: 'Das gehört erst ins visuelle Mockup.' },
+              { id: 'd', text: 'In vollfarbigen Farbverläufen mit realistischen Produktfotos', isCorrect: false, explanation: 'Realistische Farben und Fotos folgen erst in späteren Entwurfsphasen.' }
             ]
           }
         ],
@@ -1010,10 +1010,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wf-2',
             question: 'Welche Formel fasst den Unterschied der Phasen perfekt zusammen?',
             options: [
-              { id: 'a', text: 'Wireframe = Aussehen, Mockup = Funktion, Prototyp = Aufbau', isCorrect: false, explanation: 'Falsch vertauscht.' },
+              { id: 'a', text: 'Wireframe = Aussehen, Mockup = Bedienung, Prototyp = Aufbau, Entwicklung = Test', isCorrect: false, explanation: 'Falsch zugeordnet: Wireframe zeigt den Aufbau, Mockup das Aussehen.' },
               { id: 'b', text: 'Wireframe = Aufbau, Mockup = Aussehen, Prototyp = Bedienung, Entwicklung = Umsetzung', isCorrect: true, explanation: 'Exakt! Das ist der offizielle Prüfungs-Merksatz.' },
-              { id: 'c', text: 'Alle drei Begriffe bedeuten dasselbe', isCorrect: false, explanation: 'Großer Fehler in der Abschlussprüfung!' },
-              { id: 'd', text: 'Ein Prototyp ist immer statisch, ein Mockup klickbar', isCorrect: false, explanation: 'Genau umgekehrt! Der Prototyp ist interaktiv/klickbar.' }
+              { id: 'c', text: 'Wireframe = Umsetzung, Mockup = Aufbau, Prototyp = Aussehen, Entwicklung = Konzept', isCorrect: false, explanation: 'Die Phasen sind vertauscht: Zuerst kommen Aufbau, Aussehen, Bedienung und erst dann die Umsetzung.' },
+              { id: 'd', text: 'Wireframe = Bedienung, Mockup = Umsetzung, Prototyp = Aussehen, Entwicklung = Aufbau', isCorrect: false, explanation: 'Genau umgekehrt: Der Prototyp bildet die Bedienung ab, das Mockup das statische Aussehen.' }
             ]
           },
           {
@@ -1022,10 +1022,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wf-2',
             question: 'Ein Kunde möchte vor der Programmierung sehen, wie die echten Firmenfarben, Hausschriften und freigestellten Produktfotos im Layout wirken. Was legst du ihm vor?',
             options: [
-              { id: 'a', text: 'Ein Mockup (visueller Designentwurf)', isCorrect: true, explanation: 'Perfekt! Ein Mockup zeigt das fertige Aussehen mit echten Brand-Elementen.' },
-              { id: 'b', text: 'Ein Low-Fi Wireframe auf einer Serviette', isCorrect: false, explanation: 'Zeigt weder Farben noch echte Schriften.' },
-              { id: 'c', text: 'Einen Quellcode-Auszug in C++', isCorrect: false, explanation: 'Völlig am Kundenbedarf vorbei.' },
-              { id: 'd', text: 'Einen Phishing-Köder', isCorrect: false, explanation: 'Cyberkriminalität, kein Designentwurf.' }
+              { id: 'a', text: 'Ein ausgearbeitetes visuelles Mockup', isCorrect: true, explanation: 'Perfekt! Ein Mockup (visueller Designentwurf) zeigt das fertige Aussehen mit echten Brand-Elementen.' },
+              { id: 'b', text: 'Ein schematisches Low-Fi-Wireframe', isCorrect: false, explanation: 'Ein Low-Fi-Wireframe zeigt weder Farben noch echte Schriften.' },
+              { id: 'c', text: 'Eine textbasierte Sitemap-Übersicht', isCorrect: false, explanation: 'Eine Sitemap bildet nur die Seitenhierarchie ab, nicht das visuelle Design.' },
+              { id: 'd', text: 'Ein technisches Datenbank-ER-Modell', isCorrect: false, explanation: 'Ein ER-Modell beschreibt Datenstrukturen, keine Markenoptik.' }
             ]
           },
           {
@@ -1034,10 +1034,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wf-2',
             question: 'Welche Phase steht zeitlich DIREKT vor der Erstellung von Wireframes?',
             options: [
-              { id: 'a', text: 'Informationsarchitektur (IA) & Strukturierung der Inhalte', isCorrect: true, explanation: 'Richtig! Bevor wir Elemente anordnen, müssen wir wissen, welche Inhalte und Seiten überhaupt existieren.' },
-              { id: 'b', text: 'Die finale Abnahme durch den Kunden', isCorrect: false, explanation: 'Das geschieht ganz am Ende des Projekts.' },
-              { id: 'c', text: 'Das Schreiben von CSS-Code', isCorrect: false, explanation: 'Code kommt erst in der Entwicklungsphase.' },
-              { id: 'd', text: 'Der Usability-Test des fertigen Produkts', isCorrect: false, explanation: 'Testen erfolgt nach dem Prototypenbau.' }
+              { id: 'a', text: 'Informationsarchitektur und Strukturierung der Inhalte', isCorrect: true, explanation: 'Richtig! Bevor Elemente im Wireframe angeordnet werden, stehen Seitenstruktur und Inhalte fest.' },
+              { id: 'b', text: 'Visuelle Ausarbeitung von Farb- und Typografiestilen', isCorrect: false, explanation: 'Das erfolgt erst nach dem Wireframe im visuellen Design bzw. Mockup.' },
+              { id: 'c', text: 'Programmierung des produktiven HTML- und CSS-Codes', isCorrect: false, explanation: 'Die Umsetzung im Code erfolgt erst nach Konzept- und Designfreigabe.' },
+              { id: 'd', text: 'Abschließender Usability-Test des fertigen Prototyps', isCorrect: false, explanation: 'Prototypen-Tests erfolgen nach dem Wireframe- und Prototypenbau.' }
             ]
           }
         ]
@@ -1079,10 +1079,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wf-3',
             question: 'Welches Merkmal unterscheidet ein High-Fidelity Wireframe von einem Low-Fidelity Wireframe?',
             options: [
-              { id: 'a', text: 'Exakte Maßverhältnisse, echte Texte und präzise Rasterabstände in digitaler Form', isCorrect: true, explanation: 'Richtig! High-Fidelity ist millimetergenau ausgearbeitet, verzichtet aber immer noch auf bunte Dekoration.' },
-              { id: 'b', text: 'Es wird immer mit Buntstiften von Hand gezeichnet', isCorrect: false, explanation: 'High-Fi Wireframes werden mit UI-Software wie Figma gebaut.' },
-              { id: 'c', text: 'Es enthält bereits den fertigen JavaScript-Code', isCorrect: false, explanation: 'Ein Wireframe ist kein Code.' },
-              { id: 'd', text: 'Es darf maximal 3 Wörter Text enthalten', isCorrect: false, explanation: 'Gerade High-Fi nutzt reale Textinhalte.' }
+              { id: 'a', text: 'Exakte Maßverhältnisse, echte Texte und präzise Rasterabstände', isCorrect: true, explanation: 'Richtig! High-Fidelity ist digital und millimetergenau ausgearbeitet, verzichtet aber noch auf bunte Dekoration.' },
+              { id: 'b', text: 'Schnelle Freihandskizzen auf Papier ohne feste Spaltenmaße', isCorrect: false, explanation: 'Das beschreibt gerade ein Low-Fidelity-Wireframe.' },
+              { id: 'c', text: 'Vollständig lauffähiger Produktivcode mit aktiver Datenbankanbindung', isCorrect: false, explanation: 'Ein Wireframe ist ein Konzeptionsentwurf, kein fertiger Quellcode.' },
+              { id: 'd', text: 'Ausschließlich Blindtexte und grobe Platzhalter ohne Seitenraster', isCorrect: false, explanation: 'Gerade High-Fidelity-Wireframes nutzen reale Texte und exakte Raster.' }
             ]
           },
           {
@@ -1091,10 +1091,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wf-3',
             question: 'Warum eignen sich Low-Fidelity Skizzen so hervorragend für frühe Design-Sprints?',
             options: [
-              { id: 'a', text: 'Sie lassen sich in Sekunden verwerfen und neu zeichnen, ohne emotionalen oder zeitlichen Verlust', isCorrect: true, explanation: 'Genau! Keine Scheu vor Fehlern, maximale Experimentierfreude.' },
-              { id: 'b', text: 'Weil Kunden Papierskizzen direkt im App Store herunterladen können', isCorrect: false, explanation: 'Unsinn.' },
-              { id: 'c', text: 'Weil sie Druckkosten für Plakate senken', isCorrect: false, explanation: 'Nicht relevant.' },
-              { id: 'd', text: 'Weil der W3C-Standard Papierskizzen zwingend vorschreibt', isCorrect: false, explanation: 'W3C regelt Webstandards, keine Papierskizzen.' }
+              { id: 'a', text: 'Sie lassen sich in Sekunden verwerfen und neu zeichnen, ohne großen Aufwand', isCorrect: true, explanation: 'Genau! Geringer Zeit- und Emotionsverlust fördert offene Kritik und schnelles Ausprobieren.' },
+              { id: 'b', text: 'Sie liefern bereits pixelgenaue Design-Spezifikationen für die Entwicklung', isCorrect: false, explanation: 'Pixelgenaue Specs entstehen erst in späteren High-Fi-Mockups und Design-Systemen.' },
+              { id: 'c', text: 'Sie ersetzen sämtliche nachfolgenden Kundenabnahmen und Usability-Tests', isCorrect: false, explanation: 'Auch nach frühen Skizzen bleiben Prototypen, Tests und Freigaben erforderlich.' },
+              { id: 'd', text: 'Sie sind durch internationale Webstandards als Pflichtnachweis vorgeschrieben', isCorrect: false, explanation: 'Webstandards regeln technische Umsetzung, keine Papierskizzen.' }
             ]
           }
         ]
@@ -1128,10 +1128,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wf-4',
             question: 'Was ist der häufigste Anfängerfehler beim Erstellen eines Wireframes?',
             options: [
-              { id: 'a', text: 'Keine echten Fotos und Farbschattierungen zu verwenden', isCorrect: false, explanation: 'Das ist kein Fehler, sondern genau richtig!' },
-              { id: 'b', text: 'Zu früh zu gestalten (Farben, Bilder und Effekte einbauen, bevor die Struktur steht)', isCorrect: true, explanation: 'Genau! Farben lenken ab und verfälschen die Strukturdiskussion.' },
-              { id: 'c', text: 'Einen Footer einzuplanen', isCorrect: false, explanation: 'Der Footer ist ein Standardbestandteil.' },
-              { id: 'd', text: 'Graustufen zu nutzen', isCorrect: false, explanation: 'Graustufen sind ideal für Wireframes.' }
+              { id: 'a', text: 'Auf echte Produktfotos und fertige Farbschattierungen zu verzichten', isCorrect: false, explanation: 'Das ist kein Fehler, sondern in einem Wireframe genau richtig.' },
+              { id: 'b', text: 'Zu früh Farben, Bilder und Effekte einzubauen, bevor die Struktur steht', isCorrect: true, explanation: 'Genau! Frühe visuelle Gestaltung lenkt ab und verfälscht die Strukturdiskussion.' },
+              { id: 'c', text: 'Bereits frühzeitig eine Fußzeile mit rechtlichen Links einzuplanen', isCorrect: false, explanation: 'Der Footer ist ein regulärer Bestandteil der Seitenstruktur.' },
+              { id: 'd', text: 'Die gesamte Seitenaufteilung konsequent in Graustufen darzustellen', isCorrect: false, explanation: 'Graustufen sind für Wireframes ausdrücklich ideal.' }
             ]
           },
           {
@@ -1140,10 +1140,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wf-4',
             question: 'Welche Zonen gehören zur klassischen Standard-Struktur einer Website im Wireframe?',
             options: [
-              { id: 'a', text: 'Header (Logo/Navigation), Hauptinhalt (Content), Call-to-Action (CTA) und Footer', isCorrect: true, explanation: 'Richtig! Das sind die 4 fundamentalen Standardbereiche jeder Website.' },
-              { id: 'b', text: 'DNS-Server, Router, Switch und Glasfaserkabel', isCorrect: false, explanation: 'Das ist Netzwerk-Hardware.' },
-              { id: 'c', text: 'Nur ein Vollbild-Video ohne jede Schaltfläche', isCorrect: false, explanation: 'Das wäre barriere- und bedienungsfeindlich.' },
-              { id: 'd', text: 'Ausschließlich eine Cookie-Einwilligung', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Header mit Navigation, Hauptinhalt, Call-to-Action und Footer', isCorrect: true, explanation: 'Richtig! Header (Logo/Navigation), Content, Call-to-Action (CTA) und Footer sind die vier Standardbereiche einer Website.' },
+              { id: 'b', text: 'Domain-Routing, SSL-Zertifikat, Datenbank-Schema und Backup-Plan', isCorrect: false, explanation: 'Das sind technische Infrastruktur- und Backend-Komponenten, keine Wireframe-Zonen.' },
+              { id: 'c', text: 'Vollbild-Hintergrundvideo ohne Navigationsleiste und ohne Fußzeile', isCorrect: false, explanation: 'Ohne Navigation und Footer fehlen Orientierung und Pflichtangaben.' },
+              { id: 'd', text: 'Ausschließlich Cookie-Banner, Pop-up-Layer und Werbebanner-Flächen', isCorrect: false, explanation: 'Das sind ergänzende Einblendungen, nicht die grundlegende Seitenstruktur.' }
             ]
           },
           {
@@ -1152,10 +1152,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wf-4',
             question: 'Welcher Begriff bezeichnet eine hervorgehobene Schaltfläche wie "Jetzt Ticket buchen" oder "Kostenlos anmelden"?',
             options: [
-              { id: 'a', text: 'Call-to-Action (CTA)', isCorrect: true, explanation: 'Exakt! Der Call-to-Action fordert den Nutzer zur gewünschten Hauptaktion auf.' },
-              { id: 'b', text: 'Breadcrumb', isCorrect: false, explanation: 'Breadcrumb ist die Pfad-Navigation.' },
-              { id: 'c', text: 'Social Engineering', isCorrect: false, explanation: 'Das ist eine Betrugsmasche.' },
-              { id: 'd', text: 'Affordance-Köder', isCorrect: false, explanation: 'Erfundene Bezeichnung.' }
+              { id: 'a', text: 'Call-to-Action', isCorrect: true, explanation: 'Exakt! Der Call-to-Action (CTA) fordert den Nutzer gezielt zur gewünschten Hauptaktion auf.' },
+              { id: 'b', text: 'Breadcrumb', isCorrect: false, explanation: 'Breadcrumb bezeichnet die hierarchische Pfadnavigation.' },
+              { id: 'c', text: 'Hamburger-Menü', isCorrect: false, explanation: 'Das Hamburger-Menü bündelt Navigationspunkte auf kleinen Bildschirmen.' },
+              { id: 'd', text: 'Hero-Teaser', isCorrect: false, explanation: 'Der Hero-Bereich ist die große Einstiegsbühne im oberen Seitenbereich.' }
             ]
           }
         ]
@@ -1188,10 +1188,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wf-5',
             question: 'Warum sind Sinus-Milieus für die Designkonzeption aussagekräftiger als rein demografische Daten (wie Alter)?',
             options: [
-              { id: 'a', text: 'Weil sie grundlegende Werte, Einstellungen und Lebensstile bündeln', isCorrect: true, explanation: 'Richtig! Zwei 30-Jährige können völlig unterschiedliche Lebenswelten und Designgeschmäcker haben.' },
-              { id: 'b', text: 'Weil sie gesetzlich vorgeschrieben sind', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'c', text: 'Weil sie nur für den Online-Handel gelten', isCorrect: false, explanation: 'Sinus-Milieus gelten für alle Lebensbereiche.' },
-              { id: 'd', text: 'Weil sie Pixel in Vektoren umwandeln', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Weil sie Werte, Einstellungen und Lebensstile realitätsnah bündeln', isCorrect: true, explanation: 'Richtig! Zwei gleich alte Menschen können völlig unterschiedliche Lebenswelten und Designgeschmäcker haben.' },
+              { id: 'b', text: 'Weil sie bei öffentlichen Medienaufträgen gesetzlich vorgeschrieben sind', isCorrect: false, explanation: 'Sinus-Milieus sind ein bewährtes Marktforschungsmodell, keine gesetzliche Pflicht.' },
+              { id: 'c', text: 'Weil sie exakte Kaufhistorien einzelner Kunden im Online-Shop abbilden', isCorrect: false, explanation: 'Sinus-Milieus gruppieren gesellschaftliche Lebenswelten, nicht individuelle Kaufdaten.' },
+              { id: 'd', text: 'Weil sie automatisch verbindliche Farb- und Schriftvorgaben liefern', isCorrect: false, explanation: 'Sie liefern Orientierung für die Konzeption, ersetzen aber nicht die kreative Gestaltung.' }
             ]
           },
           {
@@ -1212,10 +1212,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wf-5',
             question: 'Was versteht man im Design-Kontext unter einer "Persona"?',
             options: [
-              { id: 'a', text: 'Eine fiktive, aber datenbasierte Repräsentantin einer Zielgruppe zur Konkretisierung von Nutzerbedürfnissen', isCorrect: true, explanation: 'Exakt! Personas verleihen anonymen Zielgruppendaten ein konkretes Gesicht mit Zielen und Schmerzpunkten.' },
-              { id: 'b', text: 'Einen echten Kunden mit unterschriebenem Vertrag', isCorrect: false, explanation: 'Personas sind fiktive Modellnutzer.' },
-              { id: 'c', text: 'Das Passwort des System-Administrators', isCorrect: false, explanation: 'Kein IT-Zugangsdaten-Begriff.' },
-              { id: 'd', text: 'Ein Programm zur Bildbearbeitung', isCorrect: false, explanation: 'Nein.' }
+              { id: 'a', text: 'Eine fiktive, datenbasierte Stellvertreterin einer Zielgruppe mit Zielen und Bedürfnissen', isCorrect: true, explanation: 'Exakt! Personas verleihen anonymen Zielgruppendaten ein konkretes Gesicht mit Zielen und Schmerzpunkten.' },
+              { id: 'b', text: 'Eine reale Bestandskundin, die das Projekt vertraglich abnimmt und freigibt', isCorrect: false, explanation: 'Personas sind fiktive Modellnutzer, keine konkreten Vertragspartner.' },
+              { id: 'c', text: 'Ein internes Benutzerkonto mit erweiterten Rechten im Content-Management-System', isCorrect: false, explanation: 'Das bezeichnet eine technische Systemrolle, keine Zielgruppen-Persona.' },
+              { id: 'd', text: 'Eine visuelle Stilvorlage zur Festlegung von Hausfarben, Schriften und Bildsprache', isCorrect: false, explanation: 'Das ist ein Styleguide oder Moodboard, keine Persona.' }
             ],
             merksatz: 'Personas übersetzen Zielgruppenstatistiken in anschauliche Nutzerprofile mit konkreten Bedürfnissen.'
           }
@@ -1249,10 +1249,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wf-6',
             question: 'Was ist der Hauptzweck eines Styleguides im Webdesign?',
             options: [
-              { id: 'a', text: 'Sicherstellung der visuellen Konsistenz über alle Seiten hinweg', isCorrect: true, explanation: 'Richtig! Ein Styleguide sorgt dafür, dass alle Elemente einheitlich aussehen.' },
-              { id: 'b', text: 'Die automatische Programmierung des Backends', isCorrect: false, explanation: 'Styleguides betreffen das Frontend-Design, nicht das Backend.' },
-              { id: 'c', text: 'Das Festlegen der Server-Preise', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Die Auswahl der Büroausstattung', isCorrect: false, explanation: 'Das gehört nicht zum digitalen Styleguide.' }
+              { id: 'a', text: 'Die Sicherstellung visueller Konsistenz über alle Seiten und Kanäle', isCorrect: true, explanation: 'Richtig! Ein Styleguide sorgt dafür, dass Farben, Typografie und Komponenten einheitlich wirken.' },
+              { id: 'b', text: 'Die automatische Generierung der serverseitigen Datenbankstruktur', isCorrect: false, explanation: 'Styleguides betreffen die visuelle Gestaltung, nicht die Backend-Architektur.' },
+              { id: 'c', text: 'Die kaufmännische Kalkulation von Hosting- und Lizenzkosten', isCorrect: false, explanation: 'Kostenkalkulation gehört ins Projektmanagement, nicht in den Styleguide.' },
+              { id: 'd', text: 'Die rechtliche Prüfung von Impressum, AGB und Datenschutzerklärung', isCorrect: false, explanation: 'Rechtsprüfung ist keine Aufgabe des visuellen Styleguides.' }
             ]
           },
           {
@@ -1273,10 +1273,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wf-6',
             question: 'Was unterscheidet eine "Component Library" in UI-Design-Tools (wie Figma) von einem reinen PDF-Styleguide?',
             options: [
-              { id: 'a', text: 'Sie enthält wiederverwendbare, interaktive UI-Bausteine (Buttons, Formularfelder), die zentral geändert werden können', isCorrect: true, explanation: 'Exakt! Änderungen an Komponenten in der Library aktualisieren automatisch alle verknüpften Instanzen im Projekt.' },
-              { id: 'b', text: 'Ein PDF-Styleguide kann gedruckt werden, eine Component Library löscht automatisch den Quellcode', isCorrect: false, explanation: 'Unsinn.' },
-              { id: 'c', text: 'Component Libraries sind gesetzlich verboten', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Sie beinhaltet ausschließlich Audio-Dateien', isCorrect: false, explanation: 'UI Component Libraries beinhalten Interface-Elemente.' }
+              { id: 'a', text: 'Sie bietet wiederverwendbare UI-Bausteine, die sich zentral für alle Screens aktualisieren lassen', isCorrect: true, explanation: 'Exakt! Änderungen an Komponenten (z. B. Buttons, Formularfeldern) in der Library aktualisieren automatisch alle verknüpften Instanzen.' },
+              { id: 'b', text: 'Sie dokumentiert ausschließlich statische Druckfarben und Rastermaße für Print-Publikationen', isCorrect: false, explanation: 'UI-Component-Libraries sind speziell für dynamische digitale Oberflächen gedacht.' },
+              { id: 'c', text: 'Sie ersetzt die gesamte Frontend-Programmierung und erzeugt direkt fertige Datenbankabfragen', isCorrect: false, explanation: 'Component Libraries unterstützen Design und Übergabe, ersetzen aber keine Backend-Logik.' },
+              { id: 'd', text: 'Sie speichert lediglich einzelne Bild- und Audio-Assets ohne Verknüpfung zu Layout-Instanzen', isCorrect: false, explanation: 'Der Kernvorteil liegt gerade in verknüpften, zentral pflegbaren Interface-Komponenten.' }
             ],
             merksatz: 'Component Libraries bündeln wiederverwendbare UI-Elemente für maximale Effizienz und Konsistenz.'
           }
@@ -1337,10 +1337,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'proto-1',
             question: 'Was unterscheidet einen Prototyp fundamental von einem Mockup?',
             options: [
-              { id: 'a', text: 'Ein Mockup hat keine Farben, ein Prototyp schon', isCorrect: false, explanation: 'Mockups haben bereits volle Farben und Schriften.' },
-              { id: 'b', text: 'Ein Prototyp ist interaktiv und simuliert Bedienabläufe, während ein Mockup ein statischer visueller Entwurf ist', isCorrect: true, explanation: 'Richtig! Das ist der wesentliche Prüfungsunterschied.' },
-              { id: 'c', text: 'Ein Prototyp wird immer auf Papier gezeichnet', isCorrect: false, explanation: 'Papierskizzen sind meist Low-Fi Wireframes.' },
-              { id: 'd', text: 'Mockups sind bereits fertig programmierte Software', isCorrect: false, explanation: 'Mockups sind statische Bilder.' }
+              { id: 'a', text: 'Ein Mockup verzichtet noch auf Farben und Schriften, während ein Prototyp sie ergänzt', isCorrect: false, explanation: 'Mockups enthalten bereits volle Farben, Schriften und visuelles Feindesign.' },
+              { id: 'b', text: 'Ein Prototyp ist interaktiv und simuliert Abläufe, während ein Mockup statisch bleibt', isCorrect: true, explanation: 'Richtig! Das ist der wesentliche Prüfungsunterschied zwischen Prototyp und Mockup.' },
+              { id: 'c', text: 'Ein Prototyp entsteht ausschließlich als Papierskizze, ein Mockup immer im UI-Tool', isCorrect: false, explanation: 'Papierskizzen sind meist Low-Fi-Wireframes; Prototypen sind oft digital und klickbar.' },
+              { id: 'd', text: 'Ein Mockup besteht aus lauffähigem Frontend-Code, ein Prototyp nur aus statischen Bildern', isCorrect: false, explanation: 'Genau umgekehrt: Mockups sind statische Entwürfe, Prototypen simulieren die Bedienung.' }
             ]
           },
           {
@@ -1349,10 +1349,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'proto-1',
             question: 'Was versteht man unter einem "Klickdummy"?',
             options: [
-              { id: 'a', text: 'Einen einfachen Prototyp, bei dem statische Screens über Hotspots klickbar verbunden sind, ohne echte Datenbank-Logik', isCorrect: true, explanation: 'Exakt! Er simuliert den Klickpfad schnell und wirkungsvoll ohne Backend.' },
-              { id: 'b', text: 'Einen Dummy-Kunden, der Rechnungen nicht bezahlt', isCorrect: false, explanation: 'Umgangssprachlich, aber kein Fachbegriff.' },
-              { id: 'c', text: 'Ein Bot-Programm zur Klick-Manipulation', isCorrect: false, explanation: 'Das wäre Betrug.' },
-              { id: 'd', text: 'Eine kaputte Computermaus', isCorrect: false, explanation: 'Nein.' }
+              { id: 'a', text: 'Ein einfacher Prototyp mit klickbar verknüpften Screens ohne echte Backend-Logik', isCorrect: true, explanation: 'Exakt! Ein Klickdummy simuliert den Klickpfad über Hotspots schnell und wirkungsvoll ohne Datenbank.' },
+              { id: 'b', text: 'Ein automatisiertes Testskript zur Lastprüfung von Webservern unter Volllast', isCorrect: false, explanation: 'Das beschreibt Last- bzw. Performance-Tests, keinen Klickdummy.' },
+              { id: 'c', text: 'Ein vollständig programmiertes Frontend-Modul mit angebundener Testdatenbank', isCorrect: false, explanation: 'Ein Klickdummy kommt gerade ohne echte Programmierung und Datenbank aus.' },
+              { id: 'd', text: 'Ein statischer Stil-Entwurf zur Freigabe von Farbpalette und Hausschrift', isCorrect: false, explanation: 'Das ist ein Mockup oder Style Tile, kein interaktiver Klickdummy.' }
             ]
           },
           {
@@ -1361,10 +1361,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'proto-1',
             question: 'Warum gilt im Medienprojekt die Regel: "Je früher Prototypen getestet werden, desto günstiger das Projekt"?',
             options: [
-              { id: 'a', text: 'Weil Design- und Logikfehler in Prototypen mit minimalem Zeitaufwand behoben werden können, bevor teurer Code entsteht', isCorrect: true, explanation: 'Richtig! (Bekannt als 1-10-100-Regel der Fehlerkosten).' },
-              { id: 'b', text: 'Weil der Kunde den Prototyp als fertiges Endprodukt kauft', isCorrect: false, explanation: 'Ein Prototyp ist kein fertiges Produkt.' },
-              { id: 'c', text: 'Weil Prototypen keine Server-Gebühren kosten', isCorrect: false, explanation: 'Zweitrangig.' },
-              { id: 'd', text: 'Weil dann keine Barrierefreiheit mehr nötig ist', isCorrect: false, explanation: 'Barrierefreiheit ist immer Pflicht.' }
+              { id: 'a', text: 'Weil Konzept- und Logikfehler rasch behoben werden, bevor teurer Code entsteht', isCorrect: true, explanation: 'Richtig! Nach der 1-10-100-Regel der Fehlerkosten steigen Änderungskosten im laufenden Projekt stark an.' },
+              { id: 'b', text: 'Weil getestete Prototypen unverändert als fertiges Produkt ausgeliefert werden', isCorrect: false, explanation: 'Ein Prototyp dient der Überprüfung und ersetzt nicht die produktive Umsetzung.' },
+              { id: 'c', text: 'Weil durch frühe Tests die laufenden Server- und Lizenzkosten komplett entfallen', isCorrect: false, explanation: 'Betriebskosten bleiben bestehen; der Spareffekt liegt in vermiedener Nacharbeit.' },
+              { id: 'd', text: 'Weil nach einem Prototypen-Test keine Qualitäts- oder Barrierefreiheitsprüfung nötig ist', isCorrect: false, explanation: 'Abschluss- und Barrierefreiheitstests bleiben auch bei frühen Prototypen unverzichtbar.' }
             ]
           }
         ]
@@ -1417,10 +1417,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'proto-2',
             question: 'Ein Prototyp zeigt alle 12 Unterseiten einer neuen Hochschul-Website mit Menü, aber kein Formular und keine Suche funktionieren. Um welche Art handelt es sich?',
             options: [
-              { id: 'a', text: 'Horizontaler Prototyp (Breite)', isCorrect: true, explanation: 'Richtig! Große Übersicht über alle Bereiche, aber keine funktionale Tiefe.' },
-              { id: 'b', text: 'Vertikaler Prototyp', isCorrect: false, explanation: 'Vertikal wäre eine Einzelfunktion in voller Tiefe.' },
-              { id: 'c', text: 'Phishing-Webseite', isCorrect: false, explanation: 'Nein.' },
-              { id: 'd', text: 'Vollständiger Produktiv-Code', isCorrect: false, explanation: 'Funktionen sind nur simuliert.' }
+              { id: 'a', text: 'Horizontaler Prototyp', isCorrect: true, explanation: 'Richtig! Ein horizontaler Prototyp bildet die Breite (viele Bereiche/Menüs) ab, aber ohne tiefe Einzel-Funktionen.' },
+              { id: 'b', text: 'Vertikaler Prototyp', isCorrect: false, explanation: 'Ein vertikaler Prototyp bildet eine Einzelfunktion in voller Tiefe ab.' },
+              { id: 'c', text: 'Evolutionärer Prototyp', isCorrect: false, explanation: 'Ein evolutionärer Prototyp wird schrittweise zum Endprodukt weiterentwickelt.' },
+              { id: 'd', text: 'Technischer Funktionsprototyp', isCorrect: false, explanation: 'Hier werden keine tiefen technischen Funktionen umgesetzt, sondern nur die Navigationsbreite.' }
             ]
           },
           {
@@ -1429,10 +1429,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'proto-2',
             question: 'Wann entscheidet sich ein Konzeptionsteam typischerweise für einen vertikalen Prototyp?',
             options: [
-              { id: 'a', text: 'Wenn ein neuartiger, komplexer Kern-Workflow (z. B. Konfigurator oder Zahlungsdialog) vorab intensiv getestet werden muss', isCorrect: true, explanation: 'Exakt! Das Risiko für diesen kritischen Pfad wird dadurch minimiert.' },
-              { id: 'b', text: 'Wenn der Kunde nur die Startseite sehen möchte', isCorrect: false, explanation: 'Dafür reicht oft ein Mockup.' },
-              { id: 'c', text: 'Wenn der Zeitplan bereits um 3 Monate überschritten ist', isCorrect: false, explanation: 'Kein methodischer Grund.' },
-              { id: 'd', text: 'Wenn keine Computer zur Verfügung stehen', isCorrect: false, explanation: 'Vertikale Prototypen erfordern UI-Tools.' }
+              { id: 'a', text: 'Wenn ein komplexer Kern-Workflow vorab in voller Tiefe getestet werden muss', isCorrect: true, explanation: 'Exakt! Bei kritischen Abläufen (z. B. Konfigurator oder Zahlungsdialog) minimiert ein vertikaler Prototyp das Risiko.' },
+              { id: 'b', text: 'Wenn der Auftraggeber zunächst nur einen Überblick über die Startseite wünscht', isCorrect: false, explanation: 'Für einen reinen visuellen Eindruck der Startseite genügt ein statisches Mockup.' },
+              { id: 'c', text: 'Wenn möglichst alle Unterseiten ohne funktionale Detailtiefe gezeigt werden sollen', isCorrect: false, explanation: 'Das ist genau der Anwendungsfall eines horizontalen Prototyps.' },
+              { id: 'd', text: 'Wenn das gesamte Projekt bereits abgeschlossen ist und archiviert werden soll', isCorrect: false, explanation: 'Prototypen werden vor der Umsetzung zum Testen eingesetzt, nicht bei der Archivierung.' }
             ]
           }
         ]
@@ -1488,10 +1488,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'proto-3',
             question: 'Wie verhält sich der Testleiter während eines Usability-Tests mit einem Prototyp?',
             options: [
-              { id: 'a', text: 'Zurückhaltend beobachtend; er greift nicht helfend ein und ermutigt zum "lauten Denken" (Think Aloud)', isCorrect: true, explanation: 'Richtig! Nur unbeeinflusstes Handeln liefert ehrliche Usability-Erkenntnisse.' },
-              { id: 'b', text: 'Er klickt alle Buttons für den Nutzer vor', isCorrect: false, explanation: 'Macht den Test komplett wertlos.' },
-              { id: 'c', text: 'Er verteidigt das Design lautstark gegen Kritik', isCorrect: false, explanation: 'Falscher Stolz schadet dem Produkt.' },
-              { id: 'd', text: 'Er verlässt den Raum und schließt die Tür ab', isCorrect: false, explanation: 'Beobachtung und Protokollierung sind zwingend.' }
+              { id: 'a', text: 'Er beobachtet neutral, greift nicht ein und ermutigt zum lauten Denken', isCorrect: true, explanation: 'Richtig! Durch „Think Aloud“ und unbeeinflusstes Handeln entstehen ehrliche Usability-Erkenntnisse.' },
+              { id: 'b', text: 'Er führt alle Klickschritte vorab vor, damit keine Bedienfehler auftreten', isCorrect: false, explanation: 'Vorführen beeinflusst die Testperson und macht den Usability-Test wertlos.' },
+              { id: 'c', text: 'Er rechtfertigt gestalterische Entscheidungen sofort bei kritischen Fragen', isCorrect: false, explanation: 'Das Verteidigen des Entwurfs hemmt ehrliches Feedback der Testpersonen.' },
+              { id: 'd', text: 'Er verlässt während der gesamten Aufgabe den Raum und wertet nur Klickdaten aus', isCorrect: false, explanation: 'Aktives Beobachten und Protokollieren von Reaktionen sind im Test unverzichtbar.' }
             ]
           },
           {
@@ -1567,10 +1567,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'sec-1',
             question: 'Ein Nutzer erhält eine SMS: "Ihr Paket wartet im Zoll. Klicken Sie hier und zahlen Sie 2 €". Wie nennt man diesen Betrug?',
             options: [
-              { id: 'a', text: 'Smishing (SMS-Phishing)', isCorrect: true, explanation: 'Richtig! Phishing per SMS bezeichnet man als Smishing.' },
-              { id: 'b', text: 'Vishing', isCorrect: false, explanation: 'Vishing erfolgt per Sprach-Anruf (Voice Phishing).' },
-              { id: 'c', text: 'Pharming', isCorrect: false, explanation: 'Pharming manipuliert DNS/Webseiten-Umleitungen.' },
-              { id: 'd', text: 'Usability-Heuristik', isCorrect: false, explanation: 'Das ist ein Konzept für Designqualität.' }
+              { id: 'a', text: 'Smishing', isCorrect: true, explanation: 'Richtig! Phishing per SMS bezeichnet man als Smishing (SMS-Phishing).' },
+              { id: 'b', text: 'Vishing', isCorrect: false, explanation: 'Vishing erfolgt per Sprachanruf (Voice Phishing).' },
+              { id: 'c', text: 'Pharming', isCorrect: false, explanation: 'Pharming manipuliert DNS-Einträge oder Weiterleitungen.' },
+              { id: 'd', text: 'Spoofing', isCorrect: false, explanation: 'Spoofing bezeichnet das Fälschen von Absender- oder Netzwerkidentitäten.' }
             ]
           },
           {
@@ -1579,10 +1579,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'sec-1',
             question: 'Was unterscheidet Pharming von klassischem E-Mail-Phishing?',
             options: [
-              { id: 'a', text: 'Pharming betrifft nur Mac-Nutzer', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'b', text: 'Bei Pharming landet der Nutzer auch bei korrekter URL-Eingabe durch Manipulation unbemerkt auf einer gefälschten Website', isCorrect: true, explanation: 'Genau! Pharming manipuliert DNS-Einträge oder Router, wodurch selbst die richtige URL umgeleitet wird.' },
-              { id: 'c', text: 'Pharming verschickt nur Briefe per Post', isCorrect: false, explanation: 'Nein.' },
-              { id: 'd', text: 'Es gibt keinen Unterschied', isCorrect: false, explanation: 'Pharming ist eine technische Umleitung, Phishing basiert auf Köder-Nachrichten.' }
+              { id: 'a', text: 'Pharming zielt ausschließlich auf mobile Endgeräte und Messaging-Apps ab', isCorrect: false, explanation: 'Falsch: Pharming betrifft DNS-Auflösung und Router unabhängig vom Gerätetyp.' },
+              { id: 'b', text: 'Beim Pharming wird selbst eine korrekt eingegebene URL auf eine gefälschte Seite umgeleitet', isCorrect: true, explanation: 'Genau! Pharming manipuliert DNS-Einträge oder Router, sodass Nutzer trotz richtiger URL auf einer Fälschung landen.' },
+              { id: 'c', text: 'Pharming verbreitet sich ausschließlich über kompromittierte Dateianhänge in Serienmails', isCorrect: false, explanation: 'Das beschreibt klassisches E-Mail-Phishing bzw. Malware-Versand.' },
+              { id: 'd', text: 'Beide Begriffe bezeichnen exakt denselben Angriff über manipulierte Hyperlinks in E-Mails', isCorrect: false, explanation: 'Pharming ist eine technische Umleitung auf DNS-Ebene, Phishing basiert auf Köder-Nachrichten.' }
             ]
           },
           {
@@ -1591,10 +1591,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'sec-1',
             question: 'Ein Betrüger ruft einen Mitarbeiter an, gibt sich als IT-Support der eigenen Firma aus und fordert das Passwort zur "Systemwartung". Wie heißt diese Betrugsform?',
             options: [
-              { id: 'a', text: 'Vishing (Voice Phishing)', isCorrect: true, explanation: 'Richtig! Telefonisches Abfischen von Daten nennt sich Vishing.' },
-              { id: 'b', text: 'Smishing', isCorrect: false, explanation: 'Smishing erfolgt per SMS.' },
-              { id: 'c', text: 'Wireframe-Mockup', isCorrect: false, explanation: 'Das ist ein UI-Designbegriff.' },
-              { id: 'd', text: 'WCAG Stufe AAA', isCorrect: false, explanation: 'Accessibility-Standard.' }
+              { id: 'a', text: 'Vishing', isCorrect: true, explanation: 'Richtig! Telefonisches Abfischen sensibler Daten nennt sich Vishing (Voice Phishing).' },
+              { id: 'b', text: 'Smishing', isCorrect: false, explanation: 'Smishing erfolgt per SMS-Nachricht.' },
+              { id: 'c', text: 'Pharming', isCorrect: false, explanation: 'Pharming leitet Internetadressen technisch auf gefälschte Server um.' },
+              { id: 'd', text: 'Keylogging', isCorrect: false, explanation: 'Keylogging protokolliert heimlich Tastatureingaben per Software oder Hardware.' }
             ]
           },
           {
@@ -1603,10 +1603,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'sec-1',
             question: 'Was versteht man unter "Spear-Phishing"?',
             options: [
-              { id: 'a', text: 'Einen maßgeschneiderten, gezielten Phishing-Angriff auf eine ganz bestimmte Person oder Firma mit vorab recherchierten Details', isCorrect: true, explanation: 'Exakt! Im Gegensatz zu Massen-Spam wird das Opfer gezielt ausspioniert.' },
-              { id: 'b', text: 'Einen Angriff auf Speichermedien wie USB-Sticks', isCorrect: false, explanation: 'Falsche Wortherkunft.' },
-              { id: 'c', text: 'Das Versenden von Flyern per Post', isCorrect: false, explanation: 'Nein.' },
-              { id: 'd', text: 'Einen automatischen Virenscan', isCorrect: false, explanation: 'Schutzmaßnahme, kein Angriff.' }
+              { id: 'a', text: 'Einen gezielten, individuell recherchierten Phishing-Angriff auf bestimmte Personen oder Firmen', isCorrect: true, explanation: 'Exakt! Im Gegensatz zu Massen-Phishing nutzen Angreifer persönliche Details des Ziels.' },
+              { id: 'b', text: 'Einen automatisierten Angriff über infizierte Wechseldatenträger wie externe USB-Sticks', isCorrect: false, explanation: 'Das bezeichnet eher Baiting über physische Datenträger, nicht Spear-Phishing.' },
+              { id: 'c', text: 'Einen breit gestreuten Massenversand identischer Betrugsmails an Millionen Adressen', isCorrect: false, explanation: 'Das ist klassisches Massen-Phishing, gerade nicht das gezielte Spear-Phishing.' },
+              { id: 'd', text: 'Einen vorbeugenden Sicherheitstest durch interne Virenscanner auf Unternehmensservern', isCorrect: false, explanation: 'Spear-Phishing ist ein gezielter Angriff, kein interner Virenscan.' }
             ]
           }
         ],
@@ -1723,10 +1723,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'sec-2',
             question: 'Welches Merkmal deutet am stärksten auf einen Fake-Shop hin?',
             options: [
-              { id: 'a', text: 'Zahlung per Rechnung oder PayPal mit Käuferschutz', isCorrect: false, explanation: 'Das sind sichere Zahlungsarten.' },
-              { id: 'b', text: 'Ein vollständiges, im Handelsregister prüfbares Impressum', isCorrect: false, explanation: 'Das spricht für einen seriösen Händler.' },
-              { id: 'c', text: 'Ausschließlich Vorkasse/Banküberweisung als Zahlungsmethode und kein Impressum', isCorrect: true, explanation: 'Richtig! Fake-Shops wollen unwiderrufliche Vorab-Überweisungen und verstecken ihre Identität.' },
-              { id: 'd', text: 'Ein responsives Design für Smartphones', isCorrect: false, explanation: 'Auch betrügerische Seiten können responsive sein.' }
+              { id: 'a', text: 'Zahlung per Rechnung oder über Zahlungsdienste mit Käuferschutz', isCorrect: false, explanation: 'Das sind in der Regel kundenfreundliche, sicherere Zahlungsarten.' },
+              { id: 'b', text: 'Ein vollständiges, im Handelsregister nachprüfbares Impressum', isCorrect: false, explanation: 'Ein prüfbares Impressum spricht für einen seriösen Anbieter.' },
+              { id: 'c', text: 'Ausschließlich Vorkasse per Überweisung und fehlendes Impressum', isCorrect: true, explanation: 'Richtig! Fake-Shops erzwingen unwiderrufliche Vorab-Überweisungen und verschleiern ihre Identität.' },
+              { id: 'd', text: 'Eine mobil optimierte Darstellung mit verschlüsselter Verbindung', isCorrect: false, explanation: 'Auch betrügerische Seiten nutzen oft HTTPS und responsive Vorlagen.' }
             ]
           },
           {
@@ -1735,10 +1735,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'sec-2',
             question: 'Was ist das Kernprinzip von "Social Engineering"?',
             options: [
-              { id: 'a', text: 'Nicht die Software, sondern der Mensch wird durch Manipulation, Autorität oder Hilfsbereitschaft als Schwachstelle ausgenutzt', isCorrect: true, explanation: 'Genau! "Der Mensch ist das schwächste Glied in der Sicherheitskette."' },
-              { id: 'b', text: 'Das Einrichten von Social-Media-Accounts für Firmen', isCorrect: false, explanation: 'Das ist Social Media Marketing.' },
-              { id: 'c', text: 'Das Löten von Computer-Chips', isCorrect: false, explanation: 'Hardware-Technik.' },
-              { id: 'd', text: 'Die Entwicklung von barrierefreien Farbräumen', isCorrect: false, explanation: 'Barrierefreiheit, nicht Betrug.' }
+              { id: 'a', text: 'Das gezielte Ausnutzen menschlicher Eigenschaften wie Vertrauen, Angst oder Hilfsbereitschaft', isCorrect: true, explanation: 'Genau! Nicht primär die Software, sondern der Mensch wird psychologisch manipuliert.' },
+              { id: 'b', text: 'Die systematische Analyse öffentlicher Unternehmensprofile zur Reichweitensteigerung', isCorrect: false, explanation: 'Das gehört zum Social Media Marketing, nicht zu Social Engineering.' },
+              { id: 'c', text: 'Das automatisierte Durchprobieren tausender Passwortkombinationen an einem Login-Formular', isCorrect: false, explanation: 'Das beschreibt einen Brute-Force-Angriff, kein Social Engineering.' },
+              { id: 'd', text: 'Das Einschleusen schadhafter Datenbankbefehle über ungesicherte Eingabefelder einer Website', isCorrect: false, explanation: 'Das ist eine SQL-Injection, ein technischer Angriff auf Code.' }
             ]
           },
           {
@@ -1747,10 +1747,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'sec-2',
             question: 'Eine gefälschte E-Mail im Namen der Geschäftsführung ordnet eine sofortige vertrauliche Blitzüberweisung an. Wie nennt man diesen Betrug?',
             options: [
-              { id: 'a', text: 'CEO-Fraud (Chef-Masche)', isCorrect: true, explanation: 'Richtig! Hoher Druck, Autorität und Geheimhaltung sind typisch für CEO-Fraud.' },
-              { id: 'b', text: 'Breadcrumb-Trap', isCorrect: false, explanation: 'Erfundener Begriff.' },
-              { id: 'c', text: 'Kanban-WIP-Limit', isCorrect: false, explanation: 'Das ist eine agile Projektmanagement-Regel.' },
-              { id: 'd', text: 'Nielsen-Heuristik', isCorrect: false, explanation: 'Usability-Konzept.' }
+              { id: 'a', text: 'CEO-Fraud', isCorrect: true, explanation: 'Richtig! CEO-Fraud („Chef-Masche“) nutzt vorgetäuschte Autorität, Zeitdruck und Geheimhaltung.' },
+              { id: 'b', text: 'Pharming', isCorrect: false, explanation: 'Pharming leitet Webadressen über manipulierte DNS-Einträge um.' },
+              { id: 'c', text: 'Ransomware', isCorrect: false, explanation: 'Ransomware verschlüsselt Dateien zur Lösegelderpressung.' },
+              { id: 'd', text: 'Brute-Force-Attacke', isCorrect: false, explanation: 'Brute-Force probiert systematisch Zugangsdaten durch.' }
             ]
           }
         ]
@@ -1804,10 +1804,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'sec-3',
             question: 'Was ist der Unterschied zwischen Datenschutz und Datensicherheit?',
             options: [
-              { id: 'a', text: 'Es gibt keinen, die Begriffe sind Synonyme', isCorrect: false, explanation: 'Klassischer Fehler! Sie bedeuten Verschiedenes.' },
-              { id: 'b', text: 'Datenschutz schützt personenbezogene Daten der Bürger; Datensicherheit schützt Daten generell vor Verlust, Diebstahl oder Zerstörung', isCorrect: true, explanation: 'Exakt! Das ist die exakte IHK-Definition.' },
-              { id: 'c', text: 'Datensicherheit gilt nur für Mediengestalter, Datenschutz für Banken', isCorrect: false, explanation: 'Beides gilt für alle Unternehmen.' },
-              { id: 'd', text: 'Datenschutz meint ausschließlich Virenschutzprogramme', isCorrect: false, explanation: 'Virenschutz ist eine technische Maßnahme der Datensicherheit.' }
+              { id: 'a', text: 'Beide Begriffe sind in der DSGVO Synonyme für den technischen Schutz digitaler Daten', isCorrect: false, explanation: 'Klassischer Fehler: Datenschutz und Datensicherheit verfolgen unterschiedliche Schutzziele.' },
+              { id: 'b', text: 'Datenschutz schützt personenbezogene Daten; Datensicherheit schützt Daten generell vor Verlust oder Zugriff', isCorrect: true, explanation: 'Exakt! Das ist die zentrale IHK-Abgrenzung zwischen Datenschutz (Persönlichkeitsrecht) und Datensicherheit (technisch-organisatorischer Schutz aller Daten).' },
+              { id: 'c', text: 'Datensicherheit gilt ausschließlich für IT-Dienstleister, während Datenschutz nur Behörden betrifft', isCorrect: false, explanation: 'Beide Bereiche gelten für alle Unternehmen und Organisationen.' },
+              { id: 'd', text: 'Datenschutz umfasst technische Maßnahmen wie Backups, Datensicherheit ausschließlich Gesetze', isCorrect: false, explanation: 'Genau umgekehrt: Backups und Verschlüsselung sind Maßnahmen der Datensicherheit.' }
             ],
             merksatz: 'Datenschutz = Schutz der Person/Privatsphäre. Datensicherheit = Technischer/organisatorischer Schutz aller Daten.'
           },
@@ -1817,10 +1817,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'sec-3',
             question: 'Ein Schadprogramm tarnt sich als nützliche Software (z.B. kostenloses Schriftenpaket), schleust aber unbemerkt Schadcode ein. Um welchen Typ handelt es sich?',
             options: [
-              { id: 'a', text: 'Trojanisches Pferd (Trojaner)', isCorrect: true, explanation: 'Richtig! Die Tarnung als harmlose oder nützliche Anwendung definiert den Trojaner.' },
-              { id: 'b', text: 'Computervirus', isCorrect: false, explanation: 'Ein Virus infiziert bestehende Wirtsdateien.' },
-              { id: 'c', text: 'Netzwerkwurm', isCorrect: false, explanation: 'Ein Wurm verbreitet sich selbstständig über Sicherheitslücken.' },
-              { id: 'd', text: 'Low-Fi Wireframe', isCorrect: false, explanation: 'Designkonzept.' }
+              { id: 'a', text: 'Trojaner', isCorrect: true, explanation: 'Richtig! Ein Trojanisches Pferd (Trojaner) tarnt sich als harmlose oder nützliche Anwendung.' },
+              { id: 'b', text: 'Computervirus', isCorrect: false, explanation: 'Ein Virus infiziert bestehende Wirtsdateien und verbreitet sich über deren Ausführung.' },
+              { id: 'c', text: 'Netzwerkwurm', isCorrect: false, explanation: 'Ein Wurm verbreitet sich selbstständig über Netzwerke und Sicherheitslücken.' },
+              { id: 'd', text: 'Rootkit', isCorrect: false, explanation: 'Ein Rootkit verbirgt bereits eingedrungene Schadsoftware tief im Betriebssystem.' }
             ]
           },
           {
@@ -1829,10 +1829,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'sec-3',
             question: 'Welche Schadsoftware verschlüsselt Festplatten eines Unternehmens und erpresst Bitcoins für den Freischalt-Schlüssel?',
             options: [
-              { id: 'a', text: 'Ransomware (Erpressungs-Trojaner)', isCorrect: true, explanation: 'Perfekt! Ransom = Lösegeld. Nur externe Backups schützen vor Datenverlust.' },
-              { id: 'b', text: 'Adware', isCorrect: false, explanation: 'Adware blendet Werbebanner ein.' },
-              { id: 'c', text: 'Screenreader', isCorrect: false, explanation: 'Hilfsmittel für barrierefreies Lesen.' },
-              { id: 'd', text: 'Affordance-Filter', isCorrect: false, explanation: 'Erfunden.' }
+              { id: 'a', text: 'Ransomware', isCorrect: true, explanation: 'Perfekt! Ransomware (Erpressungs-Trojaner) verschlüsselt Daten für Lösegeld. Nur saubere Offline-Backups schützen zuverlässig.' },
+              { id: 'b', text: 'Adware', isCorrect: false, explanation: 'Adware blendet unerwünschte Werbung ein.' },
+              { id: 'c', text: 'Spyware', isCorrect: false, explanation: 'Spyware späht heimlich Nutzerdaten und Aktivitäten aus, verschlüsselt aber nicht zur Erpressung.' },
+              { id: 'd', text: 'Scareware', isCorrect: false, explanation: 'Scareware erzeugt falsche Warnmeldungen, um Opfer zum Kauf unnötiger Software zu drängen.' }
             ]
           },
           {
@@ -1841,10 +1841,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'sec-3',
             question: 'Ein Webshop ist plötzlich nicht mehr erreichbar, weil Tausende fremde Rechner gleichzeitig den Server mit Datenanfragen fluten. Um welche Angriffsart handelt es sich?',
             options: [
-              { id: 'a', text: 'DDoS-Angriff (Distributed Denial of Service)', isCorrect: true, explanation: 'Richtig! Durch massenhafte Anfragen werden die Serverressourcen erschöpft, sodass reguläre Nutzer ausgesperrt werden.' },
-              { id: 'b', text: 'Wireframing', isCorrect: false, explanation: 'Das ist Konzeption.' },
-              { id: 'c', text: 'Single Source Publishing', isCorrect: false, explanation: 'Das ist medienneutrale Datenhaltung.' },
-              { id: 'd', text: 'Scrum Sprint Review', isCorrect: false, explanation: 'Agiles Meeting.' }
+              { id: 'a', text: 'DDoS-Angriff', isCorrect: true, explanation: 'Richtig! Bei einem Distributed-Denial-of-Service-Angriff überlasten massenhafte Anfragen die Serverressourcen.' },
+              { id: 'b', text: 'SQL-Injection', isCorrect: false, explanation: 'Bei einer SQL-Injection wird schadhafter Datenbankcode über Eingabefelder eingeschleust.' },
+              { id: 'c', text: 'Man-in-the-Middle', isCorrect: false, explanation: 'Dabei schaltet sich ein Angreifer heimlich zwischen zwei Kommunikationspartner.' },
+              { id: 'd', text: 'Cross-Site-Scripting', isCorrect: false, explanation: 'Bei XSS wird schadhafter Skriptcode in vertrauenswürdige Webseiten eingeschleust.' }
             ]
           },
           {
@@ -1853,10 +1853,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'sec-3',
             question: 'Warum ist die Verschlüsselung über HTTPS (TLS/SSL) für Webformulare rechtlich und technisch zwingend erforderlich?',
             options: [
-              { id: 'a', text: 'Sie schützt Daten vor dem Abfangen durch Dritte (Man-in-the-Middle) auf dem Übertragungsweg und gewährleistet Authentizität', isCorrect: true, explanation: 'Exakt! HTTPS sichert den Transportweg zwischen Nutzer und Server ab.' },
-              { id: 'b', text: 'Damit der Webserver keine Festplatte benötigt', isCorrect: false, explanation: 'Technisch unsinnig.' },
-              { id: 'c', text: 'Damit Bilder automatisch in CMYK konvertiert werden', isCorrect: false, explanation: 'HTTPS hat nichts mit Farbräumen zu tun.' },
-              { id: 'd', text: 'Um Google-Werbung kostenfrei freizuschalten', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Sie schützt Daten beim Transport vor dem Mitlesen durch Dritte und prüft die Echtheit', isCorrect: true, explanation: 'Exakt! HTTPS verhindert Man-in-the-Middle-Angriffe auf dem Übertragungsweg und sichert Authentizität.' },
+              { id: 'b', text: 'Sie verschlüsselt dauerhaft alle gespeicherten Datensätze innerhalb der Unternehmensdatenbank', isCorrect: false, explanation: 'HTTPS schützt den Transportweg, nicht automatisch die dauerhafte Speicherung auf der Festplatte.' },
+              { id: 'c', text: 'Sie verhindert zuverlässig, dass Nutzer schwache Passwörter im Formular eingeben können', isCorrect: false, explanation: 'Passwortregeln werden durch Validierung erzwungen, nicht durch Transportverschlüsselung.' },
+              { id: 'd', text: 'Sie macht eine Datenschutzerklärung sowie Cookie-Einwilligungen auf der Website entbehrlich', isCorrect: false, explanation: 'HTTPS ist eine technische Sicherheitsmaßnahme und ersetzt keine rechtlichen Informationspflichten.' }
             ]
           }
         ]
@@ -1910,10 +1910,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'sec-4',
             question: 'Welche Angaben müssen nach deutschem Telemediengesetz (TDDDG/DDG) zwingend im Impressum einer geschäftsmäßigen Website stehen?',
             options: [
-              { id: 'a', text: 'Name, ladungsfähige Anschrift, schnelle Kontaktdaten (E-Mail/Telefon) und Vertretungsberechtigte', isCorrect: true, explanation: 'Richtig! Das Impressum dient der rechtlichen Transparenz und Anbieterkennzeichnung.' },
-              { id: 'b', text: 'Geburtsdatum und Lieblingsfarben des Webdesigners', isCorrect: false, explanation: 'Rechtlich vollkommen irrelevant.' },
-              { id: 'c', text: 'Das vollständige Quellcode-Repository', isCorrect: false, explanation: 'Quellcode gehört nicht ins Impressum.' },
-              { id: 'd', text: 'Die Passwörter der Kundenkonten', isCorrect: false, explanation: 'Verletzt gravierend den Datenschutz.' }
+              { id: 'a', text: 'Name, ladungsfähige Anschrift, schnelle Kontaktdaten und Vertretungsberechtigte', isCorrect: true, explanation: 'Richtig! Angaben wie E-Mail/Telefon, Anschrift und Vertretung sichern rechtliche Transparenz.' },
+              { id: 'b', text: 'Vollständige Liste aller aktuellen Kundenprojekte, Jahresumsätze und Mitarbeiterzahlen', isCorrect: false, explanation: 'Geschäftsgeheimnisse und Referenzen gehören nicht zu den Impressumspflichten.' },
+              { id: 'c', text: 'Technischer Quellcode-Nachweis, verwendetes CMS sowie Name des Hosting-Rechenzentrums', isCorrect: false, explanation: 'Technische Systemdetails sind nicht Teil der Impressumspflicht.' },
+              { id: 'd', text: 'Private Wohnanschriften und persönliche Durchwahlen aller beteiligten Angestellten', isCorrect: false, explanation: 'Gefordert ist die geschäftliche ladungsfähige Anschrift des Anbieters, keine Privatdaten von Angestellten.' }
             ]
           },
           {
@@ -1922,10 +1922,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'sec-4',
             question: 'Was bedeutet die Creative-Commons-Lizenzangabe "CC BY-NC"?',
             options: [
-              { id: 'a', text: 'Das Werk darf unter Namensnennung (BY) genutzt werden, jedoch NICHT für kommerzielle Zwecke (NC)', isCorrect: true, explanation: 'Exakt! BY = Attribution (Namensnennung), NC = Non-Commercial (nicht kommerziell).' },
-              { id: 'b', text: 'Das Werk darf beliebig verkauft werden, ohne den Autor zu nennen', isCorrect: false, explanation: 'Das widerspricht sowohl BY als auch NC.' },
-              { id: 'c', text: 'Das Werk ist vollkommen lizenzfrei im Public Domain', isCorrect: false, explanation: 'Public Domain entspricht CC0.' },
-              { id: 'd', text: 'Das Werk darf nur auf Papier ausgedruckt werden', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Das Werk darf unter Namensnennung genutzt werden, aber nicht für kommerzielle Zwecke', isCorrect: true, explanation: 'Exakt! BY = Attribution (Namensnennung), NC = Non-Commercial (nicht kommerziell).' },
+              { id: 'b', text: 'Das Werk darf kommerziell verwertet werden, solange der Urheber nicht verändert wird', isCorrect: false, explanation: 'NC schließt kommerzielle Nutzung ausdrücklich aus.' },
+              { id: 'c', text: 'Das Werk ist gemeinfrei nutzbar und erfordert weder Namensnennung noch Einschränkungen', isCorrect: false, explanation: 'Gemeinfreiheit bzw. Public Domain entspricht CC0, nicht CC BY-NC.' },
+              { id: 'd', text: 'Das Werk darf ausschließlich unverändert für redaktionelle Printmedien verwendet werden', isCorrect: false, explanation: 'Bearbeitungsverbot wäre ND (NoDerivatives), nicht NC.' }
             ],
             merksatz: 'Creative Commons: BY = Namensnennung, NC = Nicht Kommerziell, ND = Keine Bearbeitung, SA = Weitergabe unter gleichen Bedingungen.'
           }
@@ -1987,10 +1987,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'a11y-1',
             question: 'Welche Gruppe profitiert besonders von Untertiteln in Web-Videos?',
             options: [
-              { id: 'a', text: 'Nur Screenreader-Nutzer', isCorrect: false, explanation: 'Screenreader lesen Textinhalte vor.' },
-              { id: 'b', text: 'Gehörlose Personen sowie Nutzer in lauten oder stummgeschalteten Umgebungen', isCorrect: true, explanation: 'Richtig! Barrierefreiheit hilft sowohl dauerhaft eingeschränkten als auch situativ betroffenen Nutzern.' },
-              { id: 'c', text: 'Ausschließlich Suchmaschinen-Crawler', isCorrect: false, explanation: 'Suchmaschinen profitieren zwar auch, aber der Hauptnutzen gilt Menschen.' },
-              { id: 'd', text: 'Nur Personen mit Tastatursteuerung', isCorrect: false, explanation: 'Tastatursteuerung hilft motorisch eingeschränkten Personen.' }
+              { id: 'a', text: 'Ausschließlich blinde Nutzer, die Inhalte per Screenreader erfassen', isCorrect: false, explanation: 'Screenreader lesen Textinhalte vor; für blinde Nutzer ist bei Videos vor allem eine Audiodeskription wichtig.' },
+              { id: 'b', text: 'Gehörlose Menschen sowie Nutzer in lauten oder stummen Umgebungen', isCorrect: true, explanation: 'Richtig! Barrierefreiheit hilft sowohl dauerhaft eingeschränkten als auch situativ betroffenen Nutzern.' },
+              { id: 'c', text: 'Ausschließlich Suchmaschinen-Crawler zur automatischen Indexierung', isCorrect: false, explanation: 'Suchmaschinen profitieren zwar ebenfalls, der Hauptnutzen gilt aber Menschen.' },
+              { id: 'd', text: 'Ausschließlich Personen mit motorischen Einschränkungen an der Maus', isCorrect: false, explanation: 'Motorisch eingeschränkten Nutzern hilft primär vollständige Tastaturbedienbarkeit.' }
             ]
           },
           {
@@ -1999,10 +1999,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'a11y-1',
             question: 'Warum profitieren Menschen mit ADHS oder kognitiven Einschränkungen besonders von ruhigen, reizarmen Benutzeroberflächen?',
             options: [
-              { id: 'a', text: 'Weil Reizüberflutung, blinkende Banner und unstrukturierte Textwüsten die Fokussierung erschweren', isCorrect: true, explanation: 'Richtig! Kognitive Barrierefreiheit erfordert klare visuelle Hierarchie und Verzicht auf visuelles Rauschen.' },
-              { id: 'b', text: 'Weil sie nur Bildschirme mit 4K-Auflösung besitzen', isCorrect: false, explanation: 'Absurd.' },
-              { id: 'c', text: 'Weil Screenreader keine Farben unterstützen', isCorrect: false, explanation: 'Screenreader lesen Code vor, unabhängig von ADHS.' },
-              { id: 'd', text: 'Weil Tastaturen sonst kaputtgehen', isCorrect: false, explanation: 'Nein.' }
+              { id: 'a', text: 'Weil Reizüberflutung, Animationen und unklare Textblöcke die Fokussierung erschweren', isCorrect: true, explanation: 'Richtig! Kognitive Barrierefreiheit erfordert klare visuelle Hierarchie und wenig visuelles Rauschen.' },
+              { id: 'b', text: 'Weil ruhige Layouts technisch geringere Anforderungen an die Bildschirmauflösung stellen', isCorrect: false, explanation: 'Die Darstellung auf Displays ist nicht der Grund; es geht um kognitive Verarbeitung.' },
+              { id: 'c', text: 'Weil Vorlesesoftware bei stark farbigen und animierten Layouts keine Inhalte erkennt', isCorrect: false, explanation: 'Screenreader werten die HTML-Semantik aus, unabhängig von der visuellen Reizdichte.' },
+              { id: 'd', text: 'Weil die WCAG für kognitive Barrierefreiheit sämtliche Bilder und Icons untersagen', isCorrect: false, explanation: 'Klare Icons und unterstützende Bilder können das Verständnis sogar fördern.' }
             ]
           },
           {
@@ -2011,10 +2011,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'a11y-1',
             question: 'Welche Entwurfs-Entscheidung hilft motorisch eingeschränkten Menschen (z. B. mit Parkinson oder Handzittern)?',
             options: [
-              { id: 'a', text: 'Große Klickflächen (mind. 44x44px) und vollständige Tastaturbedienbarkeit ohne Mauszwang', isCorrect: true, explanation: 'Perfekt! Große Touch-Flächen und Tastaturnavigation erleichtern die Treffsicherheit.' },
-              { id: 'b', text: 'Schaltflächen möglichst winzig gestalten', isCorrect: false, explanation: 'Das führt zu Fehlklicks.' },
-              { id: 'c', text: 'Ausschließlich Mausgesten mit Kreisbewegungen erzwingen', isCorrect: false, explanation: 'Komplett barrierefeindlich.' },
-              { id: 'd', text: 'Den Kontrast auf 1:1 reduzieren', isCorrect: false, explanation: 'Macht Text unsichtbar.' }
+              { id: 'a', text: 'Großzügige Klickflächen ab 44×44 px und vollständige Tastaturbedienbarkeit', isCorrect: true, explanation: 'Perfekt! Große Touch-Flächen (mind. 44×44 px) und Tastaturnavigation ohne Mauszwang erhöhen die Treffsicherheit.' },
+              { id: 'b', text: 'Kompakte Schaltflächen unter 16×16 px zur Vermeidung von langem Scrollen', isCorrect: false, explanation: 'Zu kleine Klickflächen führen bei Zittern oder ungenauer Steuerung sofort zu Fehlklicks.' },
+              { id: 'c', text: 'Auslösen wichtiger Funktionen über komplexe Mehrfinger- und Drag-Gesten', isCorrect: false, explanation: 'Komplexe Gesten sind für motorisch eingeschränkte Nutzer oft nicht bedienbar.' },
+              { id: 'd', text: 'Zeitlich streng begrenzte Formularsitzungen mit automatischem Logout', isCorrect: false, explanation: 'Knappe Zeitlimits benachteiligen Nutzer, die mehr Zeit für Eingaben benötigen.' }
             ]
           }
         ],
@@ -2133,10 +2133,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'a11y-2',
             question: 'Wofür steht das Akronym "POUR" in den WCAG?',
             options: [
-              { id: 'a', text: 'Performance, Optimization, Usability, Rendering', isCorrect: false, explanation: 'Das sind technische Performance-Begriffe.' },
-              { id: 'b', text: 'Perceivable, Operable, Understandable, Robust (Wahrnehmbar, Bedienbar, Verständlich, Robust)', isCorrect: true, explanation: 'Perfekt! Das sind die 4 Grundprinzipien der WCAG.' },
-              { id: 'c', text: 'Pixel, Outline, Typography, Resolution', isCorrect: false, explanation: 'Erfundene Begriffe.' },
-              { id: 'd', text: 'Phishing, Operable, User, Responsive', isCorrect: false, explanation: 'Falsche Mischung.' }
+              { id: 'a', text: 'Performance, Optimization, Usability, Rendering', isCorrect: false, explanation: 'Das sind technische Performance-Begriffe, nicht die WCAG-Prinzipien.' },
+              { id: 'b', text: 'Perceivable, Operable, Understandable, Robust', isCorrect: true, explanation: 'Perfekt! Wahrnehmbar, Bedienbar, Verständlich und Robust sind die 4 Grundprinzipien der WCAG.' },
+              { id: 'c', text: 'Presentation, Orientation, Uniformity, Readability', isCorrect: false, explanation: 'Das sind keine offiziellen WCAG-Prinzipien.' },
+              { id: 'd', text: 'Privacy, Observability, Utility, Responsiveness', isCorrect: false, explanation: 'Diese Begriffe stammen nicht aus dem WCAG-POUR-Modell.' }
             ]
           },
           {
@@ -2202,10 +2202,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'a11y-3',
             question: 'Warum ist es barrierefeindlich, eine Fehlermeldung ausschließlich durch ein rotes Feld anzuzeigen?',
             options: [
-              { id: 'a', text: 'Weil Rot im Webdesign verboten ist', isCorrect: false, explanation: 'Rot ist eine gängige Signalfarbe.' },
-              { id: 'b', text: 'Weil farbenblinde oder sehbehinderte Menschen den Fehler nicht wahrnehmen können', isCorrect: true, explanation: 'Richtig! Information darf nie über Farbe allein vermittelt werden. Immer Text + Icon ergänzen!' },
-              { id: 'c', text: 'Weil der Server dadurch langsamer lädt', isCorrect: false, explanation: 'Hat keinen Einfluss auf Serverleistung.' },
-              { id: 'd', text: 'Weil Google Seiten mit Rot abstraft', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Weil rote Signalfarben laut WCAG-Richtlinie in Formularen untersagt sind', isCorrect: false, explanation: 'Rot ist als Signalfarbe durchaus zulässig, darf aber nicht das einzige Merkmal sein.' },
+              { id: 'b', text: 'Weil farbenblinde oder sehbehinderte Menschen den Fehler sonst übersehen', isCorrect: true, explanation: 'Richtig! Information darf nie über Farbe allein vermittelt werden – immer Text und/oder Icon ergänzen.' },
+              { id: 'c', text: 'Weil rote Rahmen von mobilen Browsern nicht kontrastreich gerendert werden', isCorrect: false, explanation: 'Browser rendern Rot problemlos; das Problem liegt in der menschlichen Farbwahrnehmung.' },
+              { id: 'd', text: 'Weil Screenreader standardmäßig nur grüne und blaue Hinweisfelder vorlesen', isCorrect: false, explanation: 'Screenreader werten Semantik und Text aus, keine Farben.' }
             ]
           },
           {
@@ -2214,10 +2214,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'a11y-3',
             question: 'Wie zeichnet man ein rein dekoratives Schmuckbild (z. B. eine grafische Trennlinie) im HTML barrierefrei aus?',
             options: [
-              { id: 'a', text: 'Mit einem leeren Alt-Attribut alt="", damit Screenreader es stumm übergehen', isCorrect: true, explanation: 'Richtig! So liest der Screenreader keinen störenden Dateinamen vor.' },
-              { id: 'b', text: 'Das alt-Attribut ganz weglassen', isCorrect: false, explanation: 'Ohne alt-Attribut liest der Screenreader oft den kryptischen Dateinamen vor.' },
-              { id: 'c', text: 'Mit alt="Hier ist ein Deko-Bild"', isCorrect: false, explanation: 'Das spammt blinde Nutzer mit unnützer Information zu.' },
-              { id: 'd', text: 'Deko-Bilder sind gesetzlich verboten', isCorrect: false, explanation: 'Dekoration ist erlaubt, muss aber als solche markiert sein.' }
+              { id: 'a', text: 'Mit einem leeren Attribut alt="", damit Screenreader es übergehen', isCorrect: true, explanation: 'Richtig! Mit alt="" erkennen Screenreader das Bild als dekorativ und lesen keinen Dateinamen vor.' },
+              { id: 'b', text: 'Durch vollständiges Weglassen des alt-Attributs im img-Element', isCorrect: false, explanation: 'Fehlt das alt-Attribut komplett, lesen viele Screenreader stattdessen den kryptischen Dateinamen vor.' },
+              { id: 'c', text: 'Mit dem beschreibenden Hinweis alt="Dekorative Trennlinie"', isCorrect: false, explanation: 'Rein dekorative Elemente sollten Screenreader-Nutzer nicht mit unnötigen Ansagen belasten.' },
+              { id: 'd', text: 'Durch Einbinden als nicht barrierefreies Element mit title="Deko"', isCorrect: false, explanation: 'Das title-Attribut ersetzt kein leeres alt-Attribut für dekorative Grafiken.' }
             ]
           },
           {
@@ -2226,10 +2226,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'a11y-3',
             question: 'Warum darf die Überschriftenstruktur (h1, h2, h3) in HTML nicht aus optischen Gründen durchbrochen werden (z. B. von h1 direkt zu h4)?',
             options: [
-              { id: 'a', text: 'Weil blinde Screenreader-Nutzer anhand der Überschriften-Ebenen durch das Dokument springen und die Hierarchie verstehen', isCorrect: true, explanation: 'Exakt! Eine saubere Überschriften-Hierarchie ist das Inhaltsverzeichnis für Screenreader.' },
-              { id: 'b', text: 'Weil sonst der CSS-Code abstürzt', isCorrect: false, explanation: 'CSS stürzt nicht ab.' },
-              { id: 'c', text: 'Weil die Schrift dann unscharf gerendert wird', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Weil nur h1 gesetzlich geschützt ist', isCorrect: false, explanation: 'Unsinn.' }
+              { id: 'a', text: 'Weil Screenreader anhand der Ebenen navigieren und die Dokumentstruktur erfassen', isCorrect: true, explanation: 'Exakt! Eine saubere Überschriften-Hierarchie dient Screenreader-Nutzern als Inhaltsverzeichnis.' },
+              { id: 'b', text: 'Weil Browser bei übersprungenen Ebenen die CSS-Regeln der Seite ignorieren', isCorrect: false, explanation: 'CSS funktioniert technisch weiter, aber die semantische Struktur geht verloren.' },
+              { id: 'c', text: 'Weil Suchmaschinen ab einer h3-Überschrift sämtliche Folgetexte nicht indexieren', isCorrect: false, explanation: 'Suchmaschinen indexieren auch tiefere Ebenen, bevorzugen aber logische Hierarchien.' },
+              { id: 'd', text: 'Weil HTML5 pro Webseite technisch nur eine Überschrift jeder Ebene erlaubt', isCorrect: false, explanation: 'Mehrere h2- oder h3-Überschriften sind völlig normal, solange die Hierarchie logisch bleibt.' }
             ]
           }
         ]
@@ -2315,10 +2315,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'proj-1',
             question: 'Was ist ein wesentlicher Bestandteil der Phase 6: Projektabschluss?',
             options: [
-              { id: 'a', text: 'Formelle Projektabnahme durch den Auftraggeber, Projektdokumentation und Lessons-Learned-Abschluss', isCorrect: true, explanation: 'Richtig! Die formelle Abnahme, Entlastung des Teams und Dokumentation schließen das Projekt rechtlich und organisatorisch ab.' },
-              { id: 'b', text: 'Erstmaliges Erstellen von Design-Wireframes', isCorrect: false, explanation: 'Das gehört in die Konzeptionsphase.' },
-              { id: 'c', text: 'Definition der allerersten Zielgruppenanforderungen', isCorrect: false, explanation: 'Das gehört in Initiierung und Konzeption.' },
-              { id: 'd', text: 'Neuaufsetzen der gesamten Software-Architektur', isCorrect: false, explanation: 'Das wäre eine Neuplanung.' }
+              { id: 'a', text: 'Formelle Projektabnahme, Abschlussdokumentation und Lessons Learned', isCorrect: true, explanation: 'Richtig! Abnahme durch den Auftraggeber, Entlastung, Dokumentation und Lessons Learned schließen das Projekt ab.' },
+              { id: 'b', text: 'Erstellung erster Navigationsstrukturen und klickbarer Wireframes', isCorrect: false, explanation: 'Das gehört in die Konzeptions- bzw. Entwurfsphase.' },
+              { id: 'c', text: 'Erhebung von Zielgruppenanforderungen und Machbarkeitsanalyse', isCorrect: false, explanation: 'Das gehört in die Projektinitiierung und Definitionsphase.' },
+              { id: 'd', text: 'Auswahl von Frameworks und Aufbau der produktiven Systemarchitektur', isCorrect: false, explanation: 'Das ist Bestandteil der Planungs- und Realisierungsphase.' }
             ]
           }
         ]
@@ -2373,10 +2373,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'proj-2',
             question: 'Welche formale Eigenschaft besitzt ein Meilenstein in einem Projektzeitplan (Gantt-Diagramm)?',
             options: [
-              { id: 'a', text: 'Er hat eine Zeitdauer von 0 Tagen und markiert ein überprüfbares Zwischenereignis', isCorrect: true, explanation: 'Richtig! Meilensteine haben keine Dauer, sie markieren den Zeitpunkt des Erreichens eines Zwischenziels (z. B. Freigabe Layouts).' },
-              { id: 'b', text: 'Er muss immer mindestens 4 Wochen dauern', isCorrect: false, explanation: 'Falsch, ein Meilenstein ist ein Stichtag/Ereignis.' },
-              { id: 'c', text: 'Er beschreibt ausschließlich das Budget', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Er darf nur vom Programmierer definiert werden', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Er hat eine Dauer von 0 Tagen und markiert ein prüfbares Ereignis', isCorrect: true, explanation: 'Richtig! Meilensteine haben keine zeitliche Dauer, sondern markieren Stichtage wie die Layout-Freigabe.' },
+              { id: 'b', text: 'Er umfasst stets ein festes Arbeitspaket von mindestens zwei Wochen', isCorrect: false, explanation: 'Falsch: Arbeitspakete haben eine Dauer, ein Meilenstein ist ein punktueller Stichtag.' },
+              { id: 'c', text: 'Er bildet ausschließlich die kaufmännische Budgetfreigabe im Projekt ab', isCorrect: false, explanation: 'Meilensteine beziehen sich auf inhaltliche, terminliche und qualitative Zwischenziele.' },
+              { id: 'd', text: 'Er markiert immer das zeitliche Ende einer gesamten Projektphase', isCorrect: false, explanation: 'Meilensteine können auch innerhalb einer Phase wichtige Zwischenergebnisse markieren.' }
             ]
           },
           {
@@ -2385,10 +2385,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'proj-2',
             question: 'Der Kunde wünscht mitten in der Realisierungsphase zusätzliche Funktionen, die nicht im Pflichtenheft stehen. Was ist das korrekte Vorgehen?',
             options: [
-              { id: 'a', text: 'Ein geregelter "Change Request" (Änderungsantrag) mit Prüfung von Mehrkosten und Terminverzögerungen', isCorrect: true, explanation: 'Genau richtig! Änderungen werden über ein formelles Änderungsmanagement dokumentiert, kalkuliert und vom Kunden freigegeben.' },
-              { id: 'b', text: 'Die Wünsche ohne Dokumentation und kostenlos am Wochenende einbauen', isCorrect: false, explanation: 'Führt zu Scope Creep, Qualitätsmängeln und Budgetüberziehungen.' },
-              { id: 'c', text: 'Sofortige Kündigung des Projekts', isCorrect: false, explanation: 'Unprofessionell.' },
-              { id: 'd', text: 'Den Kunden ignorieren und heimlich weitermachen', isCorrect: false, explanation: 'Absolut falsch.' }
+              { id: 'a', text: 'Ein strukturierter Change Request mit Prüfung von Kosten und Terminen', isCorrect: true, explanation: 'Genau richtig! Über einen Änderungsantrag (Change Request) werden Mehrkosten und Terminfolgen dokumentiert und freigegeben.' },
+              { id: 'b', text: 'Die kulante Umsetzung ohne Dokumentation im Rahmen des alten Budgets', isCorrect: false, explanation: 'Ungeprüfte Zusatzwünsche führen zu Scope Creep, Qualitätsmängeln und Budgetüberziehungen.' },
+              { id: 'c', text: 'Die sofortige Aussetzung des laufenden Vertrags bis zum Projektabschluss', isCorrect: false, explanation: 'Änderungswünsche werden über Change Management geregelt, nicht durch pauschalen Abbruch.' },
+              { id: 'd', text: 'Die stillschweigende Zurückstellung aller Wünsche ohne Rückmeldung', isCorrect: false, explanation: 'Professionelle Projektkommunikation erfordert Transparenz und verbindliche Abstimmung.' }
             ]
           }
         ]
@@ -2430,10 +2430,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'proj-3',
             question: 'Was ist in Scrum eine "Retrospektive"?',
             options: [
-              { id: 'a', text: 'Eine Präsentation der Software für die Kunden', isCorrect: false, explanation: 'Das ist das Sprint Review.' },
-              { id: 'b', text: 'Eine interne Teambesprechung am Sprintende zur Verbesserung der Zusammenarbeit und Prozesse', isCorrect: true, explanation: 'Richtig! In der Retrospektive reflektiert das Team die Arbeitsweise.' },
-              { id: 'c', text: 'Die Liste aller offenen Anforderungen', isCorrect: false, explanation: 'Das ist das Product Backlog.' },
-              { id: 'd', text: 'Das finale Projektabschluss-Essen', isCorrect: false, explanation: 'Nett, aber nicht der methodische Fachbegriff.' }
+              { id: 'a', text: 'Eine Präsentation des Produktinkrements vor Kunden und Stakeholdern', isCorrect: false, explanation: 'Das ist das Sprint Review, nicht die Retrospektive.' },
+              { id: 'b', text: 'Ein Team-Meeting am Sprintende zur Verbesserung von Prozess und Zusammenarbeit', isCorrect: true, explanation: 'Richtig! In der Retrospektive reflektiert das Team die eigene Arbeitsweise.' },
+              { id: 'c', text: 'Die priorisierte Sammlung aller offenen Produktanforderungen im Projekt', isCorrect: false, explanation: 'Das beschreibt das Product Backlog.' },
+              { id: 'd', text: 'Eine kurze tägliche Abstimmung des Teams zu aktuellen Aufgaben und Hürden', isCorrect: false, explanation: 'Das ist das Daily Scrum (Stand-up).' }
             ]
           },
           {
@@ -2442,10 +2442,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'proj-3',
             question: 'Welche zentrale Aufgabe hat der Product Owner im Scrum-Framework?',
             options: [
-              { id: 'a', text: 'Er pflegt und priorisiert das Product Backlog nach geschäftlichem Wert und vertritt die Anwenderwünsche', isCorrect: true, explanation: 'Exakt! Der Product Owner verantwortet den wirtschaftlichen Wert und das Product Backlog.' },
-              { id: 'b', text: 'Er schreibt den gesamten Programmcode allein', isCorrect: false, explanation: 'Das macht das Entwickler-Team.' },
-              { id: 'c', text: 'Er fungiert als klassischer Chef, der Aufgaben autoritär zuteilt', isCorrect: false, explanation: 'Scrum-Teams arbeiten selbstorganisiert.' },
-              { id: 'd', text: 'Er moderiert ausschließlich das Daily Standup', isCorrect: false, explanation: 'Das Entwickler-Team organisiert das Daily selbst, unterstützt vom Scrum Master.' }
+              { id: 'a', text: 'Er priorisiert das Product Backlog nach Geschäftswert und vertritt die Anforderungen', isCorrect: true, explanation: 'Exakt! Der Product Owner verantwortet den wirtschaftlichen Wert und pflegt das Product Backlog.' },
+              { id: 'b', text: 'Er übernimmt die technische Architektur und programmiert kritische Kernmodule selbst', isCorrect: false, explanation: 'Die technische Umsetzung liegt beim Entwicklerteam.' },
+              { id: 'c', text: 'Er verteilt im Sprint Planning jedem Teammitglied verbindlich einzelne Tagesaufgaben', isCorrect: false, explanation: 'Scrum-Teams organisieren ihre Aufgabenverteilung selbstständig.' },
+              { id: 'd', text: 'Er moderiert das Daily Scrum und beseitigt organisatorische Störungen im Team', isCorrect: false, explanation: 'Die methodische Unterstützung und Beseitigung von Impediments übernimmt der Scrum Master.' }
             ]
           },
           {
@@ -2454,10 +2454,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'proj-3',
             question: 'Was ist der Hauptzweck des "Sprint Reviews"?',
             options: [
-              { id: 'a', text: 'Vorstellung des fertigen Produkt-Inkrements vor Stakeholdern, um wertvolles Feedback zu sammeln', isCorrect: true, explanation: 'Richtig! Im Review wird das potentiell auslieferbare Produktinkrement demonstriert.' },
-              { id: 'b', text: 'Kritik an einzelnen Teammitgliedern üben', isCorrect: false, explanation: 'Falsch und unkonstruktiv.' },
-              { id: 'c', text: 'Die Projektkosten der letzten 5 Jahre kalkulieren', isCorrect: false, explanation: 'Gehört nicht zum Sprint Review.' },
-              { id: 'd', text: 'Das Product Backlog komplett löschen', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Vorstellung des Produktinkrements vor Stakeholdern zum Einholen von Feedback', isCorrect: true, explanation: 'Richtig! Im Sprint Review wird das potenziell auslieferbare Inkrement präsentiert und gemeinsam bewertet.' },
+              { id: 'b', text: 'Interne Bewertung der Zusammenarbeit und Anpassung der Teamprozesse im Sprint', isCorrect: false, explanation: 'Das ist der Zweck der Sprint Retrospektive, nicht des Sprint Reviews.' },
+              { id: 'c', text: 'Detaillierte Schätzung neuer User Stories und Festlegung des nächsten Sprintziels', isCorrect: false, explanation: 'Das findet im Sprint Planning statt.' },
+              { id: 'd', text: 'Kaufmännische Endabrechnung und Archivierung aller abgeschlossenen Projektverträge', isCorrect: false, explanation: 'Das gehört zum formalen Projektabschluss, nicht zu einem einzelnen Sprint Review.' }
             ]
           },
           {
@@ -2466,10 +2466,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'proj-3',
             question: 'Welche Rolle hat der "Scrum Master" im agilen Projekt?',
             options: [
-              { id: 'a', text: 'Er ist Servant Leader, beseitigt Hindernisse (Impediments) und sorgt für die Einhaltung der Scrum-Regeln', isCorrect: true, explanation: 'Exakt! Der Scrum Master coacht das Team, schützt es vor Störungen von außen und räumt Hürden aus dem Weg.' },
-              { id: 'b', text: 'Er bestimmt das finale Design der Webapplikation', isCorrect: false, explanation: 'Das entscheiden Designer/Product Owner.' },
-              { id: 'c', text: 'Er ist der Kunde und bezahlt die Rechnungen', isCorrect: false, explanation: 'Das ist der Auftraggeber/Stakeholder.' },
-              { id: 'd', text: 'Er schreibt das Lastenheft des Kunden', isCorrect: false, explanation: 'Nein.' }
+              { id: 'a', text: 'Er coacht das Team, beseitigt Hindernisse und achtet auf die Scrum-Regeln', isCorrect: true, explanation: 'Exakt! Als Servant Leader räumt der Scrum Master Impediments aus dem Weg und schützt den agilen Prozess.' },
+              { id: 'b', text: 'Er definiert das visuelle Designsystem und gibt fertige Layouts für den Kunden frei', isCorrect: false, explanation: 'Fachliche Designentscheidungen liegen beim Team bzw. in Abstimmung mit dem Product Owner.' },
+              { id: 'c', text: 'Er priorisiert das Product Backlog nach wirtschaftlichem Nutzen und Budgetvorgaben', isCorrect: false, explanation: 'Das ist die Kernaufgabe des Product Owners.' },
+              { id: 'd', text: 'Er vertritt den Auftraggeber rechtlich und erteilt dem Team disziplinarische Weisungen', isCorrect: false, explanation: 'Der Scrum Master hat keine klassische disziplinarische Vorgesetztenrolle.' }
             ]
           }
         ]
@@ -2523,10 +2523,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'proj-4',
             question: 'Was versteht man unter einer "Ich-Botschaft" in der professionellen Projektkommunikation?',
             options: [
-              { id: 'a', text: 'Das Äußern der eigenen Wahrnehmung und Wirkung ("Ich stelle fest..."), ohne den Gesprächspartner direkt anzugreifen', isCorrect: true, explanation: 'Exakt! Ich-Botschaften reduzieren Abwehrhaltungen und fördern ein sachliches Gespräch.' },
-              { id: 'b', text: 'Eine egoistische Forderung nach Gehaltserhöhung', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'c', text: 'Das Versenden von E-Mails im Nur-Lese-Modus', isCorrect: false, explanation: 'Hat nichts mit Kommunikationstechnik zu tun.' },
-              { id: 'd', text: 'Eine automatische Abwesenheitsnotiz', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Das sachliche Schildern der eigenen Wahrnehmung ohne Vorwurf an das Gegenüber', isCorrect: true, explanation: 'Exakt! Formulierungen wie „Ich stelle fest …“ reduzieren Abwehrhaltungen und fördern konstruktive Gespräche.' },
+              { id: 'b', text: 'Das direkte Konfrontieren der Gegenseite mit persönlichen Verhaltenszuschreibungen', isCorrect: false, explanation: 'Das beschreibt eine vorwurfsvolle Du-Botschaft, keine Ich-Botschaft.' },
+              { id: 'c', text: 'Das einseitige Versenden schriftlicher Anweisungen ohne Rückfragemöglichkeit', isCorrect: false, explanation: 'Ich-Botschaften sind eine Dialogtechnik für konstruktives Feedback.' },
+              { id: 'd', text: 'Das bewusste Zurückhalten eigener Kritikpunkte zugunsten der Gruppenharmonie', isCorrect: false, explanation: 'Ich-Botschaften sprechen Probleme offen, aber wertschätzend an.' }
             ]
           },
           {
@@ -2535,10 +2535,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'proj-4',
             question: 'Was ist das Ziel des "Harvard-Konzepts" im Verhandlungs- und Konfliktmanagement?',
             options: [
-              { id: 'a', text: 'Eine sachbezogene Verhandlung zur Erzielung von Win-Win-Lösungen auf Basis gegenseitiger Interessen statt starrer Positionen', isCorrect: true, explanation: 'Richtig! Trennung von Mensch und Problem sowie Fokus auf gemeinsame Interessen stehen im Mittelpunkt.' },
-              { id: 'b', text: 'Den Verhandlungspartner durch Lautstärke zum Schweigen zu bringen', isCorrect: false, explanation: 'Unprofessionell und destruktiv.' },
-              { id: 'c', text: 'Möglichst hohe Vertragsstrafen durchzusetzen', isCorrect: false, explanation: 'Nicht Ziel des Harvard-Prinzips.' },
-              { id: 'd', text: 'Das Abbrechen aller Kundenprojekte', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Sachbezogenes Verhandeln für Win-Win-Lösungen auf Basis gemeinsamer Interessen', isCorrect: true, explanation: 'Richtig! Trennung von Mensch und Problem sowie Fokus auf Interessen statt starrer Positionen prägen das Harvard-Konzept.' },
+              { id: 'b', text: 'Konsequentes Durchsetzen der eigenen Maximalposition durch gezielten Zeitdruck', isCorrect: false, explanation: 'Das entspricht hartem Positionsfeilschen, nicht dem Harvard-Konzept.' },
+              { id: 'c', text: 'Schnelles Nachgeben bei strittigen Punkten, um Konflikte vollständig zu umgehen', isCorrect: false, explanation: 'Weiches Nachgeben führt selten zu fairen, tragfähigen Lösungen.' },
+              { id: 'd', text: 'Verlagerung strittiger Vertragsfragen direkt in ein gerichtliches Schiedsverfahren', isCorrect: false, explanation: 'Das Harvard-Konzept zielt auf einvernehmliche Lösungen ohne Eskalation.' }
             ],
             examTip: 'Harvard-Konzept: Trenne Personen von Problemen, fokussiere auf Interessen statt starrer Positionen für echte Win-Win-Ergebnisse.'
           }
@@ -2625,10 +2625,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'db-1',
             question: 'Was beschreibt eine einzelne Zeile (Row) in einer relationalen Datenbanktabelle?',
             options: [
-              { id: 'a', text: 'Einen Datensatz, der ein konkretes einzelnes Objekt repräsentiert (z. B. ein einzelnes Projekt)', isCorrect: true, explanation: 'Richtig! Eine Zeile ist ein Datensatz für genau ein Objekt; Spalten sind die Eigenschaften (Felder).' },
-              { id: 'b', text: 'Eine Spalte mit allen E-Mail-Adressen der Kunden', isCorrect: false, explanation: 'Das wäre eine Spalte (Feld), keine Zeile.' },
-              { id: 'c', text: 'Den Namen der gesamten Datenbankdatei', isCorrect: false, explanation: 'Das ist der Datenbank-Name.' },
-              { id: 'd', text: 'Eine SQL-Verbindung zum Server', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Einen einzelnen Datensatz, der ein konkretes Objekt repräsentiert', isCorrect: true, explanation: 'Richtig! Eine Zeile ist ein Datensatz für genau ein Objekt (z. B. ein Projekt); Spalten sind die Felder.' },
+              { id: 'b', text: 'Ein einzelnes Attribut, das eine bestimmte Eigenschaft aller Einträge sammelt', isCorrect: false, explanation: 'Das beschreibt eine Spalte (Feld), keine Zeile.' },
+              { id: 'c', text: 'Die übergeordnete Bezeichnung des gesamten Datenbank-Schemas', isCorrect: false, explanation: 'Das ist der Datenbank- bzw. Schemaname, keine Tabellenzeile.' },
+              { id: 'd', text: 'Eine definierte Verknüpfungsregel zwischen zwei separaten Tabellen', isCorrect: false, explanation: 'Beziehungen werden über Schlüssel und Relationen definiert, nicht durch eine einzelne Zeile.' }
             ]
           },
           {
@@ -2637,10 +2637,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'db-1',
             question: 'Welche Kernfunktion hat ein Primärschlüssel (Primary Key)?',
             options: [
-              { id: 'a', text: 'Er verschlüsselt Passwörter mit TLS', isCorrect: false, explanation: 'Primärschlüssel dienen der Identifikation, nicht der kryptografischen Verschlüsselung.' },
-              { id: 'b', text: 'Er identifiziert jeden Datensatz innerhalb einer Tabelle vollkommen eindeutig', isCorrect: true, explanation: 'Exakt! Der Primärschlüssel (z. B. Kunden_ID = 502) garantiert Verwechslungsfreiheit.' },
-              { id: 'c', text: 'Er sortiert die Datensätze immer alphabetisch nach dem Nachnamen', isCorrect: false, explanation: 'Das macht die Klausel ORDER BY.' },
-              { id: 'd', text: 'Er löscht doppelte Bilddateien automatisch', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Er verschlüsselt vertrauliche Tabellenwerte automatisch bei der Übertragung', isCorrect: false, explanation: 'Primärschlüssel dienen der Identifikation, nicht der kryptografischen Verschlüsselung.' },
+              { id: 'b', text: 'Er identifiziert jeden Datensatz innerhalb einer Tabelle eindeutig', isCorrect: true, explanation: 'Exakt! Der Primärschlüssel (z. B. Kunden_ID = 502) garantiert Verwechslungsfreiheit.' },
+              { id: 'c', text: 'Er sortiert sämtliche Abfrageergebnisse dauerhaft alphabetisch nach Namen', isCorrect: false, explanation: 'Für Sortierungen in Abfragen ist die Klausel ORDER BY zuständig.' },
+              { id: 'd', text: 'Er bereinigt veraltete Bild- und Mediendateien im Dateisystem automatisch', isCorrect: false, explanation: 'Ein Primärschlüssel verwaltet keine Dateien im Dateisystem.' }
             ]
           },
           {
@@ -2649,10 +2649,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'db-1',
             question: 'Wie wird eine n:m-Beziehung (z. B. ein Web-Projekt nutzt mehrere Bilder und ein Bild kommt in mehreren Projekten vor) technisch realisiert?',
             options: [
-              { id: 'a', text: 'Über eine zusätzliche Verknüpfungstabelle (Zwischentabelle), die beide Fremdschlüssel enthält', isCorrect: true, explanation: 'Richtig! Eine Zwischentabelle (z. B. Projekt_Bilder mit Projekt_ID und Bild_ID) löst n:m-Beziehungen auf.' },
-              { id: 'b', text: 'Man schreibt alle Bild-Namen kommagetrennt in ein einziges Textfeld', isCorrect: false, explanation: 'Das verletzt fundamentale Normalisierungsregeln und erschwert Abfragen.' },
-              { id: 'c', text: 'n:m-Beziehungen sind in relationalen Datenbanken unmöglich', isCorrect: false, explanation: 'Sie sind gängiger Standard via Zwischentabelle.' },
-              { id: 'd', text: 'Man verdoppelt einfach die gesamte Datenbank', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Über eine zusätzliche Zwischentabelle, die beide Fremdschlüssel aufnimmt', isCorrect: true, explanation: 'Richtig! Eine Verknüpfungstabelle (z. B. Projekt_Bilder mit Projekt_ID und Bild_ID) löst n:m-Beziehungen sauber auf.' },
+              { id: 'b', text: 'Über ein einzelnes Textfeld, das alle Bildnamen kommagetrennt speichert', isCorrect: false, explanation: 'Kommagetrennte Listen verletzen die erste Normalform und erschweren Abfragen.' },
+              { id: 'c', text: 'Über das direkte Duplizieren beider Tabellen für jeden neuen Projektordner', isCorrect: false, explanation: 'Tabellen zu kopieren erzeugt massive Redundanz statt einer sauberen Relation.' },
+              { id: 'd', text: 'Über eine direkte Verbindung ohne Fremdschlüssel, da n:m-Relationen in SQL fehlen', isCorrect: false, explanation: 'n:m-Beziehungen sind gängiger Standard und werden über eine Zwischentabelle umgesetzt.' }
             ]
           },
           {
@@ -2661,10 +2661,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'db-1',
             question: 'Warum speichert man in einer Bestelltabelle als Kundenreferenz nur die Kunden_ID (Fremdschlüssel) statt des Namens?',
             options: [
-              { id: 'a', text: 'Damit Daten konsistent bleiben und eine Namensänderung nur an einer zentralen Stelle vorgenommen werden muss', isCorrect: true, explanation: 'Exakt! Single Source of Truth: Ändert sich der Name oder die Adresse, reicht ein Update in der Kunden-Tabelle.' },
-              { id: 'b', text: 'Weil relationale Datenbanken keine Buchstaben speichern können', isCorrect: false, explanation: 'Datenbanken unterstützen Textfelder (VARCHAR).' },
-              { id: 'c', text: 'Weil die DSGVO das Speichern von Kundennamen in Webshops verbietet', isCorrect: false, explanation: 'Kundendaten dürfen zur Vertragserfüllung gespeichert werden.' },
-              { id: 'd', text: 'Damit der Online-Shop langsamer lädt', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Damit Daten konsistent bleiben und Änderungen zentral an einer Stelle erfolgen', isCorrect: true, explanation: 'Exakt! Single Source of Truth: Ändert sich Name oder Adresse, reicht ein einziges Update in der Kundentabelle.' },
+              { id: 'b', text: 'Weil relationale Bestelltabellen aus technischen Gründen keine Textspalten erlauben', isCorrect: false, explanation: 'Datenbanken unterstützen Textfelder (VARCHAR) problemlos – es geht um Redundanzvermeidung.' },
+              { id: 'c', text: 'Weil die DSGVO das Speichern von Kundennamen in verknüpften Datenbanken verbietet', isCorrect: false, explanation: 'Kundendaten dürfen zur Vertragserfüllung gespeichert werden.' },
+              { id: 'd', text: 'Weil numerische Schlüssel die optische Darstellung der Rechnung im Frontend steuern', isCorrect: false, explanation: 'Fremdschlüssel sichern Datenintegrität, nicht das visuelle Rechnungsdesign.' }
             ]
           },
           {
@@ -2673,10 +2673,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'db-1',
             question: 'Welches Szenario beschreibt eine klassische 1:n-Beziehung im Mediendesign?',
             options: [
-              { id: 'a', text: 'Ein Kunde hat mehrere beauftragte Web-Projekte, aber jedes Projekt gehört zu genau einem Kunden', isCorrect: true, explanation: 'Richtig! Ein Kunde (1) kann viele Projekte (n) besitzen.' },
-              { id: 'b', text: 'Ein Mitarbeiter besitzt genau einen Firmenausweis', isCorrect: false, explanation: 'Das ist eine 1:1-Beziehung.' },
-              { id: 'c', text: 'Ein Student besucht viele Vorlesungen und jede Vorlesung hat viele Studenten', isCorrect: false, explanation: 'Das ist eine n:m-Beziehung.' },
-              { id: 'd', text: 'Ein SVG-Icon hat genau eine Farbpalette', isCorrect: false, explanation: 'Nicht repräsentativ für relationale Kardinalitäten.' }
+              { id: 'a', text: 'Ein Kunde hat mehrere Web-Projekte, aber jedes Projekt gehört zu einem Kunden', isCorrect: true, explanation: 'Richtig! Ein Kunde (1) kann viele Projekte (n) besitzen.' },
+              { id: 'b', text: 'Jeder Mitarbeiter besitzt genau einen personalisierten Firmenausweis mit Chip', isCorrect: false, explanation: 'Das ist eine 1:1-Beziehung.' },
+              { id: 'c', text: 'Mehrere Designer arbeiten an vielen Projekten mit jeweils mehreren Beteiligten', isCorrect: false, explanation: 'Das ist eine n:m-Beziehung.' },
+              { id: 'd', text: 'Jede Druckdatei besitzt exakt ein eindeutiges Farbprofil für den Export', isCorrect: false, explanation: 'Das beschreibt eine 1:1-Zuordnung, keine 1:n-Beziehung.' }
             ]
           }
         ]
@@ -2767,9 +2767,9 @@ export const CHAPTERS: Chapter[] = [
             question: 'Wie lautet die korrekte SQL-Abfrage, um nur freigegebene Projekte abzufragen?',
             options: [
               { id: 'a', text: "SELECT Titel FROM Projekte WHERE Status = 'Freigegeben';", isCorrect: true, explanation: 'Exakt! Die WHERE-Klausel filtert auf Datensätze mit dem Status Freigegeben.' },
-              { id: 'b', text: "SEARCH Projekte IF Status IS 'Freigegeben';", isCorrect: false, explanation: 'Ungültige SQL-Syntax.' },
-              { id: 'c', text: "FILTER Projekte BY 'Freigegeben';", isCorrect: false, explanation: 'Ungültige SQL-Syntax.' },
-              { id: 'd', text: "GET Projekte (Freigegeben);", isCorrect: false, explanation: 'Ungültige SQL-Syntax.' }
+              { id: 'b', text: "SELECT Titel FROM Projekte IF Status = 'Freigegeben';", isCorrect: false, explanation: 'Ungültige SQL-Syntax: In SQL wird mit WHERE gefiltert, nicht mit IF.' },
+              { id: 'c', text: "FILTER Titel FROM Projekte BY Status = 'Freigegeben';", isCorrect: false, explanation: 'Ungültige SQL-Syntax: Abfragen beginnen in SQL mit SELECT, nicht mit FILTER.' },
+              { id: 'd', text: "SELECT Titel IN Projekte HAVING Status = 'Freigegeben';", isCorrect: false, explanation: 'Ungültige SQL-Syntax: Tabellen stehen nach FROM und Einzelfilter stehen in WHERE.' }
             ]
           },
           {
@@ -2778,10 +2778,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'db-2',
             question: 'Wofür steht die Abkürzung DESC in einer SQL-Sortieranweisung (z. B. ORDER BY Datum DESC)?',
             options: [
-              { id: 'a', text: 'Absteigend sortieren (Descending – vom Neuesten zum Ältesten bzw. Z bis A)', isCorrect: true, explanation: 'Richtig! DESC = absteigend; ASC = aufsteigend.' },
-              { id: 'b', text: 'Description – fügt eine Beschreibung an', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'c', text: 'Destroy – löscht das Feld nach der Sortierung', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Design – formatiert das Feld für Mediengestalter', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Descending – sortiert die Treffer absteigend', isCorrect: true, explanation: 'Richtig! DESC sortiert absteigend (vom Neuesten zum Ältesten bzw. Z bis A), ASC sortiert aufsteigend.' },
+              { id: 'b', text: 'Description – ergänzt eine Spaltenbeschreibung', isCorrect: false, explanation: 'Falsch: DESC steuert die Sortierrichtung, nicht Spaltenbeschreibungen.' },
+              { id: 'c', text: 'Distinct – entfernt doppelte Datensätze vorab', isCorrect: false, explanation: 'Falsch: Duplikate werden mit dem Schlüsselwort DISTINCT entfernt.' },
+              { id: 'd', text: 'Default – stellt die Standardsortierung wieder her', isCorrect: false, explanation: 'Falsch: Die Standardsortierung in SQL ist aufsteigend (ASC).' }
             ]
           },
           {
@@ -2790,10 +2790,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'db-2',
             question: 'Welches SQL-Konstrukt verbindet Datensätze aus zwei Tabellen (z. B. Projekte und Kunden) anhand passender IDs?',
             options: [
-              { id: 'a', text: 'JOIN (z. B. Projekte JOIN Kunden ON Projekte.Kunden_ID = Kunden.Kunden_ID)', isCorrect: true, explanation: 'Richtig! Ein JOIN verbindet Tabellen über Primär- und Fremdschlüssel.' },
-              { id: 'b', text: 'ATTACH FILE', isCorrect: false, explanation: 'Kein SQL-Standard.' },
-              { id: 'c', text: 'COMBINE CSS', isCorrect: false, explanation: 'CSS ist Stylesheet-Technologie, kein SQL.' },
-              { id: 'd', text: 'GROUP BY ORDER', isCorrect: false, explanation: 'GROUP BY dient der Aggregation, nicht der Tabellenverknüpfung.' }
+              { id: 'a', text: 'JOIN', isCorrect: true, explanation: 'Richtig! Ein JOIN (z. B. Projekte JOIN Kunden ON Projekte.Kunden_ID = Kunden.Kunden_ID) verbindet Tabellen über Primär- und Fremdschlüssel.' },
+              { id: 'b', text: 'GROUP BY', isCorrect: false, explanation: 'GROUP BY fasst Datensätze für Aggregationen zusammen, verknüpft aber keine zwei Tabellen.' },
+              { id: 'c', text: 'ORDER BY', isCorrect: false, explanation: 'ORDER BY sortiert das Abfrageergebnis, stellt aber keine Tabellenverbindung her.' },
+              { id: 'd', text: 'DISTINCT', isCorrect: false, explanation: 'DISTINCT blendet doppelte Ergebniszeilen aus, verbindet aber keine Tabellen.' }
             ]
           }
         ]
@@ -2859,10 +2859,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'db-3',
             question: 'Was ist das primäre Ziel der Normalisierung in einer relationalen Datenbank?',
             options: [
-              { id: 'a', text: 'Wiederholungen (Redundanzen) und Widersprüche möglichst vollständig zu vermeiden', isCorrect: true, explanation: 'Richtig! Daten werden logisch aufgeteilt, damit jede Information nur an einer einzigen Stelle gepflegt werden muss.' },
-              { id: 'b', text: 'Alle Tabellen zu einer einzigen riesigen Tabelle zusammenzufassen', isCorrect: false, explanation: 'Das wäre Denormalisierung und führt zu Redundanzen.' },
-              { id: 'c', text: 'Alle Daten in Großbuchstaben umzuwandeln', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Die Datenbank ohne Passwörter öffentlich zugänglich zu machen', isCorrect: false, explanation: 'Verletzt Datenschutz und Sicherheit.' }
+              { id: 'a', text: 'Datenredundanzen und Widersprüche durch klare Aufteilung vermeiden', isCorrect: true, explanation: 'Richtig! Durch Normalisierung wird jede Information nur einmal gepflegt und bleibt konsistent.' },
+              { id: 'b', text: 'Alle Projekt- und Kundendaten in einer einzigen Gesamttabelle bündeln', isCorrect: false, explanation: 'Das wäre Denormalisierung und führt gerade zu doppelter Datenhaltung.' },
+              { id: 'c', text: 'Alle Textfelder einheitlich in Großbuchstaben und feste Längen umwandeln', isCorrect: false, explanation: 'Normalisierung betrifft die Tabellenstruktur, nicht die Schreibweise von Texten.' },
+              { id: 'd', text: 'Alle Tabellen ohne Primär- und Fremdschlüssel frei zugänglich halten', isCorrect: false, explanation: 'Gerade Primär- und Fremdschlüssel sichern die Integrität normalisierter Tabellen.' }
             ]
           },
           {
@@ -2871,10 +2871,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'db-3',
             question: 'Warum sollte ein Veröffentlichungsdatum in einer Datenbank als Datentyp DATE und nicht als freier Text (VARCHAR) gespeichert werden?',
             options: [
-              { id: 'a', text: 'Weil nur mit dem Datentyp DATE korrekte chronologische Sortierungen und Datumsberechnungen möglich sind', isCorrect: true, explanation: 'Exakt! Textfelder sortieren alphabetisch, was bei Datumsangaben zu falschen Reihenfolgen führt.' },
-              { id: 'b', text: 'Weil Textfelder maximal 4 Zeichen lang sein dürfen', isCorrect: false, explanation: 'VARCHAR kann hunderte Zeichen lang sein.' },
-              { id: 'c', text: 'Weil der Webbrowser sonst abstürzt', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Weil DATE weniger bunte Farben im SQL-Editor anzeigt', isCorrect: false, explanation: 'Völlig falsch.' }
+              { id: 'a', text: 'Weil nur DATE exakte chronologische Sortierungen und Datumsrechnungen erlaubt', isCorrect: true, explanation: 'Exakt! Textfelder sortieren alphabetisch, was bei Datumsangaben zu falschen Reihenfolgen führt.' },
+              { id: 'b', text: 'Weil Textfelder in relationalen Datenbanken keine Ziffern und Punkte speichern', isCorrect: false, explanation: 'VARCHAR kann beliebige Zeichen speichern, interpretiert sie aber nicht als echtes Datum.' },
+              { id: 'c', text: 'Weil Webbrowser Datumsangaben aus Textspalten technisch nicht anzeigen können', isCorrect: false, explanation: 'Browser zeigen Text problemlos an; der Nachteil liegt bei Sortierung und Berechnung in der Datenbank.' },
+              { id: 'd', text: 'Weil der Datentyp DATE automatisch auch die Zeitzone und Uhrzeit des Nutzers ermittelt', isCorrect: false, explanation: 'DATE speichert nur das Kalenderdatum; für Uhrzeit und Zeitzone braucht man DATETIME oder TIMESTAMP.' }
             ]
           },
           {
@@ -2895,10 +2895,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'db-3',
             question: 'Wann kommen in modernen Webprojekten nicht-relationale NoSQL-Datenbanken bevorzugt zum Einsatz?',
             options: [
-              { id: 'a', text: 'Bei riesigen, unstrukturierten Datenmengen wie Social-Media-Feeds oder flexiblen JSON-Dokumenten', isCorrect: true, explanation: 'Richtig! NoSQL-Systeme skalieren exzellent für unstrukturierte Big-Data- und Dokumentenströme.' },
-              { id: 'b', text: 'Wenn man Tabellenkalkulationen in Excel drucken möchte', isCorrect: false, explanation: 'Kein NoSQL-Anwendungsfall.' },
-              { id: 'c', text: 'Wenn der Server keinen Stromanschluss hat', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Ausschließlich bei Webseiten mit nur einem einzigen Besucher pro Monat', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Bei großen, unstrukturierten Datenmengen wie Feeds oder flexiblen JSON-Dokumenten', isCorrect: true, explanation: 'Richtig! NoSQL-Systeme skalieren flexibel für große, dokumentenorientierte oder unstrukturierte Datenströme.' },
+              { id: 'b', text: 'Bei klassischen Buchhaltungs- und Rechnungssystemen mit strengen Tabellenbezügen', isCorrect: false, explanation: 'Streng strukturierte Finanzdaten mit festen Relationen sind ein klassischer Fall für relationale SQL-Datenbanken.' },
+              { id: 'c', text: 'Bei rein statischen Visitenkarten-Websites ohne dynamische Benutzerinteraktionen', isCorrect: false, explanation: 'Statische Websites benötigen meist überhaupt keine Datenbank.' },
+              { id: 'd', text: 'Bei lokalen Druckvorstufen-Workflows zur direkten PDF/X-4-Ausgabe im Offsetdruck', isCorrect: false, explanation: 'PDF-Ausgabe erfolgt über Layout- und RIP-Software, nicht über NoSQL-Datenbanken.' }
             ]
           },
           {
@@ -2907,10 +2907,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'db-3',
             question: 'Welche 4 Kernfragen muss ein Mediengestalter bei der Konzeption eines neuen Datenbanksystems beantworten?',
             options: [
-              { id: 'a', text: '1. Welche Tabellen? 2. Was ist der Primärschlüssel? 3. Wie sind sie verknüpft (1:n, n:m)? 4. Welche Datentypen?', isCorrect: true, explanation: 'Exakt! Das ist der Leitfaden für die Systemplanung im Mediendesign.' },
-              { id: 'b', text: '1. Welcher Font? 2. Welches Logo? 3. Welcher Drucker? 4. Welche Kaffeemaschine?', isCorrect: false, explanation: 'Das sind keine Datenbanksystemfragen.' },
-              { id: 'c', text: '1. Wie teuer ist der Monitor? 2. Welches Betriebssystem? 3. WLAN-Passwort? 4. Feiertage?', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: '1. CSS Grid? 2. Flexbox? 3. RGB? 4. CMYK?', isCorrect: false, explanation: 'Das sind Layout- und Farbraumfragen, keine Datenbankmodellierung.' }
+              { id: 'a', text: '1. Welche Tabellen? 2. Welcher Primärschlüssel? 3. Welche Beziehungen? 4. Welche Datentypen?', isCorrect: true, explanation: 'Exakt! Tabellen, Primärschlüssel, Verknüpfungen (1:n, n:m) und Datentypen bilden den Leitfaden der Datenbankplanung.' },
+              { id: 'b', text: '1. Welche Schriftart? 2. Welches Logo? 3. Welche Hausfarbe? 4. Welcher Rasterabstand?', isCorrect: false, explanation: 'Das sind Fragen des Corporate Designs, nicht der Datenbankmodellierung.' },
+              { id: 'c', text: '1. Welcher Monitor? 2. Welches Betriebssystem? 3. Welche Maus? 4. Welcher Drucker?', isCorrect: false, explanation: 'Das betrifft Arbeitsplatz-Hardware, nicht das Datenmodell.' },
+              { id: 'd', text: '1. CSS Grid? 2. Flexbox? 3. Farbprofil RGB? 4. Farbprofil CMYK?', isCorrect: false, explanation: 'Das sind Fragen zu Frontend-Layout und Farbraum, nicht zur Datenbankkonzeption.' }
             ]
           }
         ]
@@ -3007,10 +3007,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'db-4',
             question: 'Wie werden Objekte und Arrays (Listen) in der JSON-Syntax voneinander unterschieden?',
             options: [
-              { id: 'a', text: 'Objekte stehen in geschweiften Klammern { }, Arrays (Listen) in eckigen Klammern [ ]', isCorrect: true, explanation: 'Exakt! Objekte { } bündeln Eigenschaften; Arrays [ ] listen Werte oder Objekte auf.' },
-              { id: 'b', text: 'Objekte stehen in spitzen Klammern < >, Arrays in runden Klammern ( )', isCorrect: false, explanation: 'Spitze Klammern gehören zu XML/HTML.' },
-              { id: 'c', text: 'Objekte beginnen mit einem Doppelpunkt :, Arrays mit einem Semikolon ;', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Es gibt keinen Unterschied, beides nutzt geschweifte Klammern { }', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Objekte stehen in geschweiften Klammern { }, Arrays in eckigen Klammern [ ]', isCorrect: true, explanation: 'Exakt! Objekte { } bündeln Schlüssel-Wert-Paare; Arrays [ ] listen geordnete Werte oder Objekte auf.' },
+              { id: 'b', text: 'Objekte stehen in spitzen Klammern < >, Arrays in runden Klammern ( )', isCorrect: false, explanation: 'Spitze Klammern gehören zu XML und HTML, nicht zu JSON.' },
+              { id: 'c', text: 'Objekte stehen in eckigen Klammern [ ], Arrays in geschweiften Klammern { }', isCorrect: false, explanation: 'Genau umgekehrt: { } sind Objekte und [ ] sind Arrays.' },
+              { id: 'd', text: 'Objekte und Arrays nutzen beide geschweifte Klammern { } mit Typ-Kennung', isCorrect: false, explanation: 'JSON unterscheidet beide Strukturen direkt über { } für Objekte und [ ] für Arrays.' }
             ]
           },
           {
@@ -3019,10 +3019,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'db-4',
             question: 'Welcher der folgenden Datensätze ist ein gültiges, syntaktisch fehlerfreies JSON-Objekt?',
             options: [
-              { id: 'a', text: '{ "projekt": "Portfolio", "version": 1.2, "aktiv": true, "farben": ["#FFF", "#000"] }', isCorrect: true, explanation: 'Perfekt! Schlüssel in doppelten Anführungszeichen, Number mit Punkt (1.2), Boolean kleingeschrieben (true) und valides Array.' },
-              { id: 'b', text: '{ \'projekt\': \'Portfolio\', "version": 1,2 }', isCorrect: false, explanation: 'Einfache Anführungszeichen (\') und deutsches Komma in Zahlen sind in JSON ungültig!' },
-              { id: 'c', text: '{ projekt: "Portfolio", "aktiv": True, }', isCorrect: false, explanation: 'Schlüssel müssen in Anführungszeichen stehen, True muss kleingeschrieben sein und Trailing Comma am Ende ist verboten.' },
-              { id: 'd', text: '<projekt name="Portfolio" version="1.2" />', isCorrect: false, explanation: 'Das ist XML-Syntax, kein JSON.' }
+              { id: 'a', text: '{ "projekt": "Portfolio", "version": 1.2, "aktiv": true }', isCorrect: true, explanation: 'Perfekt! Schlüssel in doppelten Anführungszeichen, Dezimalzahl mit Punkt (1.2) und kleingeschriebener Boolean (true).' },
+              { id: 'b', text: "{ 'projekt': 'Portfolio', \"version\": 1,2, \"aktiv\": true }", isCorrect: false, explanation: 'Einfache Anführungszeichen (\') und ein deutsches Komma in Zahlen (1,2) sind in JSON ungültig.' },
+              { id: 'c', text: '{ projekt: "Portfolio", "version": 1.2, "aktiv": True, }', isCorrect: false, explanation: 'Schlüssel müssen in Anführungszeichen stehen, true wird kleingeschrieben und ein abschließendes Komma ist verboten.' },
+              { id: 'd', text: '<projekt name="Portfolio" version="1.2" aktiv="true" />', isCorrect: false, explanation: 'Das ist XML-Syntax, kein gültiges JSON-Objekt.' }
             ],
             examTip: 'Merke: Schlüssel immer in doppelten Anführungszeichen ("schluessel"), Zahlen mit Punkt (1.2)!'
           },
@@ -3032,10 +3032,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'db-4',
             question: 'Warum hat JSON das ältere XML-Format im Web und in Web-Apps für APIs weitgehend verdrängt?',
             options: [
-              { id: 'a', text: 'JSON ist durch den Verzicht auf schließende Tags kompakter (kleinere Dateigröße), wird schneller geparst und direkt nativ im Webbrowser verarbeitet', isCorrect: true, explanation: 'Richtig! Das sind die 4 IHK-Hauptargumente aus dem PDF (Kompaktheit, Geschwindigkeit, native JS-Integration, Lesbarkeit).' },
-              { id: 'b', text: 'Weil XML nur bis maximal 100 Zeichen Text speichern kann', isCorrect: false, explanation: 'XML kann beliebig groß sein.' },
-              { id: 'c', text: 'Weil JSON nur auf Apple-Geräten funktioniert', isCorrect: false, explanation: 'JSON ist plattformunabhängig.' },
-              { id: 'd', text: 'Weil XML keine Bilder anzeigen darf', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'JSON ist ohne schließende Tags kompakter, schneller zu parsen und direkt im Browser nutzbar', isCorrect: true, explanation: 'Richtig! Kompaktere Dateigröße, schnelles Parsing, native JavaScript-Integration und gute Lesbarkeit sprechen für JSON.' },
+              { id: 'b', text: 'XML ist technisch auf wenige Kilobyte Dateigröße begrenzt und scheitert an größeren APIs', isCorrect: false, explanation: 'XML kann beliebig groß sein, erzeugt durch schließende Tags aber deutlich mehr Overhead.' },
+              { id: 'c', text: 'JSON unterstützt im Gegensatz zu XML direkt eingebettete hochauflösende Rasterbilder', isCorrect: false, explanation: 'Beide Formate sind textbasiert und referenzieren Bilder in der Regel über URLs oder Base64.' },
+              { id: 'd', text: 'XML wird von modernen Webservern nicht mehr unterstützt und lässt sich nicht über HTTP senden', isCorrect: false, explanation: 'XML funktioniert weiterhin über HTTP, ist für Web-APIs aber schwergewichtiger als JSON.' }
             ],
             merksatz: 'JSON ist kompakter als XML, schneller im Parsing und nativ im Webbrowser integriert.'
           },
@@ -3045,10 +3045,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'db-4',
             question: 'Wie arbeiten ein Web-Server und das von dir gestaltete Frontend-Design über eine Web-API typischerweise zusammen?',
             options: [
-              { id: 'a', text: 'Der Server schickt schlanke Daten im JSON-Format (z. B. {"temp": 22}); das Frontend nimmt die Werte und stellt sie visuell im Design dar (z. B. Sonne & 22°C-Badge)', isCorrect: true, explanation: 'Exakt! Das ist der Standard-Workflow für Mediengestalter: Server liefert JSON-Daten, Interface visualisiert sie.' },
-              { id: 'b', text: 'Der Server schickt ein fertiges Bitmap-Foto der gesamten Website und der Browser zeigt es nur an', isCorrect: false, explanation: 'Das wäre extrem ineffizient und nicht barrierefrei.' },
-              { id: 'c', text: 'Das Frontend schickt gedruckte PDFs per E-Mail an den Server', isCorrect: false, explanation: 'Unsinn.' },
-              { id: 'd', text: 'Es gibt bei Web-Apps keine Trennung von Daten und Design', isCorrect: false, explanation: 'Die Trennung von Daten (JSON) und Präsentation (HTML/CSS/Design) ist das Grundprinzip moderner Softwarearchitektur.' }
+              { id: 'a', text: 'Der Server liefert strukturierte JSON-Daten und das Frontend stellt sie visuell im Interface dar', isCorrect: true, explanation: 'Exakt! Beispiel: Der Server sendet {"temp": 22}, das Frontend rendert daraus ein Wetter-Icon und ein 22°C-Badge.' },
+              { id: 'b', text: 'Der Server rendert jede Unterseite als fertige Bitmap-Grafik und der Browser zeigt nur das Bild an', isCorrect: false, explanation: 'Das wäre ineffizient, nicht interaktiv und nicht barrierefrei.' },
+              { id: 'c', text: 'Das Frontend speichert alle Nutzerdaten dauerhaft lokal und fragt den Server nur beim ersten Aufruf', isCorrect: false, explanation: 'Dynamische Web-Apps tauschen regelmäßig strukturierte Daten über APIs mit dem Server aus.' },
+              { id: 'd', text: 'Server und Frontend speichern Daten und CSS-Design immer gemeinsam in einer untrennbaren Datei', isCorrect: false, explanation: 'Die saubere Trennung von Daten (JSON) und Präsentation (HTML/CSS) ist das Grundprinzip moderner Web-APIs.' }
             ]
           }
         ]
@@ -3146,10 +3146,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-1',
             question: 'Was versteht man in der Medienproduktion unter „medienneutralen Daten“?',
             options: [
-              { id: 'a', text: 'Inhalte, die so strukturiert gespeichert sind, dass sie unabhängig von einem bestimmten Ausgabemedium oder Design für Web, Print, App und Newsletter genutzt werden können', isCorrect: true, explanation: 'Exakt! Das ist die offizielle IHK-Definition aus dem Prüfungsleitfaden.' },
-              { id: 'b', text: 'Dateien, die ausschließlich in Schwarz-Weiß gespeichert werden', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'c', text: 'PDF-Dokumente, die ohne Bilder exportiert wurden', isCorrect: false, explanation: 'PDFs sind Endformate, keine medienneutralen Quellen.' },
-              { id: 'd', text: 'Grafiken, die ausschließlich auf CDs gebrannt werden dürfen', isCorrect: false, explanation: 'Unsinn.' }
+              { id: 'a', text: 'Strukturiert gespeicherte Inhalte ohne Bindung an ein bestimmtes Design oder Ausgabemedium', isCorrect: true, explanation: 'Exakt! Medienneutrale Daten lassen sich flexibel für Web, Print, App oder Newsletter ausgeben.' },
+              { id: 'b', text: 'Bild- und Textdateien, die vorab einheitlich in Graustufen ohne Farbprofil abgelegt werden', isCorrect: false, explanation: 'Medienneutralität bedeutet Unabhängigkeit vom Ausgabekanal, nicht Verzicht auf Farbe.' },
+              { id: 'c', text: 'Druckfertige PDF-Dokumente, bei denen Bilder und Grafiken extern ausgelagert wurden', isCorrect: false, explanation: 'PDFs sind layoutgebundene Endformate, keine medienneutralen Quelldaten.' },
+              { id: 'd', text: 'Komprimierte Webgrafiken, die automatisch für alle Browsergrößen skaliert werden können', isCorrect: false, explanation: 'Responsivität im Web ist nur ein Kanal; Medienneutralität umfasst alle Ausgabemedien.' }
             ],
             merksatz: 'Medienneutrale Daten trennen Inhalt und Layout für beliebige Ausgabekanäle.'
           },
@@ -3159,10 +3159,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-1',
             question: 'Welche 4 Bereiche werden bei einer medienneutralen Produktion sauber voneinander getrennt?',
             options: [
-              { id: 'a', text: 'Inhalt (Content), Struktur (Hierarchie), Gestaltung (Style) und Ausgabe (Medium)', isCorrect: true, explanation: 'Richtig! Das Prinzip der Separation of Concerns im Medienworkflow.' },
-              { id: 'b', text: 'Farbe, Papiergewicht, Druckfarbe und Drucklack', isCorrect: false, explanation: 'Das sind reine Print-Produktionsparameter.' },
-              { id: 'c', text: 'Monitor, Tastatur, Maus und Grafikkarte', isCorrect: false, explanation: 'Das ist Hardware.' },
-              { id: 'd', text: 'Kunde, Agentur, Druckerei und Postbote', isCorrect: false, explanation: 'Das sind beteiligte Personen.' }
+              { id: 'a', text: 'Inhalt, Struktur, Gestaltung und Ausgabe', isCorrect: true, explanation: 'Richtig! Content (Inhalt), Hierarchie (Struktur), Style (Gestaltung) und Medium (Ausgabe) werden sauber getrennt.' },
+              { id: 'b', text: 'Farbraum, Papiergewicht, Druckfarbe und Veredelung', isCorrect: false, explanation: 'Das sind spezifische Parameter der Printproduktion, nicht die vier Trennungsebenen.' },
+              { id: 'c', text: 'Entwurf, Korrektur, Freigabe und Archivierung', isCorrect: false, explanation: 'Das sind Ablaufphasen im Projekt, nicht die vier Daten- und Ausgabebereiche.' },
+              { id: 'd', text: 'Kunde, Redaktion, Druckerei und Versanddienstleister', isCorrect: false, explanation: 'Das sind beteiligte Rollen und Partner, keine strukturellen Ebenen der Datenproduktion.' }
             ]
           },
           {
@@ -3171,10 +3171,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-1',
             question: 'Warum sollte ein Text in medienneutralen Quelldaten semantisch als „H1“ und nicht als „fett und 24pt“ deklariert werden?',
             options: [
-              { id: 'a', text: 'Weil nur durch die Semantik das System die Bedeutung kennt und die Information im Web als <h1> und im Magazin als druckgerechte Headline formatieren kann', isCorrect: true, explanation: 'Genau! Semantik transportiert Bedeutung, die Templates für jedes Medium passend interpretieren.' },
-              { id: 'b', text: 'Weil „fett“ in modernen Druckereien verboten ist', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'c', text: 'Weil Schriftgrößen in pt nur für Schallplatten gelten', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Weil XML keine Zahlen speichern kann', isCorrect: false, explanation: 'XML kann Zahlen speichern.' }
+              { id: 'a', text: 'Weil das System so die Bedeutung kennt und jedes Ausgabemedium die Überschrift passend formatiert', isCorrect: true, explanation: 'Genau! Semantik transportiert Bedeutung – im Web wird daraus ein <h1>, im Magazin eine passende Druck-Headline.' },
+              { id: 'b', text: 'Weil fette Schriftschnitte in modernen Satzsystemen nicht mehr direkt zugewiesen werden können', isCorrect: false, explanation: 'Schriftschnitte sind technisch problemlos möglich, gehören aber in die Gestaltungsebene.' },
+              { id: 'c', text: 'Weil Punktgrößen wie 28 pt ausschließlich im Printbereich und nie auf Bildschirmen funktionieren', isCorrect: false, explanation: 'Maßeinheiten lassen sich umrechnen; entscheidend ist die Trennung von Bedeutung und Aussehen.' },
+              { id: 'd', text: 'Weil XML- und JSON-Formate grundsätzlich keine numerischen Werte für Schriftgrößen erlauben', isCorrect: false, explanation: 'XML und JSON können Zahlen speichern, sollten aber in medienneutralen Daten keine feste Optik vorgeben.' }
             ],
             merksatz: 'Semantische Rollen (H1, Preis) ermöglichen die flexible Formatierung je nach Zielmedium.'
           },
@@ -3184,10 +3184,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-1',
             question: 'Worin liegt der fundamentale Nachteil eines rein layoutbasierten Workflows gegenüber einem strukturbasierten?',
             options: [
-              { id: 'a', text: 'Der Inhalt wird direkt in das Layout eingebacken; soll derselbe Inhalt für einen anderen Kanal genutzt werden, muss alles manuell neu gestaltet werden', isCorrect: true, explanation: 'Richtig! Layoutbasiert (z. B. Text direkt in InDesign) verhindert die automatisierte Mehrfachnutzung.' },
-              { id: 'b', text: 'Layoutbasierte Dokumente können nicht gedruckt werden', isCorrect: false, explanation: 'Layoutbasierte Workflows waren der historische Standard im Print.' },
-              { id: 'c', text: 'Strukturbasierte Daten dürfen keine Bilder enthalten', isCorrect: false, explanation: 'Strukturierte Daten referenzieren Bildmetadaten exzellent.' },
-              { id: 'd', text: 'Es gibt keinen Unterschied zwischen beiden Methoden', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Der Inhalt ist fest im Layout eingebunden und muss für andere Kanäle manuell neu gesetzt werden', isCorrect: true, explanation: 'Richtig! Im layoutbasierten Workflow (z. B. Text direkt in InDesign) ist automatisierte Mehrfachnutzung kaum möglich.' },
+              { id: 'b', text: 'Layoutbasierte Dokumente lassen sich im Offsetdruck technisch nicht farbverbindlich ausgeben', isCorrect: false, explanation: 'Für reinen Print sind layoutbasierte Workflows genau der klassische Standard.' },
+              { id: 'c', text: 'Strukturbasierte Quelldaten können im Gegensatz zu Layoutdateien keine Bilddaten einbinden', isCorrect: false, explanation: 'Strukturierte Daten referenzieren Bilder und Metadaten sehr effizient.' },
+              { id: 'd', text: 'Beide Verfahren liefern identische Datenstrukturen und unterscheiden sich nur in der Softwarewahl', isCorrect: false, explanation: 'Der Unterschied liegt fundamental in der Trennung von Inhalt und Layout.' }
             ]
           },
           {
@@ -3196,10 +3196,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-1',
             question: 'Warum eignet sich ein fertig gestaltetes Druck-PDF üblicherweise NICHT als medienneutraler Ausgangsdatenbestand?',
             options: [
-              { id: 'a', text: 'Weil ein PDF bereits fest auf ein ganz bestimmtes Ausgabemedium, starre Seitenmaße und ein fixes Layout festgelegt ist', isCorrect: true, explanation: 'Exakt! Das PDF ist das Endprodukt einer bestimmten Ausgabe, nicht die neutrale Quelle.' },
-              { id: 'b', text: 'Weil PDFs keinen Text enthalten dürfen', isCorrect: false, explanation: 'PDFs enthalten Text, aber layoutgebunden.' },
-              { id: 'c', text: 'Weil Adobe das Urheberrecht auf alle PDF-Dateien besitzt', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Weil PDFs nur im Dunkeln gelesen werden können', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Weil ein PDF bereits fest auf ein Ausgabemedium, starre Seitenmaße und ein Layout fixiert ist', isCorrect: true, explanation: 'Exakt! Das PDF ist das layoutgebundene Endprodukt einer Ausgabe, nicht die medienneutrale Quelle.' },
+              { id: 'b', text: 'Weil Druck-PDFs aus Sicherheitsgründen grundsätzlich keinen kopierbaren Text enthalten dürfen', isCorrect: false, explanation: 'PDFs enthalten in der Regel Text, allerdings fest in ein starres Seitenlayout eingebunden.' },
+              { id: 'c', text: 'Weil PDF-Dateien proprietär sind und sich nicht auf mobilen Endgeräten öffnen lassen', isCorrect: false, explanation: 'PDF ist ein offener ISO-Standard und überall lesbar, aber nicht medienneutral strukturiert.' },
+              { id: 'd', text: 'Weil in einem PDF-Dokument keine Vektorgrafiken oder Metadaten gespeichert werden können', isCorrect: false, explanation: 'PDF unterstützt Vektoren und Metadaten, bleibt aber auf ein fixes Seitenlayout festgelegt.' }
             ]
           }
         ]
@@ -3280,10 +3280,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-2',
             question: 'Was ist der primäre Vorteil des Single Source Publishing (SSP) für Unternehmen?',
             options: [
-              { id: 'a', text: 'Inhalte müssen nur einmal zentral gepflegt werden, wodurch Aktualisierungen für alle Kanäle (Print, Web, App) konsistent, zeitsparend und fehlerfrei erfolgen', isCorrect: true, explanation: 'Exakt! Das ist der Hauptnutzen von Single Source Publishing.' },
-              { id: 'b', text: 'Man benötigt überhaupt keine Grafiker und Designer mehr', isCorrect: false, explanation: 'Templates und Ausgabedesign müssen von Mediengestaltern gestaltet werden.' },
-              { id: 'c', text: 'Die Website darf nur noch auf einem einzigen Server gehostet werden', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Druckmaschinen drucken automatisch ohne Papier', isCorrect: false, explanation: 'Unsinn.' }
+              { id: 'a', text: 'Inhalte werden einmal zentral gepflegt und konsistent über alle Kanäle ausgespielt', isCorrect: true, explanation: 'Exakt! Aktualisierungen erfolgen zeitsparend, einheitlich und fehlerfrei für Print, Web und App.' },
+              { id: 'b', text: 'Gestalterische Templates für Print und Web werden vollständig durch KI ersetzt', isCorrect: false, explanation: 'Medienspezifische Templates und Ausgabedesigns müssen weiterhin professionell gestaltet werden.' },
+              { id: 'c', text: 'Alle digitalen Ausgabekanäle laufen zwingend auf demselben physischen Webserver', isCorrect: false, explanation: 'Single Source meint eine zentrale Datenquelle, nicht zwingend einen einzigen Server.' },
+              { id: 'd', text: 'Jede Änderung im Webshop wird automatisch ohne Freigabe sofort in den Druck geschickt', isCorrect: false, explanation: 'Freigabe- und Qualitätskontrollen bleiben im Publishing-Workflow weiterhin unverzichtbar.' }
             ],
             merksatz: 'Single Source: Zentrale Datenpflege verhindert Datenchaos und spart immense Korrekturzeit.'
           },
@@ -3293,10 +3293,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-2',
             question: 'Warum müssen Bilder bei der Ausgabe für Print und Web unterschiedlich aufbereitet werden?',
             options: [
-              { id: 'a', text: 'Weil Print 300 DPI, CMYK-Farbraum und Beschnitt erfordert, während das Web sRGB-Farben, 72–144 DPI und komprimierte Dateigrößen für kurze Ladezeiten verlangt', isCorrect: true, explanation: 'Richtig! Ein medienneutrales Bild muss im hochauflösenden Original vorliegen, um beide Kanäle bedienen zu können.' },
-              { id: 'b', text: 'Weil Web-Browser nur Schwarz-Weiß-Bilder unterstützen', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'c', text: 'Weil Druckmaschinen keine Fotos drucken können', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Weil DPI nur bei Tonaufnahmen eine Rolle spielt', isCorrect: false, explanation: 'DPI ist die Druckpunktdichte.' }
+              { id: 'a', text: 'Print braucht 300 dpi, CMYK und Beschnitt; Web braucht sRGB, geringere Auflösung und kleine Dateien', isCorrect: true, explanation: 'Richtig! Deshalb liegt das medienneutrale Masterbild hochauflösend vor und wird kanalabhängig konvertiert (Web typ. 72–144 dpi).' },
+              { id: 'b', text: 'Print verarbeitet ausschließlich Vektordaten, während Web-Browser nur unkomprimierte Rasterbilder zeigen', isCorrect: false, explanation: 'Beide Kanäle nutzen sowohl Raster- als auch Vektorgrafiken, aber mit unterschiedlichen Zielparametern.' },
+              { id: 'c', text: 'Print nutzt das additive RGB-Farbmodell, während Webseiten auf das subtraktive CMYK-Modell setzen', isCorrect: false, explanation: 'Genau umgekehrt: Bildschirme nutzen additives RGB, der Druck nutzt subtraktives CMYK.' },
+              { id: 'd', text: 'Print verzichtet auf Farbprofile, während Webbrowser zwingend 300 dpi mit 3 mm Beschnitt fordern', isCorrect: false, explanation: 'Farbprofile, 300 dpi und Beschnitt sind klassische Anforderungen der Druckvorstufe.' }
             ]
           },
           {
@@ -3305,10 +3305,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-2',
             question: 'Wie funktioniert XML als Format für medienneutrale Daten?',
             options: [
-              { id: 'a', text: 'XML nutzt benutzerdefinierte Tags (z. B. <produktname>...</produktname>), um Daten hierarchisch und rein strukturell ohne feste Layoutvorgaben zu beschreiben', isCorrect: true, explanation: 'Richtig! XML trennt Struktur von Layout und ist daher ein klassischer medienneutraler Standard.' },
-              { id: 'b', text: 'XML formatiert Texte immer automatisch in Times New Roman 12pt', isCorrect: false, explanation: 'XML enthält keine Schriftarten.' },
-              { id: 'c', text: 'XML ist ausschließlich für Videos gedacht', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'XML kann nur von einem einzigen Softwarehersteller geöffnet werden', isCorrect: false, explanation: 'XML ist ein offener Standard.' }
+              { id: 'a', text: 'XML beschreibt Daten über frei definierbare Tags hierarchisch und ohne feste Layoutvorgaben', isCorrect: true, explanation: 'Richtig! Mit eigenen Tags (z. B. <produktname>…</produktname>) trennt XML Struktur sauber vom Layout.' },
+              { id: 'b', text: 'XML legt Schriftarten, Zeilenabstände und Seitenränder verbindlich für alle Drucksysteme fest', isCorrect: false, explanation: 'XML enthält selbst keine Layout- oder Schriftartvorgaben – dafür gibt es Stylesheets/Templates.' },
+              { id: 'c', text: 'XML komprimiert hochauflösende Bild- und Videodaten verlustfrei in einem einzigen Container', isCorrect: false, explanation: 'XML ist ein textbasiertes Auszeichnungsformat für strukturierte Daten, kein Medien-Codec.' },
+              { id: 'd', text: 'XML ist ein proprietäres Austauschformat, das ausschließlich in speziellen Satzprogrammen läuft', isCorrect: false, explanation: 'XML ist ein offener, plattformunabhängiger W3C-Standard.' }
             ]
           },
           {
@@ -3317,10 +3317,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-2',
             question: 'Welche Reihenfolge beschreibt den offiziellen IHK-Produktionsablauf medienneutraler Daten korrekt?',
             options: [
-              { id: 'a', text: 'Daten strukturiert erfassen → Inhalt & Gestaltung trennen → Vorlage/Template wählen → Mediengerecht ausgeben → Qualität kontrollieren', isCorrect: true, explanation: 'Exakt die 5-Schritte-Kette aus den IHK-Prüfungshinweisen!' },
-              { id: 'b', text: 'Drucken → Layouten → Daten löschen → Rechnen', isCorrect: false, explanation: 'Unsinn.' },
-              { id: 'c', text: 'Design zeichnen → Text vergessen → PDF drucken', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Qualitätskontrolle → Daten erfassen → Template löschen', isCorrect: false, explanation: 'Reihenfolge falsch.' }
+              { id: 'a', text: 'Daten erfassen → Inhalt & Design trennen → Template wählen → Mediengerecht ausgeben → Prüfen', isCorrect: true, explanation: 'Exakt die 5-Schritte-Kette aus den IHK-Prüfungshinweisen für medienneutrale Produktion!' },
+              { id: 'b', text: 'Template drucken → Layout fixieren → Daten erfassen → Mediengerecht ausgeben → Prüfen', isCorrect: false, explanation: 'Zuerst werden Daten strukturiert erfasst und vom Layout getrennt, erst danach folgt die Ausgabe.' },
+              { id: 'c', text: 'Inhalt & Design verbinden → PDF erzeugen → Template wählen → Daten erfassen → Prüfen', isCorrect: false, explanation: 'Inhalt und Gestaltung dürfen gerade nicht vorab fest miteinander verbunden werden.' },
+              { id: 'd', text: 'Prüfen → Mediengerecht ausgeben → Daten erfassen → Template wählen → Inhalt trennen', isCorrect: false, explanation: 'Die Reihenfolge ist verdreht: Qualitätskontrolle steht am Ende der Ausgabekette.' }
             ],
             merksatz: 'Erfassen → Trennen → Vorlage wählen → Ausgeben → Kontrollieren.'
           },
@@ -3330,10 +3330,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-2',
             question: 'Ist eine XML- oder JSON-Datei automatisch medienneutral?',
             options: [
-              { id: 'a', text: 'Nein, entscheidend ist, ob die Daten sinnvoll strukturiert und vollkommen unabhängig von einem bestimmten Layout oder Zielmedium angelegt sind', isCorrect: true, explanation: 'Genau! Stehen in der XML z. B. feste Spaltenbreiten oder feste Umbrüche, ist sie nicht mehr medienneutral.' },
-              { id: 'b', text: 'Ja, jede Datei mit der Endung .xml ist immer zu 100% medienneutral', isCorrect: false, explanation: 'Die Dateiendung allein garantiert keine Medienneutralität.' },
-              { id: 'c', text: 'Ja, weil JSON vom W3C gesetzlich als medienneutral geschützt ist', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Nein, weil nur Microsoft Word echte medienneutrale Daten erzeugen kann', isCorrect: false, explanation: 'Word ist typischerweise layoutbasiert.' }
+              { id: 'a', text: 'Nein, entscheidend ist eine saubere Struktur ohne feste Layout- oder Zielmedium-Vorgaben', isCorrect: true, explanation: 'Genau! Enthält eine XML-Datei feste Spaltenbreiten oder Seitenumbrüche, ist sie nicht mehr medienneutral.' },
+              { id: 'b', text: 'Ja, jede syntaktisch wohlgeformte XML- oder JSON-Datei ist automatisch medienneutral', isCorrect: false, explanation: 'Die Dateiendung allein garantiert keine Medienneutralität, wenn Layoutdaten darin verankert sind.' },
+              { id: 'c', text: 'Ja, weil das W3C Layout-Attribute innerhalb von XML- und JSON-Dateien technisch sperrt', isCorrect: false, explanation: 'XML und JSON lassen beliebige Felder zu – die Trennung von Inhalt und Design ist eine Konzeptionsleistung.' },
+              { id: 'd', text: 'Nein, weil echte Medienneutralität ausschließlich über binäre Datenbank-Exports erreicht wird', isCorrect: false, explanation: 'Auch textbasierte Formate wie XML und JSON sind bestens geeignet, sofern sie layoutfrei strukturiert sind.' }
             ]
           }
         ]
@@ -3410,10 +3410,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-3',
             question: 'Welche Aufgabe übernimmt ein Template (Vorlage) im medienneutralen Publishing-Workflow?',
             options: [
-              { id: 'a', text: 'Es ordnet die neutralen Daten nach festgelegten Design-Regeln an und bereitet sie spezifisch für ein Zielmedium (z. B. Webshop oder Printkatalog) auf', isCorrect: true, explanation: 'Richtig! Das Template übersetzt Rohdaten in das mediengerechte Layout.' },
-              { id: 'b', text: 'Es löscht alle Texte, die länger als 10 Wörter sind', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'c', text: 'Es wandelt XML in reines Papier um', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Es ersetzt den Computer durch eine Schreibmaschine', isCorrect: false, explanation: 'Unsinn.' }
+              { id: 'a', text: 'Es überführt neutrale Daten nach festen Designregeln in das passende Zielmedium', isCorrect: true, explanation: 'Richtig! Das Template bereitet die Rohdaten gezielt für ein Zielmedium (z. B. Webshop oder Printkatalog) auf.' },
+              { id: 'b', text: 'Es prüft die XML-Datei lediglich auf Rechtschreibfehler und kürzt zu lange Produkttexte', isCorrect: false, explanation: 'Templates steuern Layout und Darstellung, nicht redaktionelles Lektorat.' },
+              { id: 'c', text: 'Es ersetzt die zentrale Datenbank und speichert sämtliche Produktinhalte dauerhaft im Layout', isCorrect: false, explanation: 'Daten bleiben zentral gespeichert; das Template dient nur der Ausgabegestaltung.' },
+              { id: 'd', text: 'Es konvertiert alle fremden Bildformate automatisch in unkomprimierte Rohdaten für Archive', isCorrect: false, explanation: 'Archivierung von Rohdaten ist Aufgabe des DAM/Datenmanagements, nicht des Ausgabe-Templates.' }
             ]
           },
           {
@@ -3422,10 +3422,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-3',
             question: 'Was unterscheidet Inhalt (Content) von Metadaten?',
             options: [
-              { id: 'a', text: 'Inhalt ist das, was der Nutzer sieht (z. B. Produkttext, Bild); Metadaten beschreiben und verwalten den Inhalt (z. B. Bildrechte, Autor, Erstelldatum)', isCorrect: true, explanation: 'Exakt! Das ist die Differenzierung aus Frage 7 der IHK-Musterantworten.' },
-              { id: 'b', text: 'Inhalt ist immer digital, Metadaten sind immer auf Papier gedruckt', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'c', text: 'Inhalt darf nur von Anwälten geschrieben werden', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Es gibt keinen Unterschied, beides meint dasselbe', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Inhalt ist für Nutzer sichtbar; Metadaten beschreiben und verwalten diesen Inhalt im Hintergrund', isCorrect: true, explanation: 'Exakt! Produkttext und Bild sind Inhalt; Bildrechte, Autor und Erstelldatum sind Metadaten (IHK-Musterantwort).' },
+              { id: 'b', text: 'Inhalt liegt immer in digitaler Form vor, während Metadaten ausschließlich gedruckt archiviert werden', isCorrect: false, explanation: 'Beide werden digital verwaltet – der Unterschied liegt in Darstellung vs. Beschreibung.' },
+              { id: 'c', text: 'Inhalt umfasst ausschließlich Bilder und Grafiken, während Metadaten alle Fließtexte enthalten', isCorrect: false, explanation: 'Auch Texte und Überschriften gehören zum Inhalt; Metadaten sind Daten über Daten.' },
+              { id: 'd', text: 'Beide Begriffe werden im Publishing synonym für sämtliche Daten innerhalb einer XML-Datei genutzt', isCorrect: false, explanation: 'Inhalt und Metadaten erfüllen klar getrennte Aufgaben bei der Publikation und Verwaltung.' }
             ],
             merksatz: 'Inhalt = was veröffentlicht wird. Metadaten = Angaben zur Verwaltung & Rechtssicherheit (Bildrechte, Autor).'
           },
@@ -3435,10 +3435,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-3',
             question: 'Warum ist eine Qualitätskontrolle bei Single Source Publishing besonders kritisch?',
             options: [
-              { id: 'a', text: 'Weil fehlerhafte, unvollständige oder veraltete Daten sich automatisch und unbemerkt in ALLE Medienausgaben (Web, Print, Newsletter) verbreiten', isCorrect: true, explanation: 'Richtig! Ein falscher Preis im zentralen Datenbestand infiziert sofort alle Ausgabekanäle.' },
-              { id: 'b', text: 'Weil der Stromverbrauch bei Fehlern im Datenbestand um 500% ansteigt', isCorrect: false, explanation: 'Unsinn.' },
-              { id: 'c', text: 'Weil das Internet sonst gelöscht werden muss', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Weil Qualitätskontrollen gesetzlich nur für Spielzeug vorgeschrieben sind', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Weil sich fehlerhafte oder veraltete Daten automatisch in alle Ausgabekanäle verbreiten', isCorrect: true, explanation: 'Richtig! Ein falscher Preis im zentralen Datenbestand landet sofort gleichzeitig in Web, Print und Newsletter.' },
+              { id: 'b', text: 'Weil schon ein einzelner Tippfehler die gesamte Datenbankdatei unwiderruflich beschädigt', isCorrect: false, explanation: 'Inhaltliche Fehler beschädigen die Datei nicht technisch, multiplizieren sich aber in alle Medien.' },
+              { id: 'c', text: 'Weil nachträgliche Korrekturen an zentralen Quelldaten im SSP technisch gesperrt sind', isCorrect: false, explanation: 'Zentrale Daten lassen sich jederzeit korrigieren – aber bereits gedruckte Auflagen nicht mehr.' },
+              { id: 'd', text: 'Weil jedes Zielmedium eine völlig getrennte, unabhängige Datenquelle von Hand pflegen muss', isCorrect: false, explanation: 'Bei SSP gibt es genau eine zentrale Quelle – deshalb wirkt sich jeder Datenfehler kanalübergreifend aus.' }
             ]
           },
           {
@@ -3447,10 +3447,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-3',
             question: 'Welche 2 Vorteile und welche 2 Herausforderungen kennzeichnen medienneutrale Workflows?',
             options: [
-              { id: 'a', text: 'Vorteile: Zentrale Datenpflege & Mehrfachnutzung; Herausforderungen: Hoher Strukturierungsaufwand & Anpassung an unterschiedliche Zielmedienanforderungen', isCorrect: true, explanation: 'Genau! IHK-Prüfungsfrage 8 aus den Musterantworten.' },
-              { id: 'b', text: 'Vorteile: Kostenlos & fehlerfrei; Herausforderungen: Funktioniert nur bei Vollmond', isCorrect: false, explanation: 'Unsinn.' },
-              { id: 'c', text: 'Vorteile: Keine Schriftarten nötig; Herausforderungen: Es können nur Zahlen verarbeitet werden', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Vorteile: Höhere Druckauflage; Herausforderungen: Web-Verbot', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Vorteile: Zentrale Pflege & Mehrfachnutzung; Hürden: Strukturierungsaufwand & Medienanpassung', isCorrect: true, explanation: 'Genau! Zentrale Datenpflege und Mehrfachnutzung stehen hohem Strukturierungsaufwand und komplexen Zielmedien-Templates gegenüber.' },
+              { id: 'b', text: 'Vorteile: Geringer Startaufwand & keine Templates; Hürden: Nur ein Ausgabekanal nutzbar', isCorrect: false, explanation: 'Genau umgekehrt: Der Startaufwand ist höher, dafür sind viele Kanäle aus einer Quelle bedienbar.' },
+              { id: 'c', text: 'Vorteile: Verzicht auf Typografie & Bilder; Hürden: Es lassen sich nur Zahlen verarbeiten', isCorrect: false, explanation: 'Medienneutrale Workflows verarbeiten Texte, Zahlen und Medienassets für voll gestaltete Ausgaben.' },
+              { id: 'd', text: 'Vorteile: Automatische Druckfreigabe ohne Prüfung; Hürden: Keine Nutzung für Webshops möglich', isCorrect: false, explanation: 'Webshops sind sogar ein Paradebeispiel für SSP, und Qualitätskontrolle bleibt unerlässlich.' }
             ]
           },
           {
@@ -3543,10 +3543,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-4',
             question: 'Was ist der fundamentale Unterschied zwischen HTML und XML bezüglich der verwendeten Tags?',
             options: [
-              { id: 'a', text: 'HTML hat vordefinierte Tags für das Aussehen (z. B. <h1>), während XML keine vordefinierten Tags hat und man eigene Tags für die inhaltliche Bedeutung frei erfindet', isCorrect: true, explanation: 'Richtig! HTML bestimmt die Präsentation, XML beschreibt die inhaltliche Semantik mit frei definierten Tags (z. B. <produkt>).' },
-              { id: 'b', text: 'HTML funktioniert nur offline, XML nur im Internet', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'c', text: 'XML erlaubt grundsätzlich keine Buchstaben in Tags', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Es gibt keinen Unterschied, beide Sprachen nutzen exakt dieselben Tags', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'HTML nutzt feste Tags zur Darstellung; in XML definiert man eigene Tags für die Datenbedeutung', isCorrect: true, explanation: 'Richtig! HTML hat vordefinierte Tags (z. B. <h1>), während XML eigene semantische Tags (z. B. <produkt>) ermöglicht.' },
+              { id: 'b', text: 'HTML dient ausschließlich lokalen Offline-Dokumenten, während XML nur im Webbrowser läuft', isCorrect: false, explanation: 'HTML ist gerade die Kernsprache für Webseiten im Browser; XML dient plattformübergreifendem Datenaustausch.' },
+              { id: 'c', text: 'XML erlaubt nur numerische Tag-Namen ohne Buchstaben, während HTML Textnamen verwendet', isCorrect: false, explanation: 'XML-Tag-Namen bestehen regulär aus Buchstaben und dürfen sogar nicht mit einer Ziffer beginnen.' },
+              { id: 'd', text: 'Beide Sprachen verwenden exakt denselben festen Tag-Katalog und unterscheiden sich nur bei CSS', isCorrect: false, explanation: 'XML besitzt keinen festen Tag-Katalog – genau darin liegt seine Erweiterbarkeit.' }
             ],
             merksatz: 'HTML = feste Tags für die Präsentation | XML = frei erfundene Tags für die Bedeutung.'
           },
@@ -3556,10 +3556,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-4',
             question: 'Welche der folgenden Bedingungen MUSS zwingend erfüllt sein, damit ein XML-Dokument als „wohlgeformt“ (well-formed) gilt?',
             options: [
-              { id: 'a', text: 'Genau ein Wurzelelement (Root), alle Tags geschlossen, saubere Verschachtelung ohne Überkreuzung und Beachtung von Case-Sensitivity', isCorrect: true, explanation: 'Exakt! Das sind die 4 Grundregeln der Wohlgeformtheit aus dem PDF.' },
-              { id: 'b', text: 'Die Datei muss mindestens 5 Bilder enthalten', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'c', text: 'Tags dürfen niemals mit Großbuchstaben beginnen', isCorrect: false, explanation: 'Großbuchstaben sind erlaubt, müssen aber einheitlich geschlossen werden (Case-Sensitivity).' },
-              { id: 'd', text: 'Die Datei muss auf Deutsch verfasst sein', isCorrect: false, explanation: 'Unsinn.' }
+              { id: 'a', text: 'Genau ein Wurzelelement, alle Tags geschlossen, sauber verschachtelt und Case-Sensitivity beachtet', isCorrect: true, explanation: 'Exakt! Root-Element, geschlossene Tags, korrekte Verschachtelung ohne Überkreuzung und Groß-/Kleinschreibung sind Pflicht.' },
+              { id: 'b', text: 'Mindestens zwei Wurzelelemente, optionale End-Tags und Verzicht auf Attribute in den Elementen', isCorrect: false, explanation: 'Ein XML-Dokument darf immer nur genau ein Wurzelelement haben und jedes Tag muss geschlossen sein.' },
+              { id: 'c', text: 'Ausschließlich klein geschriebene Tag-Namen sowie mindestens eine eingebettete CSS-Datei', isCorrect: false, explanation: 'Großbuchstaben sind erlaubt, solange öffnendes und schließendes Tag exakt gleich geschrieben sind; CSS ist optional.' },
+              { id: 'd', text: 'Eine vollständige deutsche Beschriftung aller Tags sowie ein verknüpftes Druck-PDF im Header', isCorrect: false, explanation: 'Die Wohlgeformtheit prüft formale XML-Syntaxregeln, nicht Sprache oder Dateianhänge.' }
             ]
           },
           {
@@ -3568,10 +3568,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-4',
             question: 'Welches XML-Codesegment enthält einen groben Syntaxfehler und ist NICHT wohlgeformt?',
             options: [
-              { id: 'a', text: '<a><b>Inhalt</a></b> (Tags sind überkreuzt verschachtelt)', isCorrect: true, explanation: 'Richtig! <b> wurde zuletzt geöffnet, muss also zuerst geschlossen werden (<a><b>Inhalt</b></a>).' },
-              { id: 'b', text: '<produkt><name>Stuhl</name><preis>99</preis></produkt>', isCorrect: false, explanation: 'Das ist vollständig wohlgeformt.' },
-              { id: 'c', text: '<shop><produkt waehrung="EUR">Tisch</produkt></shop>', isCorrect: false, explanation: 'Das ist vollständig wohlgeformt.' },
-              { id: 'd', text: '<artikel><titel>Katalog</titel></artikel>', isCorrect: false, explanation: 'Das ist vollständig wohlgeformt.' }
+              { id: 'a', text: '<artikel><titel>Katalog</artikel></titel>', isCorrect: true, explanation: 'Richtig! Die Tags sind überkreuzt verschachtelt: <titel> wurde zuletzt geöffnet und muss zuerst geschlossen werden (<artikel><titel>Katalog</titel></artikel>).' },
+              { id: 'b', text: '<produkt><name>Stuhl</name><preis>99</preis></produkt>', isCorrect: false, explanation: 'Dieses Segment ist vollständig wohlgeformt.' },
+              { id: 'c', text: '<shop><produkt waehrung="EUR">Tisch</produkt></shop>', isCorrect: false, explanation: 'Dieses Segment ist vollständig wohlgeformt.' },
+              { id: 'd', text: '<katalog><seite>Inhalt</seite></katalog>', isCorrect: false, explanation: 'Dieses Segment ist vollständig wohlgeformt.' }
             ]
           },
           {
@@ -3580,10 +3580,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-4',
             question: 'Welche Aufgabe übernimmt XSLT (Extensible Stylesheet Language Transformations) im Mediendesign-Workflow?',
             options: [
-              { id: 'a', text: 'Es wandelt strukturierte XML-Rohdaten über Vorlagen in andere Zielformate um, z. B. in formatiertes HTML für den Webbrowser', isCorrect: true, explanation: 'Exakt! XML (Rohdaten) + XSLT (Design-Vorlage) = HTML (Ergebnis für den Nutzer).' },
-              { id: 'b', text: 'Es löscht alle Bilddateien vom Webserver', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'c', text: 'Es formatiert Festplatten im Drucksaal', isCorrect: false, explanation: 'Unsinn.' },
-              { id: 'd', text: 'Es repariert kaputte Monitorpixel', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Es transformiert XML-Daten anhand von Vorlagen in Zielformate wie HTML', isCorrect: true, explanation: 'Exakt! XML (Rohdaten) + XSLT (Transformationsvorlage) ergibt z. B. formatiertes HTML für den Webbrowser.' },
+              { id: 'b', text: 'Es prüft die Einhaltung erlaubter Datentypen und Pflichtfelder einer XML-Datei', isCorrect: false, explanation: 'Die Struktur- und Datentypprüfung übernimmt ein XML-Schema (XSD) oder eine DTD.' },
+              { id: 'c', text: 'Es adressiert gezielt einzelne Knoten und Attribute innerhalb eines XML-Baums', isCorrect: false, explanation: 'Das gezielte Suchen und Adressieren von Knoten ist Aufgabe von XPath.' },
+              { id: 'd', text: 'Es komprimiert große XML-Bestände verlustfrei für die Langzeitarchivierung', isCorrect: false, explanation: 'XSLT dient der Transformation in Zielformate, nicht der Dateikompression.' }
             ],
             merksatz: 'XSLT transformiert XML-Rohdaten in gestaltetes HTML oder Druckformate.'
           },
@@ -3593,10 +3593,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'med-4',
             question: 'Welche 4-teilige IHK-Prüfungskette beschreibt das Zusammenspiel von XML und seinen Zusatztechnologien perfekt?',
             options: [
-              { id: 'a', text: 'XML (speichert Daten) → DTD/XSD (prüft Struktur) → XPath (sucht Daten) → XSLT (macht Design/HTML daraus)', isCorrect: true, explanation: 'Perfekt! Das ist die offizielle IHK-Zusammenfassungsformel aus dem PDF.' },
-              { id: 'b', text: 'HTML → CSS → JavaScript → PHP', isCorrect: false, explanation: 'Das ist der Web-Frontend-Stack, nicht die XML-Technologiefamilie.' },
-              { id: 'c', text: 'RGB → CMYK → Druck → Beschnitt', isCorrect: false, explanation: 'Das ist Druckfarbseparation.' },
-              { id: 'd', text: 'InDesign → Photoshop → Illustrator → Premiere', isCorrect: false, explanation: 'Das sind Adobe-Programme.' }
+              { id: 'a', text: 'XML → DTD/XSD → XPath → XSLT', isCorrect: true, explanation: 'Perfekt! XML speichert Daten, DTD/XSD prüft die Struktur, XPath sucht Knoten und XSLT transformiert sie in Zielformate wie HTML.' },
+              { id: 'b', text: 'HTML → CSS → JavaScript → PHP', isCorrect: false, explanation: 'Das ist der klassische Web-Stack, nicht die XML-Technologiefamilie.' },
+              { id: 'c', text: 'JSON → SQL → REST → GraphQL', isCorrect: false, explanation: 'Das sind API- und Datenbanktechnologien, nicht die XML-Verarbeitungskette.' },
+              { id: 'd', text: 'RGB → ICC → CMYK → PDF/X-4', isCorrect: false, explanation: 'Das beschreibt den Farbmanagement-Workflow in der Druckvorstufe.' }
             ],
             merksatz: 'Die Prüfungskette: XML speichert → DTD/XSD prüft → XPath sucht → XSLT macht Design/HTML!'
           }
@@ -3656,10 +3656,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'gfx-1',
             question: 'Welches Format ist für ein responsives Firmenlogo im Web am besten geeignet, um auf allen Displaygrößen scharf zu bleiben?',
             options: [
-              { id: 'a', text: 'SVG (Vektorbasiert)', isCorrect: true, explanation: 'Richtig! SVG bleibt bei jeder Skalierung knackscharf und ist sehr speichereffizient.' },
-              { id: 'b', text: 'JPG mit hoher Kompression', isCorrect: false, explanation: 'JPG verpixelt beim Vergrößern.' },
-              { id: 'c', text: 'BMP', isCorrect: false, explanation: 'Veraltet und ungeeignet.' },
-              { id: 'd', text: 'TIFF', isCorrect: false, explanation: 'Kein Web-Format.' }
+              { id: 'a', text: 'SVG', isCorrect: true, explanation: 'Richtig! SVG ist vektorbasiert, bleibt bei jeder Skalierung gestochen scharf und ist sehr speichereffizient.' },
+              { id: 'b', text: 'JPG', isCorrect: false, explanation: 'JPG ist eine verlustbehaftete Rastergrafik und verpixelt beim Vergrößern.' },
+              { id: 'c', text: 'BMP', isCorrect: false, explanation: 'BMP ist unkomprimiert, pixelbasiert und fürs Web ungeeignet.' },
+              { id: 'd', text: 'TIFF', isCorrect: false, explanation: 'TIFF ist ein Print-/Archivformat für Rasterdaten und kein gängiges Web-Logoformat.' }
             ]
           },
           {
@@ -3668,10 +3668,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'gfx-1',
             question: 'Was passiert mit einer Pixelgrafik (Rastergrafik), wenn sie extrem stark vergrößert wird?',
             options: [
-              { id: 'a', text: 'Es kommt zur Treppchenbildung (Verpixelung), da die einzelnen Farbpunkte sichtbar werden', isCorrect: true, explanation: 'Richtig! Da Pixel ein meilenweit definiertes Raster sind, führt Vergrößerung zu Unschärfe und Treppchenbildung.' },
-              { id: 'b', text: 'Sie wandelt sich automatisch in eine mathematische Vektordatei um', isCorrect: false, explanation: 'Konvertierung erfordert Vektorisierungstools, passiert nicht automatisch.' },
-              { id: 'c', text: 'Die Dateigröße schrumpft auf 0 Byte', isCorrect: false, explanation: 'Physikalisch unmöglich.' },
-              { id: 'd', text: 'Sie wird automatisch in CMYK konvertiert', isCorrect: false, explanation: 'Farbraum ändert sich nicht beim Skalieren.' }
+              { id: 'a', text: 'Es entsteht sichtbare Treppchenbildung, weil die einzelnen Bildpunkte vergrößert werden', isCorrect: true, explanation: 'Richtig! Da Rastergrafiken aus einem festen Pixelraster bestehen, führt starkes Vergrößern zu Unschärfe und Treppchenbildung (Verpixelung).' },
+              { id: 'b', text: 'Sie wird vom Betriebssystem automatisch in mathematische Vektorpfade umgerechnet', isCorrect: false, explanation: 'Eine Vektorisierung erfolgt nicht automatisch beim Vergrößern, sondern erfordert spezielle Nachzeichnung.' },
+              { id: 'c', text: 'Die Dateigröße reduziert sich proportional, da weniger Bildpunkte pro Fläche vorliegen', isCorrect: false, explanation: 'Die reine Skalierung bei der Darstellung verringert nicht automatisch die gespeicherte Pixelanzahl.' },
+              { id: 'd', text: 'Die Farbdarstellung wechselt automatisch vom RGB- in den CMYK-Druckfarbraum', isCorrect: false, explanation: 'Der Farbraum bleibt beim Skalieren unverändert.' }
             ]
           },
           {
@@ -3680,10 +3680,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'gfx-1',
             question: 'Auf welcher Auszeichnungssprache basiert das Vektorgrafik-Format SVG (Scalable Vector Graphics)?',
             options: [
-              { id: 'a', text: 'XML (Extensible Markup Language)', isCorrect: true, explanation: 'Exakt! SVG-Dateien sind XML-Dokumente, deren Pfade und Formen in Text-Code beschrieben werden.' },
-              { id: 'b', text: 'C++', isCorrect: false, explanation: 'C++ ist eine kompilierte Programmiersprache.' },
-              { id: 'c', text: 'MP3', isCorrect: false, explanation: 'MP3 ist ein Audioformat.' },
-              { id: 'd', text: 'SQL', isCorrect: false, explanation: 'SQL ist eine Datenbankabfragesprache.' }
+              { id: 'a', text: 'XML', isCorrect: true, explanation: 'Exakt! SVG basiert auf XML (Extensible Markup Language), sodass Pfade und Formen textbasiert beschrieben werden.' },
+              { id: 'b', text: 'JSON', isCorrect: false, explanation: 'JSON ist ein Datenaustauschformat, aber nicht die Auszeichnungssprache hinter SVG.' },
+              { id: 'c', text: 'PostScript', isCorrect: false, explanation: 'PostScript ist eine Seitenbeschreibungssprache aus dem Druckbereich (z. B. EPS), nicht die Basis von SVG.' },
+              { id: 'd', text: 'SQL', isCorrect: false, explanation: 'SQL ist eine Datenbankabfragesprache und keine Auszeichnungssprache für Vektorgrafiken.' }
             ],
             merksatz: 'SVG ist ein XML-basiertes Vektorformat – unendlich skalierbar und per Code/CSS manipulierbar!'
           }
@@ -3725,10 +3725,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'gfx-2',
             question: 'Was ist ein wesentlicher Vorteil des WebP-Formats gegenüber dem klassischen JPG?',
             options: [
-              { id: 'a', text: 'Bessere Kompression bei gleicher Qualität und Unterstützung von Transparenz', isCorrect: true, explanation: 'Exakt! WebP kombiniert die Vorteile von JPG und PNG.' },
-              { id: 'b', text: 'Es kann nur in Schwarz-Weiß speichern', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'c', text: 'Es benötigt keine Internetverbindung', isCorrect: false, explanation: 'Unsinning.' },
-              { id: 'd', text: 'Es ist ein reines Audio-Format', isCorrect: false, explanation: 'Nein.' }
+              { id: 'a', text: 'Bessere Kompression bei gleicher Qualität sowie Unterstützung von Transparenz', isCorrect: true, explanation: 'Exakt! WebP verbindet effiziente Kompression mit Alphakanal-Transparenz und Animation.' },
+              { id: 'b', text: 'Native Unterstützung des CMYK-Farbraums für die direkte Offsetdruck-Belichtung', isCorrect: false, explanation: 'WebP ist ein reines Web-Bildformat im RGB-Raum und kein klassisches Druckvorstufenformat.' },
+              { id: 'c', text: 'Unbegrenzte verlustfreie Skalierbarkeit durch mathematisch definierte Vektorpfade', isCorrect: false, explanation: 'WebP ist ein Rastergrafikformat; Vektorpfade bietet SVG.' },
+              { id: 'd', text: 'Verzicht auf jegliche Bildkompression bei gleichzeitig halbierter Pixelauflösung', isCorrect: false, explanation: 'WebP erzielt kleinere Dateien durch moderne verlustbehaftete oder verlustfreie Kompression, nicht durch Halbierung der Auflösung.' }
             ]
           },
           {
@@ -3737,10 +3737,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'gfx-2',
             question: 'Welches Kompressionsverfahren eignet sich am besten für Screenshots mit feinem Text und transparentem Hintergrund?',
             options: [
-              { id: 'a', text: 'Verlustfreie Kompression (Lossless, z. B. PNG oder WebP-Lossless)', isCorrect: true, explanation: 'Richtig! Verlustfreie Kompression verhindert störende Artefakte an Textkanten und unterstützt Alphakanäle.' },
-              { id: 'b', text: 'Starke verblassende JPG-Kompression auf Qualitätsstufe 10%', isCorrect: false, explanation: 'Führt zu unleserlichen Textartefakten und unterstützt keine Transparenz.' },
-              { id: 'c', text: 'Druck-CMYK-Farbauszug ohne Kompression', isCorrect: false, explanation: 'Für Web-Screenshots ungeeignet.' },
-              { id: 'd', text: 'MP4-Videokompression', isCorrect: false, explanation: 'MP4 ist ein Videoformat.' }
+              { id: 'a', text: 'Verlustfreie Kompression wie PNG oder verlustfreies WebP', isCorrect: true, explanation: 'Richtig! Verlustfreie (Lossless) Kompression verhindert Artefakte an scharfen Textkanten und unterstützt Transparenz.' },
+              { id: 'b', text: 'Stark verlustbehaftete JPG-Kompression mit geringer Qualität', isCorrect: false, explanation: 'JPG erzeugt störende Artefakte an Textkanten und unterstützt keinen Alphakanal.' },
+              { id: 'c', text: 'Unkomprimierte CMYK-Farbseparation im Druckformat TIFF', isCorrect: false, explanation: 'TIFF im CMYK-Raum ist für Web-Screenshots wegen Dateigröße und Browser-Support ungeeignet.' },
+              { id: 'd', text: 'Reduzierte 8-Bit-Palette ohne feine Abstufungen als animiertes GIF', isCorrect: false, explanation: 'GIF kennt nur 256 Farben und keine weiche Halbtransparenz (Alphakanal).' }
             ]
           },
           {
@@ -3749,10 +3749,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'gfx-2',
             question: 'Was versteht man unter "Kompression-Artefakten" bei einer JPG-Datei?',
             options: [
-              { id: 'a', text: 'Sichtbare Störungen, Blockbildungen oder Fransen an Kontrastkanten durch verlustbehaftetes Datenlöschen', isCorrect: true, explanation: 'Exakt! JPG fasst ähnliche 8x8-Pixelblöcke zusammen, was bei hoher Kompression sichtbare Störungen erzeugt.' },
-              { id: 'b', text: 'Historische Kunstwerke in Digitalmuseen', isCorrect: false, explanation: 'Sprachverwechslung.' },
-              { id: 'c', text: 'Die Schärfung von Vektorpfaden', isCorrect: false, explanation: 'Artefakte verschlechtern das Bild.' },
-              { id: 'd', text: 'Das automatische Einfügen von Wasserzeichen', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Sichtbare Blockbildungen und Fransen an Kanten durch verlustbehaftete Kompression', isCorrect: true, explanation: 'Exakt! JPG fasst ähnliche 8×8-Pixelblöcke zusammen, was bei starker Kompression sichtbare Störungen erzeugt.' },
+              { id: 'b', text: 'Automatisch eingebettete Metadaten zu Kamera, Brennweite und Aufnahmedatum', isCorrect: false, explanation: 'Das sind EXIF-Metadaten, keine Kompressionsartefakte.' },
+              { id: 'c', text: 'Gezielte Kantenverstärkung zur besseren Lesbarkeit von Texten in Rasterbildern', isCorrect: false, explanation: 'Artefakte sind unerwünschte Qualitätsverluste, keine gewollte Schärfung.' },
+              { id: 'd', text: 'Unsichtbare digitale Markierungen zum Schutz des Urheberrechts im Bildmaterial', isCorrect: false, explanation: 'Das sind digitale Wasserzeichen, keine Kompressionsartefakte.' }
             ],
             examTip: 'IHK-Merksatz: Verlustbehaftete Kompression (JPG) spart Speicher, erzeugt aber irreversible Kompressionsartefakte.'
           }
@@ -3794,10 +3794,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'gfx-3',
             question: 'Was versteht man unter medienneutraler Datenhaltung?',
             options: [
-              { id: 'a', text: 'Daten werden so aufbereitet, dass sie für verschiedene Ausgabemedien (Web, Print, App) flexibel einsetzbar sind', isCorrect: true, explanation: 'Richtig! Die Trennung von Inhalt und Format ist hierbei entscheidend.' },
-              { id: 'b', text: 'Daten dürfen nur auf USB-Sticks gespeichert werden', isCorrect: false, explanation: 'Nein.' },
-              { id: 'c', text: 'Alle Bilder müssen zwingend schwarz-weiß sein', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'd', text: 'Das Löschen aller Meta-Daten', isCorrect: false, explanation: 'Gegenteil ist der Fall.' }
+              { id: 'a', text: 'Daten werden unabhängig vom Ausgabekanal für Web, Print und App aufbereitet', isCorrect: true, explanation: 'Richtig! Die Trennung von Inhalt und medienspezifischem Format macht Inhalte mehrfach nutzbar.' },
+              { id: 'b', text: 'Daten werden ausschließlich auf lokalen Wechselmedien ohne Cloud-Anbindung archiviert', isCorrect: false, explanation: 'Medienneutralität meint Unabhängigkeit vom Ausgabemedium, nicht vom Speichermedium.' },
+              { id: 'c', text: 'Alle Bilder werden vorab in Graustufen ohne Farbprofil vereinheitlicht gespeichert', isCorrect: false, explanation: 'Medienneutrale Bilddaten bleiben im großen RGB-Farbraum, nicht in Graustufen.' },
+              { id: 'd', text: 'Sämtliche Metadaten und Strukturmerkmale werden vor der Ausgabe entfernt', isCorrect: false, explanation: 'Genau das Gegenteil: Struktur und Metadaten sind für medienneutrale Datenhaltung entscheidend.' }
             ]
           },
           {
@@ -3806,10 +3806,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'gfx-3',
             question: 'Was versteht man unter dem Prinzip des "Late Binding" bei der Farbraumkonvertierung in der Medienproduktion?',
             options: [
-              { id: 'a', text: 'Bilddaten werden möglichst lange im neutralen RGB-Farbraum belassen und erst bei der konkreten Medienausgabe in CMYK umgewandelt', isCorrect: true, explanation: 'Richtig! Late Binding bewahrt das volle Farbspektrum für alle Kanäle bis zur finalen Druckausgabe.' },
-              { id: 'b', text: 'Das Binden von Büchern am späten Abend', isCorrect: false, explanation: 'Falsche Wortbedeutung.' },
-              { id: 'c', text: 'Das sofortige Umwandeln aller Fotos in CMYK beim Fotografieren', isCorrect: false, explanation: 'Das wäre "Early Binding" und zerstört RGB-Farbinformationen für Web.' },
-              { id: 'd', text: 'Das automatische Löschen von Schriftarten aus InDesign', isCorrect: false, explanation: 'Falsch.' }
+              { id: 'a', text: 'Bilddaten bleiben lange im neutralen RGB-Raum und werden erst bei der Druckausgabe in CMYK gewandelt', isCorrect: true, explanation: 'Richtig! Late Binding bewahrt das volle Farbspektrum für alle Kanäle bis zur finalen Druckausgabe.' },
+              { id: 'b', text: 'Bilddaten werden direkt nach dem Import in den zielspezifischen CMYK-Druckfarbraum konvertiert', isCorrect: false, explanation: 'Das wäre „Early Binding“ und beschneidet frühzeitig den größeren RGB-Farbraum für digitale Kanäle.' },
+              { id: 'c', text: 'Farbprofile werden erst nach dem Auflagendruck manuell in der Druckmaschine zugewiesen', isCorrect: false, explanation: 'Die Farbraumkonvertierung erfolgt vor der Druckplattenbelichtung, typischerweise beim PDF/X-Export oder im RIP.' },
+              { id: 'd', text: 'Verknüpfte Bilddateien und Schriften werden erst bei der Langzeitarchivierung ins Dokument eingebettet', isCorrect: false, explanation: 'Late Binding im Farbmanagement bezieht sich auf den späten Zeitpunkt der Farbraumkonvertierung.' }
             ]
           },
           {
@@ -3818,10 +3818,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'gfx-3',
             question: 'Warum gilt der eciRGB-v2-Farbraum als besonders geeignet für die medienneutrale Bilddatenhaltung?',
             options: [
-              { id: 'a', text: 'Weil er einen sehr großen Farbumfang besitzt, der sowohl sRGB (Web) als auch gängige Offsetdruck-Farbräume (CMYK) vollständig abdeckt', isCorrect: true, explanation: 'Exakt! Großer RGB-Farbraum verhindert Farbverluste bei späteren Umwandlungen.' },
-              { id: 'b', text: 'Weil er nur 4 Farben darstellen kann', isCorrect: false, explanation: 'Falsch.' },
-              { id: 'c', text: 'Weil eciRGB nur auf Linux-Servern existiert', isCorrect: false, explanation: 'eciRGB ist ein plattformunabhängiger ICC-Standard.' },
-              { id: 'd', text: 'Weil er Bilder automatisch um 50% komprimiert', isCorrect: false, explanation: 'Ein Farbraum komprimiert keine Dateigrößen.' }
+              { id: 'a', text: 'Weil sein großer Farbumfang sowohl sRGB fürs Web als auch Offset-CMYK gut abdeckt', isCorrect: true, explanation: 'Exakt! Der große RGB-Arbeitsfarbraum eciRGB v2 minimiert Farbverluste bei späteren Konvertierungen in sRGB oder CMYK.' },
+              { id: 'b', text: 'Weil er direkt auf die vier Druckfarben Cyan, Magenta, Gelb und Schwarz begrenzt ist', isCorrect: false, explanation: 'eciRGB v2 ist ein großer RGB-Arbeitsfarbraum, kein 4-Farb-CMYK-Raum.' },
+              { id: 'c', text: 'Weil er Web-Dateien beim Export automatisch ohne Qualitätsverlust um die Hälfte verkleinert', isCorrect: false, explanation: 'Ein Farbprofil definiert die Farbdarstellung, nicht die Dateikompression.' },
+              { id: 'd', text: 'Weil moderne Webbrowser ausschließlich Bilder im eciRGB-v2-Profil fehlerfrei anzeigen', isCorrect: false, explanation: 'Für das Web wird standardmäßig in sRGB konvertiert; eciRGB v2 dient als medienneutraler Master-Arbeitsfarbraum.' }
             ],
             merksatz: 'Late Binding & eciRGB-v2 sichern maximale Farbqualität für die spätere Transformation in Web (sRGB) oder Print (CMYK).'
           }
@@ -3909,10 +3909,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-1',
             question: 'Wie lange darf die Probezeit in einem Berufsausbildungsverhältnis nach dem Berufsbildungsgesetz (BBiG) maximal dauern?',
             options: [
-              { id: 'a', text: 'Maximal 4 Monate (gesetzlicher Rahmen: 1 bis 4 Monate)', isCorrect: true, explanation: 'Richtig! § 20 BBiG schreibt zwingend vor: Die Probezeit muss mindestens einen Monat und darf höchstens vier Monate betragen.' },
-              { id: 'b', text: 'Maximal 6 Monate wie bei normalen Arbeitsverträgen', isCorrect: false, explanation: 'Falsch: 6 Monate gilt für reguläre Arbeitnehmer nach BGB/KSchG, für Azubis im BBiG gilt die Obergrenze von 4 Monaten!' },
-              { id: 'c', text: 'Maximal 3 Monate', isCorrect: false, explanation: 'Falsch: 3 Monate ist zwar häufig vereinbart, die gesetzliche Obergrenze liegt aber bei 4 Monaten.' },
-              { id: 'd', text: 'Beliebig lang, sofern beide Vertragspartner im Vertrag zustimmen', isCorrect: false, explanation: 'Falsch: Das BBiG ist zwingendes Arbeitnehmerschutzrecht und kann nicht zuungunsten des Azubis abbedungen werden.' }
+              { id: 'a', text: 'Mindestens 1 Monat und höchstens 4 Monate', isCorrect: true, explanation: 'Richtig! § 20 BBiG schreibt zwingend vor: Die Probezeit muss mindestens einen Monat und darf höchstens vier Monate betragen.' },
+              { id: 'b', text: 'Mindestens 2 Monate und höchstens 6 Monate', isCorrect: false, explanation: 'Falsch: Bis zu 6 Monate gelten für reguläre Arbeitsverhältnisse nach BGB, für Azubis gilt nach § 20 BBiG die Obergrenze von 4 Monaten.' },
+              { id: 'c', text: 'Mindestens 1 Monat und höchstens 3 Monate', isCorrect: false, explanation: 'Falsch: 3 Monate werden oft vereinbart, die gesetzliche Obergrenze nach BBiG liegt aber bei 4 Monaten.' },
+              { id: 'd', text: 'Frei vereinbar, sofern beide Seiten zustimmen', isCorrect: false, explanation: 'Falsch: Das BBiG ist zwingendes Schutzrecht und darf nicht zuungunsten der Auszubildenden ausgedehnt werden.' }
             ],
             merksatz: 'BBiG § 20: Probezeit mindestens 1 Monat, höchstens 4 Monate!'
           },
@@ -3922,10 +3922,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-1',
             question: 'Ein Mediengestalter-Azubi hat seine 3-monatige Probezeit erfolgreich beendet. Nach 8 Monaten Ausbildung möchte der Betrieb dem Azubi ordentlich mit einer Frist von 4 Wochen kündigen, weil die Auftragslage eingebrochen ist. Ist diese Kündigung rechtmäßig?',
             options: [
-              { id: 'a', text: 'Nein, nach der Probezeit ist eine ordentliche Kündigung durch den Ausbildungsbetrieb gesetzlich ausgeschlossen', isCorrect: true, explanation: 'Exakt! Nach § 22 Abs. 2 BBiG kann der Ausbildungsbetrieb nach Ablauf der Probezeit nicht mehr ordentlich (z. B. betriebsbedingt) kündigen, sondern nur noch außerordentlich aus wichtigem Grund.' },
-              { id: 'b', text: 'Ja, bei schlechter Auftragslage greift immer die gesetzliche Kündigungsfrist von 4 Wochen', isCorrect: false, explanation: 'Falsch: Der Ausbildungsbetrieb hat einen Erziehungs- und Ausbildungsauftrag; wirtschaftliche Flauten berechtigen nicht zur Kündigung eines Azubis.' },
-              { id: 'c', text: 'Ja, sofern der Betriebsrat vor der Kündigung nicht widersprochen hat', isCorrect: false, explanation: 'Falsch: Selbst mit Zustimmung des Betriebsrats ist eine ordentliche Kündigung durch den Betrieb nach § 22 BBiG gesetzlich unwirksam.' },
-              { id: 'd', text: 'Ja, aber nur mit einer Abfindung von 3 Monatsvergütungen', isCorrect: false, explanation: 'Falsch: Das BBiG sieht bei Kündigungen keinen Abfindungsanspruch vor, die Kündigung ist schlicht unwirksam.' }
+              { id: 'a', text: 'Nein, eine ordentliche Kündigung durch den Ausbildungsbetrieb ist nach der Probezeit ausgeschlossen', isCorrect: true, explanation: 'Exakt! Nach § 22 Abs. 2 BBiG kann der Betrieb nach der Probezeit nicht mehr ordentlich (z. B. betriebsbedingt) kündigen, sondern nur außerordentlich aus wichtigem Grund.' },
+              { id: 'b', text: 'Ja, bei rückläufiger Auftragslage gilt die gesetzliche Kündigungsfrist von vier Wochen zum Monatsende', isCorrect: false, explanation: 'Falsch: Wirtschaftliche Flauten berechtigen nach Ablauf der Probezeit nicht zur ordentlichen Kündigung eines Azubis.' },
+              { id: 'c', text: 'Ja, sofern der Betriebsrat vorab angehört wurde und der Kündigung ausdrücklich zugestimmt hat', isCorrect: false, explanation: 'Falsch: Selbst mit Zustimmung des Betriebsrats ist eine ordentliche Kündigung durch den Betrieb nach § 22 BBiG unwirksam.' },
+              { id: 'd', text: 'Ja, allerdings nur gegen Zahlung einer gesetzlichen Abfindung in Höhe von drei Monatsvergütungen', isCorrect: false, explanation: 'Falsch: Das BBiG sieht keinen Abfindungs-Freikauf vor; die ordentliche Kündigung durch den Betrieb ist schlicht unwirksam.' }
             ],
             merksatz: 'Nach der Probezeit gibt es für den Ausbildungsbetrieb keine ordentliche Kündigung mehr!'
           },
@@ -3935,10 +3935,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-1',
             question: 'Welche maximale tägliche Arbeitszeit und welche wöchentliche Obergrenze gilt nach dem Jugendarbeitsschutzgesetz (JArbSchG) für einen 17-jährigen Auszubildenden?',
             options: [
-              { id: 'a', text: 'Maximal 8 Stunden täglich und maximal 40 Stunden wöchentlich an höchstens 5 Tagen pro Woche', isCorrect: true, explanation: 'Richtig! Nach § 8 JArbSchG dürfen Jugendliche nicht mehr als 8 Stunden täglich und nicht mehr als 40 Stunden wöchentlich beschäftigt werden. Samstags- und Sonntagsarbeit ist in Werbeagenturen grundsätzlich unzulässig.' },
-              { id: 'b', text: 'Maximal 10 Stunden täglich und maximal 48 Stunden wöchentlich', isCorrect: false, explanation: 'Falsch: Das sind Höchstgrenzen des ArbZG für volljährige Arbeitnehmer.' },
-              { id: 'c', text: 'Maximal 7 Stunden täglich und maximal 35 Stunden wöchentlich', isCorrect: false, explanation: 'Falsch: Die gesetzliche Obergrenze liegt bei 8 Std./Tag bzw. 40 Std./Woche.' },
-              { id: 'd', text: 'Maximal 8,5 Stunden täglich an 6 Tagen pro Woche', isCorrect: false, explanation: 'Falsch: Für Jugendliche gilt zwingend die 5-Tage-Woche nach § 15 JArbSchG.' }
+              { id: 'a', text: 'Maximal 8 Stunden täglich und 40 Stunden wöchentlich an höchstens 5 Tagen', isCorrect: true, explanation: 'Richtig! Nach §§ 8, 15 JArbSchG gelten maximal 8 Stunden täglich, 40 Stunden wöchentlich und die 5-Tage-Woche.' },
+              { id: 'b', text: 'Maximal 10 Stunden täglich und 48 Stunden wöchentlich an höchstens 6 Tagen', isCorrect: false, explanation: 'Falsch: Das entspricht den Höchstgrenzen des ArbZG für volljährige Arbeitnehmer.' },
+              { id: 'c', text: 'Maximal 7 Stunden täglich und 35 Stunden wöchentlich an höchstens 5 Tagen', isCorrect: false, explanation: 'Falsch: Die gesetzliche Obergrenze im JArbSchG liegt bei 8 Stunden täglich bzw. 40 Stunden wöchentlich.' },
+              { id: 'd', text: 'Maximal 8,5 Stunden täglich und 42 Stunden wöchentlich an höchstens 6 Tagen', isCorrect: false, explanation: 'Falsch: Für Jugendliche gilt die 5-Tage-Woche und grundsätzlich das 8-Stunden-Limit (Ausgleich bis 8,5 Std. nur bei Verkürzung an einem anderen Tag derselben Woche).' }
             ],
             merksatz: 'JArbSchG: Max. 8 Stunden am Tag, max. 40 Stunden in der Woche, 5-Tage-Woche!'
           },
@@ -3948,10 +3948,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-1',
             question: 'Wie hoch ist der gesetzliche Mindesturlaubsanspruch nach dem Bundesurlaubsgesetz (BUrlG) bei einer 5-Tage-Woche und wie ist er im Vergleich zum JArbSchG geregelt?',
             options: [
-              { id: 'a', text: 'BUrlG: Mindestens 20 Arbeitstage (bzw. 24 Werktage bei 6-Tage-Woche); für Jugendliche nach JArbSchG gestaffelt 30, 27 bzw. 25 Werktage je nach Alter', isCorrect: true, explanation: 'Richtig! Das BUrlG garantiert 24 Werktage (= 20 Arbeitstage bei 5-Tage-Woche). Für Jugendliche unter 16/17/18 Jahren gelten zu Beginn des Kalenderjahres 30/27/25 Werktage nach § 19 JArbSchG.' },
-              { id: 'b', text: 'Genau 12 Arbeitstage für alle Arbeitnehmer und Azubis', isCorrect: false, explanation: 'Falsch: 12 Tage ist weit unter dem gesetzlichen Mindeststandard.' },
-              { id: 'c', text: 'Mindestens 30 Arbeitstage für Erwachsene und 20 für Jugendliche', isCorrect: false, explanation: 'Falsch: Jugendliche erhalten mehr Schutz und damit mehr Urlaubstage als Erwachsene.' },
-              { id: 'd', text: 'Urlaubsanspruch besteht erst nach 2 Jahren Betriebszugehörigkeit', isCorrect: false, explanation: 'Falsch: Der volle Urlaubsanspruch wird erstmals nach 6-monatigem Bestehen des Arbeitsverhältnisses erworben.' }
+              { id: 'a', text: 'BUrlG: 20 Arbeitstage bei 5-Tage-Woche; JArbSchG: je nach Alter 30, 27 oder 25 Werktage', isCorrect: true, explanation: 'Richtig! Das BUrlG garantiert 24 Werktage (= 20 Arbeitstage bei 5-Tage-Woche). Für Jugendliche unter 16/17/18 Jahren gelten 30/27/25 Werktage nach § 19 JArbSchG.' },
+              { id: 'b', text: 'BUrlG: 15 Arbeitstage bei 5-Tage-Woche; JArbSchG: einheitlich 20 Werktage für alle Azubis', isCorrect: false, explanation: 'Falsch: Beide Werte liegen deutlich unter dem gesetzlichen Mindesturlaub.' },
+              { id: 'c', text: 'BUrlG: 30 Arbeitstage für Erwachsene; JArbSchG: einheitlich 20 Werktage für Jugendliche', isCorrect: false, explanation: 'Falsch: Jugendliche genießen höheren Schutz und erhalten mehr gesetzlichen Mindesturlaub als Erwachsene.' },
+              { id: 'd', text: 'BUrlG: 24 Arbeitstage ab dem 2. Berufsjahr; JArbSchG: 18 Werktage während der Ausbildung', isCorrect: false, explanation: 'Falsch: Der volle Urlaubsanspruch entsteht bereits nach 6 Monaten Wartezeit und liegt für Jugendliche höher.' }
             ],
             merksatz: 'BUrlG: Mind. 20 Arbeitstage (5-Tage-Woche). JArbSchG: Unter 16 = 30, unter 17 = 27, unter 18 = 25 Werktage!'
           },
@@ -3961,10 +3961,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-1',
             question: 'Wann greift das Kündigungsschutzgesetz (KSchG) für reguläre Arbeitnehmer und welche drei Kündigungsgründe unterscheidet es?',
             options: [
-              { id: 'a', text: 'Ab mehr als 10 Vollzeit-Arbeitnehmern und mind. 6 Monaten Betriebszugehörigkeit; Kündigungsgründe: personenbedingt, verhaltensbedingt oder betriebsbedingt', isCorrect: true, explanation: 'Exakt! Das KSchG schützt Arbeitnehmer in Betrieben mit mehr als 10 Beschäftigten nach 6 Monaten Wartezeit. Eine Kündigung ist nur sozial gerechtfertigt, wenn sie personen-, verhaltens- oder betriebsbedingt ist.' },
-              { id: 'b', text: 'In allen Betrieben ab dem ersten Mitarbeiter und ab dem ersten Arbeitstag ohne sachlichen Grund', isCorrect: false, explanation: 'Falsch: Kleinbetriebe bis 10 AN sind vom KSchG ausgenommen.' },
-              { id: 'c', text: 'Nur für Auszubildende nach Ablauf des ersten Ausbildungsjahres', isCorrect: false, explanation: 'Falsch: Für Azubis gilt vorrangig das BBiG.' },
-              { id: 'd', text: 'Nur dann, wenn der Arbeitnehmer mehr als 50 Jahre alt ist', isCorrect: false, explanation: 'Falsch: Das KSchG gilt altersunabhängig.' }
+              { id: 'a', text: 'Ab über 10 Vollzeitkräften nach 6 Monaten; Gründe: personen-, verhaltens- oder betriebsbedingt', isCorrect: true, explanation: 'Exakt! Das KSchG gilt bei mehr als 10 Vollzeit-Beschäftigten nach 6 Monaten Wartezeit; Kündigungen müssen sozial gerechtfertigt sein.' },
+              { id: 'b', text: 'In allen Betrieben ab dem ersten Beschäftigten ab Tag 1; Gründe: wirtschaftlich oder persönlich', isCorrect: false, explanation: 'Falsch: Kleinbetriebe mit bis zu 10 Vollzeit-Beschäftigten fallen nicht unter das KSchG.' },
+              { id: 'c', text: 'Ab 5 Beschäftigten nach dem 1. Ausbildungsjahr; Gründe: nur betriebs- oder fristlos bedingt', isCorrect: false, explanation: 'Falsch: Für Auszubildende gilt vorrangig das BBiG, und die KSchG-Schwelle liegt bei mehr als 10 Arbeitnehmern.' },
+              { id: 'd', text: 'Ab 50 Beschäftigten nach 2 Jahren Betriebszugehörigkeit; Gründe: nur betriebsbedingt zulässig', isCorrect: false, explanation: 'Falsch: Die Schwellenwerte sind > 10 Beschäftigte und 6 Monate Wartezeit mit drei anerkannten Kündigungsgründen.' }
             ],
             merksatz: 'KSchG: Gilt ab >10 Mitarbeitern nach 6 Monaten Wartezeit: personen-, verhaltens- oder betriebsbedingt!'
           }
@@ -4021,10 +4021,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-2',
             question: 'Was besagt das sogenannte "Günstigkeitsprinzip" im Arbeits- und Tarifrecht?',
             options: [
-              { id: 'a', text: 'Regelungen im Einzelarbeitsvertrag dürfen von geltenden Tarifverträgen abweichen, wenn sie für den Arbeitnehmer günstiger sind (z. B. mehr Urlaub oder höheres Gehalt)', isCorrect: true, explanation: 'Richtig! Das Günstigkeitsprinzip (§ 4 Abs. 3 TVG) schützt den Arbeitnehmer: Verschlechterungen gegenüber Gesetzen/Tarifverträgen sind unwirksam, Besserstellungen jederzeit erlaubt.' },
-              { id: 'b', text: 'Der Arbeitgeber darf immer die für das Unternehmen kostengünstigste Regelung auswählen', isCorrect: false, explanation: 'Falsch: Das Günstigkeitsprinzip dient dem Schutz der Beschäftigten, nicht der Kosteneinsparung des Betriebs.' },
-              { id: 'c', text: 'Ausländische Fachkräfte erhalten automatisch denselben Lohn wie einheimische Fachkräfte', isCorrect: false, explanation: 'Das regelt das Allgemeine Gleichbehandlungsgesetz (AGG), nicht das Günstigkeitsprinzip.' },
-              { id: 'd', text: 'Tarifverträge stehen rechtlich über dem Grundgesetz', isCorrect: false, explanation: 'Falsch: Das Grundgesetz ist die oberste Rechtsnorm in Deutschland.' }
+              { id: 'a', text: 'Einzelarbeitsverträge dürfen von Tarifverträgen abweichen, wenn sie für Beschäftigte günstiger sind', isCorrect: true, explanation: 'Richtig! Das Günstigkeitsprinzip (§ 4 Abs. 3 TVG) erlaubt Besserstellungen wie mehr Urlaub oder höheres Gehalt, verbietet aber Verschlechterungen.' },
+              { id: 'b', text: 'Arbeitgeber dürfen bei mehreren geltenden Regeln die für den Betrieb wirtschaftlich günstigste wählen', isCorrect: false, explanation: 'Falsch: Das Günstigkeitsprinzip schützt die Beschäftigten, nicht die Kosteneinsparung des Betriebs.' },
+              { id: 'c', text: 'Alle Beschäftigten gleicher Qualifikation erhalten unabhängig vom Vertrag exakt denselben Tariflohn', isCorrect: false, explanation: 'Besserstellungen im Einzelvertrag sind ausdrücklich zulässig; Diskriminierungsschutz regelt das AGG.' },
+              { id: 'd', text: 'Ein gültiger Tarifvertrag hat rechtlich stets Vorrang vor zwingenden Bundesgesetzen und dem BGB', isCorrect: false, explanation: 'Falsch: Zwingendes Gesetzesrecht und das Grundgesetz stehen in der Normenhierarchie über Tarifverträgen.' }
             ],
             merksatz: 'Günstigkeitsprinzip: Abweichungen vom Tarifvertrag sind nur erlaubt, wenn sie den Arbeitnehmer besserstellen!'
           },
@@ -4034,10 +4034,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-2',
             question: 'Welche Rechtsfolge hat es, wenn die Geschäftsführung einer Medienagentur einem festangestellten Webdesigner kündigt, ohne den bestehenden Betriebsrat vor Ausspruch der Kündigung anzuhören?',
             options: [
-              { id: 'a', text: 'Die Kündigung ist nach § 102 BetrVG unwirksam', isCorrect: true, explanation: 'Exakt! Nach § 102 Abs. 1 BetrVG ist der Betriebsrat vor jeder Kündigung anzuhören. Eine ohne Anhörung des Betriebsrats ausgesprochene Kündigung ist von vornherein unwirksam.' },
-              { id: 'b', text: 'Die Kündigung ist gültig, der Betriebsrat erhält lediglich eine Entschädigungszahlung', isCorrect: false, explanation: 'Falsch: Die Kündigung selbst ist nach ständiger Rechtsprechung absolut unwirksam.' },
-              { id: 'c', text: 'Die Kündigungsfrist verlängert sich automatisch um 6 Monate', isCorrect: false, explanation: 'Falsch: Es gibt keine Verlängerung, die Kündigung ist rechtsunwirksam.' },
-              { id: 'd', text: 'Der Arbeitgeber muss lediglich ein Bußgeld an das Finanzamt zahlen', isCorrect: false, explanation: 'Falsch: Das BetrVG schützt das Arbeitsverhältnis des Mitarbeiters.' }
+              { id: 'a', text: 'Die Kündigung ist ohne vorherige Anhörung nach § 102 BetrVG unwirksam', isCorrect: true, explanation: 'Exakt! Nach § 102 Abs. 1 BetrVG ist der Betriebsrat vor jeder Kündigung anzuhören. Eine ohne Anhörung ausgesprochene Kündigung ist von vornherein unwirksam.' },
+              { id: 'b', text: 'Die Kündigung bleibt gültig, der Betriebsrat erhält eine Entschädigung', isCorrect: false, explanation: 'Falsch: Die Kündigung selbst ist nach § 102 Abs. 1 Satz 3 BetrVG absolut unwirksam.' },
+              { id: 'c', text: 'Die Kündigung bleibt wirksam, die Kündigungsfrist verdoppelt sich aber', isCorrect: false, explanation: 'Falsch: Es gibt keine Fristverlängerung – die Kündigung ist rechtsunwirksam.' },
+              { id: 'd', text: 'Die Kündigung wird wirksam, sobald die Anhörung nachträglich erfolgt', isCorrect: false, explanation: 'Falsch: Eine unterlassene Anhörung vor Ausspruch der Kündigung kann nicht rückwirkend geheilt werden.' }
             ],
             merksatz: 'Ohne vorherige Betriebsratsanhörung ist jede Kündigung unwirksam (§ 102 BetrVG)!'
           },
@@ -4047,10 +4047,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-2',
             question: 'Welcher Bestandteil wird bei einer Standard-Gehaltsabrechnung NICHT von den gesetzlichen Sozialversicherungsbeiträgen abgezogen?',
             options: [
-              { id: 'a', text: 'Die gesetzliche Unfallversicherung (Berufsgenossenschaft)', isCorrect: true, explanation: 'Richtig! Die Beiträge zur gesetzlichen Unfallversicherung (z.B. BG ETEM) trägt der Arbeitgeber zu 100% allein; sie tauchen daher nicht als Abzug auf der Gehaltsabrechnung des Arbeitnehmers auf.' },
-              { id: 'b', text: 'Die gesetzliche Krankenversicherung', isCorrect: false, explanation: 'Wird paritätisch vom Bruttogehalt von AG und AN getragen.' },
-              { id: 'c', text: 'Die gesetzliche Rentenversicherung', isCorrect: false, explanation: 'Wird zur Hälfte vom Arbeitnehmerlohn abgezogen.' },
-              { id: 'd', text: 'Die gesetzliche Pflegeversicherung', isCorrect: false, explanation: 'Wird ebenfalls monatlich anteilig vom Lohn abgezogen.' }
+              { id: 'a', text: 'Die gesetzliche Unfallversicherung', isCorrect: true, explanation: 'Richtig! Die Beiträge zur gesetzlichen Unfallversicherung (Berufsgenossenschaft, z. B. BG ETEM) trägt der Arbeitgeber zu 100 % allein.' },
+              { id: 'b', text: 'Die gesetzliche Krankenversicherung', isCorrect: false, explanation: 'Die Krankenversicherung wird paritätisch vom Bruttogehalt von Arbeitgeber und Arbeitnehmer getragen.' },
+              { id: 'c', text: 'Die gesetzliche Rentenversicherung', isCorrect: false, explanation: 'Die Rentenversicherung wird zur Hälfte vom Bruttolohn des Arbeitnehmers abgezogen.' },
+              { id: 'd', text: 'Die gesetzliche Pflegeversicherung', isCorrect: false, explanation: 'Die Pflegeversicherung wird monatlich anteilig vom Bruttogehalt des Arbeitnehmers abgezogen.' }
             ],
             merksatz: 'Prüfungsfalle: Die Unfallversicherung bezahlt der Arbeitgeber zu 100% alleine!'
           },
@@ -4060,10 +4060,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-2',
             question: 'Worin besteht der rechtliche Unterschied zwischen einem Manteltarifvertrag (Rahmentarifvertrag) und einem Lohn-/Gehaltstarifvertrag?',
             options: [
-              { id: 'a', text: 'Der Manteltarifvertrag regelt grundlegende Arbeitsbedingungen (Arbeitszeit, Urlaub, Kündigungsfristen) mit mehrjähriger Laufzeit; der Entgelttarifvertrag regelt die Höhe der Vergütung mit kürzerer Laufzeit (meist 12–24 Monate)', isCorrect: true, explanation: 'Richtig! Manteltarifverträge haben lange Laufzeiten (oft 3–5 Jahre) für Arbeitszeiten/Urlaub; Lohn- und Gehaltstarifverträge werden regelmäßig neu verhandelt (meist 1 bis 2 Jahre).' },
-              { id: 'b', text: 'Der Manteltarifvertrag gilt nur für Führungskräfte, der Entgelttarifvertrag nur für Azubis', isCorrect: false, explanation: 'Falsch: Beide Tarifverträge gelten für die tarifgebundenen Arbeitnehmer der jeweiligen Branche.' },
-              { id: 'c', text: 'Der Manteltarifvertrag wird von der Bundesregierung beschlossen, der Gehaltstarifvertrag vom Betriebsrat', isCorrect: false, explanation: 'Falsch: Tarifverträge werden autonom zwischen Gewerkschaften und Arbeitgeberverbänden ausgehandelt (Tarifautonomie).' },
-              { id: 'd', text: 'Es gibt keinen Unterschied, die beiden Begriffe sind rechtlich identisch', isCorrect: false, explanation: 'Falsch: Es handelt sich um zwei getrennte Tarifvertragsarten.' }
+              { id: 'a', text: 'Der Manteltarifvertrag regelt langfristig Rahmenbedingungen; der Entgelttarifvertrag regelt kürzerfristig Löhne', isCorrect: true, explanation: 'Richtig! Manteltarifverträge regeln Arbeitszeit, Urlaub und Kündigungsfristen über mehrere Jahre; Entgelttarifverträge laufen meist 12–24 Monate.' },
+              { id: 'b', text: 'Der Manteltarifvertrag gilt ausschließlich für Führungskräfte; der Entgelttarifvertrag gilt nur für Auszubildende', isCorrect: false, explanation: 'Falsch: Beide Tarifvertragsarten gelten für die tarifgebundenen Beschäftigten der jeweiligen Branche.' },
+              { id: 'c', text: 'Der Manteltarifvertrag wird vom Gesetzgeber erlassen; der Entgelttarifvertrag wird vom Betriebsrat beschlossen', isCorrect: false, explanation: 'Falsch: Beide werden im Rahmen der Tarifautonomie zwischen Gewerkschaften und Arbeitgeberverbänden ausgehandelt.' },
+              { id: 'd', text: 'Der Manteltarifvertrag gilt nur bei unbefristeten Verträgen; der Entgelttarifvertrag nur bei befristeten Stellen', isCorrect: false, explanation: 'Falsch: Der Unterschied liegt im Regelungsgegenstand (Rahmenbedingungen vs. Vergütung) und in der Laufzeit.' }
             ],
             merksatz: 'Manteltarifvertrag = Rahmenbedingungen & lange Laufzeit. Entgelttarifvertrag = Lohnhöhe & kurze Laufzeit!'
           },
@@ -4073,10 +4073,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-2',
             question: 'Welche formale Voraussetzung muss erfüllt sein, damit eine Gewerkschaft einen regulären unbefristeten Streik rechtmäßig ausrufen darf?',
             options: [
-              { id: 'a', text: 'Die Friedenspflicht muss abgelaufen sein, die Tarifverhandlungen müssen für gescheitert erklärt worden sein und mind. 75 % der Gewerkschaftsmitglieder müssen in einer Urabstimmung zustimmen', isCorrect: true, explanation: 'Exakt! Während der Laufzeit eines Tarifvertrags gilt Friedenspflicht (kein Streik). Nach Scheitern der Verhandlungen ist eine Urabstimmung mit mindestens 75 % Zustimmung der Gewerkschaftsmitglieder zwingend erforderlich.' },
-              { id: 'b', text: 'Der Bundeskanzler muss den Streik per Eildekret genehmigen', isCorrect: false, explanation: 'Falsch: Der Staat mischt sich wegen der verfassungsrechtlichen Tarifautonomie (Art. 9 Abs. 3 GG) nicht ein.' },
-              { id: 'c', text: 'Ein Streik ist jederzeit spontan von einzelnen Mitarbeitern während der Arbeitszeit ohne Gewerkschaft erlaubt (wilder Streik)', isCorrect: false, explanation: 'Falsch: Sogenannte "wilde Streiks" ohne Gewerkschaftsträger sind in Deutschland rechtswidrig und können zur fristlosen Kündigung führen.' },
-              { id: 'd', text: 'Es genügt eine einfache Mehrheit von 51 % im Betriebsrat', isCorrect: false, explanation: 'Falsch: Der Betriebsrat darf niemals zum Streik aufrufen; Arbeitskämpfe führen ausschließlich die Tarifparteien!' }
+              { id: 'a', text: 'Friedenspflicht beendet, Verhandlungen für gescheitert erklärt und mind. 75 % Zustimmung in der Urabstimmung', isCorrect: true, explanation: 'Exakt! Während der Tariflaufzeit gilt Friedenspflicht. Nach gescheiterten Verhandlungen erfordert ein Erzwingungsstreik mind. 75 % Zustimmung der Gewerkschaftsmitglieder.' },
+              { id: 'b', text: 'Friedenspflicht beendet, Zustimmung des Bundeswirtschaftsministeriums und Anmeldung beim Arbeitsgericht', isCorrect: false, explanation: 'Falsch: Wegen der Tarifautonomie (Art. 9 Abs. 3 GG) mischt sich der Staat nicht durch Genehmigungen ein.' },
+              { id: 'c', text: 'Spontaner Arbeitsniederlegungsbeschluss einzelner Abteilungen während der Arbeitszeit ohne Gewerkschaft', isCorrect: false, explanation: 'Falsch: Ein sogenannter „wilder Streik“ ohne Gewerkschaftsträger ist in Deutschland rechtswidrig und kann arbeitsrechtliche Folgen haben.' },
+              { id: 'd', text: 'Einfache Mehrheit von über 50 % im Betriebsrat sowie vorherige schriftliche Mitteilung an die Geschäftsleitung', isCorrect: false, explanation: 'Falsch: Der Betriebsrat unterliegt der Friedenspflicht und darf niemals zum Streik aufrufen – das dürfen nur Gewerkschaften.' }
             ],
             merksatz: 'Streik: Friedenspflicht abgelaufen + Urabstimmung (mind. 75 % Zustimmung) + Gewerkschaftsführung!'
           }
@@ -4145,10 +4145,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-3',
             question: 'Ein Mitarbeiter erkrankt schwer und ist wegen derselben Diagnose 10 Wochen lang ununterbrochen arbeitsunfähig geschrieben. Wer zahlt in den ersten 6 Wochen und wer ab der 7. Woche die finanzielle Unterstützung?',
             options: [
-              { id: 'a', text: 'Woche 1–6: Der Arbeitgeber zahlt 100% Gehalt (Entgeltfortzahlung); ab Woche 7: Die Krankenkasse zahlt Krankengeld', isCorrect: true, explanation: 'Perfekt! Nach dem Entgeltfortzahlungsgesetz zahlt der Arbeitgeber bis zu 6 Wochen den vollen Lohn. Ab der 7. Woche springt die Krankenkasse mit Krankengeld ein.' },
-              { id: 'b', text: 'Woche 1–6: Die Krankenkasse zahlt Krankengeld; ab Woche 7: Die Agentur für Arbeit zahlt Bürgergeld', isCorrect: false, explanation: 'Falsch: Der Arbeitgeber ist gesetzlich zur 6-wöchigen Entgeltfortzahlung verpflichtet.' },
-              { id: 'c', text: 'Die Berufsgenossenschaft zahlt ab Tag 1 durchgehend Verletztengeld', isCorrect: false, explanation: 'Falsch: Berufsgenossenschaft zahlt nur bei Arbeitsunfällen oder Berufskrankheiten, nicht bei gewöhnlicher Krankheit.' },
-              { id: 'd', text: 'Der Arbeitgeber zahlt alle 10 Wochen zu 100% weiter', isCorrect: false, explanation: 'Falsch: Die gesetzliche Entgeltfortzahlungspflicht des Arbeitgebers endet nach genau 6 Wochen.' }
+              { id: 'a', text: 'Woche 1–6: Arbeitgeber zahlt volles Gehalt; ab Woche 7: Krankenkasse zahlt Krankengeld', isCorrect: true, explanation: 'Perfekt! Nach dem Entgeltfortzahlungsgesetz zahlt der Arbeitgeber bis zu 6 Wochen 100 % Entgeltfortzahlung; ab Woche 7 springt die Krankenkasse mit Krankengeld ein.' },
+              { id: 'b', text: 'Woche 1–6: Krankenkasse zahlt Krankengeld; ab Woche 7: Arbeitsagentur zahlt Übergangsgeld', isCorrect: false, explanation: 'Falsch: Der Arbeitgeber ist zunächst zur 6-wöchigen Entgeltfortzahlung verpflichtet.' },
+              { id: 'c', text: 'Woche 1–10: Berufsgenossenschaft zahlt ab dem ersten Krankheitstag volles Verletztengeld', isCorrect: false, explanation: 'Falsch: Die Berufsgenossenschaft leistet nur bei Arbeitsunfällen oder Berufskrankheiten, nicht bei allgemeiner Erkrankung.' },
+              { id: 'd', text: 'Woche 1–10: Arbeitgeber zahlt durchgehend 100 % Gehalt und rechnet mit der Rentenkasse ab', isCorrect: false, explanation: 'Falsch: Die gesetzliche Entgeltfortzahlung durch den Arbeitgeber endet bei derselben Krankheit nach genau 6 Wochen.' }
             ],
             merksatz: '1.–6. Woche: Arbeitgeber (100% Entgeltfortzahlung). Ab 7. Woche: Krankenkasse (Krankengeld).'
           },
@@ -4158,10 +4158,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-3',
             question: 'Was versteht man unter dem "Umlageverfahren" in der gesetzlichen Rentenversicherung (Generationenvertrag)?',
             options: [
-              { id: 'a', text: 'Die aktuellen Rentenbeiträge der erwerbstätigen Generation werden unmittelbar zur Auszahlung der Renten der heutigen Ruheständler verwendet', isCorrect: true, explanation: 'Richtig! Es wird kein individueller Spartopf angespart (Kapitaldeckungsverfahren), sondern die laufenden Einnahmen finanzieren direkt die aktuellen Rentenauszahlungen.' },
-              { id: 'b', text: 'Jeder Arbeitnehmer spart seine Beiträge auf einem persönlichen Sparkonto für sein eigenes Rentenalter an', isCorrect: false, explanation: 'Das wäre das Kapitaldeckungsverfahren (wie bei privaten Rentenversicherungen), nicht das gesetzliche Umlageverfahren.' },
-              { id: 'c', text: 'Die Renten werden zu 100% aus den Goldreserven der Bundesbank gedeckt', isCorrect: false, explanation: 'Falsch: Die Rentenversicherung finanziert sich über monatliche Sozialbeiträge und staatliche Steuerzuschüsse.' },
-              { id: 'd', text: 'Rentenbeiträge werden an der Börse ausschließlich in Technologie-Aktien investiert', isCorrect: false, explanation: 'Falsch: Die gesetzliche Rente ist umlagefinanziert.' }
+              { id: 'a', text: 'Aktuelle Beiträge der Erwerbstätigen finanzieren direkt die laufenden Renten der heutigen Rentner', isCorrect: true, explanation: 'Richtig! Beim Umlageverfahren (Generationenvertrag) wird kein eigener Spartopf angespart, sondern laufend umverteilt.' },
+              { id: 'b', text: 'Jeder Versicherte spart seine Beiträge verzinst auf einem eigenen Konto für den Ruhestand an', isCorrect: false, explanation: 'Das beschreibt das Kapitaldeckungsverfahren (wie bei privaten Rentenversicherungen), nicht das gesetzliche Umlageverfahren.' },
+              { id: 'c', text: 'Alle Rentenzahlungen werden vollständig aus den Währungs- und Goldreserven der Bundesbank gedeckt', isCorrect: false, explanation: 'Falsch: Die Rentenversicherung finanziert sich über laufende Sozialbeiträge und Bundeszuschüsse.' },
+              { id: 'd', text: 'Die Rentenbeiträge werden zentral an den internationalen Kapitalmärkten in Aktienfonds angelegt', isCorrect: false, explanation: 'Falsch: Die gesetzliche Rentenversicherung basiert im Kern auf dem Umlageverfahren.' }
             ],
             merksatz: 'Umlageverfahren: Die Jungen zahlen heute direkt für die Alten (Generationenvertrag).'
           },
@@ -4171,10 +4171,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-3',
             question: 'Welche Funktion hat die "Beitragsbemessungsgrenze" (BBG) in den deutschen Sozialversicherungen?',
             options: [
-              { id: 'a', text: 'Sie markiert den maximalen Bruttoeinkommensbetrag, bis zu dem Sozialversicherungsbeiträge berechnet werden; Einkommensanteile darüber hinaus sind beitragsfrei', isCorrect: true, explanation: 'Richtig! Wer z. B. mehr als die BBG verdient, zahlt für den darüber liegenden Betrag keine prozentualen Sozialabgaben mehr. Dadurch werden auch die Leistungsansprüche (z. B. Renten- oder Krankengeldhöhe) nach oben gedeckelt.' },
-              { id: 'b', text: 'Sie legt fest, ab welchem Einkommen man überhaupt erst Steuern zahlen muss', isCorrect: false, explanation: 'Falsch: Das ist der steuerliche Grundfreibetrag im Einkommensteuerrecht.' },
-              { id: 'c', text: 'Sie verbietet Arbeitgebern, Gehälter über 10.000 € monatlich auszuzahlen', isCorrect: false, explanation: 'Falsch: Es gibt keine Obergrenze für Gehälter.' },
-              { id: 'd', text: 'Sie bestimmt den Mindestlohn für ungelernte Aushilfskräfte', isCorrect: false, explanation: 'Falsch: Das regelt das Mindestlohngesetz (MiLoG).' }
+              { id: 'a', text: 'Sie legt das maximale Bruttoeinkommen fest, bis zu dem Sozialabgaben berechnet werden', isCorrect: true, explanation: 'Richtig! Einkommensanteile oberhalb der BBG sind beitragsfrei; zugleich sind dadurch auch Leistungen wie Rente oder Krankengeld nach oben gedeckelt.' },
+              { id: 'b', text: 'Sie legt fest, ab welchem Jahreseinkommen Arbeitnehmer überhaupt Einkommensteuer zahlen', isCorrect: false, explanation: 'Falsch: Das ist der steuerliche Grundfreibetrag im Einkommensteuerrecht.' },
+              { id: 'c', text: 'Sie begrenzt das zulässige monatliche Bruttogehalt von Fachkräften in Tarifverträgen', isCorrect: false, explanation: 'Falsch: Es gibt keine gesetzliche Obergrenze für Gehälter.' },
+              { id: 'd', text: 'Sie definiert die untere Einkommensgrenze für versicherungsfreie Minijobs im Betrieb', isCorrect: false, explanation: 'Falsch: Das ist die Geringfügigkeitsgrenze, nicht die Beitragsbemessungsgrenze.' }
             ],
             merksatz: 'Beitragsbemessungsgrenze: Einkommen oberhalb dieser Grenze ist beitragsfrei zur Sozialversicherung!'
           },
@@ -4184,10 +4184,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-3',
             question: 'Warum raten Verbraucherzentralen und Gewerkschaften auch Mediengestaltern dringend zum frühzeitigen Abschluss einer privaten Berufsunfähigkeitsversicherung (BU)?',
             options: [
-              { id: 'a', text: 'Weil die gesetzliche Rentenversicherung für nach 1961 Geborene keinen Berufsschutz mehr bietet, sondern nur eine stark reduzierte Erwerbsminderungsrente zahlt, wenn man überhaupt keine Arbeit mehr ausüben kann', isCorrect: true, explanation: 'Exakt! Wer seinen erlernten Beruf als Mediengestalter (z. B. durch Burnout, Sehsturz oder Rückenprobleme) nicht mehr ausüben kann, aber noch 6 Std. als Pförtner arbeiten könnte, erhält vom Staat 0 € Erwerbsminderungsrente.' },
-              { id: 'b', text: 'Weil der Arbeitgeber bei Berufsunfähigkeit automatisch das Gehalt lebenslang zu 100% weiterzahlt', isCorrect: false, explanation: 'Falsch: Die Entgeltfortzahlung des Arbeitgebers endet nach genau 6 Wochen.' },
-              { id: 'c', text: 'Weil der Gesetzgeber den Abschluss einer privaten BU für alle Bundesbürger gesetzlich zur Pflicht gemacht hat', isCorrect: false, explanation: 'Falsch: Die Berufsunfähigkeitsversicherung ist eine freiwillige Individualversicherung.' },
-              { id: 'd', text: 'Weil gesetzliche Krankenkassen die Behandlung von Bildschirmarbeitern verweigern', isCorrect: false, explanation: 'Unsinn: Die gesetzliche Krankenversicherung behandelt alle Versicherten unabhängig vom Beruf.' }
+              { id: 'a', text: 'Weil die gesetzliche Rente keinen Berufsschutz mehr bietet, sondern nur eine knappe Erwerbsminderungsrente', isCorrect: true, explanation: 'Exakt! Für nach 1961 Geborene zählt nicht mehr der erlernte Beruf, sondern ob überhaupt noch irgendeine Tätigkeit (mind. 6 Std./Tag) möglich ist.' },
+              { id: 'b', text: 'Weil die Entgeltfortzahlung des Arbeitgebers bei längerer Krankheit erst ab dem vierten Monat einsetzt', isCorrect: false, explanation: 'Falsch: Der Arbeitgeber zahlt ab dem ersten Krankheitstag bis zu 6 Wochen weiter – danach schützt aber keine BU-Leistung des Betriebs.' },
+              { id: 'c', text: 'Weil der Gesetzgeber den Abschluss einer privaten Berufsunfähigkeitsversicherung verbindlich vorschreibt', isCorrect: false, explanation: 'Falsch: Die Berufsunfähigkeitsversicherung ist eine freiwillige Individualversicherung.' },
+              { id: 'd', text: 'Weil gesetzliche Krankenkassen typische Erkrankungen durch Bildschirmarbeit nicht erstatten', isCorrect: false, explanation: 'Falsch: Die GKV übernimmt medizinische Behandlungen, ersetzt aber keinen dauerhaften Einkommensverlust im gelernten Beruf.' }
             ],
             merksatz: 'Gesetzlich gibt es nur noch Erwerbsminderungsrente ohne Berufsschutz – eine private BU sichert den eigenen Lebensstandard!'
           }
@@ -4244,10 +4244,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-4',
             question: 'Welches Mindeststammkapital ist gesetzlich vorgeschrieben, um eine Gesellschaft mit beschränkter Haftung (GmbH) zu gründen, und wie haftet sie für Geschäftsschulden?',
             options: [
-              { id: 'a', text: 'Mindestens 25.000 € Stammkapital; die Haftung ist auf das Gesellschaftsvermögen beschränkt (keine Privathaftung)', isCorrect: true, explanation: 'Richtig! § 5 Abs. 1 GmbHG schreibt 25.000 € Stammkapital vor. Die Gesellschafter haften grundsätzlich nicht mit ihrem Privatvermögen.' },
-              { id: 'b', text: 'Mindestens 50.000 € Stammkapital; Gesellschafter haften voll mit ihrem Privatvermögen', isCorrect: false, explanation: 'Falsch: 50.000 € ist das Grundkapital einer Aktiengesellschaft (AG).' },
-              { id: 'c', text: 'Kein Mindestkapital; Haftung erfolgt persönlich und unbeschränkt', isCorrect: false, explanation: 'Falsch: Das gilt für Einzelunternehmen oder GbR, nicht für eine reguläre GmbH.' },
-              { id: 'd', text: 'Mindestens 10.000 €; Haftung übernimmt die örtliche Industrie- und Handelskammer', isCorrect: false, explanation: 'Falsch: Die IHK übernimmt niemals Schulden privater Unternehmen.' }
+              { id: 'a', text: 'Mindestens 25.000 € Stammkapital; die Haftung beschränkt sich auf das Gesellschaftsvermögen', isCorrect: true, explanation: 'Richtig! § 5 Abs. 1 GmbHG schreibt 25.000 € Stammkapital vor; die Gesellschafter haften grundsätzlich nicht privat.' },
+              { id: 'b', text: 'Mindestens 50.000 € Grundkapital; die Gesellschafter haften zusätzlich mit ihrem Privatvermögen', isCorrect: false, explanation: 'Falsch: 50.000 € ist das Grundkapital einer Aktiengesellschaft (AG), und auch dort ist die Haftung beschränkt.' },
+              { id: 'c', text: 'Kein gesetzliches Mindestkapital; die Haftung erfolgt stets persönlich und unbeschränkt', isCorrect: false, explanation: 'Falsch: Das gilt für Einzelunternehmen, GbR oder OHG, nicht für eine reguläre GmbH.' },
+              { id: 'd', text: 'Mindestens 10.000 € Stammkapital; die Haftung greift erst ab einem Jahresumsatz von 100.000 €', isCorrect: false, explanation: 'Falsch: Das Mindeststammkapital der GmbH beträgt 25.000 € unabhängig vom Umsatz.' }
             ],
             merksatz: 'GmbH: Mindeststammkapital 25.000 €; Haftung beschränkt auf das Gesellschaftsvermögen!'
           },
@@ -4257,10 +4257,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-4',
             question: 'In einer Kommanditgesellschaft (KG) gibt es zwei Typen von Gesellschaftern. Worin besteht der wesentliche Unterschied zwischen Komplementär und Kommanditist bezüglich der Haftung?',
             options: [
-              { id: 'a', text: 'Der Komplementär haftet unbeschränkt mit seinem gesamten Privat- und Geschäftsvermögen; der Kommanditist haftet nur beschränkt mit seiner im Handelsregister eingetragenen Vermögenseinlage', isCorrect: true, explanation: 'Perfekt! Komplementär = Vollhafter (persönlich & unbeschränkt), Kommanditist = Teilhafter (haftet nur mit seiner Einlage).' },
-              { id: 'b', text: 'Beide Gesellschafter haften ausschließlich mit dem Firmenvermögen bis maximal 25.000 €', isCorrect: false, explanation: 'Falsch: Bei Personengesellschaften haftet mindestens ein Partner immer persönlich mit Privatvermögen.' },
-              { id: 'c', text: 'Der Kommanditist leitet die Geschäfte allein und haftet mit Haus und Hof; der Komplementär haftet gar nicht', isCorrect: false, explanation: 'Falsch: Es ist genau umgekehrt – der Komplementär leitet und haftet voll.' },
-              { id: 'd', text: 'Es gibt keinen Unterschied, beide haften zu 50% für alle Schulden', isCorrect: false, explanation: 'Falsch: Der Hauptgrund für eine KG ist die Trennung in Vollhafter und Teilhafter.' }
+              { id: 'a', text: 'Der Komplementär haftet persönlich und unbeschränkt; der Kommanditist nur bis zur Höhe seiner Einlage', isCorrect: true, explanation: 'Perfekt! Komplementär = Vollhafter (Privat- und Geschäftsvermögen), Kommanditist = Teilhafter (nur eingetragene Vermögenseinlage).' },
+              { id: 'b', text: 'Beide Gesellschaftergruppen haften ausschließlich mit dem Gesellschaftsvermögen bis 25.000 €', isCorrect: false, explanation: 'Falsch: Bei einer Personengesellschaft wie der KG haftet mindestens ein Partner (Komplementär) voll persönlich.' },
+              { id: 'c', text: 'Der Kommanditist führt die Geschäfte und haftet unbeschränkt; der Komplementär haftet gar nicht', isCorrect: false, explanation: 'Falsch: Es ist genau umgekehrt – der Komplementär führt die Geschäfte und haftet unbeschränkt.' },
+              { id: 'd', text: 'Beide Gesellschafter haften stets gesamtschuldnerisch zu gleichen Teilen mit ihrem Privatvermögen', isCorrect: false, explanation: 'Falsch: Das gilt für die OHG; die KG trennt bewusst in Vollhafter und Teilhafter.' }
             ],
             merksatz: 'KG: Komplementär = haftet VOLL (mit Privatvermögen), Kommanditist = haftet TEIL (nur Einlage)!'
           },
@@ -4270,10 +4270,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-4',
             question: 'Eine Druckerei liefert 5.000 Kundenflyer, die erhebliche Fehldrucke und Farbstreifen aufweisen (Sachmangel). Welches vorrangige Recht hat der Käufer nach BGB gegenüber der Druckerei?',
             options: [
-              { id: 'a', text: 'Recht auf Nacherfüllung (Neulieferung mangelfreier Flyer oder Nachbesserung)', isCorrect: true, explanation: 'Richtig! Nach § 439 BGB gilt der Vorrang der Nacherfüllung. Erst wenn die Nacherfüllung fehlschlägt oder verweigert wird, darf der Käufer mindern oder vom Vertrag zurücktreten.' },
-              { id: 'b', text: 'Sofortiger Rücktritt vom Kaufvertrag und Rückforderung des Kaufpreises ohne Fristsetzung', isCorrect: false, explanation: 'Falsch: Das BGB gibt dem Verkäufer zunächst das Recht zur zweiten Andienung (Nacherfüllung nach § 439 BGB).' },
-              { id: 'c', text: 'Sofortige Minderung des Kaufpreises um 50 % ohne vorherige Frist zur Nacherfüllung', isCorrect: false, explanation: 'Falsch: Minderung ist erst nach erfolglosem Ablauf einer angemessenen Nacherfüllungsfrist zulässig.' },
-              { id: 'd', text: 'Schadensersatz statt der Leistung ohne vorheriges Recht der zweiten Andienung', isCorrect: false, explanation: 'Falsch: Auch Schadensersatz statt der Leistung setzt grundsätzlich ein erfolgloses Nacherfüllungsverlangen voraus.' }
+              { id: 'a', text: 'Recht auf Nacherfüllung durch Nachbesserung oder mangelfreie Neulieferung', isCorrect: true, explanation: 'Richtig! Nach § 439 BGB gilt der Vorrang der Nacherfüllung. Erst wenn sie scheitert oder verweigert wird, greifen Rücktritt oder Minderung.' },
+              { id: 'b', text: 'Sofortiger Rücktritt vom Vertrag und Rückzahlung des Kaufpreises ohne Frist', isCorrect: false, explanation: 'Falsch: Das BGB gewährt dem Verkäufer zunächst das Recht zur zweiten Andienung (Nacherfüllung nach § 439 BGB).' },
+              { id: 'c', text: 'Sofortige Minderung des Kaufpreises um 50 % ohne vorherige Fristsetzung', isCorrect: false, explanation: 'Falsch: Eine Kaufpreisminderung ist grundsätzlich erst nach erfolgloser Frist zur Nacherfüllung zulässig.' },
+              { id: 'd', text: 'Sofortiger Schadensersatz statt der Leistung ohne Nacherfüllungsverlangen', isCorrect: false, explanation: 'Falsch: Auch Schadensersatz statt der Leistung setzt in der Regel zunächst ein erfolgloses Nacherfüllungsverlangen voraus.' }
             ],
             merksatz: 'Recht der zweiten Andienung: Bei Sachmängeln zuerst immer Nacherfüllung verlangen!'
           },
@@ -4283,10 +4283,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-4',
             question: 'Was versteht man unter Inflation und welche geldpolitische Maßnahme ergreift die Europäische Zentralbank (EZB) typischerweise zur Bekämpfung einer zu hohen Inflationsrate?',
             options: [
-              { id: 'a', text: 'Inflation ist ein anhaltender Anstieg des allgemeinen Preisniveaus und damit Kaufkraftverlust des Geldes; die EZB erhöht die Leitzinsen, um Kredite zu verteuern und die Nachfrage zu bremsen', isCorrect: true, explanation: 'Richtig! Durch Zinserhöhungen der EZB werden Kredite für Unternehmen und Verbraucher teurer, Sparen wird attraktiver, die überhitzte Nachfrage kühlt ab und der Preisauftrieb sinkt.' },
-              { id: 'b', text: 'Inflation bedeutet, dass Waren immer billiger werden; die EZB senkt daraufhin die Steuern der Bürger', isCorrect: false, explanation: 'Falsch: Das Sinken des allgemeinen Preisniveaus heißt Deflation. Steuern beschließt zudem das Parlament, nicht die EZB.' },
-              { id: 'c', text: 'Die EZB druckt massenhaft neues Bargeld und verteilt es kostenlos an Agenturen', isCorrect: false, explanation: 'Falsch: Zusätzliche Geldmengenausweitung würde die Inflation weiter anheizen.' },
-              { id: 'd', text: 'Die EZB schließt für 3 Monate alle Bankfilialen in der Europäischen Union', isCorrect: false, explanation: 'Unsinn.' }
+              { id: 'a', text: 'Anhaltender Anstieg des Preisniveaus mit Kaufkraftverlust; die EZB erhöht die Leitzinsen zur Bremsung', isCorrect: true, explanation: 'Richtig! Höhere Leitzinsen verteuern Kredite, machen Sparen attraktiver, dämpfen die Nachfrage und bremsen den Preisauftrieb.' },
+              { id: 'b', text: 'Anhaltendes Sinken des Preisniveaus bei steigender Kaufkraft; die EZB senkt direkt die Mehrwertsteuer', isCorrect: false, explanation: 'Falsch: Sinkende Preise heißen Deflation; zudem beschließt die Politik über Steuern, nicht die EZB.' },
+              { id: 'c', text: 'Kurzfristige Preisschwankung einzelner Rohstoffe; die EZB weitet die Geldmenge über neue Kredite aus', isCorrect: false, explanation: 'Falsch: Eine Ausweitung der Geldmenge würde die Inflation noch weiter anheizen.' },
+              { id: 'd', text: 'Überhitzung der Exportwirtschaft im Euroraum; die EZB fixiert verbindliche Höchstpreise für Händler', isCorrect: false, explanation: 'Falsch: Die EZB steuert über geldpolitische Instrumente wie Leitzinsen, nicht über staatliche Preisdeckel.' }
             ],
             merksatz: 'Inflation = Kaufkraftverlust. Reaktion der EZB: Leitzinsen anheben, um den Geldwert zu stabilisieren!'
           },
@@ -4296,10 +4296,10 @@ export const CHAPTERS: Chapter[] = [
             moduleId: 'wiso-4',
             question: 'Worin liegt der fundamentale rechtliche Unterschied zwischen der gesetzlichen Sachmängelhaftung (Gewährleistung) und einer kaufmännischen Garantie?',
             options: [
-              { id: 'a', text: 'Gewährleistung ist ein gesetzlicher Anspruch gegen den Verkäufer (2 Jahre ab Kauf), dass die Ware bei Übergabe fehlerfrei war; Garantie ist eine rein freiwillige Zusicherung des Herstellers oder Verkäufers zu eigenen Bedingungen', isCorrect: true, explanation: 'Exakt! Die 2-jährige Gewährleistung ist zwingendes BGB-Recht. Eine Garantie (z. B. 3 Jahre Herstellergarantie auf einen Monitor) ist eine freiwillige Leistung, die die gesetzliche Gewährleistung niemals einschränken darf.' },
-              { id: 'b', text: 'Garantie ist gesetzlich vorgeschrieben, Gewährleistung existiert im BGB seit 2002 nicht mehr', isCorrect: false, explanation: 'Falsch: Genau umgekehrt, Gewährleistung ist das gesetzliche Recht.' },
-              { id: 'c', text: 'Gewährleistung gilt nur für Software-Lizenzen, Garantie nur für Hardware-Geräte', isCorrect: false, explanation: 'Falsch: Gewährleistungsrechte gelten für alle Kaufverträge über bewegliche Sachen.' },
-              { id: 'd', text: 'Beide Begriffe bezeichnen exakt dasselbe und können beliebig vom Verkäufer gestrichen werden', isCorrect: false, explanation: 'Falsch: Gewährleistung kann beim Verbrauchsgüterkauf nicht ausgeschlossen werden.' }
+              { id: 'a', text: 'Gewährleistung ist ein gesetzlicher Anspruch gegen den Verkäufer; Garantie eine freiwillige Zusicherung', isCorrect: true, explanation: 'Exakt! Die 2-jährige Gewährleistung nach BGB gilt für Mängel bei Übergabe und kann beim Verbrauchsgüterkauf nicht ausgeschlossen werden; Garantie ist eine freiwillige Leistung zu eigenen Bedingungen.' },
+              { id: 'b', text: 'Garantie ist eine zweijährige gesetzliche Pflicht des Verkäufers; Gewährleistung eine freiwillige Leistung', isCorrect: false, explanation: 'Falsch: Genau umgekehrt – die Gewährleistung ist gesetzlich verankert, die Garantie freiwillig.' },
+              { id: 'c', text: 'Gewährleistung gilt ausschließlich für Software-Lizenzen; Garantie greift nur für physische Hardware', isCorrect: false, explanation: 'Falsch: Gewährleistungsrechte gelten für alle Kaufverträge über bewegliche Sachen und digitale Produkte.' },
+              { id: 'd', text: 'Beide Begriffe sind rechtlich identisch und können vom Händler in den AGB vollständig gestrichen werden', isCorrect: false, explanation: 'Falsch: Die gesetzliche Gewährleistung darf beim Verbrauchsgüterkauf gegenüber Privatkunden nicht ausgeschlossen werden.' }
             ],
             merksatz: 'Gewährleistung = 2 Jahre gesetzliche Pflicht des Verkäufers! Garantie = freiwilliges Versprechen!'
           }
