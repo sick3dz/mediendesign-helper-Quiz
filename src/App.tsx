@@ -1061,21 +1061,22 @@ export default function App() {
     unicorn: '🦄',
   };
 
-  // Determine next module
-  const currentChapterIndex = currentChapter
-    ? CHAPTERS.findIndex(c => c.id === currentChapter.id)
-    : -1;
+  // Determine next module strictly within the current chapter
   const currentModuleIndex =
     currentChapter && currentModule
       ? currentChapter.modules.findIndex(m => m.id === currentModule.id)
       : -1;
-  const hasNextInChapter =
+  const hasNextInChapter = Boolean(
     currentChapter &&
-    currentModuleIndex >= 0 &&
-    currentModuleIndex + 1 < currentChapter.modules.length;
-  const hasNextChapter =
-    currentChapterIndex >= 0 && currentChapterIndex + 1 < CHAPTERS.length;
-  const hasNextModule = Boolean(hasNextInChapter || hasNextChapter);
+      currentModuleIndex >= 0 &&
+      currentModuleIndex + 1 < currentChapter.modules.length
+  );
+  const hasNextModule = hasNextInChapter;
+
+  const handleFinishChapter = () => {
+    setSelectedModuleMeta(null);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  };
 
   const handleNextModule = () => {
     if (!currentChapter || !currentModule) return;
@@ -1084,20 +1085,11 @@ export default function App() {
       setSelectedModuleMeta({
         chapterId: currentChapter.id,
         moduleId: nextMod.id,
+        level: 1,
       });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (hasNextChapter) {
-      const nextChap = CHAPTERS[currentChapterIndex + 1];
-      if (nextChap.modules.length > 0) {
-        setSelectedChapterId(nextChap.id);
-        setSelectedModuleMeta({
-          chapterId: nextChap.id,
-          moduleId: nextChap.modules[0].id,
-        });
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     } else {
-      setSelectedModuleMeta(null);
+      handleFinishChapter();
     }
   };
 
@@ -1295,18 +1287,20 @@ export default function App() {
           />
         ) : selectedModuleMeta && currentChapter && currentModule ? (
           <ModuleLearningView
+            key={`${currentChapter.id}-${currentModule.id}`}
             chapter={currentChapter}
             module={currentModule}
             bionic={settings.bionicReading}
             initialLevel={selectedModuleMeta.level || 1}
             isLevel1Completed={stats.completedModules.includes(currentModule.id)}
             isLevel2Completed={Boolean(stats.completedModulesLevel2?.includes(currentModule.id))}
-            onBack={() => setSelectedModuleMeta(null)}
+            onBack={handleFinishChapter}
             onModuleCompleted={(modId, xp, lvl) => handleModuleCompleted(modId, xp, lvl)}
             onMiniGameCompleted={handleMiniGameCompleted}
             onCorrectAnswer={handleCorrectAnswer}
             onAnswer={handleAnswer}
             onNextModule={handleNextModule}
+            onFinishChapter={handleFinishChapter}
             hasNextModule={hasNextModule}
           />
         ) : (

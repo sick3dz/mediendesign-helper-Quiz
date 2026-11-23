@@ -40,6 +40,7 @@ interface Props {
   onCorrectAnswer?: () => void;
   onAnswer?: (questionId: string, isCorrect: boolean) => void;
   onNextModule?: () => void;
+  onFinishChapter?: () => void;
   hasNextModule?: boolean;
 }
 
@@ -56,6 +57,7 @@ export const ModuleLearningView: React.FC<Props> = ({
   onCorrectAnswer,
   onAnswer,
   onNextModule,
+  onFinishChapter,
   hasNextModule = false,
 }) => {
   const [currentLevel, setCurrentLevel] = useState<1 | 2>(initialLevel);
@@ -70,8 +72,29 @@ export const ModuleLearningView: React.FC<Props> = ({
   });
   const [accumulatedXp, setAccumulatedXp] = useState(0);
 
+  const nuggetViewRef = useRef<HTMLDivElement>(null);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (nuggetViewRef.current) {
+      nuggetViewRef.current.scrollIntoView({ behavior: 'auto', block: 'start' });
+    }
+  };
+
+  const resetToLevel1Start = () => {
+    setShowSummaryModal(false);
+    setCurrentLevel(1);
+    setViewState('learn');
+    setCurrentNuggetIndex(0);
+    setStepIndex(0);
+    setAccumulatedXp(0);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  };
+
   useEffect(() => {
     setCurrentLevel(initialLevel);
+    setCurrentNuggetIndex(0);
+    setStepIndex(0);
     setShowSummaryModal(false);
     setAccumulatedXp(0);
     if (initialLevel === 2) {
@@ -79,23 +102,18 @@ export const ModuleLearningView: React.FC<Props> = ({
     } else {
       setViewState('learn');
     }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [initialLevel, module.id, module.miniGameType]);
 
-  const nuggetViewRef = useRef<HTMLDivElement>(null);
-
-  const currentNugget = module.nuggets[currentNuggetIndex];
-  const isLastNugget = currentNuggetIndex === module.nuggets.length - 1;
+  const safeNuggetIndex = Math.min(currentNuggetIndex, Math.max(0, module.nuggets.length - 1));
+  const currentNugget = module.nuggets[safeNuggetIndex];
+  const isLastNugget = safeNuggetIndex === module.nuggets.length - 1;
 
   // Total steps in current nugget: 1 (title/concept) + bullets + 1 (example if exists) + 1 (merksatz if exists)
-  const totalSteps = 1 + currentNugget.bulletPoints.length + (currentNugget.example ? 1 : 0) + (currentNugget.merksatz ? 1 : 0);
+  const totalSteps = currentNugget
+    ? 1 + currentNugget.bulletPoints.length + (currentNugget.example ? 1 : 0) + (currentNugget.merksatz ? 1 : 0)
+    : 1;
   const isNuggetComplete = stepIndex >= totalSteps - 1;
-
-  const scrollToTop = () => {
-    window.scrollTo(0, 0);
-    if (nuggetViewRef.current) {
-      nuggetViewRef.current.scrollIntoView({ behavior: 'auto', block: 'start' });
-    }
-  };
 
   const nextStep = () => {
     soundEffects.playClick();
@@ -115,7 +133,7 @@ export const ModuleLearningView: React.FC<Props> = ({
         setViewState('quiz');
       }
     } else {
-      setCurrentNuggetIndex(i => i + 1);
+      setCurrentNuggetIndex(safeNuggetIndex + 1);
       setStepIndex(0);
       scrollToTop();
     }
@@ -125,10 +143,10 @@ export const ModuleLearningView: React.FC<Props> = ({
     soundEffects.playClick();
     if (stepIndex > 0) {
       setStepIndex(prev => prev - 1);
-    } else if (currentNuggetIndex > 0) {
-      setCurrentNuggetIndex(i => i - 1);
+    } else if (safeNuggetIndex > 0) {
+      setCurrentNuggetIndex(safeNuggetIndex - 1);
       // When going back, show all steps of the previous nugget
-      const prevNug = module.nuggets[currentNuggetIndex - 1];
+      const prevNug = module.nuggets[safeNuggetIndex - 1];
       const prevTotalSteps = 1 + prevNug.bulletPoints.length + (prevNug.example ? 1 : 0) + (prevNug.merksatz ? 1 : 0);
       setStepIndex(prevTotalSteps - 1);
       scrollToTop();
@@ -176,7 +194,7 @@ export const ModuleLearningView: React.FC<Props> = ({
           <button
             onClick={() => {
               soundEffects.playClick();
-              setCurrentLevel(1);
+              resetToLevel1Start();
             }}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               currentLevel === 1
@@ -333,14 +351,14 @@ export const ModuleLearningView: React.FC<Props> = ({
           <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
             <div
               className="bg-indigo-600 dark:bg-indigo-500 h-full transition-all duration-300"
-              style={{ width: `${((currentNuggetIndex) / module.nuggets.length) * 100 + ((stepIndex + 1) / totalSteps) * (100 / module.nuggets.length)}%` }}
+              style={{ width: `${(safeNuggetIndex / module.nuggets.length) * 100 + ((stepIndex + 1) / totalSteps) * (100 / module.nuggets.length)}%` }}
             />
           </div>
 
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-2">
               <span className="font-mono text-[10px] font-bold text-indigo-600 dark:text-indigo-400 tabular-nums uppercase">
-                Häppchen {currentNuggetIndex + 1}/{module.nuggets.length}
+                Häppchen {safeNuggetIndex + 1}/{module.nuggets.length}
               </span>
               {currentNugget.examFavorite && (
                 <span className="text-[10px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -455,7 +473,7 @@ export const ModuleLearningView: React.FC<Props> = ({
           <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
             <button
               onClick={prevNugget}
-              disabled={currentNuggetIndex === 0 && stepIndex === 0}
+              disabled={safeNuggetIndex === 0 && stepIndex === 0}
               className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors flex items-center gap-1 cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" /> Zurück
@@ -668,6 +686,7 @@ export const ModuleLearningView: React.FC<Props> = ({
           onAnswer={onAnswer}
           onBackToOverview={onBack}
           onNextModule={onNextModule}
+          onFinishChapter={onFinishChapter ?? onBack}
           hasNextModule={hasNextModule}
         />
       )}
@@ -683,6 +702,7 @@ export const ModuleLearningView: React.FC<Props> = ({
           isLevel2Completed={isLevel2Completed}
           onClose={() => setShowSummaryModal(false)}
           onNextModule={onNextModule}
+          onFinishChapter={onFinishChapter ?? onBack}
           hasNextModule={hasNextModule}
           onStartLevel2={() => {
             setShowSummaryModal(false);
@@ -693,11 +713,7 @@ export const ModuleLearningView: React.FC<Props> = ({
               setViewState('quiz');
             }
           }}
-          onRepeatLevel1={() => {
-            setShowSummaryModal(false);
-            setCurrentLevel(1);
-            setViewState('learn');
-          }}
+          onRepeatLevel1={resetToLevel1Start}
         />
       )}
     </div>

@@ -26,6 +26,7 @@ interface Props {
   onStartLevel2?: () => void;
   onRepeatLevel1?: () => void;
   onNextModule?: () => void;
+  onFinishChapter?: () => void;
   hasNextModule?: boolean;
 }
 
@@ -40,6 +41,7 @@ export const ModuleSummaryModal: React.FC<Props> = ({
   onStartLevel2,
   onRepeatLevel1,
   onNextModule,
+  onFinishChapter,
   hasNextModule = false,
 }) => {
   // Collect all exam tips and merksätze across nuggets & questions
@@ -215,8 +217,8 @@ export const ModuleSummaryModal: React.FC<Props> = ({
               </div>
             )}
 
-            {/* Primary Next Module Button */}
-            {hasNextModule && onNextModule && (
+            {/* Primary Next Module or Finish Chapter Button */}
+            {hasNextModule && onNextModule ? (
               <button
                 type="button"
                 onClick={() => {
@@ -228,7 +230,19 @@ export const ModuleSummaryModal: React.FC<Props> = ({
                 <span>Nächstes Modul</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-            )}
+            ) : onFinishChapter ? (
+              <button
+                type="button"
+                onClick={() => {
+                  soundEffects.playClick();
+                  onFinishChapter();
+                }}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Kapitel beenden</span>
+              </button>
+            ) : null}
           </div>
         </div>
       </div>

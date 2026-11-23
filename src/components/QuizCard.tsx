@@ -3,7 +3,7 @@ import { QuizQuestion, QuizOption } from '../types/quiz';
 import { BionicText } from '../utils/bionicReading';
 import { soundEffects } from '../services/audioService';
 import confetti from 'canvas-confetti';
-import { Check, X, ArrowRight, RotateCcw, Award, Lightbulb, Star, Sparkles, AlertTriangle, BookOpen, HelpCircle, Zap } from 'lucide-react';
+import { Check, CheckCircle2, X, ArrowRight, RotateCcw, Award, Lightbulb, Star, Sparkles, AlertTriangle, BookOpen, HelpCircle, Zap } from 'lucide-react';
 import { QuestionDetailModal } from './QuestionDetailModal';
 import { QuestionAssetWidget } from './QuestionAssetWidget';
 import { ExpandableText } from './ExpandableText';
@@ -17,6 +17,7 @@ interface Props {
   onAnswer?: (questionId: string, isCorrect: boolean) => void;
   onBackToOverview?: () => void;
   onNextModule?: () => void;
+  onFinishChapter?: () => void;
   hasNextModule?: boolean;
 }
 
@@ -29,6 +30,7 @@ export const QuizCard: React.FC<Props> = ({
   onAnswer,
   onBackToOverview,
   onNextModule,
+  onFinishChapter,
   hasNextModule = false,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -231,28 +233,41 @@ export const QuizCard: React.FC<Props> = ({
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-3">
-          {hasNextModule && onNextModule && (
-            <button
-              onClick={onNextModule}
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-98"
-            >
-              <span>Nächstes Modul starten</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          )}
+          {hasNextModule && onNextModule ? (
+            <>
+              <button
+                onClick={onNextModule}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-98"
+              >
+                <span>Nächstes Modul starten</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
 
-          {onBackToOverview && (
+              {onBackToOverview && (
+                <button
+                  onClick={onBackToOverview}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-98 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
+                >
+                  <span>Zur Kapitelübersicht</span>
+                </button>
+              )}
+            </>
+          ) : onFinishChapter ? (
+            <button
+              onClick={onFinishChapter}
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-98"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Kapitel beenden</span>
+            </button>
+          ) : onBackToOverview ? (
             <button
               onClick={onBackToOverview}
-              className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-98 ${
-                hasNextModule && onNextModule
-                  ? 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200'
-                  : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-              }`}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-98 bg-indigo-600 hover:bg-indigo-700 text-white"
             >
               <span>Zur Kapitelübersicht</span>
             </button>
-          )}
+          ) : null}
 
           <button
             onClick={restart}
